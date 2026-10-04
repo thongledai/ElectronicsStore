@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360">
+  <defs><linearGradient id="bpromo-audio.svg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#0b1b34"/><stop offset="1" stop-color="#183a72"/></linearGradient></defs>
+  <rect width="640" height="360" rx="22" fill="url(#bpromo-audio.svg)"/>
+  <circle cx="540" cy="60" r="120" fill="#ff7a18" opacity=".16"/>
+  <circle cx="90" cy="320" r="90" fill="#ff7a18" opacity=".12"/>
+  
+  <path d="M392 236v-40a68 68 0 0 1 136 0v40" fill="none" stroke="#fff" stroke-width="18" stroke-linecap="round" opacity=".9"/>
+  <rect x="368" y="216" width="46" height="86" rx="22" fill="#ff7a18"/>
+  <rect x="506" y="216" width="46" height="86" rx="22" fill="#ff7a18"/>
+</svg>

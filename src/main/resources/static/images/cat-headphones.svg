@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 240" width="280" height="240">
+  <defs><linearGradient id="gcat-headphones" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#ff7a18"/><stop offset="1" stop-color="#0b1b34"/></linearGradient></defs>
+  <rect width="280" height="240" rx="20" fill="url(#gcat-headphones)"/>
+  <path d="M74 152v-24a66 66 0 0 1 132 0v24" fill="none" stroke="#fff" stroke-width="17" stroke-linecap="round" opacity=".95"/>
+      <rect x="52" y="134" width="42" height="76" rx="20" fill="#fff" opacity=".95"/>
+      <rect x="186" y="134" width="42" height="76" rx="20" fill="#fff" opacity=".95"/>
+</svg>

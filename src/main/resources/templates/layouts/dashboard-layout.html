@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<!--
+  Layout for Manager / Employee / Shipper pages.
+
+  A page uses it like this:
+    <html th:replace="~{layouts/dashboard-layout :: layout('Tổng quan', 'manager', 'index', ~{::section.content})}">
+      <head><title>Tổng quan | TechNova</title></head>
+      <body><section class="content"> ... </section></body>
+    </html>
+
+  Parameters
+    title    page title (shown in topbar and <title>)
+    role     'manager' | 'employee' | 'shipper'  -> picks fragments/{role}-sidebar
+    active   key of the highlighted sidebar link (see each *-sidebar.html)
+    content  page content                -> ~{::section.content}
+-->
+<html lang="vi" th:fragment="layout(title, role, active, content)" th:with="URL=@{/}" th:attr="data-role=${role}">
+<head th:replace="~{fragments/header :: head(${title + ' | TechNova'}, 'TechNova Electronics — khu vực quản lý')}"></head>
+<body>
+<div class="layout">
+
+  <nav th:replace="~{|fragments/${role}-sidebar| :: sidebar(${active})}"></nav>
+
+  <main class="main">
+    <header th:replace="~{fragments/dashboard-topbar :: topbar(${role}, ${title})}"></header>
+    <section th:replace="${content}"></section>
+  </main>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/roles.js}"></script>
+</body>
+</html>

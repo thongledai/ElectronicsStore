@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en" th:replace="~{layouts/customer-layout :: layout(
+        'All Products — TechNova Electronics',
+        'Browse all 25 TechNova products — laptops, smartphones, headphones, smartwatches and gaming accessories with filters, search and sorting.',
+        ~{::main}, ~{}, 'products.js', false)}">
+<head><title>All Products — TechNova Electronics</title></head>
+<body>
+
+<main>
+
+  <!-- PAGE HEAD / BREADCRUMB -->
+  <section class="page-head">
+    <div class="container">
+      <h1 id="pageTitle">All Products</h1>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a th:href="@{/customer/index}">Home</a></li>
+          <li class="breadcrumb-item active" aria-current="page" id="crumbCurrent">Products</li>
+        </ol>
+      </nav>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="row g-4">
+
+        <!-- ==========================================================
+             FILTER SIDEBAR
+             ========================================================== -->
+        <aside class="col-lg-3">
+
+          <!-- Mobile toggle for the filter panel -->
+          <button class="btn btn-ghost w-100 d-lg-none mb-3" type="button"
+                  data-bs-toggle="collapse" data-bs-target="#filterPanel" aria-expanded="false">
+            <i class="fas fa-sliders me-2"></i>Filters &amp; Sorting
+          </button>
+
+          <div class="collapse d-lg-block" id="filterPanel">
+            <div class="filter-panel">
+
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h6 mb-0"><i class="fas fa-filter me-2 text-primary"></i>Filters</h2>
+                <button class="btn btn-sm btn-link p-0 text-decoration-none" id="clearFilters" type="button">
+                  Clear all
+                </button>
+              </div>
+
+              <!-- Search within results -->
+              <div class="filter-group">
+                <label class="filter-title" for="filterSearch">Search</label>
+                <div class="input-icon">
+                  <i class="fas fa-magnifying-glass"></i>
+                  <input type="search" class="form-control" id="filterSearch" placeholder="Product or brand…" autocomplete="off">
+                </div>
+              </div>
+
+              <!-- Category checkboxes (built by js/products.js) -->
+              <div class="filter-group">
+                <div class="filter-title">Category</div>
+                <div id="categoryFilters"></div>
+              </div>
+
+              <!-- Price range -->
+              <div class="filter-group">
+                <div class="filter-title">Max Price</div>
+                <div class="range-wrap">
+                  <input type="range" class="form-range" id="priceRange" min="0" max="250000" step="1000" value="250000">
+                  <div class="range-values">
+                    <span>₹0</span>
+                    <span id="priceValue">₹2,50,000</span>
+                  </div>
+                </div>
+                <!-- Quick price presets -->
+                <div class="d-flex flex-wrap gap-2 mt-3">
+                  <button class="btn btn-sm btn-ghost price-preset" data-max="10000" type="button">Under ₹10K</button>
+                  <button class="btn btn-sm btn-ghost price-preset" data-max="25000" type="button">Under ₹25K</button>
+                  <button class="btn btn-sm btn-ghost price-preset" data-max="50000" type="button">Under ₹50K</button>
+                  <button class="btn btn-sm btn-ghost price-preset" data-max="250000" type="button">All</button>
+                </div>
+              </div>
+
+              <!-- Brand checkboxes -->
+              <div class="filter-group">
+                <div class="filter-title">Brand</div>
+                <div id="brandFilters"></div>
+              </div>
+
+              <!-- Minimum rating -->
+              <div class="filter-group">
+                <div class="filter-title">Customer Rating</div>
+                <div id="ratingFilters"></div>
+              </div>
+
+              <!-- Availability -->
+              <div class="filter-group">
+                <div class="filter-title">Availability</div>
+                <label class="filter-check">
+                  <input type="checkbox" id="inStockOnly">
+                  <span>In stock only</span>
+                </label>
+                <label class="filter-check">
+                  <input type="checkbox" id="onSaleOnly">
+                  <span>On sale / discounted</span>
+                </label>
+              </div>
+
+            </div>
+          </div>
+        </aside>
+
+        <!-- ==========================================================
+             PRODUCT GRID
+             ========================================================== -->
+        <div class="col-lg-9">
+
+          <!-- Toolbar: result count, sort, view toggle -->
+          <div class="toolbar">
+            <p class="result-count mb-0" id="resultCount">Loading products…</p>
+
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              <label for="sortSelect" class="small text-muted mb-0 d-none d-sm-inline">Sort by</label>
+              <select class="form-select form-select-sm" id="sortSelect" style="width:auto" aria-label="Sort products">
+                <option value="featured">Featured</option>
+                <option value="popular">Most Popular</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+                <option value="rating">Highest Rated</option>
+                <option value="discount">Biggest Discount</option>
+                <option value="name-asc">Name: A to Z</option>
+                <option value="name-desc">Name: Z to A</option>
+              </select>
+
+              <div class="view-toggle" role="group" aria-label="View mode">
+                <button class="active" id="gridViewBtn" type="button" aria-label="Grid view" title="Grid view">
+                  <i class="fas fa-grip"></i>
+                </button>
+                <button id="listViewBtn" type="button" aria-label="List view" title="List view">
+                  <i class="fas fa-list"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Active filter chips -->
+          <div class="chip-row" id="activeChips"></div>
+
+          <!-- Products -->
+          <div class="row g-3 g-md-4 products-grid" id="productGrid"></div>
+
+          <!-- Pagination -->
+          <nav class="mt-5" aria-label="Product pages">
+            <ul class="pagination justify-content-center" id="pagination"></ul>
+          </nav>
+
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</main>
+
+
+</body>
+</html>

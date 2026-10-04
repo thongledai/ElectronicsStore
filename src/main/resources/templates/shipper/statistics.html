@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="vi" th:replace="~{layouts/dashboard-layout :: layout('Thống kê giao hàng', 'shipper', 'statistics', ~{::section.content})}">
+<head><title>Thống kê giao hàng | TechNova</title></head>
+<body>
+<section class="content"><div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4"><div><h1 class="title">Thống kê giao hàng</h1>
+<div class="subtitle">Tổng hợp số đơn được phân công, giao thành công và thất bại.</div>
+</div>
+<button class="btn btn-primary btn-sm" data-demo-action="Thêm mới"><i class="fa-solid fa-plus me-1"></i>Thêm mới</button></div>
+<div class="row g-3 mb-4"><div class="col-6 col-xl-3"><div class="stat"><div class="d-flex justify-content-between"><span class="statlabel">Tổng đơn được phân công</span><div class="staticon"><i class="fa-solid fa-clipboard-list"></i></div>
+</div>
+<div class="statvalue">24</div>
+<div class="muted">Tháng 10/2026</div>
+</div>
+</div>
+<div class="col-6 col-xl-3"><div class="stat"><div class="d-flex justify-content-between"><span class="statlabel">Giao thành công</span><div class="staticon"><i class="fa-solid fa-circle-check"></i></div>
+</div>
+<div class="statvalue">20</div>
+<div class="muted">83,3% tổng đơn</div>
+</div>
+</div>
+<div class="col-6 col-xl-3"><div class="stat"><div class="d-flex justify-content-between"><span class="statlabel">Giao thất bại</span><div class="staticon"><i class="fa-solid fa-circle-xmark"></i></div>
+</div>
+<div class="statvalue">1</div>
+<div class="muted">4,2% tổng đơn</div>
+</div>
+</div>
+</div>
+<div class="panel mb-3"><div class="row g-3"><div class="col-md-4"><label class="form-label">Thời gian</label><select class="form-select"><option>7 ngày qua</option><option>Tháng này</option><option>Năm nay</option></select></div>
+<div class="col-md-4"><label class="form-label">Chỉ số</label><select class="form-select"><option>Số đơn hàng</option><option>Tỷ lệ giao thành công</option><option>Đơn giao thất bại</option></select></div>
+<div class="col-md-4 d-flex align-items-end"><button class="btn btn-primary w-100" data-demo-action="Lọc thống kê">Áp dụng bộ lọc</button></div>
+</div>
+</div>
+<div class="panel"><h2 class="paneltitle mb-3">Kết quả thống kê</h2>
+<div class="chart"><div><i class="fa-solid fa-chart-column fa-2x mb-2"></i><br>Biểu đồ giao hàng<br><small>Chờ tích hợp dữ liệu backend</small></div>
+</div>
+</div>
+</section>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="vi" th:replace="~{layouts/dashboard-layout :: layout('Tổng quan giao hàng', 'shipper', 'index', ~{::section.content})}">
+<head><title>Tổng quan giao hàng | TechNova</title></head>
+<body>
+<section class="content"><div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4"><div><h1 class="title">Tổng quan giao hàng</h1>
+<div class="subtitle">Theo dõi đơn được phân công và tiến độ giao hàng.</div>
+</div>
+<button class="btn btn-primary btn-sm" data-demo-action="Thêm mới"><i class="fa-solid fa-plus me-1"></i>Thêm mới</button></div>
+<div class="row g-3 mb-4"><div class="col-6 col-xl-3"><div class="stat"><div class="d-flex justify-content-between"><span class="statlabel">Đơn được phân công</span><div class="staticon"><i class="fa-solid fa-clipboard-list"></i></div>
+</div>
+<div class="statvalue">24</div>
+<div class="muted">Trong tháng này</div>
+</div>
+</div>
+<div class="col-6 col-xl-3"><div class="stat"><div class="d-flex justify-content-between"><span class="statlabel">Đang giao</span><div class="staticon"><i class="fa-solid fa-truck"></i></div>
+</div>
+<div class="statvalue">3</div>
+<div class="muted">Cần cập nhật</div>
+</div>
+</div>
+<div class="col-6 col-xl-3"><div class="stat"><div class="d-flex justify-content-between"><span class="statlabel">Giao thành công</span><div class="staticon"><i class="fa-solid fa-circle-check"></i></div>
+</div>
+<div class="statvalue">20</div>
+<div class="muted">Tỷ lệ 83,3%</div>
+</div>
+</div>
+<div class="col-6 col-xl-3"><div class="stat"><div class="d-flex justify-content-between"><span class="statlabel">Giao thất bại</span><div class="staticon"><i class="fa-solid fa-circle-xmark"></i></div>
+</div>
+<div class="statvalue">1</div>
+<div class="muted">Cần xử lý lại</div>
+</div>
+</div>
+</div>
+<div class="panel"><h2 class="paneltitle mb-3">Đơn hàng gần đây</h2>
+<div class="table-responsive"><table class="table"><thead><tr><th>Mã đơn</th><th>Người nhận</th><th>Địa chỉ giao</th><th>Trạng thái</th></tr>
+</thead>
+<tbody><tr><td>#TN-2046</td><td>Lê Thu Hà<div class="muted">0905 123 456</div>
+</td><td>12 Nguyễn Văn Linh, Đà Nẵng</td><td><span class="status purple">Đang giao</span></td></tr>
+<tr><td>#TN-2041</td><td>Nguyễn Hoàng Long<div class="muted">0914 222 333</div>
+</td><td>45 Lê Duẩn, Đà Nẵng</td><td><span class="status yellow">Đã tiếp nhận</span></td></tr>
+<tr><td>#TN-2038</td><td>Phạm Thảo Vy<div class="muted">0988 456 789</div>
+</td><td>18 Trần Phú, Đà Nẵng</td><td><span class="status green">Đã giao thành công</span></td></tr>
+<tr><td>#TN-2036</td><td>Trần Minh Khoa<div class="muted">0901 333 444</div>
+</td><td>62 Điện Biên Phủ, Đà Nẵng</td><td><span class="status red">Giao thất bại</span></td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+</body>
+</html>

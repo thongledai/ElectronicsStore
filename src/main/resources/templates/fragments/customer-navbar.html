@@ -1,0 +1,124 @@
+<!--
+  Customer navigation (announcement bar + header).
+  Use:  <div th:replace="~{fragments/customer-navbar :: navbar}"></div>
+        <div th:replace="~{fragments/customer-navbar :: navbar-minimal}"></div>   (login page)
+  ${URL} is declared once in layouts/customer-layout.html  (= <c:url value="/" var="URL"/> in JSP).
+-->
+<th:block th:fragment="navbar">
+<!-- ==================================================================
+     ANNOUNCEMENT BAR
+     ================================================================== -->
+<div class="topbar d-none d-md-block">
+  <div class="container d-flex justify-content-between align-items-center">
+    <span><i class="fas fa-truck-fast me-2"></i>Free delivery on orders above ₹5,000 · 7-day easy returns</span>
+    <div class="topbar-links">
+      <a th:href="@{/pages/contact}"><i class="fas fa-headset me-1"></i>Support</a>
+      <a th:href="@{/pages/about}"><i class="fas fa-store me-1"></i>About Us</a>
+      <a th:href="@{/auth/login}"><i class="fas fa-user me-1"></i>Track Order</a>
+    </div>
+  </div>
+</div>
+
+<!-- ==================================================================
+     HEADER / NAVIGATION
+     ================================================================== -->
+<header class="site-header">
+  <nav class="navbar navbar-expand-lg">
+    <div class="container">
+
+      <a class="navbar-brand" th:href="@{/customer/index}">
+        <img th:src="@{/images/logo.svg}" alt="TechNova Electronics">
+      </a>
+
+      <!-- Mobile: cart + menu toggle stay visible -->
+      <div class="d-flex align-items-center gap-1 order-lg-3">
+        <div class="header-actions">
+          <button class="icon-btn js-theme-toggle" type="button" aria-label="Toggle dark mode" title="Dark mode">
+            <i class="fas fa-moon"></i>
+          </button>
+          <a class="icon-btn" th:href="@{/customer/wishlist}" aria-label="Wishlist" title="Wishlist">
+            <i class="far fa-heart"></i>
+            <span class="icon-badge js-wishlist-count" data-count="0">0</span>
+          </a>
+          <a class="icon-btn" th:href="@{/customer/cart}" aria-label="Shopping cart" title="Cart">
+            <i class="fas fa-cart-shopping"></i>
+            <span class="icon-badge js-cart-count" data-count="0">0</span>
+          </a>
+          <a class="icon-btn d-none d-sm-inline-flex" th:href="@{/auth/login}" aria-label="Account" title="Account">
+            <i class="far fa-user"></i>
+          </a>
+        </div>
+        <button class="navbar-toggler ms-1" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+                aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+
+      <div class="collapse navbar-collapse order-lg-2" id="mainNav">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" th:href="@{/customer/index}">Home</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" th:href="@{/customer/products}" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false">Categories</a>
+            <ul class="dropdown-menu js-category-menu"><!-- filled by js/main.js --></ul>
+          </li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/customer/products}">Products</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/pages/about}">About</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/pages/contact}">Contact</a></li>
+        </ul>
+
+        <!-- Live product search -->
+        <form class="header-search me-lg-3" role="search">
+          <input type="search" placeholder="Search laptops, phones, audio…" aria-label="Search products" autocomplete="off">
+          <button type="submit" aria-label="Search"><i class="fas fa-magnifying-glass"></i></button>
+          <div class="search-suggestions"></div>
+        </form>
+      </div>
+
+    </div>
+  </nav>
+</header>
+</th:block>
+
+<th:block th:fragment="navbar-minimal">
+<!-- HEADER -->
+<header class="site-header">
+  <nav class="navbar navbar-expand-lg">
+    <div class="container">
+      <a class="navbar-brand" th:href="@{/customer/index}"><img th:src="@{/images/logo.svg}" alt="TechNova Electronics"></a>
+
+      <div class="d-flex align-items-center gap-1 order-lg-3">
+        <div class="header-actions">
+          <button class="icon-btn js-theme-toggle" type="button" aria-label="Toggle dark mode" title="Dark mode">
+            <i class="fas fa-moon"></i>
+          </button>
+          <a class="icon-btn" th:href="@{/customer/wishlist}" aria-label="Wishlist" title="Wishlist">
+            <i class="far fa-heart"></i><span class="icon-badge js-wishlist-count" data-count="0">0</span>
+          </a>
+          <a class="icon-btn" th:href="@{/customer/cart}" aria-label="Shopping cart" title="Cart">
+            <i class="fas fa-cart-shopping"></i><span class="icon-badge js-cart-count" data-count="0">0</span>
+          </a>
+        </div>
+        <button class="navbar-toggler ms-1" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+                aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+
+      <div class="collapse navbar-collapse order-lg-2" id="mainNav">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" th:href="@{/customer/index}">Home</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" th:href="@{/customer/products}" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false">Categories</a>
+            <ul class="dropdown-menu js-category-menu"></ul>
+          </li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/customer/products}">Products</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/pages/about}">About</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/pages/contact}">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+</th:block>
