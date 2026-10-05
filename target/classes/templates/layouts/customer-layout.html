@@ -17,7 +17,7 @@
     pageScript   file in /static/js loaded after data.js + main.js (e.g. 'cart.js'); '' for none
     minimal      true = login-style header/footer (no announcement bar, no search)
 -->
-<html lang="en" th:fragment="layout(title, description, content, extra, pageScript, minimal)" th:with="URL=@{/}">
+<html lang="vi" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:fragment="layout(title, description, content, extra, pageScript, minimal)" th:with="URL=@{/}">
 <head th:replace="~{fragments/header :: head(${title}, ${description})}"></head>
 <body>
 

@@ -1,18 +1,24 @@
 package com.example.store.dto;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ResetPasswordDTO {
-    @NotBlank(message = "Email không được để trống")
-    @Email(message = "Email không hợp lệ")
-    private String email;
+    @NotBlank(message = "Current password is required")
+    private String oldPassword;
 
-    @NotBlank(message = "Mật khẩu không được để trống")
-    @Size(min = 6, message = "Mật khẩu tối thiểu 6 ký tự")
-    private String password;
+    @NotBlank(message = "New password is required")
+    @Size(min = 6, message = "New password must be at least 6 characters")
+    private String newPassword;
 
-    @NotBlank(message = "Xác nhận mật khẩu không được để trống")
-    private String confirmPassword;
+    @NotBlank(message = "Confirm new password is required")
+    private String confirmNewPassword;
 }

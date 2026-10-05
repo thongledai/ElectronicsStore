@@ -2,26 +2,27 @@
   Sidebar of the shipper role.   Use: <nav th:replace="~{fragments/shipper-sidebar :: sidebar('index')}"></nav>
   (normally included by layouts/dashboard-layout.html — the parameter is the key of the active link)
 -->
-<nav th:fragment="sidebar(active)" class="role-navbar" aria-label="Điều hướng Nhân viên giao hàng">
+<nav th:fragment="sidebar(active)" class="role-navbar" aria-label="Shipper Navigation">
     <div class="role-brand-row">
         <a class="brand" th:href="@{/shipper/index}"><i class="fa-solid fa-bolt me-2"></i>Tech<span>Nova</span></a>
-        <button class="nav-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#roleNavLinks" aria-controls="roleNavLinks" aria-expanded="false" aria-label="Mở menu"><i class="fa-solid fa-bars"></i></button>
+        <button class="nav-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#roleNavLinks" aria-controls="roleNavLinks" aria-expanded="false" aria-label="Toggle menu"><i class="fa-solid fa-bars"></i></button>
     </div>
-    <div class="nav-caption">Nhân viên giao hàng</div>
+    <div class="nav-caption">Shipper</div>
     <div class="nav-links collapse d-lg-flex" id="roleNavLinks">
-        <a th:href="@{/shipper/index}" th:classappend="${active == 'index'} ? 'active'" th:attr="aria-current=${active == 'index'} ? 'page'"><i class="fa-solid fa-chart-pie"></i><span>Tổng quan</span></a>
-        <a th:href="@{/shipper/assigned}" th:classappend="${active == 'assigned'} ? 'active'" th:attr="aria-current=${active == 'assigned'} ? 'page'"><i class="fa-solid fa-list-check"></i><span>Đơn được phân công</span></a>
-        <a th:href="@{/shipper/accepted}" th:classappend="${active == 'accepted'} ? 'active'" th:attr="aria-current=${active == 'accepted'} ? 'page'"><i class="fa-solid fa-clipboard-check"></i><span>Đã tiếp nhận</span></a>
-        <a th:href="@{/shipper/delivering}" th:classappend="${active == 'delivering'} ? 'active'" th:attr="aria-current=${active == 'delivering'} ? 'page'"><i class="fa-solid fa-truck-fast"></i><span>Đang giao</span></a>
-        <a th:href="@{/shipper/delivered}" th:classappend="${active == 'delivered'} ? 'active'" th:attr="aria-current=${active == 'delivered'} ? 'page'"><i class="fa-solid fa-circle-check"></i><span>Đã giao</span></a>
-        <a th:href="@{/shipper/failed}" th:classappend="${active == 'failed'} ? 'active'" th:attr="aria-current=${active == 'failed'} ? 'page'"><i class="fa-solid fa-triangle-exclamation"></i><span>Giao thất bại</span></a>
-        <a th:href="@{/shipper/statistics}" th:classappend="${active == 'statistics'} ? 'active'" th:attr="aria-current=${active == 'statistics'} ? 'page'"><i class="fa-solid fa-chart-line"></i><span>Thống kê</span></a>
+        <a th:href="@{/shipper/index}" th:classappend="${active == 'index'} ? 'active'" th:attr="aria-current=${active == 'index'} ? 'page'"><i class="fa-solid fa-chart-pie"></i><span>Dashboard</span></a>
+        <a th:href="@{/shipper/assigned}" th:classappend="${active == 'assigned'} ? 'active'" th:attr="aria-current=${active == 'assigned'} ? 'page'"><i class="fa-solid fa-list-check"></i><span>Assigned Orders</span></a>
+        <a th:href="@{/shipper/accepted}" th:classappend="${active == 'accepted'} ? 'active'" th:attr="aria-current=${active == 'accepted'} ? 'page'"><i class="fa-solid fa-clipboard-check"></i><span>Accepted</span></a>
+        <a th:href="@{/shipper/delivering}" th:classappend="${active == 'delivering'} ? 'active'" th:attr="aria-current=${active == 'delivering'} ? 'page'"><i class="fa-solid fa-truck-fast"></i><span>Delivering</span></a>
+        <a th:href="@{/shipper/delivered}" th:classappend="${active == 'delivered'} ? 'active'" th:attr="aria-current=${active == 'delivered'} ? 'page'"><i class="fa-solid fa-circle-check"></i><span>Delivered</span></a>
+        <a th:href="@{/shipper/failed}" th:classappend="${active == 'failed'} ? 'active'" th:attr="aria-current=${active == 'failed'} ? 'page'"><i class="fa-solid fa-triangle-exclamation"></i><span>Failed Deliveries</span></a>
+        <a th:href="@{/shipper/statistics}" th:classappend="${active == 'statistics'} ? 'active'" th:attr="aria-current=${active == 'statistics'} ? 'page'"><i class="fa-solid fa-chart-line"></i><span>Statistics</span></a>
+        <a th:href="@{/shipper/reset-password}" th:classappend="${active == 'reset-password'} ? 'active'" th:attr="aria-current=${active == 'reset-password'} ? 'page'"><i class="fa-solid fa-key"></i><span>Change Password</span></a>
     </div>
     <div class="nav-actions">
-        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Chuyển giao diện sáng tối" title="Chuyển giao diện sáng tối"><i class="fa-solid fa-moon"></i></button>
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle dark/light theme" title="Toggle dark/light theme"><i class="fa-solid fa-moon"></i></button>
         <!-- Spring Security logout (POST + CSRF token added automatically by th:action) -->
-        <form th:action="@{/logout}" method="post" class="m-0">
-            <button class="theme-toggle" type="submit" aria-label="Đăng xuất" title="Đăng xuất"><i class="fa-solid fa-right-from-bracket"></i></button>
+        <form th:action="@{/logout}" method="post" class="m-0 js-logout-form">
+            <button class="theme-toggle" type="submit" aria-label="Sign Out" title="Sign Out"><i class="fa-solid fa-right-from-bracket"></i></button>
         </form>
         <div class="role-avatar">S</div>
     </div>

@@ -24,7 +24,7 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    // Ví dụ: ROLE_ADMIN, ROLE_MANAGER, ROLE_EMPLOYEE, ROLE_SHIPPER, ROLE_CUSTOMER
+    // Ví dụ: ADMIN, MANAGER, EMPLOYEE, SHIPPER, CUSTOMER
     @Column(nullable = false, unique = true, length = 50)
     private String name;
 }

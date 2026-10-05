@@ -2,27 +2,28 @@
   Sidebar of the employee role.   Use: <nav th:replace="~{fragments/employee-sidebar :: sidebar('index')}"></nav>
   (normally included by layouts/dashboard-layout.html — the parameter is the key of the active link)
 -->
-<nav th:fragment="sidebar(active)" class="role-navbar" aria-label="Điều hướng Nhân viên bán hàng">
+<nav th:fragment="sidebar(active)" class="role-navbar" aria-label="Employee Navigation">
     <div class="role-brand-row">
         <a class="brand" th:href="@{/employee/index}"><i class="fa-solid fa-bolt me-2"></i>Tech<span>Nova</span></a>
-        <button class="nav-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#roleNavLinks" aria-controls="roleNavLinks" aria-expanded="false" aria-label="Mở menu"><i class="fa-solid fa-bars"></i></button>
+        <button class="nav-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#roleNavLinks" aria-controls="roleNavLinks" aria-expanded="false" aria-label="Toggle menu"><i class="fa-solid fa-bars"></i></button>
     </div>
-    <div class="nav-caption">Nhân viên bán hàng</div>
+    <div class="nav-caption">Employee</div>
     <div class="nav-links collapse d-lg-flex" id="roleNavLinks">
-        <a th:href="@{/employee/index}" th:classappend="${active == 'index'} ? 'active'" th:attr="aria-current=${active == 'index'} ? 'page'"><i class="fa-solid fa-chart-pie"></i><span>Tổng quan</span></a>
-        <a th:href="@{/employee/orders-new}" th:classappend="${active == 'orders-new'} ? 'active'" th:attr="aria-current=${active == 'orders-new'} ? 'page'"><i class="fa-solid fa-bell"></i><span>Đơn hàng mới</span></a>
-        <a th:href="@{/employee/orders-confirmed}" th:classappend="${active == 'orders-confirmed'} ? 'active'" th:attr="aria-current=${active == 'orders-confirmed'} ? 'page'"><i class="fa-solid fa-clipboard-check"></i><span>Đã xác nhận</span></a>
-        <a th:href="@{/employee/orders-picked}" th:classappend="${active == 'orders-picked'} ? 'active'" th:attr="aria-current=${active == 'orders-picked'} ? 'page'"><i class="fa-solid fa-box-open"></i><span>Đã lấy hàng</span></a>
-        <a th:href="@{/employee/orders-delivering}" th:classappend="${active == 'orders-delivering'} ? 'active'" th:attr="aria-current=${active == 'orders-delivering'} ? 'page'"><i class="fa-solid fa-truck"></i><span>Đang giao</span></a>
-        <a th:href="@{/employee/orders-delivered}" th:classappend="${active == 'orders-delivered'} ? 'active'" th:attr="aria-current=${active == 'orders-delivered'} ? 'page'"><i class="fa-solid fa-circle-check"></i><span>Đã giao</span></a>
-        <a th:href="@{/employee/orders-cancelled}" th:classappend="${active == 'orders-cancelled'} ? 'active'" th:attr="aria-current=${active == 'orders-cancelled'} ? 'page'"><i class="fa-solid fa-ban"></i><span>Đã hủy</span></a>
-        <a th:href="@{/employee/orders-returns}" th:classappend="${active == 'orders-returns'} ? 'active'" th:attr="aria-current=${active == 'orders-returns'} ? 'page'"><i class="fa-solid fa-arrow-rotate-left"></i><span>Trả hàng / Hoàn tiền</span></a>
+        <a th:href="@{/employee/index}" th:classappend="${active == 'index'} ? 'active'" th:attr="aria-current=${active == 'index'} ? 'page'"><i class="fa-solid fa-chart-pie"></i><span>Dashboard</span></a>
+        <a th:href="@{/employee/orders-new}" th:classappend="${active == 'orders-new'} ? 'active'" th:attr="aria-current=${active == 'orders-new'} ? 'page'"><i class="fa-solid fa-bell"></i><span>New Orders</span></a>
+        <a th:href="@{/employee/orders-confirmed}" th:classappend="${active == 'orders-confirmed'} ? 'active'" th:attr="aria-current=${active == 'orders-confirmed'} ? 'page'"><i class="fa-solid fa-clipboard-check"></i><span>Confirmed</span></a>
+        <a th:href="@{/employee/orders-picked}" th:classappend="${active == 'orders-picked'} ? 'active'" th:attr="aria-current=${active == 'orders-picked'} ? 'page'"><i class="fa-solid fa-box-open"></i><span>Picked Up</span></a>
+        <a th:href="@{/employee/orders-delivering}" th:classappend="${active == 'orders-delivering'} ? 'active'" th:attr="aria-current=${active == 'orders-delivering'} ? 'page'"><i class="fa-solid fa-truck"></i><span>Delivering</span></a>
+        <a th:href="@{/employee/orders-delivered}" th:classappend="${active == 'orders-delivered'} ? 'active'" th:attr="aria-current=${active == 'orders-delivered'} ? 'page'"><i class="fa-solid fa-circle-check"></i><span>Delivered</span></a>
+        <a th:href="@{/employee/orders-cancelled}" th:classappend="${active == 'orders-cancelled'} ? 'active'" th:attr="aria-current=${active == 'orders-cancelled'} ? 'page'"><i class="fa-solid fa-ban"></i><span>Cancelled</span></a>
+        <a th:href="@{/employee/orders-returns}" th:classappend="${active == 'orders-returns'} ? 'active'" th:attr="aria-current=${active == 'orders-returns'} ? 'page'"><i class="fa-solid fa-arrow-rotate-left"></i><span>Returns / Refunds</span></a>
+        <a th:href="@{/employee/reset-password}" th:classappend="${active == 'reset-password'} ? 'active'" th:attr="aria-current=${active == 'reset-password'} ? 'page'"><i class="fa-solid fa-key"></i><span>Change Password</span></a>
     </div>
     <div class="nav-actions">
-        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Chuyển giao diện sáng tối" title="Chuyển giao diện sáng tối"><i class="fa-solid fa-moon"></i></button>
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle dark/light theme" title="Toggle dark/light theme"><i class="fa-solid fa-moon"></i></button>
         <!-- Spring Security logout (POST + CSRF token added automatically by th:action) -->
-        <form th:action="@{/logout}" method="post" class="m-0">
-            <button class="theme-toggle" type="submit" aria-label="Đăng xuất" title="Đăng xuất"><i class="fa-solid fa-right-from-bracket"></i></button>
+        <form th:action="@{/logout}" method="post" class="m-0 js-logout-form">
+            <button class="theme-toggle" type="submit" aria-label="Sign Out" title="Sign Out"><i class="fa-solid fa-right-from-bracket"></i></button>
         </form>
         <div class="role-avatar">E</div>
     </div>

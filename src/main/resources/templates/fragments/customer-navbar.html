@@ -14,7 +14,7 @@
     <div class="topbar-links">
       <a th:href="@{/pages/contact}"><i class="fas fa-headset me-1"></i>Support</a>
       <a th:href="@{/pages/about}"><i class="fas fa-store me-1"></i>About Us</a>
-      <a th:href="@{/auth/login}"><i class="fas fa-user me-1"></i>Track Order</a>
+      <a th:href="@{/login}"><i class="fas fa-user me-1"></i>Track Order</a>
     </div>
   </div>
 </div>
@@ -44,9 +44,39 @@
             <i class="fas fa-cart-shopping"></i>
             <span class="icon-badge js-cart-count" data-count="0">0</span>
           </a>
-          <a class="icon-btn d-none d-sm-inline-flex" th:href="@{/auth/login}" aria-label="Account" title="Account">
-            <i class="far fa-user"></i>
-          </a>
+          <div class="dropdown d-none d-sm-inline-flex">
+            <button class="icon-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Account" title="Tài khoản">
+              <i class="far fa-user"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm js-account-menu" style="min-width: 200px;">
+              <!-- Guest: Sign In / Register -->
+              <li class="js-auth-guest">
+                <a class="dropdown-item py-2" th:href="@{/login}">
+                  <i class="fas fa-right-to-bracket me-2 text-primary"></i>Sign In / Register
+                </a>
+              </li>
+
+              <!-- Authenticated: Change Password and Sign Out -->
+              <li class="js-auth-user" style="display: none;">
+                <h6 class="dropdown-header js-account-greeting">My Account</h6>
+              </li>
+              <li class="js-auth-user" style="display: none;">
+                <a class="dropdown-item py-2" th:href="@{/customer/reset-password}">
+                  <i class="fas fa-key me-2 text-warning"></i>Change Password
+                </a>
+              </li>
+              <li class="js-auth-user" style="display: none;">
+                <hr class="dropdown-divider my-1">
+              </li>
+              <li class="js-auth-user" style="display: none;">
+                <form th:action="@{/logout}" method="post" class="m-0 js-logout-form">
+                  <button type="submit" class="dropdown-item py-2 text-danger">
+                    <i class="fas fa-right-from-bracket me-2"></i>Sign Out
+                  </button>
+                </form>
+              </li>
+            </ul>
+          </div>
         </div>
         <button class="navbar-toggler ms-1" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
                 aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">

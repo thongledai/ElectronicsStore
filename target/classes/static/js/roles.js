@@ -67,11 +67,26 @@
   function initDemoActions() {
     document.addEventListener('click', e => {
       const btn = e.target.closest('[data-demo-action]');
-      if (btn) toast(btn.getAttribute('data-demo-action') + ': chức năng minh họa, chưa kết nối backend.');
+      if (btn) toast(btn.getAttribute('data-demo-action') + ': demo feature — not connected to backend.');
     });
     document.querySelectorAll('[data-demo-status]').forEach(sel => {
       sel.addEventListener('change', () => {
-        toast('Đã chọn "' + sel.options[sel.selectedIndex].text + '" (mô phỏng, chưa lưu database).');
+        toast('Selected "' + sel.options[sel.selectedIndex].text + '" (demo — not saved to database).');
+      });
+    });
+  }
+
+  /* ---------- Complete Logout Handler ---------- */
+  function initLogoutHandler() {
+    document.querySelectorAll('form[action*="/logout"], .js-logout-form').forEach(form => {
+      form.addEventListener('submit', () => {
+        try {
+          localStorage.removeItem('technova_jwt');
+          localStorage.removeItem('technova_role');
+          localStorage.removeItem('technova_user');
+          document.cookie = 'JWT_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+          document.cookie = 'JSESSIONID=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        } catch (e) { /* storage error */ }
       });
     });
   }
@@ -80,5 +95,8 @@
     initTheme();
     initTableSearch();
     initDemoActions();
+    initLogoutHandler();
   });
+
+  window.toast = toast;
 })();

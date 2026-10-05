@@ -1350,21 +1350,40 @@ textarea.form-control { min-height: 140px; resize: vertical; }
 .form-control.is-valid, .form-select.is-valid { border-color: var(--success); background-image: none; }
 .invalid-feedback { font-size: .78rem; font-weight: 500; }
 
+/* Hide browser default password reveal / clear buttons (Edge / IE) to prevent overlapping double eye icon */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
 .input-icon { position: relative; }
-.input-icon .form-control { padding-left: 2.7rem; }
+.input-icon .form-control {
+  padding-left: 2.85rem !important;
+  padding-right: 2.85rem !important;
+}
+.input-icon .form-control.is-invalid,
+.input-icon .form-control.is-valid {
+  background-image: none !important;
+}
 .input-icon > i {
   position: absolute;
   left: 1rem; top: 50%;
   transform: translateY(-50%);
   color: var(--text-muted);
-  font-size: .9rem;
+  font-size: .95rem;
   pointer-events: none;
+  z-index: 3;
 }
 .input-icon .toggle-pass {
-  position: absolute; right: .9rem; top: 50%;
+  position: absolute; right: .85rem; top: 50%;
   transform: translateY(-50%);
   border: none; background: none; color: var(--text-muted);
   cursor: pointer;
+  z-index: 3;
+  padding: 4px 6px;
+  line-height: 1;
 }
 .input-icon .toggle-pass:hover { color: var(--blue); }
 

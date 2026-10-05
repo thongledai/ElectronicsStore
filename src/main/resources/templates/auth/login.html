@@ -2,7 +2,7 @@
 <html lang="en" th:replace="~{layouts/customer-layout :: layout(
         'Sign In — TechNova Electronics',
         'Sign in to the TechNova Electronics demo account. Frontend validation only — no real authentication.',
-        ~{::main}, ~{}, 'login.js', true)}">
+        ~{::main}, ~{}, 'auth.js', true)}">
 <head><title>Sign In — TechNova Electronics</title></head>
 <body>
 
@@ -88,7 +88,7 @@
                       <div class="mb-3">
                         <div class="d-flex justify-content-between align-items-center">
                           <label class="form-label" for="liPassword">Password</label>
-                          <a href="#" class="small" id="forgotLink">Forgot password?</a>
+                          <a th:href="@{/forgot-password}" class="small" id="forgotLink">Forgot password?</a>
                         </div>
                         <div class="input-icon">
                           <i class="fas fa-lock"></i>
@@ -164,11 +164,11 @@
                       </div>
 
                       <div class="mb-3">
-                        <label class="form-label" for="rgPhone">Mobile number</label>
+                        <label class="form-label" for="rgPhone">Phone number</label>
                         <div class="input-icon">
                           <i class="fas fa-mobile-screen"></i>
                           <input type="tel" class="form-control" id="rgPhone"
-                                 placeholder="10-digit mobile number" autocomplete="tel" maxlength="10" required>
+                                 placeholder="10 digits (03x, 05x, 07x, 08x, 09x)" autocomplete="tel" maxlength="12" required>
                         </div>
                         <div class="invalid-feedback" id="errRgPhone"></div>
                       </div>
@@ -185,7 +185,7 @@
                         </div>
                         <div class="strength-meter"><span id="strengthBar"></span></div>
                         <small class="text-muted" id="strengthText">
-                          Use 8+ characters with upper case, lower case, a number and a symbol.
+                          Use 6+ characters with upper case, lower case, a number and a symbol.
                         </small>
                         <div class="invalid-feedback" id="errRgPassword"></div>
                       </div>
@@ -208,7 +208,7 @@
                           <input type="checkbox" id="rgTerms" required>
                           <span>I agree to the Terms of Service and Privacy Policy</span>
                         </label>
-                        <div class="invalid-feedback d-block" id="errRgTerms"></div>
+                        <div class="invalid-feedback" id="errRgTerms"></div>
                       </div>
 
                       <button type="submit" class="btn btn-accent btn-lg w-100" id="registerSubmit">
@@ -218,11 +218,6 @@
 
                   </div>
                 </div>
-
-                <p class="text-center small text-muted mt-4 mb-0">
-                  <i class="fas fa-triangle-exclamation me-1 text-warning"></i>
-                  This is a frontend demonstration. Nothing is sent to a server and no real account is created.
-                </p>
 
               </div>
             </div>

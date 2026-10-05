@@ -827,16 +827,44 @@ function initYear() {
 /** Reflects the demo login state in the header account label. */
 function initAccountLabel() {
   const user = storageGet(STORE.user, null);
+  const token = localStorage.getItem('technova_jwt');
+  const isLoggedIn = !!(token || (user && user.email));
+
   document.querySelectorAll('.js-account-label').forEach(el => {
-    el.textContent = user && user.name ? user.name.split(' ')[0] : 'Sign In';
+    el.textContent = isLoggedIn && user && user.name ? user.name.split(' ')[0] : 'Sign In';
   });
-  document.querySelectorAll('.js-logout').forEach(btn => {
-    btn.classList.toggle('d-none', !user);
-    btn.addEventListener('click', e => {
-      e.preventDefault();
+
+  document.querySelectorAll('.js-account-greeting').forEach(el => {
+    if (isLoggedIn && user && user.name) {
+      el.textContent = 'Hello, ' + user.name.split(' ')[0];
+    } else {
+      el.textContent = 'My Account';
+    }
+  });
+
+  document.querySelectorAll('.js-auth-guest').forEach(el => {
+    el.style.display = isLoggedIn ? 'none' : 'block';
+  });
+
+  document.querySelectorAll('.js-auth-user').forEach(el => {
+    el.style.display = isLoggedIn ? 'block' : 'none';
+  });
+
+  if (new URLSearchParams(location.search).get('logout') === 'true') {
+    localStorage.removeItem('technova_jwt');
+    localStorage.removeItem('technova_role');
+    storageSet(STORE.user, null);
+    document.cookie = 'JWT_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    document.cookie = 'JSESSIONID=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+  }
+
+  document.querySelectorAll('form[action*="/logout"], .js-logout-form').forEach(form => {
+    form.addEventListener('submit', () => {
+      localStorage.removeItem('technova_jwt');
+      localStorage.removeItem('technova_role');
       storageSet(STORE.user, null);
-      showToast('Signed out', 'You have been logged out of the demo account.', 'info');
-      setTimeout(() => location.reload(), 700);
+      document.cookie = 'JWT_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      document.cookie = 'JSESSIONID=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     });
   });
 }
