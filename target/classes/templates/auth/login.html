@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en" th:replace="~{layouts/customer-layout :: layout(
+        'Sign In — TechNova Electronics',
+        'Sign in to the TechNova Electronics demo account. Frontend validation only — no real authentication.',
+        ~{::main}, ~{}, 'login.js', true)}">
+<head><title>Sign In — TechNova Electronics</title></head>
+<body>
+
+<main>
+  <div class="container auth-wrap">
+    <div class="row justify-content-center w-100">
+      <div class="col-lg-10">
+        <div class="auth-card">
+          <div class="row g-0">
+
+            <!-- ------------ Marketing panel ------------ -->
+            <div class="col-lg-5 d-none d-lg-block">
+              <div class="auth-aside">
+                <span class="hero-pill mb-3"><i class="fas fa-shield-halved"></i>Demo account</span>
+                <h2 class="h3">Welcome back to TechNova</h2>
+                <p style="color:rgba(255,255,255,.78);font-size:.92rem">
+                  Sign in to see your saved wishlist, track orders and check out faster next time.
+                </p>
+
+                <ul>
+                  <li><i class="fas fa-circle-check"></i>Faster checkout with saved addresses</li>
+                  <li><i class="fas fa-circle-check"></i>Order history and live tracking</li>
+                  <li><i class="fas fa-circle-check"></i>Early access to sale events</li>
+                  <li><i class="fas fa-circle-check"></i>Exclusive member-only pricing</li>
+                </ul>
+
+                <div class="mt-5 pt-3" style="border-top:1px solid rgba(255,255,255,.15)">
+                  <div class="stars mb-1">
+                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                  </div>
+                  <p class="small mb-1" style="color:rgba(255,255,255,.82)">
+                    "Genuinely the smoothest electronics store I've ordered from."
+                  </p>
+                  <p class="small mb-0" style="color:rgba(255,255,255,.55)">— Aditya K., verified buyer</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- ------------ Forms ------------ -->
+            <div class="col-lg-7">
+              <div class="p-4 p-md-5">
+
+                <!-- Tabs: Sign in / Register -->
+                <ul class="nav nav-tabs mb-4" role="tablist">
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#pane-login"
+                            type="button" role="tab" aria-selected="true">Sign In</button>
+                  </li>
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#pane-register"
+                            type="button" role="tab" aria-selected="false">Create Account</button>
+                  </li>
+                </ul>
+
+                <div class="tab-content">
+
+                  <!-- ============ SIGN IN ============ -->
+                  <div class="tab-pane fade show active" id="pane-login" role="tabpanel">
+
+                    <h1 class="h4 mb-1">Sign in to your account</h1>
+                    <p class="text-muted small mb-3">Enter your credentials to continue shopping.</p>
+
+                    <div class="demo-hint mb-4">
+                      <i class="fas fa-circle-info me-1"></i>
+                      <strong>Demo credentials:</strong>
+                      email <code>demo@technova.com</code> · password <code>Demo@123</code>
+                      <button class="btn btn-sm btn-brand ms-2 mt-2 mt-sm-0" id="fillDemoBtn" type="button">
+                        Auto-fill
+                      </button>
+                    </div>
+
+                    <form id="loginForm" novalidate>
+                      <div class="mb-3">
+                        <label class="form-label" for="liEmail">Email address</label>
+                        <div class="input-icon">
+                          <i class="fas fa-envelope"></i>
+                          <input type="email" class="form-control" id="liEmail"
+                                 placeholder="you@example.com" autocomplete="username" required>
+                        </div>
+                        <div class="invalid-feedback" id="errLiEmail"></div>
+                      </div>
+
+                      <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                          <label class="form-label" for="liPassword">Password</label>
+                          <a href="#" class="small" id="forgotLink">Forgot password?</a>
+                        </div>
+                        <div class="input-icon">
+                          <i class="fas fa-lock"></i>
+                          <input type="password" class="form-control" id="liPassword"
+                                 placeholder="Enter your password" autocomplete="current-password" required>
+                          <button class="toggle-pass" type="button" data-target="liPassword" aria-label="Show password">
+                            <i class="fas fa-eye"></i>
+                          </button>
+                        </div>
+                        <div class="invalid-feedback" id="errLiPassword"></div>
+                      </div>
+
+                      <div class="d-flex justify-content-between align-items-center mb-4">
+                        <label class="filter-check mb-0">
+                          <input type="checkbox" id="rememberMe">
+                          <span>Remember me</span>
+                        </label>
+                      </div>
+
+                      <button type="submit" class="btn btn-brand btn-lg w-100" id="loginSubmit">
+                        <i class="fas fa-right-to-bracket me-2"></i>Sign In
+                      </button>
+                    </form>
+
+                    <div class="text-center my-4 position-relative">
+                      <hr>
+                      <span class="px-3 small text-muted"
+                            style="background:var(--surface);position:absolute;top:-12px;left:50%;transform:translateX(-50%)">
+                        or continue with
+                      </span>
+                    </div>
+
+                    <div class="row g-2">
+                      <div class="col-6">
+                        <button class="btn btn-ghost w-100 js-social" data-provider="Google" type="button">
+                          <i class="fab fa-google me-2"></i>Google
+                        </button>
+                      </div>
+                      <div class="col-6">
+                        <button class="btn btn-ghost w-100 js-social" data-provider="Apple" type="button">
+                          <i class="fab fa-apple me-2"></i>Apple
+                        </button>
+                      </div>
+                    </div>
+
+                  </div>
+
+                  <!-- ============ REGISTER ============ -->
+                  <div class="tab-pane fade" id="pane-register" role="tabpanel">
+
+                    <h2 class="h4 mb-1">Create your account</h2>
+                    <p class="text-muted small mb-4">It takes less than a minute. No card details needed.</p>
+
+                    <form id="registerForm" novalidate>
+                      <div class="mb-3">
+                        <label class="form-label" for="rgName">Full name</label>
+                        <div class="input-icon">
+                          <i class="fas fa-user"></i>
+                          <input type="text" class="form-control" id="rgName"
+                                 placeholder="Your full name" autocomplete="name" required>
+                        </div>
+                        <div class="invalid-feedback" id="errRgName"></div>
+                      </div>
+
+                      <div class="mb-3">
+                        <label class="form-label" for="rgEmail">Email address</label>
+                        <div class="input-icon">
+                          <i class="fas fa-envelope"></i>
+                          <input type="email" class="form-control" id="rgEmail"
+                                 placeholder="you@example.com" autocomplete="email" required>
+                        </div>
+                        <div class="invalid-feedback" id="errRgEmail"></div>
+                      </div>
+
+                      <div class="mb-3">
+                        <label class="form-label" for="rgPhone">Mobile number</label>
+                        <div class="input-icon">
+                          <i class="fas fa-mobile-screen"></i>
+                          <input type="tel" class="form-control" id="rgPhone"
+                                 placeholder="10-digit mobile number" autocomplete="tel" maxlength="10" required>
+                        </div>
+                        <div class="invalid-feedback" id="errRgPhone"></div>
+                      </div>
+
+                      <div class="mb-3">
+                        <label class="form-label" for="rgPassword">Password</label>
+                        <div class="input-icon">
+                          <i class="fas fa-lock"></i>
+                          <input type="password" class="form-control" id="rgPassword"
+                                 placeholder="Create a strong password" autocomplete="new-password" required>
+                          <button class="toggle-pass" type="button" data-target="rgPassword" aria-label="Show password">
+                            <i class="fas fa-eye"></i>
+                          </button>
+                        </div>
+                        <div class="strength-meter"><span id="strengthBar"></span></div>
+                        <small class="text-muted" id="strengthText">
+                          Use 8+ characters with upper case, lower case, a number and a symbol.
+                        </small>
+                        <div class="invalid-feedback" id="errRgPassword"></div>
+                      </div>
+
+                      <div class="mb-3">
+                        <label class="form-label" for="rgConfirm">Confirm password</label>
+                        <div class="input-icon">
+                          <i class="fas fa-lock"></i>
+                          <input type="password" class="form-control" id="rgConfirm"
+                                 placeholder="Re-enter your password" autocomplete="new-password" required>
+                          <button class="toggle-pass" type="button" data-target="rgConfirm" aria-label="Show password">
+                            <i class="fas fa-eye"></i>
+                          </button>
+                        </div>
+                        <div class="invalid-feedback" id="errRgConfirm"></div>
+                      </div>
+
+                      <div class="mb-4">
+                        <label class="filter-check">
+                          <input type="checkbox" id="rgTerms" required>
+                          <span>I agree to the Terms of Service and Privacy Policy</span>
+                        </label>
+                        <div class="invalid-feedback d-block" id="errRgTerms"></div>
+                      </div>
+
+                      <button type="submit" class="btn btn-accent btn-lg w-100" id="registerSubmit">
+                        <i class="fas fa-user-plus me-2"></i>Create Account
+                      </button>
+                    </form>
+
+                  </div>
+                </div>
+
+                <p class="text-center small text-muted mt-4 mb-0">
+                  <i class="fas fa-triangle-exclamation me-1 text-warning"></i>
+                  This is a frontend demonstration. Nothing is sent to a server and no real account is created.
+                </p>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <p class="text-center mt-4 mb-0">
+          <a th:href="@{/customer/index}" class="btn btn-ghost"><i class="fas fa-arrow-left me-2"></i>Back to store</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</main>
+
+
+</body>
+</html>

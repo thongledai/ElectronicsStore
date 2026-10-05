@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="vi" th:replace="~{layouts/dashboard-layout :: layout('Đã giao', 'employee', 'orders-delivered', ~{::section.content})}">
+<head><title>Đã giao | TechNova</title></head>
+<body>
+<section class="content"><div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4"><div><h1 class="title">Đã giao</h1>
+<div class="subtitle">Xem chi tiết và cập nhật trạng thái đơn hàng.</div>
+</div>
+<button class="btn btn-primary btn-sm" data-demo-action="Thêm mới"><i class="fa-solid fa-plus me-1"></i>Thêm mới</button></div>
+<div class="panel mb-3"><input class="form-control" placeholder="Tìm mã đơn hoặc tên khách hàng..." data-search-table="#orders"></div>
+<div class="panel"><h2 class="paneltitle mb-3">Đã giao</h2>
+<div class="table-responsive"><table class="table" id="orders"><thead><tr><th>Mã đơn</th><th>Khách hàng</th><th>Ngày đặt</th><th>Tổng tiền</th><th>Trạng thái</th><th>Cập nhật trạng thái</th><th>Thao tác</th></tr>
+</thead>
+<tbody><tr><td>#TN-2044</td><td>Phan Tuấn Kiệt</td><td>02/10/2026</td><td>₫3.490.000</td><td><span class="status green">Đã giao</span></td><td><select class="form-select form-select-sm" data-demo-status><option value="new" >Mới</option><option value="confirmed" >Đã xác nhận</option><option value="picked" >Đã lấy hàng</option><option value="delivering" >Đang giao</option><option value="delivered" selected>Đã giao</option><option value="cancelled" >Đã hủy</option><option value="returns" >Trả hàng / Hoàn tiền</option></select></td><td><button class="action" data-demo-action="Xem chi tiết"><i class="fa-regular fa-eye"></i></button></td></tr>
+</tbody>
+</table>
+</div>
+<div class="muted">Cập nhật trạng thái chỉ mô phỏng, chưa được lưu vào database.</div>
+</div>
+</section>
+</body>
+</html>

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 40" width="420" height="40">
+  <g font-family="Poppins,Arial" font-size="13" font-weight="600" fill="#0b1b34">
+    <rect x="0" y="4" width="72" height="32" rx="7" fill="#fff"/><text x="36" y="25" text-anchor="middle">VISA</text>
+    <rect x="82" y="4" width="82" height="32" rx="7" fill="#fff"/><text x="123" y="25" text-anchor="middle">Master</text>
+    <rect x="174" y="4" width="66" height="32" rx="7" fill="#fff"/><text x="207" y="25" text-anchor="middle">UPI</text>
+    <rect x="250" y="4" width="82" height="32" rx="7" fill="#fff"/><text x="291" y="25" text-anchor="middle">RuPay</text>
+    <rect x="342" y="4" width="78" height="32" rx="7" fill="#fff"/><text x="381" y="25" text-anchor="middle">NetBank</text>
+  </g>
+</svg>

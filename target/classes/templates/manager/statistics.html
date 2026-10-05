@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="vi" th:replace="~{layouts/dashboard-layout :: layout('Thống kê hệ thống', 'manager', 'statistics', ~{::section.content})}">
+<head><title>Thống kê hệ thống | TechNova</title></head>
+<body>
+<section class="content"><div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4"><div><h1 class="title">Thống kê hệ thống</h1>
+<div class="subtitle">Thống kê doanh thu, người dùng mới và đơn hàng.</div>
+</div>
+<button class="btn btn-primary btn-sm" data-demo-action="Thêm mới"><i class="fa-solid fa-plus me-1"></i>Thêm mới</button></div>
+<div class="row g-3 mb-4"><div class="col-6 col-xl-3"><div class="stat"><div class="d-flex justify-content-between"><span class="statlabel">Doanh thu tháng</span><div class="staticon"><i class="fa-solid fa-wallet"></i></div>
+</div>
+<div class="statvalue">₫248,6M</div>
+<div class="muted">Tăng 12,8%</div>
+</div>
+</div>
+<div class="col-6 col-xl-3"><div class="stat"><div class="d-flex justify-content-between"><span class="statlabel">Người dùng mới</span><div class="staticon"><i class="fa-solid fa-users"></i></div>
+</div>
+<div class="statvalue">326</div>
+<div class="muted">Tháng 10/2026</div>
+</div>
+</div>
+<div class="col-6 col-xl-3"><div class="stat"><div class="d-flex justify-content-between"><span class="statlabel">Đơn hàng hoàn tất</span><div class="staticon"><i class="fa-solid fa-check"></i></div>
+</div>
+<div class="statvalue">1.106</div>
+<div class="muted">86% tổng đơn</div>
+</div>
+</div>
+</div>
+<div class="panel mb-3"><div class="row g-3"><div class="col-md-4"><label class="form-label">Loại thống kê</label><select class="form-select"><option>Doanh thu</option><option>Người dùng mới</option><option>Đơn hàng</option></select></div>
+<div class="col-md-4"><label class="form-label">Khoảng thời gian</label><select class="form-select"><option>Theo ngày</option><option>Theo tháng</option><option>Theo năm</option></select></div>
+<div class="col-md-4"><label class="form-label">Loại biểu đồ</label><select class="form-select"><option>Đường</option><option>Cột</option><option>Tròn</option></select></div>
+</div>
+</div>
+<div class="panel"><h2 class="paneltitle mb-3">Biểu đồ thống kê</h2>
+<div class="chart"><div><i class="fa-solid fa-chart-line fa-2x mb-2"></i><br>Khu vực hiển thị biểu đồ<br><small>Có thể tích hợp Chart.js khi có backend</small></div>
+</div>
+</div>
+</section>
+</body>
+</html>

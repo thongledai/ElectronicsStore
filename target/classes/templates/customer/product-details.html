@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" th:replace="~{layouts/customer-layout :: layout(
+        'Product Details — TechNova Electronics',
+        'Product details, full specifications, ratings and customer reviews at TechNova Electronics.',
+        ~{::main}, ~{}, 'product-details.js', false)}">
+<head><title>Product Details — TechNova Electronics</title></head>
+<body>
+
+<main>
+
+  <!-- Breadcrumb -->
+  <section class="page-head py-3">
+    <div class="container">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+          <li class="breadcrumb-item"><a th:href="@{/customer/index}">Home</a></li>
+          <li class="breadcrumb-item"><a th:href="@{/customer/products}">Products</a></li>
+          <li class="breadcrumb-item"><a href="#" id="crumbCategory">Category</a></li>
+          <li class="breadcrumb-item active" aria-current="page" id="crumbProduct">Product</li>
+        </ol>
+      </nav>
+    </div>
+  </section>
+
+  <!-- ==============================================================
+       PRODUCT DETAIL — rendered by js/product-details.js
+       ============================================================== -->
+  <section class="section pb-0">
+    <div class="container" id="productDetail">
+      <!-- Loading skeleton, replaced once the product is resolved -->
+      <div class="row g-4">
+        <div class="col-lg-6"><div class="skeleton skeleton-media" style="border-radius:var(--radius-lg)"></div></div>
+        <div class="col-lg-6">
+          <div class="skeleton skeleton-line" style="width:60%;height:28px"></div>
+          <div class="skeleton skeleton-line" style="width:40%"></div>
+          <div class="skeleton skeleton-line" style="width:80%"></div>
+          <div class="skeleton skeleton-line" style="width:70%"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==============================================================
+       TABS: Description / Specifications / Reviews
+       ============================================================== -->
+  <section class="section" id="detailTabsSection" hidden>
+    <div class="container">
+      <ul class="nav nav-tabs" id="productTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-desc"
+                  type="button" role="tab" aria-controls="tab-desc" aria-selected="true">
+            <i class="fas fa-align-left me-2"></i>Description
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-specs"
+                  type="button" role="tab" aria-controls="tab-specs" aria-selected="false">
+            <i class="fas fa-list-check me-2"></i>Specifications
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-reviews"
+                  type="button" role="tab" aria-controls="tab-reviews" aria-selected="false">
+            <i class="fas fa-star me-2"></i>Reviews <span id="reviewTabCount"></span>
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-shipping"
+                  type="button" role="tab" aria-controls="tab-shipping" aria-selected="false">
+            <i class="fas fa-truck me-2"></i>Shipping &amp; Returns
+          </button>
+        </li>
+      </ul>
+
+      <div class="tab-content pt-4">
+        <div class="tab-pane fade show active" id="tab-desc" role="tabpanel"></div>
+        <div class="tab-pane fade" id="tab-specs" role="tabpanel"></div>
+        <div class="tab-pane fade" id="tab-reviews" role="tabpanel"></div>
+
+        <div class="tab-pane fade" id="tab-shipping" role="tabpanel">
+          <div class="row g-4">
+            <div class="col-md-6">
+              <h4 class="h6 mb-3"><i class="fas fa-truck-fast text-primary me-2"></i>Delivery</h4>
+              <ul class="pd-highlights">
+                <li>Free delivery on orders above ₹5,000; ₹99 flat rate below that.</li>
+                <li>Dispatched within 24 hours of order confirmation.</li>
+                <li>Standard delivery in 2–4 business days across India.</li>
+                <li>Live tracking link sent by SMS and email once dispatched.</li>
+              </ul>
+            </div>
+            <div class="col-md-6">
+              <h4 class="h6 mb-3"><i class="fas fa-rotate-left text-primary me-2"></i>Returns &amp; Warranty</h4>
+              <ul class="pd-highlights">
+                <li>7-day no-questions-asked return window from delivery.</li>
+                <li>Product must be returned with all original accessories and packaging.</li>
+                <li>Refunds are processed within 5 business days of pickup.</li>
+                <li>Manufacturer warranty is serviced through brand-authorised centres.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Related products -->
+  <section class="section pt-0" id="relatedSection" hidden>
+    <div class="container">
+      <div class="section-head">
+        <span class="section-eyebrow"><i class="fas fa-shuffle"></i>You may also like</span>
+        <h2 class="section-title">Similar Products</h2>
+      </div>
+      <div class="row g-3 g-md-4" id="relatedGrid"></div>
+    </div>
+  </section>
+
+  <!-- Recently viewed -->
+  <section class="section pt-0" id="recentSection" hidden>
+    <div class="container">
+      <div class="section-head">
+        <span class="section-eyebrow"><i class="fas fa-clock-rotate-left"></i>Your history</span>
+        <h2 class="section-title">Recently Viewed</h2>
+      </div>
+      <div class="row g-3 g-md-4" id="recentGrid"></div>
+    </div>
+  </section>
+
+</main>
+
+
+</body>
+</html>

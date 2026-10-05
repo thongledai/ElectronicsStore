@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="vi" th:replace="~{layouts/dashboard-layout :: layout('Đơn vị vận chuyển', 'manager', 'carriers', ~{::section.content})}">
+<head><title>Đơn vị vận chuyển | TechNova</title></head>
+<body>
+<section class="content"><div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4"><div><h1 class="title">Đơn vị vận chuyển</h1>
+<div class="subtitle">Quản lý và theo dõi đơn vị vận chuyển trong hệ thống.</div>
+</div>
+<button class="btn btn-primary btn-sm" data-demo-action="Thêm mới"><i class="fa-solid fa-plus me-1"></i>Thêm mới</button></div>
+<div class="panel mb-3"><div class="row g-2 align-items-center"><div class="col-md-6"><input class="form-control" placeholder="Tìm kiếm..." data-search-table="#dataTable"></div>
+<div class="col-md-6 text-md-end"><span class="muted">Dữ liệu minh họa · 3 bản ghi</span></div>
+</div>
+</div>
+<div class="panel"><h2 class="paneltitle mb-3">Đơn vị vận chuyển</h2>
+<div class="table-responsive"><table class="table" id="dataTable"><thead><tr><th>Mã ĐVVC</th><th>Tên đơn vị</th><th>Phí cơ bản</th><th>Thời gian dự kiến</th><th>Trạng thái</th><th>Thao tác</th></tr>
+</thead>
+<tbody><tr><td>VC001</td><td>Nova Express</td><td>₫25.000</td><td>1–2 ngày</td><td><span class="status green">Hoạt động</span></td><td><button class="action" data-demo-action="Xem chi tiết"><i class="fa-regular fa-eye"></i></button> <button class="action" data-demo-action="Chỉnh sửa"><i class="fa-solid fa-pen"></i></button></td></tr>
+<tr><td>VC002</td><td>Giao Hàng Nhanh</td><td>₫30.000</td><td>1–3 ngày</td><td><span class="status green">Hoạt động</span></td><td><button class="action" data-demo-action="Xem chi tiết"><i class="fa-regular fa-eye"></i></button> <button class="action" data-demo-action="Chỉnh sửa"><i class="fa-solid fa-pen"></i></button></td></tr>
+<tr><td>VC003</td><td>Viettel Post</td><td>₫28.000</td><td>2–4 ngày</td><td><span class="status green">Hoạt động</span></td><td><button class="action" data-demo-action="Xem chi tiết"><i class="fa-regular fa-eye"></i></button> <button class="action" data-demo-action="Chỉnh sửa"><i class="fa-solid fa-pen"></i></button></td></tr>
+</tbody>
+</table>
+</div>
+<div class="d-flex justify-content-between"><span class="muted">Trang 1/1</span><div class="btn-group btn-group-sm"><button class="btn btn-outline-secondary">Trước</button><button class="btn btn-primary">1</button><button class="btn btn-outline-secondary">Sau</button></div>
+</div>
+</div>
+</section>
+</body>
+</html>

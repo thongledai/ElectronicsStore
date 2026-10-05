@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600" role="img">
+  <defs>
+    <linearGradient id="bg43393" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#eaf0fa"/><stop offset="1" stop-color="#cfdcf0"/>
+    </linearGradient>
+    <radialGradient id="gl43393" cx="50%" cy="42%" r="52%">
+      <stop offset="0" stop-color="#1b6df3" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#1b6df3" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="scr43393" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1b6df3"/><stop offset=".55" stop-color="#0f2f6b"/><stop offset="1" stop-color="#ff7a18"/>
+    </linearGradient>
+    <linearGradient id="mtl43393" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f2f5fa"/><stop offset=".5" stop-color="#c9d3e2"/><stop offset="1" stop-color="#9fadc2"/>
+    </linearGradient>
+    <linearGradient id="drk43393" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3b4658"/><stop offset="1" stop-color="#161d2b"/>
+    </linearGradient>
+    <filter id="sh43393" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#0b1b34" flood-opacity=".28"/>
+    </filter>
+  </defs>
+  <rect width="600" height="600" rx="28" fill="url(#bg43393)"/>
+  <rect width="600" height="600" rx="28" fill="url(#gl43393)"/>
+  <g filter="url(#sh43393)">
+    <path d="M226 196h148q26 0 26 26v156q0 26-26 26H226q-26 0-26-26V222q0-26 26-26z" fill="url(#drk43393)" transform="rotate(-10 300 300)"/>
+    <rect x="222" y="216" width="156" height="168" rx="26" fill="#1b6df3" opacity=".9" transform="rotate(-10 300 300)"/>
+    <path d="M240 300h34l14-30 20 60 16-38 12 24h30" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" transform="rotate(-10 300 300)"/>
+  </g>
+  <ellipse cx="300" cy="536" rx="168" ry="17" fill="#0b1b34" opacity=".16"/>
+</svg>

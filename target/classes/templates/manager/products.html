@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="vi" th:replace="~{layouts/dashboard-layout :: layout('Sản phẩm', 'manager', 'products', ~{::section.content})}">
+<head><title>Sản phẩm | TechNova</title></head>
+<body>
+<section class="content"><div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4"><div><h1 class="title">Sản phẩm</h1>
+<div class="subtitle">Quản lý và theo dõi sản phẩm trong hệ thống.</div>
+</div>
+<button class="btn btn-primary btn-sm" data-demo-action="Thêm mới"><i class="fa-solid fa-plus me-1"></i>Thêm mới</button></div>
+<div class="panel mb-3"><div class="row g-2 align-items-center"><div class="col-md-6"><input class="form-control" placeholder="Tìm kiếm..." data-search-table="#dataTable"></div>
+<div class="col-md-6 text-md-end"><span class="muted">Dữ liệu minh họa · 4 bản ghi</span></div>
+</div>
+</div>
+<div class="panel"><h2 class="paneltitle mb-3">Sản phẩm</h2>
+<div class="table-responsive"><table class="table" id="dataTable"><thead><tr><th>Mã SP</th><th>Tên sản phẩm</th><th>Danh mục</th><th>Giá bán</th><th>Tồn kho</th><th>Trạng thái</th><th>Thao tác</th></tr>
+</thead>
+<tbody><tr><td>P001</td><td>Laptop TechNova Pro 14</td><td>Laptop</td><td>₫24.990.000</td><td>18</td><td><span class="status green">Đang bán</span></td><td><button class="action" data-demo-action="Xem chi tiết"><i class="fa-regular fa-eye"></i></button> <button class="action" data-demo-action="Chỉnh sửa"><i class="fa-solid fa-pen"></i></button></td></tr>
+<tr><td>P002</td><td>Tai nghe Nova Buds</td><td>Phụ kiện</td><td>₫1.290.000</td><td>52</td><td><span class="status green">Đang bán</span></td><td><button class="action" data-demo-action="Xem chi tiết"><i class="fa-regular fa-eye"></i></button> <button class="action" data-demo-action="Chỉnh sửa"><i class="fa-solid fa-pen"></i></button></td></tr>
+<tr><td>P003</td><td>Màn hình NovaView 27</td><td>Màn hình</td><td>₫5.490.000</td><td>7</td><td><span class="status yellow">Sắp hết</span></td><td><button class="action" data-demo-action="Xem chi tiết"><i class="fa-regular fa-eye"></i></button> <button class="action" data-demo-action="Chỉnh sửa"><i class="fa-solid fa-pen"></i></button></td></tr>
+<tr><td>P004</td><td>Bàn phím Nova Mechanical</td><td>Phụ kiện</td><td>₫1.890.000</td><td>0</td><td><span class="status red">Hết hàng</span></td><td><button class="action" data-demo-action="Xem chi tiết"><i class="fa-regular fa-eye"></i></button> <button class="action" data-demo-action="Chỉnh sửa"><i class="fa-solid fa-pen"></i></button></td></tr>
+</tbody>
+</table>
+</div>
+<div class="d-flex justify-content-between"><span class="muted">Trang 1/1</span><div class="btn-group btn-group-sm"><button class="btn btn-outline-secondary">Trước</button><button class="btn btn-primary">1</button><button class="btn btn-outline-secondary">Sau</button></div>
+</div>
+</div>
+</section>
+</body>
+</html>

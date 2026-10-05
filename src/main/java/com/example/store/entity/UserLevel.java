@@ -51,4 +51,5 @@ public class UserLevel {
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+    
 }

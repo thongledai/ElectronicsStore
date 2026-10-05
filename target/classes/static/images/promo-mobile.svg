@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360">
+  <defs><linearGradient id="bpromo-mobile.svg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#062b25"/><stop offset="1" stop-color="#0d6b57"/></linearGradient></defs>
+  <rect width="640" height="360" rx="22" fill="url(#bpromo-mobile.svg)"/>
+  <circle cx="540" cy="60" r="120" fill="#12b886" opacity=".16"/>
+  <circle cx="90" cy="320" r="90" fill="#12b886" opacity=".12"/>
+  
+  <rect x="418" y="86" width="104" height="200" rx="22" fill="#fff" opacity=".95"/>
+  <rect x="428" y="102" width="84" height="168" rx="13" fill="#0d6b57" opacity=".55"/>
+  <rect x="454" y="92" width="32" height="6" rx="3" fill="#0d6b57"/>
+</svg>
