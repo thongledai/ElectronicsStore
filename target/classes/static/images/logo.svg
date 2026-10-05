@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 56" width="240" height="56">
-  <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
-    <stop offset="0" stop-color="#1b6df3"/><stop offset="1" stop-color="#ff7a18"/></linearGradient></defs>
-  <rect x="2" y="6" width="44" height="44" rx="13" fill="url(#lg)"/>
-  <path d="M26 15l-9 16h7l-3 12 10-17h-7z" fill="#fff"/>
-  <text x="56" y="28" font-family="Poppins,Segoe UI,Arial" font-size="21" font-weight="700" fill="currentColor">TechNova</text>
-  <text x="56" y="45" font-family="Poppins,Segoe UI,Arial" font-size="10.5" letter-spacing="3.4" fill="#ff7a18">ELECTRONICS</text>
-</svg>

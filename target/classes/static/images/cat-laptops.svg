@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 240" width="280" height="240">
-  <defs><linearGradient id="gcat-laptops" x1="0" y1="0" x2="1" y2="1">
-    <stop offset="0" stop-color="#1b6df3"/><stop offset="1" stop-color="#0b1b34"/></linearGradient></defs>
-  <rect width="280" height="240" rx="20" fill="url(#gcat-laptops)"/>
-  <rect x="46" y="66" width="188" height="118" rx="10" fill="#fff" opacity=".95"/>
-      <rect x="58" y="78" width="164" height="94" rx="5" fill="#1b6df3" opacity=".28"/>
-      <path d="M26 190h228l14 22H12z" fill="#fff" opacity=".85"/>
-</svg>

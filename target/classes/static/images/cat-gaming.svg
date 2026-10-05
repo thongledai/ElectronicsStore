@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 240" width="280" height="240">
-  <defs><linearGradient id="gcat-gaming" x1="0" y1="0" x2="1" y2="1">
-    <stop offset="0" stop-color="#ff4d6d"/><stop offset="1" stop-color="#0b1b34"/></linearGradient></defs>
-  <rect width="280" height="240" rx="20" fill="url(#gcat-gaming)"/>
-  <path d="M84 92h112q28 0 34 30l12 54q5 24-17 27-16 3-28-15l-14-21H97l-14 21q-12 18-28 15-22-3-17-27l12-54q6-30 34-30z" fill="#fff" opacity=".95"/>
-      <rect x="100" y="126" width="30" height="8" rx="4" fill="#ff4d6d"/><rect x="111" y="115" width="8" height="30" rx="4" fill="#ff4d6d"/>
-      <circle cx="176" cy="122" r="8" fill="#ff4d6d"/><circle cx="196" cy="140" r="8" fill="#ff4d6d"/>
-</svg>

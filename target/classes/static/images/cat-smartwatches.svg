@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 240" width="280" height="240">
-  <defs><linearGradient id="gcat-smartwatches" x1="0" y1="0" x2="1" y2="1">
-    <stop offset="0" stop-color="#7c5cff"/><stop offset="1" stop-color="#0b1b34"/></linearGradient></defs>
-  <rect width="280" height="240" rx="20" fill="url(#gcat-smartwatches)"/>
-  <path d="M116 40h48l-5 34h-38z" fill="#fff" opacity=".9"/>
-      <path d="M121 178h38l5 34h-48z" fill="#fff" opacity=".9"/>
-      <rect x="94" y="70" width="92" height="112" rx="26" fill="#fff" opacity=".95"/>
-      <rect x="104" y="80" width="72" height="92" rx="18" fill="#7c5cff" opacity=".32"/>
-</svg>
