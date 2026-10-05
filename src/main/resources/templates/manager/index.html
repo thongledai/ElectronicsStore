@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="vi" th:replace="~{layouts/dashboard-layout :: layout('Tổng quan', 'manager', 'index', ~{::section.content})}">
+<head><title>Tổng quan | TechNova</title></head>
+<body>
+<section class="content"><div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4"><div><h1 class="title">Tổng quan</h1>
+<div class="subtitle">Tình hình hoạt động và các chỉ số chính.</div>
+</div>
+<button class="btn btn-primary btn-sm" data-demo-action="Thêm mới"><i class="fa-solid fa-plus me-1"></i>Thêm mới</button></div>
+<div class="row g-3 mb-4"><div class="col-6 col-xl-3"><div class="stat"><div class="d-flex justify-content-between"><span class="statlabel">Tổng doanh thu</span><div class="staticon"><i class="fa-solid fa-wallet"></i></div>
+</div>
+<div class="statvalue">₫248,6M</div>
+<div class="muted">Tăng 12,8% so với kỳ trước</div>
+</div>
+</div>
+<div class="col-6 col-xl-3"><div class="stat"><div class="d-flex justify-content-between"><span class="statlabel">Đơn hàng</span><div class="staticon"><i class="fa-solid fa-receipt"></i></div>
+</div>
+<div class="statvalue">1.284</div>
+<div class="muted">64 đơn đang xử lý</div>
+</div>
+</div>
+<div class="col-6 col-xl-3"><div class="stat"><div class="d-flex justify-content-between"><span class="statlabel">Người dùng</span><div class="staticon"><i class="fa-solid fa-users"></i></div>
+</div>
+<div class="statvalue">8.542</div>
+<div class="muted">326 người dùng mới</div>
+</div>
+</div>
+<div class="col-6 col-xl-3"><div class="stat"><div class="d-flex justify-content-between"><span class="statlabel">Sản phẩm</span><div class="staticon"><i class="fa-solid fa-box"></i></div>
+</div>
+<div class="statvalue">436</div>
+<div class="muted">24 sản phẩm cần kiểm tra</div>
+</div>
+</div>
+</div>
+<div class="row g-3"><div class="col-lg-8"><div class="panel"><h2 class="paneltitle mb-3">Tổng quan doanh thu</h2>
+<div class="chart"><div><i class="fa-solid fa-chart-column fa-2x mb-2"></i><br>Biểu đồ doanh thu<br><small>Dữ liệu mẫu, chờ kết nối backend</small></div>
+</div>
+</div>
+</div>
+<div class="col-lg-4"><div class="panel"><h2 class="paneltitle mb-3">Tình trạng đơn hàng</h2>
+<p>Đơn hàng mới <b class="float-end">28</b></p><hr><p>Đang xử lý <b class="float-end">64</b></p><hr><p>Đang giao <b class="float-end">42</b></p><hr><p>Yêu cầu trả hàng <b class="float-end text-danger">5</b></p></div>
+</div>
+</div>
+</section>
+</body>
+</html>

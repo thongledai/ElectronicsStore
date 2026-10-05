@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="vi" th:replace="~{layouts/dashboard-layout :: layout('Được phân công', 'shipper', 'assigned', ~{::section.content})}">
+<head><title>Được phân công | TechNova</title></head>
+<body>
+<section class="content"><div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4"><div><h1 class="title">Được phân công</h1>
+<div class="subtitle">Xem thông tin người nhận và cập nhật tiến độ giao hàng.</div>
+</div>
+<button class="btn btn-primary btn-sm" data-demo-action="Thêm mới"><i class="fa-solid fa-plus me-1"></i>Thêm mới</button></div>
+<div class="panel mb-3"><input class="form-control" placeholder="Tìm mã đơn, người nhận, địa chỉ..." data-search-table="#shipTable"></div>
+<div class="panel"><h2 class="paneltitle mb-3">Được phân công</h2>
+<div class="table-responsive"><table class="table" id="shipTable"><thead><tr><th>Mã đơn</th><th>Người nhận</th><th>Địa chỉ giao</th><th>Giá trị đơn</th><th>Trạng thái</th><th>Cập nhật</th><th></th></tr>
+</thead>
+<tbody><tr><td>#TN-2046</td><td>Lê Thu Hà<div class="muted">0905 123 456</div>
+</td><td>12 Nguyễn Văn Linh, Đà Nẵng</td><td>₫2.490.000</td><td><span class="status purple">Đang giao</span></td><td><select class="form-select form-select-sm" data-demo-status><option value="assigned" >Được phân công</option><option value="accepted" >Đã tiếp nhận</option><option value="delivering" selected>Đang giao</option><option value="delivered" >Đã giao thành công</option><option value="failed" >Giao thất bại</option></select></td><td><button class="action" data-demo-action="Xem chi tiết"><i class="fa-regular fa-eye"></i></button></td></tr>
+</tbody>
+</table>
+</div>
+<div class="muted">Demo frontend; khi có backend sẽ lọc theo shipper được phân công.</div>
+</div>
+</section>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600" role="img">
+  <defs>
+    <linearGradient id="bg40436" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#eef7f3"/><stop offset="1" stop-color="#d3ebe1"/>
+    </linearGradient>
+    <radialGradient id="gl40436" cx="50%" cy="42%" r="52%">
+      <stop offset="0" stop-color="#12b886" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#12b886" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="scr40436" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1b6df3"/><stop offset=".55" stop-color="#0f2f6b"/><stop offset="1" stop-color="#ff7a18"/>
+    </linearGradient>
+    <linearGradient id="mtl40436" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f2f5fa"/><stop offset=".5" stop-color="#c9d3e2"/><stop offset="1" stop-color="#9fadc2"/>
+    </linearGradient>
+    <linearGradient id="drk40436" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3b4658"/><stop offset="1" stop-color="#161d2b"/>
+    </linearGradient>
+    <filter id="sh40436" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#0b1b34" flood-opacity=".28"/>
+    </filter>
+  </defs>
+  <rect width="600" height="600" rx="28" fill="url(#bg40436)"/>
+  <rect width="600" height="600" rx="28" fill="url(#gl40436)"/>
+  <g filter="url(#sh40436)">
+    <path d="M166 340V292a134 134 0 0 1 268 0v48" fill="none" stroke="url(#drk40436)" stroke-width="32" stroke-linecap="round"/>
+    <rect x="132" y="300" width="84" height="148" rx="38" fill="url(#drk40436)"/>
+    <rect x="384" y="300" width="84" height="148" rx="38" fill="url(#drk40436)"/>
+    <ellipse cx="174" cy="374" rx="26" ry="50" fill="#12b886"/>
+    <ellipse cx="426" cy="374" rx="26" ry="50" fill="#12b886"/>
+    <path d="M216 400q52 8 60 56" fill="none" stroke="#2b3446" stroke-width="12" stroke-linecap="round"/>
+    <ellipse cx="284" cy="462" rx="22" ry="13" fill="#12b886"/>
+    <path d="M180 246a136 136 0 0 1 240 0" fill="none" stroke="#12b886" stroke-width="8" opacity=".8"/>
+  </g>
+  <ellipse cx="300" cy="536" rx="168" ry="17" fill="#0b1b34" opacity=".16"/>
+</svg>

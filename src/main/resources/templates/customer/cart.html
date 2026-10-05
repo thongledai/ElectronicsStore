@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en" th:replace="~{layouts/customer-layout :: layout(
+        'Shopping Cart — TechNova Electronics',
+        'Review the items in your TechNova Electronics shopping cart, update quantities and see your order total.',
+        ~{::main}, ~{::#checkoutModal}, 'cart.js', false)}">
+<head><title>Shopping Cart — TechNova Electronics</title></head>
+<body>
+
+<main>
+
+  <!-- PAGE HEAD -->
+  <section class="page-head">
+    <div class="container">
+      <h1><i class="fas fa-cart-shopping me-2"></i>Shopping Cart</h1>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a th:href="@{/customer/index}">Home</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Cart</li>
+        </ol>
+      </nav>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+
+      <!-- Shown when the cart has items -->
+      <div class="row g-4" id="cartLayout" hidden>
+
+        <!-- ---------- Cart lines ---------- -->
+        <div class="col-lg-8">
+          <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <h2 class="h5 mb-0" id="cartHeading">Your items</h2>
+            <button class="btn-link-danger" id="clearCartBtn" type="button">
+              <i class="fas fa-trash-can"></i> Clear cart
+            </button>
+          </div>
+
+          <div class="d-flex flex-column gap-3" id="cartItems"></div>
+
+          <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-2">
+            <a th:href="@{/customer/products}" class="btn btn-ghost">
+              <i class="fas fa-arrow-left me-2"></i>Continue Shopping
+            </a>
+            <p class="small text-muted mb-0">
+              <i class="fas fa-lock me-1"></i>Your cart is saved automatically in this browser
+            </p>
+          </div>
+        </div>
+
+        <!-- ---------- Order summary ---------- -->
+        <div class="col-lg-4">
+          <div class="summary-panel">
+            <h2 class="h6 mb-3"><i class="fas fa-receipt me-2 text-primary"></i>Order Summary</h2>
+
+            <!-- Free shipping progress -->
+            <div class="ship-meter" id="shipMeter">
+              <div class="track"><div class="fill" id="shipFill" style="width:0%"></div></div>
+              <p id="shipText"></p>
+            </div>
+
+            <!-- Coupon -->
+            <div id="couponArea">
+              <div class="coupon-box">
+                <input type="text" class="form-control" id="couponInput" placeholder="Coupon code" aria-label="Coupon code">
+                <button class="btn btn-brand" id="applyCouponBtn" type="button">Apply</button>
+              </div>
+              <p class="small text-muted mb-3">
+                Try <code>TECHNOVA10</code>, <code>STUDENT15</code>, <code>FLAT500</code> or <code>FREESHIP</code>
+              </p>
+            </div>
+
+            <div class="summary-row"><span id="subtotalLabel">Subtotal</span><span id="subtotal">₹0</span></div>
+            <div class="summary-row" id="discountRow" hidden>
+              <span>Coupon discount</span><span class="text-success" id="discountAmount">−₹0</span>
+            </div>
+            <div class="summary-row"><span>GST (18%)</span><span id="tax">₹0</span></div>
+            <div class="summary-row" id="shippingRow"><span>Shipping</span><span id="shipping">₹0</span></div>
+
+            <div class="summary-total">
+              <span>Total</span>
+              <span class="grand" id="total">₹0</span>
+            </div>
+
+            <p class="small text-success mt-2 mb-3" id="savingsNote" hidden></p>
+
+            <button class="btn btn-accent btn-lg w-100 mt-2" id="checkoutBtn" type="button">
+              <i class="fas fa-lock me-2"></i>Proceed to Checkout
+            </button>
+
+            <div class="d-flex justify-content-center gap-3 mt-3 small text-muted">
+              <span><i class="fas fa-shield-halved me-1"></i>Secure</span>
+              <span><i class="fas fa-rotate-left me-1"></i>7-day returns</span>
+            </div>
+
+            <img th:src="@{/images/payments.svg}" alt="Accepted payment methods" class="mt-3 w-100" style="opacity:.85">
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Shown when the cart is empty -->
+      <div class="empty-state" id="cartEmpty" hidden>
+        <img th:src="@{/images/empty-cart.svg}" alt="">
+        <h3>Your cart is empty</h3>
+        <p>Looks like you haven't added anything yet. Browse our catalogue and find something you love.</p>
+        <div class="d-flex justify-content-center gap-2 flex-wrap">
+          <a th:href="@{/customer/products}" class="btn btn-brand btn-lg"><i class="fas fa-bag-shopping me-2"></i>Start Shopping</a>
+          <a th:href="@{/customer/wishlist}" class="btn btn-ghost btn-lg"><i class="far fa-heart me-2"></i>View Wishlist</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Suggested products -->
+  <section class="section pt-0" id="suggestSection">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-eyebrow"><i class="fas fa-wand-magic-sparkles"></i>Complete your setup</span>
+        <h2 class="section-title">You might also like</h2>
+      </div>
+      <div class="row g-3 g-md-4" id="suggestGrid"></div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Checkout confirmation modal (demo only) -->
+<div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border)">
+      <div class="modal-body text-center p-4 p-md-5">
+        <div class="usp-icon mx-auto mb-3" style="width:64px;height:64px;font-size:1.6rem;background:rgba(18,184,134,.12);color:var(--success)">
+          <i class="fas fa-check"></i>
+        </div>
+        <h3 class="h4" id="checkoutModalLabel">Order placed successfully!</h3>
+        <p class="text-muted">
+          This is a frontend demonstration, so no payment was taken and no order was actually created.
+          Your order reference would be <strong id="orderRef">TN-000000</strong>.
+        </p>
+        <p class="small text-muted">A confirmation email would normally arrive within a few minutes.</p>
+        <div class="d-flex gap-2 justify-content-center flex-wrap mt-3">
+          <button class="btn btn-brand" data-bs-dismiss="modal" id="modalContinue">
+            <i class="fas fa-bag-shopping me-2"></i>Continue Shopping
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

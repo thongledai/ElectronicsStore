@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360">
+  <defs><linearGradient id="bpromo-gaming.svg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#1a0b2e"/><stop offset="1" stop-color="#3d1a6b"/></linearGradient></defs>
+  <rect width="640" height="360" rx="22" fill="url(#bpromo-gaming.svg)"/>
+  <circle cx="540" cy="60" r="120" fill="#ff4d6d" opacity=".16"/>
+  <circle cx="90" cy="320" r="90" fill="#ff4d6d" opacity=".12"/>
+  
+  <path d="M372 168h128q32 0 39 34l14 62q6 27-19 31-19 3-32-17l-16-24H366l-16 24q-13 20-32 17-25-4-19-31l14-62q7-34 39-34z" fill="#fff" opacity=".95"/>
+  <rect x="392" y="206" width="34" height="9" rx="4.5" fill="#3d1a6b"/><rect x="404" y="194" width="9" height="34" rx="4.5" fill="#3d1a6b"/>
+  <circle cx="476" cy="200" r="9" fill="#ff4d6d"/><circle cx="498" cy="220" r="9" fill="#ff4d6d"/>
+</svg>

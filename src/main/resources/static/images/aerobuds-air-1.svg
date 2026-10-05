@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600" role="img">
+  <defs>
+    <linearGradient id="bg59494" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f1f2fb"/><stop offset="1" stop-color="#dcdff5"/>
+    </linearGradient>
+    <radialGradient id="gl59494" cx="50%" cy="42%" r="52%">
+      <stop offset="0" stop-color="#7c5cff" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#7c5cff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="scr59494" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1b6df3"/><stop offset=".55" stop-color="#0f2f6b"/><stop offset="1" stop-color="#ff7a18"/>
+    </linearGradient>
+    <linearGradient id="mtl59494" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f2f5fa"/><stop offset=".5" stop-color="#c9d3e2"/><stop offset="1" stop-color="#9fadc2"/>
+    </linearGradient>
+    <linearGradient id="drk59494" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3b4658"/><stop offset="1" stop-color="#161d2b"/>
+    </linearGradient>
+    <filter id="sh59494" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#0b1b34" flood-opacity=".28"/>
+    </filter>
+  </defs>
+  <rect width="600" height="600" rx="28" fill="url(#bg59494)"/>
+  <rect width="600" height="600" rx="28" fill="url(#gl59494)"/>
+  <g filter="url(#sh59494)">
+    <rect x="188" y="268" width="224" height="164" rx="46" fill="url(#mtl59494)"/>
+    <rect x="188" y="268" width="224" height="24" rx="12" fill="#c2cddd"/>
+    <circle cx="300" cy="418" r="7" fill="#7c5cff"/>
+    <g transform="translate(0,-14)">
+      <circle cx="248" cy="212" r="42" fill="#fff"/><circle cx="248" cy="212" r="20" fill="#7c5cff" opacity=".85"/>
+      <path d="M236 244q6 60 22 66t20-40" fill="#fff"/>
+      <circle cx="356" cy="212" r="42" fill="#fff"/><circle cx="356" cy="212" r="20" fill="#7c5cff" opacity=".85"/>
+      <path d="M344 244q6 60 22 66t20-40" fill="#fff"/>
+    </g>
+  </g>
+  <ellipse cx="300" cy="536" rx="168" ry="17" fill="#0b1b34" opacity=".16"/>
+</svg>
