@@ -1,26 +1,28 @@
-package com.example.store.service.impl;
+package com.example.store.service.auth.impl;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.example.store.dto.ApiResponse;
-import com.example.store.dto.AuthResponseDTO;
-import com.example.store.dto.ForgotPasswordDTO;
-import com.example.store.dto.LoginDTO;
-import com.example.store.dto.RegisterDTO;
-import com.example.store.dto.ResetPasswordDTO;
-import com.example.store.dto.UserResponseDTO;
-import com.example.store.dto.VerifyOtpDTO;
+
+import com.example.store.dto.auth.AuthResponseDTO;
+import com.example.store.dto.auth.ForgotPasswordDTO;
+import com.example.store.dto.auth.LoginDTO;
+import com.example.store.dto.auth.RegisterDTO;
+import com.example.store.dto.auth.ResetPasswordDTO;
+import com.example.store.dto.auth.VerifyOtpDTO;
+import com.example.store.dto.common.ApiResponse;
+import com.example.store.dto.common.UserResponseDTO;
 import com.example.store.entity.Role;
 import com.example.store.entity.User;
 import com.example.store.enums.OtpType;
 import com.example.store.mapper.UserMapper;
 import com.example.store.repository.RoleRepository;
 import com.example.store.repository.UserRepository;
-import com.example.store.service.IAuthenticationService;
-import com.example.store.service.IEmailService;
-import com.example.store.service.IJwtService;
-import com.example.store.service.IOtpService;
+import com.example.store.service.auth.IAuthenticationService;
+import com.example.store.service.auth.IJwtService;
+import com.example.store.service.auth.IOtpService;
+import com.example.store.service.common.IEmailService;
+
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -132,7 +134,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
 
     @Override
     @Transactional
-    public ApiResponse<?> resendOtp(com.example.store.dto.ResendOtpDTO resendOtpDTO) {
+    public ApiResponse<?> resendOtp(com.example.store.dto.auth.ResendOtpDTO resendOtpDTO) {
         String email = resendOtpDTO.getEmail().toLowerCase().trim();
         OtpType type = resendOtpDTO.getType() != null ? resendOtpDTO.getType() : OtpType.REGISTER;
 

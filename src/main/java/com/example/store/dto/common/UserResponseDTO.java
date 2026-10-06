@@ -1,4 +1,4 @@
-package com.example.store.dto;
+package com.example.store.dto.common;
 
 import java.util.UUID;
 import lombok.AllArgsConstructor;

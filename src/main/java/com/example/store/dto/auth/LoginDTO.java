@@ -1,4 +1,4 @@
-package com.example.store.dto;
+package com.example.store.dto.auth;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -11,8 +11,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ForgotPasswordDTO {
+public class LoginDTO {
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")
     private String email;
+
+    @NotBlank(message = "Password is required")
+    private String password;
+
+    @Builder.Default
+    private boolean rememberMe = false;
 }

@@ -1,4 +1,4 @@
-package com.example.store.service;
+package com.example.store.service.auth;
 
 import com.example.store.entity.User;
 

@@ -2,8 +2,9 @@ package com.example.store.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import com.example.store.dto.RegisterDTO;
-import com.example.store.dto.UserResponseDTO;
+
+import com.example.store.dto.auth.RegisterDTO;
+import com.example.store.dto.common.UserResponseDTO;
 import com.example.store.entity.User;
 
 @Mapper(componentModel = "spring")
