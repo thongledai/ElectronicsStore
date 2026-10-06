@@ -53,7 +53,7 @@ public class Order {
     @Column(nullable = false, length = 500, columnDefinition = "nvarchar(500)")
     private String address;
 
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false, length = 11)
     private String phone;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

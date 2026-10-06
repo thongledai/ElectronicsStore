@@ -36,7 +36,7 @@ public class Promotion {
     private UUID id;
 
     // Mã giảm giá khách nhập/chọn
-    @Column(nullable = false, unique = true, length = 50)
+    @Column(nullable = false, unique = true, length = 50, columnDefinition = "nvarchar(50)")
     private String code;
 
     @Column(length = 1000, columnDefinition = "nvarchar(1000)")

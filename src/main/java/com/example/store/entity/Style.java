@@ -36,7 +36,7 @@ public class Style {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false, unique = true, length = 32, columnDefinition = "nvarchar(32)")
+    @Column(nullable = false, unique = true, length = 100, columnDefinition = "nvarchar(100)")
     private String name;
 
     // Tập các category có style này

@@ -34,7 +34,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false, length = 32, columnDefinition = "nvarchar(32)")
+    @Column(nullable = false, length = 200, columnDefinition = "nvarchar(200)")
     private String fullName;
 
     @Column(unique = true)
@@ -46,7 +46,7 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(unique = true, length = 20)
+    @Column(unique = true, length = 11)
     private String phone;
 
     @Builder.Default
