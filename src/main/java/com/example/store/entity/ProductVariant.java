@@ -48,6 +48,20 @@ public class ProductVariant {
     @Column(nullable = false)
     private Integer sold = 0;
 
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean isActive = true;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean isSelling = true;
+
+    @Builder.Default
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "product_variant_images", joinColumns = @JoinColumn(name = "product_variant_id"))
+    @Column(name = "image_url", length = 1000)
+    private List<String> image = new ArrayList<>();
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
