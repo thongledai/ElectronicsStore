@@ -43,7 +43,7 @@ public class Product {
 
     @Builder.Default
     @Column(nullable = false)
-    private Integer rating = 5;
+    private Double rating = 5.0;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
