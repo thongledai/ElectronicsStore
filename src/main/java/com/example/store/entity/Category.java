@@ -33,7 +33,7 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false, unique = true, length = 32, columnDefinition = "nvarchar(32)")
+    @Column(nullable = false, unique = true, length = 100, columnDefinition = "nvarchar(100)")
     private String name;
 
     @Column(nullable = false, unique = true)

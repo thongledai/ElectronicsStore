@@ -1,22 +1,16 @@
 package com.example.store.entity;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,31 +19,32 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "styles")
+@Table(name = "brands", indexes = @Index(name = "idx_brands_name", columnList = "name"))
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Style {
+public class Brand {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(nullable = false, unique = true, length = 100, columnDefinition = "nvarchar(100)")
     private String name;
 
-    // Tập các category có style này
-    @Builder.Default
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "style_categories",
-            joinColumns = @JoinColumn(name = "style_id"),
-            inverseJoinColumns = @JoinColumn(name = "category_id"))
-    private Set<Category> categories = new HashSet<>();
+    @Column(nullable = false, unique = true, length = 120)
+    private String slug;
+
+    @Column(length = 1000)
+    private String logoUrl;
+
+    @Column(length = 1000, columnDefinition = "nvarchar(1000)")
+    private String description;
 
     @Builder.Default
     @Column(nullable = false)
-    private Boolean isDeleted = false;
+    private Boolean isActive = true;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

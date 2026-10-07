@@ -25,6 +25,6 @@ public class Role {
     private Integer id;
 
     // Ví dụ: ADMIN, MANAGER, EMPLOYEE, SHIPPER, CUSTOMER
-    @Column(nullable = false, unique = true, length = 50)
+    @Column(nullable = false, unique = true, length = 100)
     private String name;
 }

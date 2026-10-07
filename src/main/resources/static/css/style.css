@@ -27,7 +27,7 @@
    ========================================================================== */
 :root {
   /* Brand palette — navy base, blue action, orange accent */
-  --navy: #0b1b34;
+  --navy: #000000;
   --navy-700: #12294d;
   --navy-500: #1c3a66;
   --blue: #1b6df3;
@@ -84,7 +84,7 @@
   --border-strong: #2f4468;
   --blue-light: #16294d;
   --orange-light: #33220f;
-  --navy: #060d18;
+  --navy: #000000;
 
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, .4);
   --shadow-md: 0 6px 18px rgba(0, 0, 0, .45);
