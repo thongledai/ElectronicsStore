@@ -46,7 +46,7 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(unique = true, length = 11)
+    @Column(unique = true, length = 15)
     private String phone;
 
     @Builder.Default

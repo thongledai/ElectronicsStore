@@ -32,7 +32,6 @@
 <th:block th:replace="${extra}"></th:block>
 
 <th:block th:unless="${minimal}"><div th:replace="~{fragments/footer :: footer}"></div></th:block>
-<th:block th:if="${minimal}"><div th:replace="~{fragments/footer :: footer-minimal}"></div></th:block>
 
 <!-- Back to top -->
 <button class="back-to-top" type="button" aria-label="Back to top"><i class="fas fa-arrow-up"></i></button>
