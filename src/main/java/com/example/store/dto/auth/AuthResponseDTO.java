@@ -1,4 +1,6 @@
-package com.example.store.dto;
+package com.example.store.dto.auth;
+
+import com.example.store.dto.common.UserResponseDTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

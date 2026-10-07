@@ -1,11 +1,11 @@
-package com.example.store.service.impl;
+package com.example.store.service.auth.impl;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import com.example.store.entity.User;
-import com.example.store.service.IJwtService;
+import com.example.store.service.auth.IJwtService;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSSigner;

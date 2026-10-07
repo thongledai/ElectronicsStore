@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -57,10 +59,13 @@ public class ProductVariant {
     private boolean isSelling = true;
 
     @Builder.Default
-    @ElementCollection(fetch = FetchType.LAZY)
-    @CollectionTable(name = "product_variant_images", joinColumns = @JoinColumn(name = "product_variant_id"))
-    @Column(name = "image_url", length = 1000)
-    private List<String> image = new ArrayList<>();
+    @OneToMany(
+            mappedBy = "productVariant",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<ProductVariantImage> images = new ArrayList<>();
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
@@ -78,8 +83,8 @@ public class ProductVariant {
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "product_variant_style_values",
-            joinColumns = @JoinColumn(name = "variant_id"),
-            inverseJoinColumns = @JoinColumn(name = "style_value_id")
+            joinColumns = @JoinColumn(name = "variant_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "style_value_id", nullable = false)
     )
     private Set<StyleValue> styleValues = new HashSet<>();
 }

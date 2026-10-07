@@ -8,7 +8,9 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import com.example.store.service.CustomUserDetailsService;
+
+import com.example.store.service.auth.impl.CustomUserDetailsService;
+
 import lombok.RequiredArgsConstructor;
 
 @Configuration

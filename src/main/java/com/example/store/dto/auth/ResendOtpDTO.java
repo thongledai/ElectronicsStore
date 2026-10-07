@@ -1,5 +1,6 @@
-package com.example.store.dto;
+package com.example.store.dto.auth;
 
+import com.example.store.enums.OtpType;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -11,14 +12,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class LoginDTO {
+public class ResendOtpDTO {
+
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")
     private String email;
 
-    @NotBlank(message = "Password is required")
-    private String password;
-
-    @Builder.Default
-    private boolean rememberMe = false;
+    private OtpType type;
 }
