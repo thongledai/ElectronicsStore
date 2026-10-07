@@ -28,7 +28,7 @@ import lombok.Setter;
 public class Brand {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Column(nullable = false, unique = true, length = 100, columnDefinition = "nvarchar(100)")
     private String name;

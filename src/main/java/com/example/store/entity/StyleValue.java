@@ -12,7 +12,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 import lombok.*;
 
 @Entity
-@Table(name = "style_values")
+@Table(name = "style_values",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_style_value_style_name",
+                columnNames = {"style_id", "name"}))
 @Getter
 @Setter
 @NoArgsConstructor
@@ -24,7 +27,7 @@ public class StyleValue {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false, unique = true, length = 100, columnDefinition = "nvarchar(100)")
+    @Column(nullable = false, length = 100, columnDefinition = "nvarchar(100)")
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

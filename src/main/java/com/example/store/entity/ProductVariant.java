@@ -29,7 +29,12 @@ public class ProductVariant {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false, unique = true, length = 100, columnDefinition = "nvarchar(100)")
+    @Column(
+            nullable = false,
+            unique = true,
+            length = 100,
+            columnDefinition = "nvarchar(100)"
+    )
     private String sku;
 
     @Column(nullable = false, precision = 18, scale = 2)
@@ -67,10 +72,13 @@ public class ProductVariant {
     private Product product;
 
     @Builder.Default
-    @ElementCollection(fetch = FetchType.LAZY)
-    @CollectionTable(name = "product_variant_images", joinColumns = @JoinColumn(name = "product_variant_id"))
-    @Column(name = "image_url", length = 1000)
-    private List<String> image = new ArrayList<>();
+    @OneToMany(
+            mappedBy = "productVariant",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    private List<ProductVariantImage> images = new ArrayList<>();
 
     @Builder.Default
     @ManyToMany(fetch = FetchType.LAZY)

@@ -141,6 +141,19 @@
 			<artifactId>spring-boot-starter-websocket-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- Source: https://mvnrepository.com/artifact/commons-fileupload/commons-fileupload -->
+		<dependency>
+			<groupId>commons-fileupload</groupId>
+			<artifactId>commons-fileupload</artifactId>
+			<version>1.6.0</version>
+			<scope>compile</scope>
+		</dependency>
+		<!-- Source: https://cloudinary.com/documentation/java_quickstart -->
+		<dependency>
+			<groupId>com.cloudinary</groupId>
+			<artifactId>cloudinary-http5</artifactId>
+			<version>2.0.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>
