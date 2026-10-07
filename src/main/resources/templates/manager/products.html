@@ -2,27 +2,213 @@
 <html lang="vi" th:replace="~{layouts/dashboard-layout :: layout('Sản phẩm', 'manager', 'products', ~{::section.content})}">
 <head><title>Sản phẩm | TechNova</title></head>
 <body>
-<section class="content"><div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4"><div><h1 class="title">Sản phẩm</h1>
-<div class="subtitle">Quản lý và theo dõi sản phẩm trong hệ thống.</div>
-</div>
-<button class="btn btn-primary btn-sm" data-demo-action="Thêm mới"><i class="fa-solid fa-plus me-1"></i>Thêm mới</button></div>
-<div class="panel mb-3"><div class="row g-2 align-items-center"><div class="col-md-6"><input class="form-control" placeholder="Tìm kiếm..." data-search-table="#dataTable"></div>
-<div class="col-md-6 text-md-end"><span class="muted">Dữ liệu minh họa · 4 bản ghi</span></div>
-</div>
-</div>
-<div class="panel"><h2 class="paneltitle mb-3">Sản phẩm</h2>
-<div class="table-responsive"><table class="table" id="dataTable"><thead><tr><th>Mã SP</th><th>Tên sản phẩm</th><th>Danh mục</th><th>Giá bán</th><th>Tồn kho</th><th>Trạng thái</th><th>Thao tác</th></tr>
-</thead>
-<tbody><tr><td>P001</td><td>Laptop TechNova Pro 14</td><td>Laptop</td><td>₫24.990.000</td><td>18</td><td><span class="status green">Đang bán</span></td><td><button class="action" data-demo-action="Xem chi tiết"><i class="fa-regular fa-eye"></i></button> <button class="action" data-demo-action="Chỉnh sửa"><i class="fa-solid fa-pen"></i></button></td></tr>
-<tr><td>P002</td><td>Tai nghe Nova Buds</td><td>Phụ kiện</td><td>₫1.290.000</td><td>52</td><td><span class="status green">Đang bán</span></td><td><button class="action" data-demo-action="Xem chi tiết"><i class="fa-regular fa-eye"></i></button> <button class="action" data-demo-action="Chỉnh sửa"><i class="fa-solid fa-pen"></i></button></td></tr>
-<tr><td>P003</td><td>Màn hình NovaView 27</td><td>Màn hình</td><td>₫5.490.000</td><td>7</td><td><span class="status yellow">Sắp hết</span></td><td><button class="action" data-demo-action="Xem chi tiết"><i class="fa-regular fa-eye"></i></button> <button class="action" data-demo-action="Chỉnh sửa"><i class="fa-solid fa-pen"></i></button></td></tr>
-<tr><td>P004</td><td>Bàn phím Nova Mechanical</td><td>Phụ kiện</td><td>₫1.890.000</td><td>0</td><td><span class="status red">Hết hàng</span></td><td><button class="action" data-demo-action="Xem chi tiết"><i class="fa-regular fa-eye"></i></button> <button class="action" data-demo-action="Chỉnh sửa"><i class="fa-solid fa-pen"></i></button></td></tr>
-</tbody>
-</table>
-</div>
-<div class="d-flex justify-content-between"><span class="muted">Trang 1/1</span><div class="btn-group btn-group-sm"><button class="btn btn-outline-secondary">Trước</button><button class="btn btn-primary">1</button><button class="btn btn-outline-secondary">Sau</button></div>
-</div>
-</div>
+<section class="content">
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div>
+      <h1 class="title">Sản phẩm</h1>
+      <div class="subtitle">Quản lý và theo dõi thông tin sản phẩm, cấu hình biến thể trong hệ thống.</div>
+    </div>
+    <button class="btn btn-primary btn-sm" id="btnOpenCreateModal"><i class="fa-solid fa-plus me-1"></i>Thêm mới</button>
+  </div>
+
+  <!-- Search & Filter Panel -->
+  <div class="panel mb-3">
+    <div class="row g-2 align-items-center">
+      <div class="col-md-5">
+        <div class="input-group input-group-sm">
+          <input class="form-control" id="searchInput" placeholder="Tìm kiếm theo tên, mô tả...">
+          <button class="btn btn-outline-secondary" type="button" id="btnSearch"><i class="fa-solid fa-magnifying-glass"></i></button>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <select class="form-select form-select-sm" id="categoryFilter">
+          <option value="">-- Tất cả danh mục --</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <select class="form-select form-select-sm" id="statusFilter">
+          <option value="">-- Trạng thái --</option>
+          <option value="active">Đang hoạt động</option>
+          <option value="inactive">Đã ngừng/vô hiệu hóa</option>
+        </select>
+      </div>
+      <div class="col-md-2 text-md-end">
+        <span class="muted" id="totalRecordsText">0 bản ghi</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Data Table -->
+  <div class="panel">
+    <h2 class="paneltitle mb-3">Danh sách sản phẩm</h2>
+    <div class="table-responsive">
+      <table class="table" id="dataTable">
+        <thead>
+          <tr>
+            <th>Tên sản phẩm</th>
+            <th>Danh mục</th>
+            <th>Thương hiệu</th>
+            <th>Giá bán</th>
+            <th>Tồn kho</th>
+            <th>Trạng thái</th>
+            <th class="text-end">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="productTableBody">
+          <tr><td colspan="7" class="text-center py-4 text-muted">Đang tải dữ liệu...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="d-flex justify-content-between align-items-center mt-3">
+      <span class="muted" id="pageInfoText">Trang 1/1</span>
+      <div class="btn-group btn-group-sm" id="paginationControls">
+        <button class="btn btn-outline-secondary" id="btnPrevPage">Trước</button>
+        <button class="btn btn-primary" id="btnCurrentPage">1</button>
+        <button class="btn btn-outline-secondary" id="btnNextPage">Sau</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Thêm / Sửa Sản phẩm -->
+  <div class="modal fade" id="productFormModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="productModalTitle">Thêm mới sản phẩm</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <form id="productForm">
+          <input type="hidden" id="productId">
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-md-12">
+                <label class="form-label fw-semibold">Tên sản phẩm <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="productName" required placeholder="Nhập tên sản phẩm">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Slug (tùy chọn)</label>
+                <input type="text" class="form-control" id="productSlug" placeholder="Tự động sinh từ tên nếu để trống">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Danh mục <span class="text-danger">*</span></label>
+                <select class="form-select" id="productCategory" required></select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Thương hiệu <span class="text-danger">*</span></label>
+                <select class="form-select" id="productBrand" required></select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Tùy chọn hiển thị</label>
+                <div class="d-flex gap-4 mt-2">
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="productIsActive" checked>
+                    <label class="form-check-label" for="productIsActive">Kích hoạt</label>
+                  </div>
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="productIsSelling" checked>
+                    <label class="form-check-label" for="productIsSelling">Đang bán</label>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-12">
+                <label class="form-label fw-semibold">Mô tả sản phẩm <span class="text-danger">*</span></label>
+                <textarea class="form-control" id="productDescription" rows="4" required placeholder="Nhập mô tả sản phẩm"></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+            <button type="submit" class="btn btn-primary btn-sm" id="btnSaveProduct">Lưu thông tin</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Quản lý biến thể & Hình ảnh -->
+  <div class="modal fade" id="variantManageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="variantManageTitle">Quản lý biến thể: <span class="text-primary" id="variantProductName"></span></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <div class="modal-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="mb-0">Danh sách biến thể</h6>
+            <button class="btn btn-sm btn-primary" id="btnOpenCreateVariant"><i class="fa-solid fa-plus me-1"></i>Thêm biến thể</button>
+          </div>
+          <div class="table-responsive mb-4">
+            <table class="table table-bordered">
+              <thead>
+                <tr>
+                  <th>SKU</th>
+                  <th>Thuộc tính</th>
+                  <th>Giá gốc</th>
+                  <th>Giá KM</th>
+                  <th>Tồn kho</th>
+                  <th>Đã bán</th>
+                  <th>Hình ảnh</th>
+                  <th>Trạng thái</th>
+                  <th class="text-end">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="variantTableBody">
+                <tr><td colspan="9" class="text-center py-3 text-muted">Chưa có biến thể nào</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Section: Form thêm / sửa biến thể -->
+          <div id="variantFormContainer" class="p-3 border rounded bg-light" style="display:none;">
+            <h6 id="variantFormTitle" class="mb-3 fw-bold">Thêm mới biến thể</h6>
+            <form id="variantForm">
+              <input type="hidden" id="variantId">
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="form-label fw-semibold">Mã SKU <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control form-control-sm" id="variantSku" required>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label fw-semibold">Giá gốc (VNĐ) <span class="text-danger">*</span></label>
+                  <input type="number" class="form-control form-control-sm" id="variantPrice" required min="0">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label fw-semibold">Giá khuyến mãi (VNĐ)</label>
+                  <input type="number" class="form-control form-control-sm" id="variantPromoPrice" min="0">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label fw-semibold">Số lượng tồn kho <span class="text-danger">*</span></label>
+                  <input type="number" class="form-control form-control-sm" id="variantQuantity" required min="0" value="0">
+                </div>
+                <div class="col-md-8">
+                  <label class="form-label fw-semibold">Thuộc tính (Style Values)</label>
+                  <div id="variantStyleValuesContainer" class="d-flex flex-wrap gap-2"></div>
+                </div>
+                <div class="col-md-12 text-end">
+                  <button type="button" class="btn btn-sm btn-secondary me-2" id="btnCancelVariantForm">Hủy</button>
+                  <button type="submit" class="btn btn-sm btn-primary" id="btnSaveVariant">Lưu biến thể</button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- Section: Upload và xem ảnh cho biến thể -->
+          <div id="variantImagesSection" class="mt-4 p-3 border rounded" style="display:none;">
+            <h6 class="fw-bold mb-3">Hình ảnh biến thể: <span id="imgVariantSku" class="text-primary"></span></h6>
+            <div class="d-flex gap-2 align-items-center mb-3">
+              <input type="file" id="variantImageFiles" class="form-control form-control-sm" multiple accept="image/jpeg,image/png,image/webp">
+              <button class="btn btn-sm btn-success text-nowrap" id="btnUploadVariantImages"><i class="fa-solid fa-upload me-1"></i>Tải lên</button>
+            </div>
+            <div class="d-flex gap-3 flex-wrap" id="variantImagesGallery"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  <!-- Script nạp cho quản lý sản phẩm -->
+  <script th:src="@{/js/manager/products.js}"></script>
 </section>
 </body>
 </html>

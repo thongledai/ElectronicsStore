@@ -1,6 +1,8 @@
 package com.example.store.repository;
 
 import java.math.BigDecimal;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -9,14 +11,32 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import com.example.store.entity.Product;
-import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, UUID> {
 
-    Optional<Product> findBySlug(String slug);
+    @Query("""
+        SELECT p FROM Product p
+        JOIN FETCH p.category
+        JOIN FETCH p.brand
+        WHERE p.slug = :slug
+    """)
+    Optional<Product> findBySlug(@Param("slug") String slug);
+
+    @Query("""
+        SELECT p FROM Product p
+        JOIN FETCH p.category
+        JOIN FETCH p.brand
+        WHERE p.slug = :slug
+            AND p.isActive = true
+            AND p.isSelling = true
+            AND COALESCE(p.category.isDeleted, false) = false
+            AND p.brand.isActive = true
+    """)
+    Optional<Product> findPublicBySlug(@Param("slug") String slug);
 
     boolean existsBySlug(String slug);
 
@@ -33,6 +53,8 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     @Query("""
         SELECT p
         FROM Product p
+        JOIN FETCH p.category
+        JOIN FETCH p.brand
         WHERE
             (:q IS NULL OR :q = '' OR
                 LOWER(p.name) LIKE LOWER(CONCAT('%', :q, '%')) OR
@@ -56,18 +78,27 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     @Query("""
         SELECT DISTINCT p
         FROM Product p
+        JOIN FETCH p.category c
+        JOIN FETCH p.brand b
         WHERE
             p.isActive = true
             AND p.isSelling = true
-            AND COALESCE(p.category.isDeleted, false) = false
-            AND p.brand.isActive = true
+            AND COALESCE(c.isDeleted, false) = false
+            AND b.isActive = true
+            AND EXISTS (
+                SELECT 1
+                FROM ProductVariant v
+                WHERE v.product = p
+                    AND v.isActive = true
+                    AND v.isSelling = true
+            )
             AND (:q IS NULL OR :q = '' OR
                 LOWER(p.name) LIKE LOWER(CONCAT('%', :q, '%')) OR
                 LOWER(p.slug) LIKE LOWER(CONCAT('%', :q, '%')) OR
                 LOWER(p.description) LIKE LOWER(CONCAT('%', :q, '%'))
             )
-            AND (:categoryId IS NULL OR p.category.id = :categoryId)
-            AND (:brandId IS NULL OR p.brand.id = :brandId)
+            AND (:categoryIds IS NULL OR c.id IN :categoryIds)
+            AND (:brandIds IS NULL OR b.id IN :brandIds)
             AND (:minRating IS NULL OR p.rating >= :minRating)
             AND (
                 :minPrice IS NULL
@@ -79,7 +110,7 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
                         AND v.isSelling = true
                         AND (
                             CASE
-                                WHEN v.promotionalPrice IS NOT NULL
+                                WHEN v.promotionalPrice IS NOT NULL AND v.promotionalPrice > 0
                                     THEN v.promotionalPrice
                                 ELSE v.price
                             END
@@ -96,7 +127,7 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
                         AND v.isSelling = true
                         AND (
                             CASE
-                                WHEN v.promotionalPrice IS NOT NULL
+                                WHEN v.promotionalPrice IS NOT NULL AND v.promotionalPrice > 0
                                     THEN v.promotionalPrice
                                 ELSE v.price
                             END
@@ -131,8 +162,8 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
         """)
     Page<Product> searchPublicProducts(
             @Param("q") String q,
-            @Param("categoryId") UUID categoryId,
-            @Param("brandId") Long brandId,
+            @Param("categoryIds") Collection<UUID> categoryIds,
+            @Param("brandIds") Collection<Long> brandIds,
             @Param("minPrice") BigDecimal minPrice,
             @Param("maxPrice") BigDecimal maxPrice,
             @Param("minRating") Double minRating,
@@ -142,12 +173,32 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     );
 
     @Query("""
-        SELECT p
+        SELECT MAX(
+            CASE 
+                WHEN v.promotionalPrice IS NOT NULL AND v.promotionalPrice > 0 
+                THEN v.promotionalPrice 
+                ELSE v.price 
+            END
+        )
+        FROM ProductVariant v
+        WHERE v.isActive = true
+            AND v.isSelling = true
+            AND v.product.isActive = true
+            AND v.product.isSelling = true
+    """)
+    BigDecimal findMaxEffectivePrice();
+
+    @Query("""
+        SELECT DISTINCT p
         FROM Product p
+        JOIN FETCH p.category c
+        JOIN FETCH p.brand b
         WHERE p.isActive = true
             AND p.isSelling = true
-            AND COALESCE(p.category.isDeleted, false) = false
-            AND p.brand.isActive = true
+            AND COALESCE(c.isDeleted, false) = false
+            AND b.isActive = true
+            AND p.id <> :excludeId
+            AND (c.id = :categoryId OR b.id = :brandId)
             AND EXISTS (
                 SELECT 1
                 FROM ProductVariant v
@@ -155,6 +206,12 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
                     AND v.isActive = true
                     AND v.isSelling = true
             )
-        """)
-    Page<Product> findAllPublic(Pageable pageable);
+        ORDER BY CASE WHEN c.id = :categoryId THEN 0 ELSE 1 END, p.createdAt DESC
+    """)
+    List<Product> findRelatedProducts(
+            @Param("excludeId") UUID excludeId,
+            @Param("categoryId") UUID categoryId,
+            @Param("brandId") Long brandId,
+            Pageable pageable
+    );
 }

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="vi" th:replace="~{layouts/dashboard-layout :: layout('Kiểu thuộc tính', 'manager', 'styles', ~{::section.content})}">
+<head><title>Kiểu thuộc tính | TechNova</title></head>
+<body>
+<section class="content">
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div>
+      <h1 class="title">Kiểu thuộc tính (Styles)</h1>
+      <div class="subtitle">Quản lý các kiểu biến thể (Màu sắc, Dung lượng, RAM...) và giá trị gán cho danh mục.</div>
+    </div>
+    <button class="btn btn-primary btn-sm" id="btnOpenCreateStyleModal"><i class="fa-solid fa-plus me-1"></i>Thêm kiểu mới</button>
+  </div>
+
+  <!-- Search & Filter Panel -->
+  <div class="panel mb-3">
+    <div class="row g-2 align-items-center">
+      <div class="col-md-6">
+        <div class="input-group input-group-sm">
+          <input class="form-control" id="searchInput" placeholder="Tìm kiếm tên kiểu thuộc tính...">
+          <button class="btn btn-outline-secondary" type="button" id="btnSearch"><i class="fa-solid fa-magnifying-glass"></i></button>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <select class="form-select form-select-sm" id="statusFilter">
+          <option value="">-- Tất cả trạng thái --</option>
+          <option value="active">Đang hoạt động</option>
+          <option value="deleted">Đã xóa mềm</option>
+        </select>
+      </div>
+      <div class="col-md-3 text-md-end">
+        <span class="muted" id="totalRecordsText">0 bản ghi</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Data Table -->
+  <div class="panel">
+    <h2 class="paneltitle mb-3">Danh sách kiểu thuộc tính</h2>
+    <div class="table-responsive">
+      <table class="table" id="dataTable">
+        <thead>
+          <tr>
+            <th>Tên kiểu</th>
+            <th>Danh mục áp dụng</th>
+            <th>Trạng thái</th>
+            <th class="text-end">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="styleTableBody">
+          <tr><td colspan="4" class="text-center py-4 text-muted">Đang tải dữ liệu...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="d-flex justify-content-between align-items-center mt-3">
+      <span class="muted" id="pageInfoText">Trang 1/1</span>
+      <div class="btn-group btn-group-sm" id="paginationControls">
+        <button class="btn btn-outline-secondary" id="btnPrevPage">Trước</button>
+        <button class="btn btn-primary" id="btnCurrentPage">1</button>
+        <button class="btn btn-outline-secondary" id="btnNextPage">Sau</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Thêm / Sửa Kiểu thuộc tính -->
+  <div class="modal fade" id="styleFormModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="styleModalTitle">Thêm mới kiểu thuộc tính</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <form id="styleForm">
+          <input type="hidden" id="styleId">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Tên kiểu thuộc tính <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="styleName" required placeholder="Ví dụ: Màu sắc, Bộ nhớ trong">
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Áp dụng cho các danh mục</label>
+              <div id="styleCategoryCheckboxes" class="border rounded p-2 bg-light d-flex flex-column gap-1" style="max-height: 200px; overflow-y: auto;">
+                <!-- Filled dynamically by JS -->
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+            <button type="submit" class="btn btn-primary btn-sm" id="btnSaveStyle">Lưu thông tin</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Quản lý giá trị thuộc tính (StyleValues) -->
+  <div class="modal fade" id="styleValuesModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Quản lý giá trị cho kiểu: <span class="text-primary" id="modalStyleName"></span></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Add Value Form -->
+          <div class="input-group input-group-sm mb-3">
+            <input type="text" class="form-control" id="newStyleValueName" placeholder="Nhập tên giá trị mới (vd: Đen, Trắng, 256GB...)">
+            <button class="btn btn-primary" type="button" id="btnAddStyleValue"><i class="fa-solid fa-plus me-1"></i>Thêm giá trị</button>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-bordered mb-0">
+              <thead>
+                <tr>
+                  <th>Tên giá trị</th>
+                  <th>Trạng thái</th>
+                  <th class="text-end">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="styleValuesTableBody">
+                <tr><td colspan="3" class="text-center py-3 text-muted">Đang tải giá trị...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+  <!-- Script nạp cho quản lý kiểu thuộc tính -->
+  <script th:src="@{/js/manager/styles.js}"></script>
+</section>
+</body>
+</html>

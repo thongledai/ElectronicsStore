@@ -45,7 +45,15 @@ public class ProductResponseDTO {
 
     private BigDecimal minPrice;
 
+    private BigDecimal minPromotionalPrice;
+
+    private BigDecimal effectivePrice;
+
     private BigDecimal maxPrice;
+
+    private Integer totalStock;
+
+    private Integer totalSold;
 
     private String thumbnailUrl;
 

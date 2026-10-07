@@ -1,13 +1,13 @@
 package com.example.store.dto.product;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,9 +23,15 @@ public class ProductFilterDTO {
 
     private String search;
 
-    private UUID category;
+    // Hỗ trợ truyền 1 hoặc nhiều category theo slug hoặc UUID
+    private List<String> category;
 
-    private Long brand;
+    // Hỗ trợ truyền 1 hoặc nhiều brand theo slug hoặc id
+    private List<String> brand;
+
+    private UUID categoryId;
+
+    private Long brandId;
 
     @DecimalMin(
             value = "0.0",
@@ -67,9 +73,19 @@ public class ProductFilterDTO {
             message = "Kích thước trang phải lớn hơn 0"
     )
     @Max(
-            value = 100,
-            message = "Kích thước trang không được lớn hơn 100"
+            value = 50,
+            message = "Kích thước trang không được lớn hơn 50"
     )
     @Builder.Default
-    private Integer size = 10;
+    private Integer size = 12;
+
+    public String getKeyword() {
+        if (q != null && !q.trim().isEmpty()) {
+            return q.trim();
+        }
+        if (search != null && !search.trim().isEmpty()) {
+            return search.trim();
+        }
+        return null;
+    }
 }

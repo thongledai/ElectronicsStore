@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="vi" th:replace="~{layouts/dashboard-layout :: layout('Thương hiệu', 'manager', 'brands', ~{::section.content})}">
+<head><title>Thương hiệu | TechNova</title></head>
+<body>
+<section class="content">
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div>
+      <h1 class="title">Thương hiệu</h1>
+      <div class="subtitle">Quản lý các thương hiệu, logo và trạng thái hoạt động trong hệ thống.</div>
+    </div>
+    <button class="btn btn-primary btn-sm" id="btnOpenCreateBrandModal"><i class="fa-solid fa-plus me-1"></i>Thêm mới</button>
+  </div>
+
+  <!-- Search & Filter Panel -->
+  <div class="panel mb-3">
+    <div class="row g-2 align-items-center">
+      <div class="col-md-6">
+        <div class="input-group input-group-sm">
+          <input class="form-control" id="searchInput" placeholder="Tìm kiếm tên, slug thương hiệu...">
+          <button class="btn btn-outline-secondary" type="button" id="btnSearch"><i class="fa-solid fa-magnifying-glass"></i></button>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <select class="form-select form-select-sm" id="statusFilter">
+          <option value="">-- Tất cả trạng thái --</option>
+          <option value="active">Đang hoạt động</option>
+          <option value="inactive">Đã ngừng hoạt động</option>
+        </select>
+      </div>
+      <div class="col-md-3 text-md-end">
+        <span class="muted" id="totalRecordsText">0 bản ghi</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Data Table -->
+  <div class="panel">
+    <h2 class="paneltitle mb-3">Danh sách thương hiệu</h2>
+    <div class="table-responsive">
+      <table class="table" id="dataTable">
+        <thead>
+          <tr>
+            <th>Logo</th>
+            <th>Tên thương hiệu</th>
+            <th>Slug</th>
+            <th>Mô tả</th>
+            <th>Trạng thái</th>
+            <th class="text-end">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="brandTableBody">
+          <tr><td colspan="6" class="text-center py-4 text-muted">Đang tải dữ liệu...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="d-flex justify-content-between align-items-center mt-3">
+      <span class="muted" id="pageInfoText">Trang 1/1</span>
+      <div class="btn-group btn-group-sm" id="paginationControls">
+        <button class="btn btn-outline-secondary" id="btnPrevPage">Trước</button>
+        <button class="btn btn-primary" id="btnCurrentPage">1</button>
+        <button class="btn btn-outline-secondary" id="btnNextPage">Sau</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Thêm / Sửa Thương hiệu -->
+  <div class="modal fade" id="brandFormModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="brandModalTitle">Thêm mới thương hiệu</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <form id="brandForm">
+          <input type="hidden" id="brandId">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Tên thương hiệu <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="brandName" required placeholder="Ví dụ: Apple, Samsung, Sony">
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Slug (tùy chọn)</label>
+              <input type="text" class="form-control" id="brandSlug" placeholder="Tự sinh nếu để trống">
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Logo thương hiệu</label>
+              <input type="file" class="form-control" id="brandLogoFile" accept="image/jpeg,image/png,image/webp">
+              <div id="currentBrandLogoPreview" class="mt-2" style="display:none;">
+                <img id="brandPreviewImg" src="" alt="" style="max-height:60px; max-width:120px;" class="border rounded p-1">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Mô tả thương hiệu</label>
+              <textarea class="form-control" id="brandDescription" rows="3" placeholder="Mô tả tóm tắt..."></textarea>
+            </div>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="brandIsActive" checked>
+              <label class="form-check-label fw-semibold" for="brandIsActive">Hoạt động</label>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+            <button type="submit" class="btn btn-primary btn-sm" id="btnSaveBrand">Lưu thông tin</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  <!-- Script nạp cho quản lý thương hiệu -->
+  <script th:src="@{/js/manager/brands.js}"></script>
+</section>
+</body>
+</html>

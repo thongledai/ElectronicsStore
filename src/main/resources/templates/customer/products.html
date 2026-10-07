@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en" th:replace="~{layouts/customer-layout :: layout(
-        'All Products — TechNova Electronics',
-        'Browse all 25 TechNova products — laptops, smartphones, headphones, smartwatches and gaming accessories with filters, search and sorting.',
-        ~{::main}, ~{}, 'products.js', false)}">
-<head><title>All Products — TechNova Electronics</title></head>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/customer-layout :: layout(
+        'Danh sách sản phẩm — TechNova Electronics',
+        'Khám phá các sản phẩm công nghệ chính hãng tại TechNova — Laptop, Điện thoại, Phụ kiện, Tai nghe với nhiều ưu đãi hấp dẫn.',
+        ~{::main}, ~{}, 'customer/product-list.js', false)}">
+<head><title>Danh sách sản phẩm — TechNova Electronics</title></head>
 <body>
 
 <main>
@@ -11,11 +12,11 @@
   <!-- PAGE HEAD / BREADCRUMB -->
   <section class="page-head">
     <div class="container">
-      <h1 id="pageTitle">All Products</h1>
+      <h1 id="pageTitle">Tất cả sản phẩm</h1>
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a th:href="@{/customer/index}">Home</a></li>
-          <li class="breadcrumb-item active" aria-current="page" id="crumbCurrent">Products</li>
+          <li class="breadcrumb-item"><a th:href="@{/customer/index}">Trang chủ</a></li>
+          <li class="breadcrumb-item active" aria-current="page" id="crumbCurrent">Sản phẩm</li>
         </ol>
       </nav>
     </div>
@@ -33,79 +34,129 @@
           <!-- Mobile toggle for the filter panel -->
           <button class="btn btn-ghost w-100 d-lg-none mb-3" type="button"
                   data-bs-toggle="collapse" data-bs-target="#filterPanel" aria-expanded="false">
-            <i class="fas fa-sliders me-2"></i>Filters &amp; Sorting
+            <i class="fas fa-sliders me-2"></i>Bộ lọc &amp; Sắp xếp
           </button>
 
           <div class="collapse d-lg-block" id="filterPanel">
-            <div class="filter-panel">
+            <form id="filterForm" method="get" th:action="@{/customer/products}">
+              <input type="hidden" name="page" id="formPage" value="1">
+              <input type="hidden" name="sort" id="formSort" th:value="${filter.sort != null ? filter.sort : 'featured'}">
 
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <h2 class="h6 mb-0"><i class="fas fa-filter me-2 text-primary"></i>Filters</h2>
-                <button class="btn btn-sm btn-link p-0 text-decoration-none" id="clearFilters" type="button">
-                  Clear all
-                </button>
-              </div>
+              <div class="filter-panel">
 
-              <!-- Search within results -->
-              <div class="filter-group">
-                <label class="filter-title" for="filterSearch">Search</label>
-                <div class="input-icon">
-                  <i class="fas fa-magnifying-glass"></i>
-                  <input type="search" class="form-control" id="filterSearch" placeholder="Product or brand…" autocomplete="off">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h2 class="h6 mb-0"><i class="fas fa-filter me-2 text-primary"></i>Bộ lọc</h2>
+                  <a th:href="@{/customer/products}" class="btn btn-sm btn-link p-0 text-decoration-none text-danger" id="clearFilters">
+                    Xóa tất cả
+                  </a>
                 </div>
-              </div>
 
-              <!-- Category checkboxes (built by js/products.js) -->
-              <div class="filter-group">
-                <div class="filter-title">Category</div>
-                <div id="categoryFilters"></div>
-              </div>
-
-              <!-- Price range -->
-              <div class="filter-group">
-                <div class="filter-title">Max Price</div>
-                <div class="range-wrap">
-                  <input type="range" class="form-range" id="priceRange" min="0" max="250000" step="1000" value="250000">
-                  <div class="range-values">
-                    <span>₹0</span>
-                    <span id="priceValue">₹2,50,000</span>
+                <!-- Search within results -->
+                <div class="filter-group">
+                  <label class="filter-title" for="filterSearch">Tìm kiếm</label>
+                  <div class="input-icon">
+                    <i class="fas fa-magnifying-glass"></i>
+                    <input type="search" name="q" class="form-control" id="filterSearch"
+                           placeholder="Tên sản phẩm..." th:value="${filter.q != null ? filter.q : filter.search}" autocomplete="off">
                   </div>
                 </div>
-                <!-- Quick price presets -->
-                <div class="d-flex flex-wrap gap-2 mt-3">
-                  <button class="btn btn-sm btn-ghost price-preset" data-max="10000" type="button">Under ₹10K</button>
-                  <button class="btn btn-sm btn-ghost price-preset" data-max="25000" type="button">Under ₹25K</button>
-                  <button class="btn btn-sm btn-ghost price-preset" data-max="50000" type="button">Under ₹50K</button>
-                  <button class="btn btn-sm btn-ghost price-preset" data-max="250000" type="button">All</button>
+
+                <!-- Category checkboxes -->
+                <div class="filter-group">
+                  <div class="filter-title">Danh mục</div>
+                  <div id="categoryFilters">
+                    <div th:each="cat : ${categories}" class="filter-check">
+                      <label>
+                        <input type="checkbox" name="category" th:value="${cat.slug}"
+                               th:checked="${filter.category != null and (filter.category.contains(cat.slug) or filter.category.contains(cat.id.toString()))}"
+                               class="js-filter-input">
+                        <span th:text="${cat.name}">Danh mục</span>
+                      </label>
+                    </div>
+                  </div>
                 </div>
-              </div>
 
-              <!-- Brand checkboxes -->
-              <div class="filter-group">
-                <div class="filter-title">Brand</div>
-                <div id="brandFilters"></div>
-              </div>
+                <!-- Price range -->
+                <div class="filter-group">
+                  <div class="filter-title">Mức giá tối đa</div>
+                  <div class="range-wrap">
+                    <input type="range" class="form-range" id="priceRange" name="maxPrice"
+                           min="0" th:max="${maxPriceDb != null ? maxPriceDb : 100000000}" step="500000"
+                           th:value="${filter.maxPrice != null ? filter.maxPrice : (maxPriceDb != null ? maxPriceDb : 100000000)}">
+                    <div class="range-values">
+                      <span>0 ₫</span>
+                      <span id="priceValue" th:text="${#numbers.formatDecimal(filter.maxPrice != null ? filter.maxPrice : (maxPriceDb != null ? maxPriceDb : 100000000), 0, 'POINT', 0, 'POINT') + ' ₫'}">100.000.000 ₫</span>
+                    </div>
+                  </div>
+                  <!-- Quick price presets -->
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button class="btn btn-sm btn-ghost price-preset" data-max="5000000" type="button">Dưới 5tr</button>
+                    <button class="btn btn-sm btn-ghost price-preset" data-max="15000000" type="button">Dưới 15tr</button>
+                    <button class="btn btn-sm btn-ghost price-preset" data-max="30000000" type="button">Dưới 30tr</button>
+                    <button class="btn btn-sm btn-ghost price-preset" th:attr="data-max=${maxPriceDb != null ? maxPriceDb : 100000000}" type="button">Tất cả</button>
+                  </div>
+                </div>
 
-              <!-- Minimum rating -->
-              <div class="filter-group">
-                <div class="filter-title">Customer Rating</div>
-                <div id="ratingFilters"></div>
-              </div>
+                <!-- Brand checkboxes -->
+                <div class="filter-group">
+                  <div class="filter-title">Thương hiệu</div>
+                  <div id="brandFilters">
+                    <div th:each="b : ${brands}" class="filter-check">
+                      <label>
+                        <input type="checkbox" name="brand" th:value="${b.slug}"
+                               th:checked="${filter.brand != null and (filter.brand.contains(b.slug) or filter.brand.contains(b.id.toString()))}"
+                               class="js-filter-input">
+                        <span th:text="${b.name}">Thương hiệu</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
 
-              <!-- Availability -->
-              <div class="filter-group">
-                <div class="filter-title">Availability</div>
-                <label class="filter-check">
-                  <input type="checkbox" id="inStockOnly">
-                  <span>In stock only</span>
-                </label>
-                <label class="filter-check">
-                  <input type="checkbox" id="onSaleOnly">
-                  <span>On sale / discounted</span>
-                </label>
-              </div>
+                <!-- Minimum rating -->
+                <div class="filter-group">
+                  <div class="filter-title">Đánh giá khách hàng</div>
+                  <div id="ratingFilters">
+                    <div class="filter-check" th:each="r : ${ {4.5, 4.0, 3.0} }">
+                      <label>
+                        <input type="radio" name="minRating" th:value="${r}"
+                               th:checked="${filter.minRating != null and filter.minRating == r}"
+                               class="js-filter-input">
+                        <span>
+                          <i class="fas fa-star text-warning"></i>
+                          <span th:text="${'Từ ' + r + ' sao'}">Từ 4.0 sao</span>
+                        </span>
+                      </label>
+                    </div>
+                    <div class="filter-check">
+                      <label>
+                        <input type="radio" name="minRating" value=""
+                               th:checked="${filter.minRating == null}"
+                               class="js-filter-input">
+                        <span>Tất cả đánh giá</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
 
-            </div>
+                <!-- Availability -->
+                <div class="filter-group">
+                  <div class="filter-title">Tình trạng hàng</div>
+                  <label class="filter-check">
+                    <input type="checkbox" name="inStock" value="true" id="inStockOnly"
+                           th:checked="${filter.inStock != null and filter.inStock}"
+                           class="js-filter-input">
+                    <span>Còn hàng</span>
+                  </label>
+                  <label class="filter-check">
+                    <input type="checkbox" name="onSale" value="true" id="onSaleOnly"
+                           th:checked="${filter.onSale != null and filter.onSale}"
+                           class="js-filter-input">
+                    <span>Đang giảm giá</span>
+                  </label>
+                </div>
+
+              </div>
+            </form>
           </div>
         </aside>
 
@@ -116,26 +167,33 @@
 
           <!-- Toolbar: result count, sort, view toggle -->
           <div class="toolbar">
-            <p class="result-count mb-0" id="resultCount">Loading products…</p>
+            <p class="result-count mb-0" id="resultCount">
+              <span th:if="${products.totalElements > 0}">
+                Hiển thị <strong th:text="${(products.page * products.size) + 1}">1</strong>–<strong th:text="${T(java.lang.Math).min((products.page + 1) * products.size, products.totalElements)}">12</strong> trong <strong th:text="${products.totalElements}">25</strong> sản phẩm
+              </span>
+              <span th:if="${products.totalElements == 0}">
+                Không tìm thấy sản phẩm phù hợp
+              </span>
+            </p>
 
             <div class="d-flex align-items-center gap-2 flex-wrap">
-              <label for="sortSelect" class="small text-muted mb-0 d-none d-sm-inline">Sort by</label>
-              <select class="form-select form-select-sm" id="sortSelect" style="width:auto" aria-label="Sort products">
-                <option value="featured">Featured</option>
-                <option value="popular">Most Popular</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-                <option value="rating">Highest Rated</option>
-                <option value="discount">Biggest Discount</option>
-                <option value="name-asc">Name: A to Z</option>
-                <option value="name-desc">Name: Z to A</option>
+              <label for="sortSelect" class="small text-muted mb-0 d-none d-sm-inline">Sắp xếp theo</label>
+              <select class="form-select form-select-sm" id="sortSelect" style="width:auto" aria-label="Sắp xếp sản phẩm">
+                <option value="featured" th:selected="${filter.sort == null or filter.sort == 'featured'}">Mới nhất</option>
+                <option value="popular" th:selected="${filter.sort == 'popular'}">Phổ biến / Bán chạy</option>
+                <option value="price-asc" th:selected="${filter.sort == 'price-asc'}">Giá: Thấp đến Cao</option>
+                <option value="price-desc" th:selected="${filter.sort == 'price-desc'}">Giá: Cao đến Thấp</option>
+                <option value="rating" th:selected="${filter.sort == 'rating'}">Đánh giá cao</option>
+                <option value="discount" th:selected="${filter.sort == 'discount'}">Giảm giá nhiều nhất</option>
+                <option value="name-asc" th:selected="${filter.sort == 'name-asc'}">Tên: A→Z</option>
+                <option value="name-desc" th:selected="${filter.sort == 'name-desc'}">Tên: Z→A</option>
               </select>
 
-              <div class="view-toggle" role="group" aria-label="View mode">
-                <button class="active" id="gridViewBtn" type="button" aria-label="Grid view" title="Grid view">
+              <div class="view-toggle" role="group" aria-label="Chế độ hiển thị">
+                <button class="active" id="gridViewBtn" type="button" aria-label="Dạng lưới" title="Dạng lưới">
                   <i class="fas fa-grip"></i>
                 </button>
-                <button id="listViewBtn" type="button" aria-label="List view" title="List view">
+                <button id="listViewBtn" type="button" aria-label="Dạng danh sách" title="Dạng danh sách">
                   <i class="fas fa-list"></i>
                 </button>
               </div>
@@ -143,14 +201,133 @@
           </div>
 
           <!-- Active filter chips -->
-          <div class="chip-row" id="activeChips"></div>
+          <div class="chip-row" id="activeChips">
+            <span th:if="${filter.q != null and !filter.q.isEmpty()}" class="chip">
+              Tìm kiếm: <span th:text="${filter.q}"></span>
+              <button type="button" class="chip-remove js-remove-filter" data-field="q"><i class="fas fa-xmark"></i></button>
+            </span>
+            <th:block th:if="${filter.category != null}">
+              <span th:each="cVal : ${filter.category}" class="chip">
+                Danh mục: <span th:text="${cVal}"></span>
+                <button type="button" class="chip-remove js-remove-filter" data-field="category" th:attr="data-val=${cVal}"><i class="fas fa-xmark"></i></button>
+              </span>
+            </th:block>
+            <th:block th:if="${filter.brand != null}">
+              <span th:each="bVal : ${filter.brand}" class="chip">
+                Thương hiệu: <span th:text="${bVal}"></span>
+                <button type="button" class="chip-remove js-remove-filter" data-field="brand" th:attr="data-val=${bVal}"><i class="fas fa-xmark"></i></button>
+              </span>
+            </th:block>
+            <span th:if="${filter.inStock != null and filter.inStock}" class="chip">
+              Còn hàng
+              <button type="button" class="chip-remove js-remove-filter" data-field="inStock"><i class="fas fa-xmark"></i></button>
+            </span>
+            <span th:if="${filter.onSale != null and filter.onSale}" class="chip">
+              Đang giảm giá
+              <button type="button" class="chip-remove js-remove-filter" data-field="onSale"><i class="fas fa-xmark"></i></button>
+            </span>
+          </div>
 
-          <!-- Products -->
-          <div class="row g-3 g-md-4 products-grid" id="productGrid"></div>
+          <!-- Products grid -->
+          <div class="row g-3 g-md-4 products-grid" id="productGrid">
+
+            <!-- Empty state -->
+            <div th:if="${products.totalElements == 0}" class="col-12 text-center py-5">
+              <div class="p-5">
+                <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                <h3 class="h5">Không tìm thấy sản phẩm phù hợp</h3>
+                <p class="text-muted mb-4">Hãy thử thay đổi từ khóa tìm kiếm hoặc điều chỉnh lại các bộ lọc.</p>
+                <a th:href="@{/customer/products}" class="btn btn-brand btn-sm">Xem tất cả sản phẩm</a>
+              </div>
+            </div>
+
+            <!-- Product cards -->
+            <div th:each="p : ${products.content}" class="col-6 col-md-4 col-lg-3 product-col">
+              <article class="product-card" th:classappend="${p.totalStock != null and p.totalStock == 0} ? 'is-out'" th:attr="data-id=${p.id}">
+                <div class="card-media">
+                  <span th:if="${p.minPromotionalPrice != null and p.minPromotionalPrice < p.minPrice and p.minPrice > 0}"
+                        class="badge-discount"
+                        th:text="'-' + ${T(java.lang.Math).round(((p.minPrice - p.minPromotionalPrice) * 100.0) / p.minPrice)} + '%'">
+                    -10%
+                  </span>
+                  <a th:href="@{'/customer/products/' + ${p.slug}}" th:attr="aria-label=${'Xem ' + p.name}">
+                    <img th:src="${p.thumbnailUrl != null ? p.thumbnailUrl : '/images/placeholder.webp'}"
+                         th:alt="${p.name}" loading="lazy" width="600" height="600"
+                         onerror="this.onerror=null;this.src='/images/placeholder.webp';">
+                  </a>
+                  <div th:if="${p.totalStock != null and p.totalStock == 0}" class="stock-flag">
+                    <span>Hết hàng</span>
+                  </div>
+                  <div class="card-actions">
+                    <button class="card-action-btn js-wishlist" th:attr="data-id=${p.id}" type="button" aria-label="Yêu thích" title="Thêm vào yêu thích">
+                      <i class="far fa-heart"></i>
+                    </button>
+                    <a class="card-action-btn" th:href="@{'/customer/products/' + ${p.slug}}" aria-label="Xem chi tiết" title="Xem chi tiết">
+                      <i class="fas fa-eye"></i>
+                    </a>
+                  </div>
+                </div>
+
+                <div class="card-body">
+                  <span class="card-cat" th:text="${p.brandName != null ? p.brandName : (p.categoryName != null ? p.categoryName : 'TechNova')}">Brand</span>
+                  <h3 class="card-title">
+                    <a th:href="@{'/customer/products/' + ${p.slug}}" th:text="${p.name}">Tên sản phẩm</a>
+                  </h3>
+
+                  <div class="card-rating">
+                    <span class="stars">
+                      <i th:each="i : ${#numbers.sequence(1, 5)}"
+                         th:class="${p.rating >= i ? 'fas fa-star' : (p.rating >= i - 0.5 ? 'fas fa-star-half-stroke' : 'far fa-star')}"></i>
+                    </span>
+                    <span class="count" th:text="${#numbers.formatDecimal(p.rating != null ? p.rating : 5.0, 1, 1)}">5.0</span>
+                  </div>
+
+                  <div class="card-price">
+                    <span class="price" th:text="${#numbers.formatDecimal(p.effectivePrice != null ? p.effectivePrice : p.minPrice, 0, 'POINT', 0, 'POINT') + ' ₫'}">24.990.000 ₫</span>
+                    <span th:if="${p.minPromotionalPrice != null and p.minPromotionalPrice < p.minPrice}" class="price-old"
+                          th:text="${#numbers.formatDecimal(p.minPrice, 0, 'POINT', 0, 'POINT') + ' ₫'}">29.990.000 ₫</span>
+                    <span th:if="${p.minPromotionalPrice != null and p.minPromotionalPrice < p.minPrice and p.minPrice > 0}" class="price-off"
+                          th:text="${T(java.lang.Math).round(((p.minPrice - p.minPromotionalPrice) * 100.0) / p.minPrice)} + '% giảm'">10% giảm</span>
+                  </div>
+
+                  <p th:if="${p.totalStock != null and p.totalStock == 0}" class="stock-note text-danger">Tạm hết hàng</p>
+                  <p th:if="${p.totalStock != null and p.totalStock > 0 and p.totalStock <= 5}" class="stock-note text-warning"
+                     th:text="${'Chỉ còn ' + p.totalStock + ' sản phẩm'}">Chỉ còn 3 sản phẩm</p>
+
+                  <button class="btn btn-brand btn-sm btn-cart js-add-cart" th:attr="data-id=${p.id}" type="button"
+                          th:disabled="${p.totalStock != null and p.totalStock == 0}">
+                    <i class="fas fa-cart-plus me-1"></i>
+                    <span th:text="${p.totalStock != null and p.totalStock == 0 ? 'Hết hàng' : 'Thêm vào giỏ'}">Thêm vào giỏ</span>
+                  </button>
+                </div>
+              </article>
+            </div>
+
+          </div>
 
           <!-- Pagination -->
-          <nav class="mt-5" aria-label="Product pages">
-            <ul class="pagination justify-content-center" id="pagination"></ul>
+          <nav th:if="${products.totalPages > 1}" class="mt-5" aria-label="Phân trang sản phẩm">
+            <ul class="pagination justify-content-center" id="pagination">
+              <!-- Previous -->
+              <li class="page-item" th:classappend="${currentPage <= 1} ? 'disabled'">
+                <a class="page-link js-page-link" th:attr="data-page=${currentPage - 1}" href="#" aria-label="Trang trước">
+                  <i class="fas fa-chevron-left"></i>
+                </a>
+              </li>
+
+              <!-- All page numbers -->
+              <li th:each="pageNum : ${#numbers.sequence(1, products.totalPages)}" class="page-item"
+                  th:classappend="${pageNum == currentPage} ? 'active'">
+                <a class="page-link js-page-link" th:attr="data-page=${pageNum}" href="#" th:text="${pageNum}">1</a>
+              </li>
+
+              <!-- Next -->
+              <li class="page-item" th:classappend="${currentPage >= products.totalPages} ? 'disabled'">
+                <a class="page-link js-page-link" th:attr="data-page=${currentPage + 1}" href="#" aria-label="Trang sau">
+                  <i class="fas fa-chevron-right"></i>
+                </a>
+              </li>
+            </ul>
           </nav>
 
         </div>
@@ -160,7 +337,6 @@
   </section>
 
 </main>
-
 
 </body>
 </html>

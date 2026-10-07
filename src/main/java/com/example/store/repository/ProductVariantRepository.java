@@ -1,5 +1,6 @@
 package com.example.store.repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -8,13 +9,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
-import com.example.store.entity.ProductVariant;
 import org.springframework.stereotype.Repository;
 
+import com.example.store.entity.ProductVariant;
+
 @Repository
-public interface ProductVariantRepository
-        extends JpaRepository<ProductVariant, UUID> {
+public interface ProductVariantRepository extends JpaRepository<ProductVariant, UUID> {
 
     Optional<ProductVariant> findBySku(String sku);
 
@@ -30,17 +30,39 @@ public interface ProductVariantRepository
 
     boolean existsByStyleValuesId(UUID styleValueId);
 
+    @Query("""
+        SELECT COUNT(v) > 0
+        FROM ProductVariant v
+        JOIN v.styleValues sv
+        WHERE sv.id = :styleValueId
+            AND v.isActive = true
+    """)
+    boolean existsActiveVariantByStyleValueId(@Param("styleValueId") UUID styleValueId);
+
+    List<ProductVariant> findByProductId(UUID productId);
+
+    List<ProductVariant> findByProductIdAndIsActiveTrue(UUID productId);
+
+    List<ProductVariant> findByProductIdAndIsActiveTrueAndIsSellingTrue(UUID productId);
+
     Page<ProductVariant> findByProductId(UUID productId, Pageable pageable);
 
-    Page<ProductVariant> findByProductIdAndIsActiveTrue(
-            UUID productId,
-            Pageable pageable
-    );
+    @Query("""
+        SELECT DISTINCT v
+        FROM ProductVariant v
+        LEFT JOIN FETCH v.images
+        WHERE v.product.id = :productId
+    """)
+    List<ProductVariant> findAllWithImagesByProductId(@Param("productId") UUID productId);
 
-    Page<ProductVariant> findByProductIdAndIsActiveTrueAndIsSellingTrue(
-            UUID productId,
-            Pageable pageable
-    );
+    @Query("""
+        SELECT DISTINCT v
+        FROM ProductVariant v
+        LEFT JOIN FETCH v.styleValues sv
+        LEFT JOIN FETCH sv.style
+        WHERE v.product.id = :productId
+    """)
+    List<ProductVariant> findAllWithStyleValuesByProductId(@Param("productId") UUID productId);
 
     @Query("""
         SELECT v
@@ -70,18 +92,6 @@ public interface ProductVariantRepository
             @Param("isSelling") Boolean isSelling,
             @Param("inStock") Boolean inStock,
             @Param("onSale") Boolean onSale,
-            Pageable pageable
-    );
-
-    @Query("""
-        SELECT v
-        FROM ProductVariant v
-        WHERE v.product.id = :productId
-            AND v.isActive = true
-            AND v.isSelling = true
-        """)
-    Page<ProductVariant> findPublicByProductId(
-            @Param("productId") UUID productId,
             Pageable pageable
     );
 }

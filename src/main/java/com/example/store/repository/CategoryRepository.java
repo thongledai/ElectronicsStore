@@ -1,5 +1,6 @@
 package com.example.store.repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -8,20 +9,30 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import com.example.store.entity.Category;
-import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, UUID> {
 
     Optional<Category> findBySlug(String slug);
 
+    Optional<Category> findBySlugAndIsDeletedFalse(String slug);
+
+    List<Category> findByIsDeletedFalse();
+
+    List<Category> findByIsDeletedFalseOrderByCreatedAtDesc();
+
+    List<Category> findByParentIdAndIsDeletedFalse(UUID parentId);
+
     boolean existsBySlug(String slug);
 
     boolean existsBySlugAndIdNot(String slug, UUID id);
 
     boolean existsByParentId(UUID parentId);
+
+    boolean existsByParentIdAndIsDeletedFalse(UUID parentId);
 
     boolean existsByName(String name);
 
@@ -30,6 +41,7 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
     @Query("""
         SELECT c
         FROM Category c
+        LEFT JOIN FETCH c.parent
         WHERE
             (:q IS NULL OR :q = '' OR
                 LOWER(c.name) LIKE LOWER(CONCAT('%', :q, '%')) OR

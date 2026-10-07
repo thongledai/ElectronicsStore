@@ -1,16 +1,17 @@
 package com.example.store.repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import com.example.store.entity.Style;
-import org.springframework.stereotype.Repository;
 
 @Repository
 public interface StyleRepository extends JpaRepository<Style, UUID> {
@@ -24,8 +25,39 @@ public interface StyleRepository extends JpaRepository<Style, UUID> {
     boolean existsByCategoriesId(UUID categoryId);
 
     @Query("""
-        SELECT s
+        SELECT COUNT(s) > 0
         FROM Style s
+        JOIN s.categories c
+        WHERE LOWER(TRIM(s.name)) = LOWER(TRIM(:name))
+          AND c.id IN :categoryIds
+          AND s.isDeleted = false
+          AND (:excludeId IS NULL OR s.id != :excludeId)
+        """)
+    boolean existsByNameAndCategoryIds(
+            @Param("name") String name,
+            @Param("categoryIds") java.util.Collection<UUID> categoryIds,
+            @Param("excludeId") UUID excludeId
+    );
+
+    @Query("""
+        SELECT COUNT(s) > 0
+        FROM Style s
+        WHERE LOWER(TRIM(s.name)) = LOWER(TRIM(:name))
+          AND s.categories IS EMPTY
+          AND s.isDeleted = false
+          AND (:excludeId IS NULL OR s.id != :excludeId)
+        """)
+    boolean existsByNameAndCategoriesIsEmpty(
+            @Param("name") String name,
+            @Param("excludeId") UUID excludeId
+    );
+
+    List<Style> findByIsDeletedFalse();
+
+    @Query("""
+        SELECT DISTINCT s
+        FROM Style s
+        LEFT JOIN FETCH s.categories
         WHERE
             (:q IS NULL OR :q = '' OR
                 LOWER(s.name) LIKE LOWER(CONCAT('%', :q, '%'))
@@ -37,6 +69,15 @@ public interface StyleRepository extends JpaRepository<Style, UUID> {
             @Param("isDeleted") Boolean isDeleted,
             Pageable pageable
     );
+
+    @Query("""
+        SELECT DISTINCT s
+        FROM Style s
+        JOIN s.categories c
+        WHERE c.id = :categoryId
+            AND s.isDeleted = false
+        """)
+    List<Style> findAllActiveByCategoryId(@Param("categoryId") UUID categoryId);
 
     @Query("""
         SELECT DISTINCT s

@@ -1,20 +1,27 @@
 package com.example.store.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import com.example.store.entity.Brand;
-import org.springframework.stereotype.Repository;
 
 @Repository
 public interface BrandRepository extends JpaRepository<Brand, Long> {
 
     Optional<Brand> findBySlug(String slug);
+
+    Optional<Brand> findBySlugAndIsActiveTrue(String slug);
+
+    List<Brand> findByIsActiveTrue();
+
+    List<Brand> findByIsActiveTrueOrderByCreatedAtDesc();
 
     boolean existsBySlug(String slug);
 
