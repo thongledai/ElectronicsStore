@@ -2,9 +2,7 @@ package com.example.store.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -59,6 +57,12 @@ public class ProductVariant {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
+
+    @Builder.Default
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "product_variant_images", joinColumns = @JoinColumn(name = "product_variant_id"))
+    @Column(name = "image_url", length = 1000)
+    private List<String> image = new ArrayList<>();
 
     @Builder.Default
     @ManyToMany(fetch = FetchType.LAZY)
