@@ -1,13 +1,10 @@
 package com.example.store.service.product.impl;
 
-import com.example.store.common.util.SkuUtils;
-
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-
-import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -16,16 +13,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.store.common.util.SkuUtils;
 import com.example.store.dto.common.PageResponse;
 import com.example.store.dto.product.ProductVariantRequestDTO;
 import com.example.store.dto.product.ProductVariantResponseDTO;
-import com.example.store.entity.Category;
 import com.example.store.entity.Product;
 import com.example.store.entity.ProductVariant;
-import com.example.store.entity.Style;
 import com.example.store.entity.StyleValue;
 import com.example.store.exception.BusinessException;
-import com.example.store.exception.DuplicateResourceException;
 import com.example.store.exception.ResourceNotFoundException;
 import com.example.store.mapper.ProductVariantMapper;
 import com.example.store.repository.CategoryRepository;
@@ -42,224 +37,210 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ProductVariantServiceImpl implements IProductVariantService {
 
-    private final ProductRepository productRepository;
-    private final ProductVariantRepository productVariantRepository;
-    private final StyleValueRepository styleValueRepository;
-    private final CategoryRepository categoryRepository;
-    private final ProductVariantMapper productVariantMapper;
+	private final ProductRepository productRepository;
+	private final ProductVariantRepository productVariantRepository;
+	private final StyleValueRepository styleValueRepository;
+	private final CategoryRepository categoryRepository;
+	private final ProductVariantMapper productVariantMapper;
 
-    @Override
-    @Transactional(readOnly = true)
-    public PageResponse<ProductVariantResponseDTO> getVariantsByProductId(UUID productId, Pageable pageable) {
-        Page<ProductVariant> page = productVariantRepository.findByProductId(productId, pageable);
-        List<ProductVariantResponseDTO> dtoList = page.getContent().stream()
-                .map(productVariantMapper::toResponseDTO)
-                .toList();
-        return PageResponse.of(page, dtoList);
-    }
+	@Override
+	@Transactional(readOnly = true)
+	public PageResponse<ProductVariantResponseDTO> getVariantsByProductId(UUID productId, Pageable pageable) {
+		Page<ProductVariant> page = productVariantRepository.findByProductId(productId, pageable);
+		List<ProductVariantResponseDTO> dtoList = page.getContent().stream().map(productVariantMapper::toResponseDTO)
+				.toList();
+		return PageResponse.of(page, dtoList);
+	}
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<ProductVariantResponseDTO> getAllVariantsByProductId(UUID productId) {
-        List<ProductVariant> variants = productVariantRepository.findAllWithImagesByProductId(productId);
-        List<ProductVariant> styleVariants = productVariantRepository.findAllWithStyleValuesByProductId(productId);
+	@Override
+	@Transactional(readOnly = true)
+	public List<ProductVariantResponseDTO> getAllVariantsByProductId(UUID productId) {
+		List<ProductVariant> variants = productVariantRepository.findAllWithImagesByProductId(productId);
+		List<ProductVariant> styleVariants = productVariantRepository.findAllWithStyleValuesByProductId(productId);
 
-        Map<UUID, ProductVariant> variantMap = variants.stream()
-                .collect(Collectors.toMap(ProductVariant::getId, Function.identity(), (v1, v2) -> v1));
-        for (ProductVariant svVar : styleVariants) {
-            ProductVariant existing = variantMap.get(svVar.getId());
-            if (existing != null) {
-                existing.setStyleValues(svVar.getStyleValues());
-            }
-        }
+		Map<UUID, ProductVariant> variantMap = variants.stream()
+				.collect(Collectors.toMap(ProductVariant::getId, Function.identity(), (v1, v2) -> v1));
+		for (ProductVariant svVar : styleVariants) {
+			ProductVariant existing = variantMap.get(svVar.getId());
+			if (existing != null) {
+				existing.setStyleValues(svVar.getStyleValues());
+			}
+		}
 
-        return variants.stream()
-                .map(productVariantMapper::toResponseDTO)
-                .toList();
-    }
+		return variants.stream().map(productVariantMapper::toResponseDTO).toList();
+	}
 
-    @Override
-    @Transactional(readOnly = true)
-    public ProductVariantResponseDTO getVariantById(UUID id) {
-        ProductVariant variant = productVariantRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy biến thể với ID: " + id));
-        if (variant.getStyleValues() != null) {
-            variant.getStyleValues().forEach(sv -> {
-                if (sv.getStyle() != null) {
-                    sv.getStyle().getName();
-                }
-            });
-        }
-        if (variant.getImages() != null) {
-            variant.getImages().size();
-        }
-        return productVariantMapper.toResponseDTO(variant);
-    }
+	@Override
+	@Transactional(readOnly = true)
+	public ProductVariantResponseDTO getVariantById(UUID id) {
+		ProductVariant variant = productVariantRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy biến thể với ID: " + id));
+		if (variant.getStyleValues() != null) {
+			variant.getStyleValues().forEach(sv -> {
+				if (sv.getStyle() != null) {
+					sv.getStyle().getName();
+				}
+			});
+		}
+		if (variant.getImages() != null) {
+			variant.getImages().size();
+		}
+		return productVariantMapper.toResponseDTO(variant);
+	}
 
-    @Override
-    @Transactional
-    public ProductVariantResponseDTO createVariant(UUID productId, ProductVariantRequestDTO requestDTO) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm với ID: " + productId));
+	@Override
+	@Transactional
+	public ProductVariantResponseDTO createVariant(UUID productId, ProductVariantRequestDTO requestDTO) {
+		Product product = productRepository.findById(productId)
+				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm với ID: " + productId));
 
-        validatePrices(requestDTO);
+		if (!product.isActive()) {
+			throw new BusinessException("Không thể tạo biến thể cho sản phẩm đã ngừng hoạt động!");
+		}
 
-        Set<StyleValue> styleValues = validateAndGetStyleValues(product, requestDTO.getStyleValueIds());
+		validatePrices(requestDTO);
 
-        ProductVariant variant = ProductVariant.builder()
-                .product(product)
-                .sku(generateUniqueSku(product, styleValues))
-                .price(requestDTO.getPrice())
-                .promotionalPrice(requestDTO.getPromotionalPrice())
-                .quantity(requestDTO.getQuantity() != null ? requestDTO.getQuantity() : 0)
-                .sold(0)
-                .isActive(requestDTO.getIsActive() != null ? requestDTO.getIsActive() : true)
-                .isSelling(requestDTO.getIsSelling() != null ? requestDTO.getIsSelling() : true)
-                .styleValues(styleValues)
-                .build();
+		Set<StyleValue> styleValues = validateAndGetStyleValues(product, requestDTO.getStyleValueIds());
 
-        ProductVariant saved = productVariantRepository.save(variant);
-        log.info("Tạo mới biến thể thành công: id={}, sku={}", saved.getId(), saved.getSku());
-        return productVariantMapper.toResponseDTO(saved);
-    }
+		ProductVariant variant = ProductVariant.builder().product(product).sku(generateUniqueSku(product, styleValues))
+				.price(requestDTO.getPrice()).promotionalPrice(requestDTO.getPromotionalPrice())
+				.quantity(requestDTO.getQuantity() != null ? requestDTO.getQuantity() : 0).sold(0)
+				.isActive(requestDTO.getIsActive() != null ? requestDTO.getIsActive() : true)
+				.isSelling(requestDTO.getIsSelling() != null ? requestDTO.getIsSelling() : true)
+				.styleValues(styleValues).build();
 
-    @Override
-    @Transactional
-    public ProductVariantResponseDTO updateVariant(UUID productId, UUID variantId,
-            ProductVariantRequestDTO requestDTO) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm với ID: " + productId));
+		ProductVariant saved = productVariantRepository.save(variant);
+		log.info("Tạo mới biến thể thành công: id={}, sku={}", saved.getId(), saved.getSku());
+		return productVariantMapper.toResponseDTO(saved);
+	}
 
-        ProductVariant variant = productVariantRepository.findById(variantId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy biến thể với ID: " + variantId));
+	@Override
+	@Transactional
+	public ProductVariantResponseDTO updateVariant(UUID productId, UUID variantId,
+			ProductVariantRequestDTO requestDTO) {
+		Product product = productRepository.findById(productId)
+				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm với ID: " + productId));
 
-        if (!variant.getProduct().getId().equals(productId)) {
-            throw new BusinessException("Biến thể không thuộc về sản phẩm này!");
-        }
+		ProductVariant variant = productVariantRepository.findById(variantId)
+				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy biến thể với ID: " + variantId));
 
-        validatePrices(requestDTO);
+		if (!variant.getProduct().getId().equals(productId)) {
+			throw new BusinessException("Biến thể không thuộc về sản phẩm này!");
+		}
 
-        Set<StyleValue> styleValues = validateAndGetStyleValues(product, requestDTO.getStyleValueIds());
+		validatePrices(requestDTO);
 
-        variant.setPrice(requestDTO.getPrice());
-        variant.setPromotionalPrice(requestDTO.getPromotionalPrice());
-        if (requestDTO.getQuantity() != null) {
-            variant.setQuantity(requestDTO.getQuantity());
-        }
-        if (requestDTO.getIsActive() != null) {
-            variant.setActive(requestDTO.getIsActive());
-        }
-        if (requestDTO.getIsSelling() != null) {
-            variant.setSelling(requestDTO.getIsSelling());
-        }
-        variant.setStyleValues(styleValues);
+		Set<StyleValue> styleValues = validateAndGetStyleValues(product, requestDTO.getStyleValueIds());
 
-        ProductVariant updated = productVariantRepository.save(variant);
-        log.info("Cập nhật biến thể thành công: id={}, sku={}", updated.getId(), updated.getSku());
-        return productVariantMapper.toResponseDTO(updated);
-    }
+		variant.setPrice(requestDTO.getPrice());
+		variant.setPromotionalPrice(requestDTO.getPromotionalPrice());
+		if (requestDTO.getQuantity() != null) {
+			variant.setQuantity(requestDTO.getQuantity());
+		}
+		if (requestDTO.getIsActive() != null) {
+			variant.setActive(requestDTO.getIsActive());
+		}
+		if (requestDTO.getIsSelling() != null) {
+			variant.setSelling(requestDTO.getIsSelling());
+		}
+		variant.setStyleValues(styleValues);
 
-    @Override
-    @Transactional
-    public void deleteVariant(UUID productId, UUID variantId) {
-        ProductVariant variant = productVariantRepository.findById(variantId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy biến thể với ID: " + variantId));
+		ProductVariant updated = productVariantRepository.save(variant);
+		log.info("Cập nhật biến thể thành công: id={}, sku={}", updated.getId(), updated.getSku());
+		return productVariantMapper.toResponseDTO(updated);
+	}
 
-        if (!variant.getProduct().getId().equals(productId)) {
-            throw new BusinessException("Biến thể không thuộc về sản phẩm này!");
-        }
+	@Override
+	@Transactional
+	public void deleteVariant(UUID productId, UUID variantId) {
+		ProductVariant variant = productVariantRepository.findById(variantId)
+				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy biến thể với ID: " + variantId));
 
-        variant.setActive(false);
-        productVariantRepository.save(variant);
-        log.info("Vô hiệu hóa biến thể id={}", variantId);
-    }
+		if (!variant.getProduct().getId().equals(productId)) {
+			throw new BusinessException("Biến thể không thuộc về sản phẩm này!");
+		}
 
-    @Override
-    @Transactional
-    public void restoreVariant(UUID productId, UUID variantId) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm với ID: " + productId));
+		variant.setActive(false);
+		productVariantRepository.save(variant);
+		log.info("Vô hiệu hóa biến thể id={}", variantId);
+	}
 
-        if (!product.isActive()) {
-            throw new BusinessException("Không thể khôi phục biến thể khi sản phẩm cha đang ngừng hoạt động!");
-        }
+	@Override
+	@Transactional
+	public void restoreVariant(UUID productId, UUID variantId) {
+		Product product = productRepository.findById(productId)
+				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm với ID: " + productId));
 
-        ProductVariant variant = productVariantRepository.findById(variantId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy biến thể với ID: " + variantId));
+		if (!product.isActive()) {
+			throw new BusinessException("Không thể khôi phục biến thể khi sản phẩm cha đang ngừng hoạt động!");
+		}
 
-        if (!variant.getProduct().getId().equals(productId)) {
-            throw new BusinessException("Biến thể không thuộc về sản phẩm này!");
-        }
+		ProductVariant variant = productVariantRepository.findById(variantId)
+				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy biến thể với ID: " + variantId));
 
-        variant.setActive(true);
-        productVariantRepository.save(variant);
-        log.info("Khôi phục biến thể id={}", variantId);
-    }
+		if (!variant.getProduct().getId().equals(productId)) {
+			throw new BusinessException("Biến thể không thuộc về sản phẩm này!");
+		}
 
-    private void validatePrices(ProductVariantRequestDTO dto) {
-        if (dto.getPromotionalPrice() != null) {
-            if (dto.getPrice() == null || dto.getPromotionalPrice().compareTo(dto.getPrice()) >= 0) {
-                throw new BusinessException("Giá khuyến mãi phải nhỏ hơn giá gốc của sản phẩm!");
-            }
-        }
-    }
+		variant.setActive(true);
+		productVariantRepository.save(variant);
+		log.info("Khôi phục biến thể id={}", variantId);
+	}
 
-    private Set<StyleValue> validateAndGetStyleValues(
-            Product product,
-            Set<UUID> styleValueIds) {
+	private void validatePrices(ProductVariantRequestDTO dto) {
+		if (dto.getPromotionalPrice() != null) {
+			if (dto.getPrice() == null || dto.getPromotionalPrice().compareTo(dto.getPrice()) >= 0) {
+				throw new BusinessException("Giá khuyến mãi phải nhỏ hơn giá gốc của sản phẩm!");
+			}
+		}
+	}
 
-        if (styleValueIds == null || styleValueIds.isEmpty()) {
-            return new HashSet<>();
-        }
+	private Set<StyleValue> validateAndGetStyleValues(Product product, Set<UUID> styleValueIds) {
 
-        List<StyleValue> styleValues = styleValueRepository.findAllById(styleValueIds);
+		if (styleValueIds == null || styleValueIds.isEmpty()) {
+			return new HashSet<>();
+		}
 
-        if (styleValues.size() != styleValueIds.size()) {
-            throw new ResourceNotFoundException(
-                    "Một số thuộc tính lựa chọn không tồn tại!");
-        }
+		List<StyleValue> styleValues = styleValueRepository.findAllById(styleValueIds);
 
-        UUID productCategoryId = product.getCategory().getId();
+		if (styleValues.size() != styleValueIds.size()) {
+			throw new ResourceNotFoundException("Một số thuộc tính lựa chọn không tồn tại!");
+		}
 
-        Set<UUID> seenStyles = new HashSet<>();
+		UUID productCategoryId = product.getCategory().getId();
 
-        for (StyleValue sv : styleValues) {
+		Set<UUID> seenStyles = new HashSet<>();
 
-            if (Boolean.TRUE.equals(sv.getIsDeleted())) {
-                throw new BusinessException(
-                        "Giá trị thuộc tính '" + sv.getName() + "' đã bị xóa!");
-            }
+		for (StyleValue sv : styleValues) {
 
-            boolean belongsToCategory = sv.getStyle()
-                    .getCategories()
-                    .stream()
-                    .anyMatch(category ->
-                            category.getId().equals(productCategoryId));
+			if (Boolean.TRUE.equals(sv.getStyle().getIsDeleted())) {
+				throw new BusinessException("Kiểu thuộc tính '" + sv.getStyle().getName() + "' đã bị xóa!");
+			}
 
-            if (!belongsToCategory) {
-                throw new BusinessException(
-                        "Giá trị '" + sv.getName()
-                                + "' không thuộc danh mục '"
-                                + product.getCategory().getName() + "'!");
-            }
+			boolean belongsToCategory = sv.getStyle().getCategories().stream()
+					.anyMatch(category -> category.getId().equals(productCategoryId));
 
-            if (!seenStyles.add(sv.getStyle().getId())) {
-                throw new BusinessException(
-                        "Mỗi biến thể chỉ được chọn tối đa 1 giá trị cho kiểu '"
-                                + sv.getStyle().getName() + "'!");
-            }
-        }
+			if (!belongsToCategory) {
+				throw new BusinessException("Giá trị '" + sv.getName() + "' không thuộc danh mục '"
+						+ product.getCategory().getName() + "'!");
+			}
 
-        return new HashSet<>(styleValues);
-    }
+			if (!seenStyles.add(sv.getStyle().getId())) {
+				throw new BusinessException(
+						"Mỗi biến thể chỉ được chọn tối đa 1 giá trị cho kiểu '" + sv.getStyle().getName() + "'!");
+			}
+		}
 
-    // SKU luôn được tự tạo khi thêm biến thể và giữ nguyên khi cập nhật
-    private String generateUniqueSku(Product product, Set<StyleValue> styleValues) {
-        String baseSku = SkuUtils.generateSkuFromStyleValues(product.getName(), styleValues);
-        String sku = baseSku;
-        while (productVariantRepository.existsBySku(sku)) {
-            sku = SkuUtils.limitLength(baseSku, 93) + "-" + SkuUtils.randomSuffix(6);
-        }
-        return sku;
-    }
+		return new HashSet<>(styleValues);
+	}
+
+	// SKU luôn được tự tạo khi thêm biến thể và giữ nguyên khi cập nhật
+	private String generateUniqueSku(Product product, Set<StyleValue> styleValues) {
+		String baseSku = SkuUtils.generateSkuFromStyleValues(product.getName(), styleValues);
+		String sku = baseSku;
+		while (productVariantRepository.existsBySku(sku)) {
+			sku = SkuUtils.limitLength(baseSku, 93) + "-" + SkuUtils.randomSuffix(6);
+		}
+		return sku;
+	}
 }

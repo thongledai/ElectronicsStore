@@ -102,8 +102,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return `
           <tr>
+			<td>${catBadges}</td>
             <td><strong>${s.name}</strong></td>
-            <td>${catBadges}</td>
             <td>${statusBadge}</td>
             <td class="text-end">
               <button class="action js-manage-values" data-id="${s.id}" data-name="${s.name}" title="Quản lý giá trị"><i class="fa-solid fa-list-ul"></i></button>

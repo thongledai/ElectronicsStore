@@ -16,69 +16,66 @@ import com.example.store.entity.StyleValue;
 @Repository
 public interface StyleValueRepository extends JpaRepository<StyleValue, UUID> {
 
-        Optional<StyleValue> findByName(String name);
+	Optional<StyleValue> findByName(String name);
 
-        Optional<StyleValue> findByNameAndStyleId(String name, UUID styleId);
+	List<StyleValue> findByStyleId(UUID styleId);
 
-        boolean existsByName(String name);
+	Optional<StyleValue> findByNameAndStyleId(String name, UUID styleId);
 
-        boolean existsByNameAndIdNot(String name, UUID id);
+	boolean existsByName(String name);
 
-        boolean existsByNameAndStyleId(String name, UUID styleId);
+	boolean existsByNameAndIdNot(String name, UUID id);
 
-        boolean existsByNameAndStyleIdAndIdNot(String name, UUID styleId, UUID id);
+	boolean existsByNameAndStyleId(String name, UUID styleId);
 
-        boolean existsByStyleId(UUID styleId);
+	boolean existsByNameAndStyleIdAndIdNot(String name, UUID styleId, UUID id);
 
-        boolean existsByStyleIdAndIsDeletedFalse(UUID styleId);
+	boolean existsByStyleId(UUID styleId);
 
-        List<StyleValue> findByStyleIdAndIsDeletedFalse(UUID styleId);
+	boolean existsByStyleIdAndIsDeletedFalse(UUID styleId);
 
-        List<StyleValue> findByIsDeletedFalse();
+	List<StyleValue> findByStyleIdAndIsDeletedFalse(UUID styleId);
 
-        @Query("""
-                        SELECT sv
-                        FROM StyleValue sv
-                        JOIN FETCH sv.style
-                        WHERE
-                            (:q IS NULL OR :q = '' OR
-                                LOWER(sv.name) LIKE LOWER(CONCAT('%', :q, '%'))
-                            )
-                            AND (:styleId IS NULL OR sv.style.id = :styleId)
-                            AND (:isDeleted IS NULL OR sv.isDeleted = :isDeleted)
-                        """)
-        Page<StyleValue> search(
-                        @Param("q") String q,
-                        @Param("styleId") UUID styleId,
-                        @Param("isDeleted") Boolean isDeleted,
-                        Pageable pageable);
+	List<StyleValue> findByIsDeletedFalse();
 
-        @Query("""
-                        SELECT sv
-                        FROM StyleValue sv
-                        WHERE sv.style.id = :styleId
-                            AND sv.isDeleted = false
-                        """)
-        Page<StyleValue> findActiveByStyleId(
-                        @Param("styleId") UUID styleId,
-                        Pageable pageable);
+	@Query("""
+			SELECT sv
+			FROM StyleValue sv
+			JOIN FETCH sv.style
+			WHERE
+			    (:q IS NULL OR :q = '' OR
+			        LOWER(sv.name) LIKE LOWER(CONCAT('%', :q, '%'))
+			    )
+			    AND (:styleId IS NULL OR sv.style.id = :styleId)
+			    AND (:isDeleted IS NULL OR sv.isDeleted = :isDeleted)
+			""")
+	Page<StyleValue> search(@Param("q") String q, @Param("styleId") UUID styleId, @Param("isDeleted") Boolean isDeleted,
+			Pageable pageable);
 
-        @Query("""
-                        SELECT sv
-                        FROM StyleValue sv
-                        WHERE sv.isDeleted = false
-                        """)
-        Page<StyleValue> findAllActive(Pageable pageable);
+	@Query("""
+			SELECT sv
+			FROM StyleValue sv
+			WHERE sv.style.id = :styleId
+			    AND sv.isDeleted = false
+			""")
+	Page<StyleValue> findActiveByStyleId(@Param("styleId") UUID styleId, Pageable pageable);
 
-        @Query("""
-                        SELECT sv
-                        FROM StyleValue sv
-                        JOIN FETCH sv.style s
-                        JOIN s.categories c
-                        WHERE c.id = :categoryId
-                            AND sv.isDeleted = false
-                            AND s.isDeleted = false
-                        ORDER BY s.name ASC, sv.name ASC
-                        """)
-        List<StyleValue> findActiveByCategoryId(@Param("categoryId") UUID categoryId);
+	@Query("""
+			SELECT sv
+			FROM StyleValue sv
+			WHERE sv.isDeleted = false
+			""")
+	Page<StyleValue> findAllActive(Pageable pageable);
+
+	@Query("""
+			SELECT sv
+			FROM StyleValue sv
+			JOIN FETCH sv.style s
+			JOIN s.categories c
+			WHERE c.id = :categoryId
+			    AND sv.isDeleted = false
+			    AND s.isDeleted = false
+			ORDER BY s.name ASC, sv.name ASC
+			""")
+	List<StyleValue> findActiveByCategoryId(@Param("categoryId") UUID categoryId);
 }

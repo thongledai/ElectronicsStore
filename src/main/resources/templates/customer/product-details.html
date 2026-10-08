@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
-	th:replace="~{layouts/customer-layout :: layout(
+th:replace="~{layouts/customer-layout :: layout(
         ${product.name + ' — TechNova Electronics'},
         ${product.description},
-        ~{::main}, ~{}, 'customer/product-detail.js', false)}">
+        ~{::main}, ~{}, '', false)}">
 
 <head>
 <title th:text="${product.name + ' — TechNova Electronics'}">Chi
