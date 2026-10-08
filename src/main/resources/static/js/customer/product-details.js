@@ -1,169 +1,402 @@
-/* ==========================================================================
-   TechNova Electronics — Customer Product Detail Script
+﻿/* ==========================================================================
+   TechNova Electronics — Customer Product Detail
+   ==========================================================================
+   Chức năng chính:
+     1. Thumbnail gallery: click đổi ảnh lớn (event delegation)
+     2. Variant switcher: đổi phiên bản → cập nhật giá, kho, SKU, gallery
+     3. Quantity stepper: nút +/−
+   Không phụ thuộc vào framework ngoài ngoài Bootstrap (đã load ở layout).
    ========================================================================== */
+
 'use strict';
 
-document.addEventListener('DOMContentLoaded', () => {
-  const mainImage = document.getElementById('mainImage');
-  const thumbnailGallery = document.getElementById('thumbnailGallery');
-  const currentPrice = document.getElementById('currentPrice');
-  const currentOldPrice = document.getElementById('currentOldPrice');
-  const currentDiscountBadge = document.getElementById('currentDiscountBadge');
-  const currentStockStatus = document.getElementById('currentStockStatus');
-  const qtyInput = document.getElementById('qtyInput');
-  const btnQtyMinus = document.getElementById('btnQtyMinus');
-  const btnQtyPlus = document.getElementById('btnQtyPlus');
-  const btnAddToCart = document.getElementById('btnAddToCart');
+document.addEventListener('DOMContentLoaded', function () {
 
-  function formatVnd(val) {
-    if (!val) return '0 ₫';
-    return Number(val).toLocaleString('vi-VN') + ' ₫';
-  }
 
-  /* ---------- Quantity Stepper ---------- */
-  if (btnQtyMinus && btnQtyPlus && qtyInput) {
-    btnQtyMinus.addEventListener('click', () => {
-      let val = parseInt(qtyInput.value, 10) || 1;
-      if (val > 1) qtyInput.value = val - 1;
-    });
+    /* =========================================================
+       DOM REFERENCES
+       ========================================================= */
 
-    btnQtyPlus.addEventListener('click', () => {
-      let val = parseInt(qtyInput.value, 10) || 1;
-      let max = parseInt(qtyInput.max, 10) || 10;
-      if (val < max) qtyInput.value = val + 1;
-    });
+    const mainImage             = document.getElementById('mainImage');
+    const thumbnailGallery      = document.getElementById('thumbnailGallery');
 
-    qtyInput.addEventListener('change', () => {
-      let val = parseInt(qtyInput.value, 10) || 1;
-      let max = parseInt(qtyInput.max, 10) || 10;
-      if (val < 1) val = 1;
-      if (val > max) val = max;
-      qtyInput.value = val;
-    });
-  }
+    const currentPrice          = document.getElementById('currentPrice');
+    const currentOldPrice       = document.getElementById('currentOldPrice');
+    const currentDiscountBadge  = document.getElementById('currentDiscountBadge');
+    const currentStockStatus    = document.getElementById('currentStockStatus');
+    const currentSku            = document.getElementById('currentSku');
 
-  /* ---------- Thumbnail Gallery click ---------- */
-  function initThumbnails() {
-    if (!thumbnailGallery) return;
-    thumbnailGallery.querySelectorAll('.thumb-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        thumbnailGallery.querySelectorAll('.thumb-btn').forEach(b => b.classList.remove('border-primary'));
-        btn.classList.add('border-primary');
-        const img = btn.querySelector('img');
-        if (img && mainImage) {
-          mainImage.src = img.src;
+    const qtyInput              = document.getElementById('qtyInput');
+    const btnQtyMinus           = document.getElementById('btnQtyMinus');
+    const btnQtyPlus            = document.getElementById('btnQtyPlus');
+    const btnAddToCart          = document.getElementById('btnAddToCart');
+
+
+    /* =========================================================
+       FORMAT PRICE (VND)
+       ========================================================= */
+
+    function formatVnd(value) {
+        if (value === null || value === undefined || value === '') {
+            return '0 ₫';
         }
-      });
-    });
-  }
-  initThumbnails();
+        return Number(value).toLocaleString('vi-VN') + ' ₫';
+    }
 
-  /* ---------- Fetch Product Details JSON from API for dynamic switching ---------- */
-  const pathParts = window.location.pathname.split('/');
-  const slug = pathParts[pathParts.length - 1];
 
-  if (slug) {
-    fetch(`/api/products/${encodeURIComponent(slug)}`, {
-      headers: { 'Accept': 'application/json' }
-    })
-      .then(res => res.json())
-      .then(res => {
-        if (res.success && res.data && res.data.variants) {
-          setupVariantSwitcher(res.data.variants);
+    /* =========================================================
+       MAIN IMAGE SETTER
+       ========================================================= */
+
+    function setMainImage(imageUrl) {
+        if (!mainImage) return;
+
+        if (!imageUrl || String(imageUrl).trim() === '') {
+            imageUrl = '/images/placeholder.webp';
         }
-      })
-      .catch(err => console.warn('Không thể tải dữ liệu biến thể:', err));
-  }
 
-  function setupVariantSwitcher(variants) {
-    const variantButtons = document.querySelectorAll('.js-variant-choice');
-    variantButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const variantId = btn.getAttribute('data-variant-id');
-        const variant = variants.find(v => v.id === variantId);
-        if (!variant) return;
+        mainImage.onerror = function () {
+            this.onerror = null;
+            this.src = '/images/placeholder.webp';
+        };
 
-        variantButtons.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+        mainImage.src = imageUrl;
+    }
 
-        // 1. Update Price
-        const effPrice = (variant.promotionalPrice && variant.promotionalPrice > 0)
-          ? variant.promotionalPrice
-          : variant.price;
 
-        if (currentPrice) currentPrice.textContent = formatVnd(effPrice);
+    /* =========================================================
+       THUMBNAIL GALLERY — event delegation
+       Hoạt động cả với thumbnail được render bởi Thymeleaf lẫn
+       thumbnail được tạo động bởi renderGallery().
+       ========================================================= */
 
-        if (variant.promotionalPrice && variant.promotionalPrice < variant.price) {
-          if (currentOldPrice) {
-            currentOldPrice.textContent = formatVnd(variant.price);
-            currentOldPrice.hidden = false;
-          }
-          if (currentDiscountBadge) {
-            const pct = Math.round(((variant.price - variant.promotionalPrice) * 100) / variant.price);
-            currentDiscountBadge.textContent = `-${pct}%`;
-            currentDiscountBadge.hidden = false;
-          }
+    if (thumbnailGallery) {
+        thumbnailGallery.addEventListener('click', function (event) {
+
+            const thumbnail = event.target.closest('.gallery-thumb');
+
+            if (!thumbnail) return;
+
+            event.preventDefault();
+
+            /* Xóa active cũ */
+            thumbnailGallery
+                .querySelectorAll('.gallery-thumb')
+                .forEach(function (item) {
+                    item.classList.remove('active');
+                });
+
+            /* Đánh dấu active mới và đổi ảnh lớn */
+            thumbnail.classList.add('active');
+            setMainImage(thumbnail.getAttribute('data-src'));
+        });
+    }
+
+
+    /* =========================================================
+       RENDER GALLERY (dùng khi đổi variant)
+       ========================================================= */
+
+    function renderGallery(imageUrls) {
+
+        var images = [];
+
+        if (Array.isArray(imageUrls)) {
+            images = imageUrls.filter(function (url) {
+                return url && String(url).trim() !== '';
+            });
+        }
+
+        if (images.length === 0) {
+            images = ['/images/placeholder.webp'];
+        }
+
+        /* Ảnh lớn → ảnh đầu tiên */
+        setMainImage(images[0]);
+
+        if (!thumbnailGallery) return;
+
+        /* Xoá thumbnail cũ */
+        thumbnailGallery.innerHTML = '';
+
+        /* Tạo thumbnail mới */
+        images.forEach(function (imageUrl, index) {
+
+            var button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'gallery-thumb';
+            if (index === 0) button.classList.add('active');
+            button.setAttribute('data-src', imageUrl);
+            button.setAttribute('aria-label', 'Xem ảnh ' + (index + 1));
+
+            var img = document.createElement('img');
+            img.src      = imageUrl;
+            img.alt      = 'Ảnh sản phẩm ' + (index + 1);
+            img.width    = 78;
+            img.height   = 78;
+            img.style.cssText = 'width:100%;height:100%;object-fit:contain;';
+            img.onerror = function () {
+                this.onerror = null;
+                this.src = '/images/placeholder.webp';
+            };
+
+            button.appendChild(img);
+            thumbnailGallery.appendChild(button);
+        });
+    }
+
+
+    /* =========================================================
+       INITIAL MAIN IMAGE — fallback nếu src rỗng
+       ========================================================= */
+
+    if (mainImage) {
+        mainImage.onerror = function () {
+            this.onerror = null;
+            this.src = '/images/placeholder.webp';
+        };
+
+        if (!mainImage.getAttribute('src')) {
+            mainImage.src = '/images/placeholder.webp';
+        }
+    }
+
+
+    /* =========================================================
+       QUANTITY STEPPER
+       ========================================================= */
+
+    if (btnQtyMinus && qtyInput) {
+        btnQtyMinus.addEventListener('click', function () {
+            var value = parseInt(qtyInput.value, 10) || 1;
+            if (value > 1) value--;
+            qtyInput.value = value;
+        });
+    }
+
+    if (btnQtyPlus && qtyInput) {
+        btnQtyPlus.addEventListener('click', function () {
+            var value = parseInt(qtyInput.value, 10) || 1;
+            var max   = parseInt(qtyInput.max,   10) || 10;
+            if (value < max) value++;
+            qtyInput.value = value;
+        });
+    }
+
+    if (qtyInput) {
+        qtyInput.addEventListener('change', function () {
+            var value = parseInt(qtyInput.value, 10) || 1;
+            var max   = parseInt(qtyInput.max,   10) || 10;
+            if (value < 1)   value = 1;
+            if (value > max) value = max;
+            qtyInput.value = value;
+        });
+    }
+
+
+    /* =========================================================
+       APPLY VARIANT DATA TO PAGE
+       Hàm này cập nhật giá, kho, SKU và gallery khi đổi variant.
+       ========================================================= */
+
+    function applyVariant(variant) {
+
+        /* ---- Giá ---- */
+        var effectivePrice =
+            variant.promotionalPrice &&
+            Number(variant.promotionalPrice) > 0
+                ? variant.promotionalPrice
+                : variant.price;
+
+        if (currentPrice) {
+            currentPrice.textContent = formatVnd(effectivePrice);
+        }
+
+        /* ---- Giá cũ + badge giảm giá ---- */
+        if (
+            variant.promotionalPrice &&
+            Number(variant.promotionalPrice) < Number(variant.price)
+        ) {
+            if (currentOldPrice) {
+                currentOldPrice.textContent = formatVnd(variant.price);
+                currentOldPrice.hidden = false;
+            }
+
+            if (currentDiscountBadge) {
+                var discount = Math.round(
+                    (
+                        (Number(variant.price) - Number(variant.promotionalPrice)) * 100
+                    ) / Number(variant.price)
+                );
+                currentDiscountBadge.textContent = '-' + discount + '%';
+                currentDiscountBadge.hidden = false;
+            }
+
         } else {
-          if (currentOldPrice) currentOldPrice.hidden = true;
-          if (currentDiscountBadge) currentDiscountBadge.hidden = true;
+            if (currentOldPrice)       currentOldPrice.hidden = true;
+            if (currentDiscountBadge)  currentDiscountBadge.hidden = true;
         }
 
-        // 2. Update Stock Status
+        /* ---- Tình trạng kho ---- */
         if (currentStockStatus) {
-          if (variant.quantity > 0) {
-            currentStockStatus.innerHTML = `<strong class="text-success">Còn hàng (${variant.quantity} sản phẩm)</strong>`;
-            if (btnAddToCart) btnAddToCart.disabled = false;
-            if (qtyInput) qtyInput.max = Math.min(variant.quantity, 10);
-          } else {
-            currentStockStatus.innerHTML = `<strong class="text-danger">Tạm hết hàng</strong>`;
-            if (btnAddToCart) btnAddToCart.disabled = true;
-          }
+            if (Number(variant.quantity) > 0) {
+                currentStockStatus.innerHTML =
+                    '<strong class="text-success">' +
+                    'Còn hàng (' + variant.quantity + ' sản phẩm)' +
+                    '</strong>';
+
+                if (btnAddToCart) btnAddToCart.disabled = false;
+
+                if (qtyInput) {
+                    qtyInput.max = Math.min(Number(variant.quantity), 10);
+                }
+
+            } else {
+                currentStockStatus.innerHTML =
+                    '<strong class="text-danger">Tạm hết hàng</strong>';
+
+                if (btnAddToCart) btnAddToCart.disabled = true;
+            }
         }
 
-        // 3. Update Images
-        if (variant.imageUrls && variant.imageUrls.length > 0) {
-          if (mainImage) mainImage.src = variant.imageUrls[0];
-          if (thumbnailGallery) {
-            thumbnailGallery.innerHTML = variant.imageUrls.map((url, i) => `
-              <button type="button" class="thumb-btn p-1 border rounded ${i === 0 ? 'border-primary' : ''}"
-                      style="width:70px; height:70px; background:white; overflow:hidden;">
-                <img src="${url}" alt="Variant Image" style="width:100%; height:100%; object-fit:contain;">
-              </button>
-            `).join('');
-            initThumbnails();
-          }
+        /* ---- SKU ---- */
+        if (currentSku) {
+            currentSku.textContent = variant.sku || 'N/A';
         }
-      });
-    });
-  }
 
-  /* ---------- Intercept Cart & Wishlist actions in capture phase ---------- */
-  document.body.addEventListener('click', e => {
-    const addCartBtn = e.target.closest('.js-add-cart');
-    if (addCartBtn) {
-      e.stopPropagation();
-      e.preventDefault();
-      if (window.showToast) {
-        window.showToast('Thông báo', 'Chức năng giỏ hàng đang được cập nhật!', 'info');
-      } else if (window.toast) {
-        window.toast('Chức năng giỏ hàng đang được cập nhật!');
-      } else {
-        alert('Chức năng giỏ hàng đang được cập nhật!');
-      }
-      return;
+        /* ---- Gallery ---- */
+        renderGallery(variant.imageUrls);
     }
 
-    const wishBtn = e.target.closest('.js-wishlist');
-    if (wishBtn) {
-      e.stopPropagation();
-      e.preventDefault();
-      if (window.showToast) {
-        window.showToast('Thông báo', 'Chức năng danh sách yêu thích đang được cập nhật!', 'info');
-      } else if (window.toast) {
-        window.toast('Chức năng danh sách yêu thích đang được cập nhật!');
-      } else {
-        alert('Chức năng danh sách yêu thích đang được cập nhật!');
-      }
+
+    /* =========================================================
+       VARIANT SWITCHER
+       setupVariantSwitcher() gắn click handler cho các nút variant.
+       Nhận mảng variants (từ API) để tìm thông tin chi tiết khi click.
+       ========================================================= */
+
+    function setupVariantSwitcher(variants) {
+
+        var variantButtons = document.querySelectorAll('.js-variant-choice');
+
+        variantButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+
+                var variantId = button.getAttribute('data-variant-id');
+
+                var variant = variants.find(function (item) {
+                    return String(item.id) === String(variantId);
+                });
+
+                if (!variant) return;
+
+                /* Cập nhật trạng thái active */
+                variantButtons.forEach(function (item) {
+                    item.classList.remove('active');
+                });
+                button.classList.add('active');
+
+                /* Cập nhật trang */
+                applyVariant(variant);
+            });
+        });
     }
-  }, true);
-});
+
+
+    /* =========================================================
+       LOAD VARIANTS FROM API
+       Dùng slug trong URL để gọi /api/products/{slug}.
+       Nếu API thành công → setupVariantSwitcher với dữ liệu đầy đủ.
+       Nếu API lỗi → variant buttons vẫn hiển thị đúng (do Thymeleaf
+       đã render sẵn), chỉ thiếu khả năng đổi gallery khi click.
+       ========================================================= */
+
+    var pathParts = window.location.pathname
+        .split('/')
+        .filter(function (item) { return item !== ''; });
+
+    var slug = pathParts.length > 0
+        ? pathParts[pathParts.length - 1]
+        : null;
+
+
+    if (slug) {
+        fetch('/api/products/' + encodeURIComponent(slug), {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' }
+        })
+        .then(function (response) {
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+            return response.json();
+        })
+        .then(function (response) {
+            if (
+                response &&
+                response.success &&
+                response.data &&
+                Array.isArray(response.data.variants)
+            ) {
+                setupVariantSwitcher(response.data.variants);
+            }
+        })
+        .catch(function (error) {
+            console.warn('Không thể tải dữ liệu biến thể:', error);
+
+            /*
+             * Fallback: gắn click handler mà không có gallery update.
+             * Ít nhất nút variant vẫn toggle active state.
+             */
+            var variantButtons = document.querySelectorAll('.js-variant-choice');
+            variantButtons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    variantButtons.forEach(function (item) {
+                        item.classList.remove('active');
+                    });
+                    button.classList.add('active');
+                });
+            });
+        });
+    }
+
+
+    /* =========================================================
+       CART / WISHLIST — stub handlers
+       ========================================================= */
+
+    document.body.addEventListener('click', function (event) {
+
+        var addCartBtn = event.target.closest('.js-add-cart');
+
+        if (addCartBtn) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (window.showToast) {
+                window.showToast('Thông báo', 'Chức năng giỏ hàng đang được cập nhật!', 'info');
+            } else if (window.toast) {
+                window.toast('Chức năng giỏ hàng đang được cập nhật!');
+            } else {
+                alert('Chức năng giỏ hàng đang được cập nhật!');
+            }
+            return;
+        }
+
+        var wishBtn = event.target.closest('.js-wishlist');
+
+        if (wishBtn) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (window.showToast) {
+                window.showToast('Thông báo', 'Chức năng danh sách yêu thích đang được cập nhật!', 'info');
+            } else if (window.toast) {
+                window.toast('Chức năng danh sách yêu thích đang được cập nhật!');
+            } else {
+                alert('Chức năng danh sách yêu thích đang được cập nhật!');
+            }
+        }
+
+    }, true);
+
+
+}); /* end DOMContentLoaded */

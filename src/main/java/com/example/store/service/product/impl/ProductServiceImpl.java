@@ -15,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.JpaSort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -132,26 +133,7 @@ public class ProductServiceImpl implements IProductService {
 						variantsByProduct.getOrDefault(product.getId(), Collections.emptyList())))
 				.collect(Collectors.toList());
 
-		// In-memory sort fallback for complex sorts if necessary (e.g. popular,
-		// discount)
-		if ("popular".equalsIgnoreCase(filterDTO.getSort())) {
-			dtoList.sort(Comparator.comparing(ProductResponseDTO::getTotalSold,
-					Comparator.nullsLast(Comparator.reverseOrder())));
-		} else if ("discount".equalsIgnoreCase(filterDTO.getSort())) {
-			dtoList.sort(Comparator.comparing(p -> (p.getMinPrice() != null && p.getMinPromotionalPrice() != null)
-					? p.getMinPrice().subtract(p.getMinPromotionalPrice())
-					: BigDecimal.ZERO, Comparator.reverseOrder()));
-		}
-
-		// Sắp xếp theo giá trong phạm vi trang hiện tại
-		if ("price-asc".equalsIgnoreCase(filterDTO.getSort())) {
-			dtoList.sort(Comparator.comparing(ProductResponseDTO::getEffectivePrice,
-					Comparator.nullsLast(Comparator.naturalOrder())));
-		} else if ("price-desc".equalsIgnoreCase(filterDTO.getSort())) {
-			dtoList.sort(Comparator.comparing(ProductResponseDTO::getEffectivePrice,
-					Comparator.nullsLast(Comparator.reverseOrder())));
-		}
-
+		// Sorting is performed by the database before pagination.
 		return PageResponse.of(productPage, dtoList);
 	}
 
@@ -461,13 +443,33 @@ public class ProductServiceImpl implements IProductService {
 		if (sortParam == null || sortParam.trim().isEmpty()) {
 			return Sort.by(Sort.Direction.DESC, "createdAt");
 		}
+
+		String effectivePriceExpression = """
+				(select min(case
+					when v.promotionalPrice is not null and v.promotionalPrice > 0
+					then v.promotionalPrice
+					else v.price
+				end)
+				from ProductVariant v
+				where v.product = p
+					and v.isActive = true
+					and v.isSelling = true)
+				""";
+
 		return switch (sortParam.toLowerCase()) {
-		case "price-asc" -> Sort.by(Sort.Direction.ASC, "name"); // fallback JPA sort
-		case "price-desc" -> Sort.by(Sort.Direction.DESC, "name");
+		case "price-asc" ->
+			JpaSort.unsafe(Sort.Direction.ASC, effectivePriceExpression).and(Sort.by(Sort.Direction.ASC, "name"));
+		case "price-desc" ->
+			JpaSort.unsafe(Sort.Direction.DESC, effectivePriceExpression).and(Sort.by(Sort.Direction.ASC, "name"));
+		case "popular" -> JpaSort.unsafe(Sort.Direction.DESC,
+				"(select coalesce(sum(v.sold), 0) from ProductVariant v where v.product = p and v.isActive = true and v.isSelling = true)")
+				.and(Sort.by(Sort.Direction.DESC, "createdAt"));
+		case "discount" -> JpaSort.unsafe(Sort.Direction.DESC,
+				"(select max(case when v.promotionalPrice is not null and v.promotionalPrice < v.price then v.price - v.promotionalPrice else 0 end) from ProductVariant v where v.product = p and v.isActive = true and v.isSelling = true)")
+				.and(Sort.by(Sort.Direction.DESC, "createdAt"));
 		case "rating" -> Sort.by(Sort.Direction.DESC, "rating").and(Sort.by(Sort.Direction.DESC, "createdAt"));
 		case "name-asc" -> Sort.by(Sort.Direction.ASC, "name");
 		case "name-desc" -> Sort.by(Sort.Direction.DESC, "name");
-		case "popular", "discount" -> Sort.by(Sort.Direction.DESC, "createdAt");
 		default -> Sort.by(Sort.Direction.DESC, "createdAt");
 		};
 	}
