@@ -1,165 +1,152 @@
 /* ==========================================================================
-   TechNova Electronics — Customer Product List Script
+   TechNova Electronics — Customer Product List Script (AJAX version)
    ========================================================================== */
 'use strict';
 
-document.addEventListener('DOMContentLoaded', () => {
-  const filterForm = document.getElementById('filterForm');
-  const sortSelect = document.getElementById('sortSelect');
-  const formSort = document.getElementById('formSort');
-  const formPage = document.getElementById('formPage');
-  const priceRange = document.getElementById('priceRange');
-  const priceValue = document.getElementById('priceValue');
-  const gridViewBtn = document.getElementById('gridViewBtn');
-  const listViewBtn = document.getElementById('listViewBtn');
-  const productGrid = document.getElementById('productGrid');
+let allCategories = [];
+let currentCategory = null;
 
-  /* ---------- Format VNĐ ---------- */
-  function formatVnd(val) {
-    return Number(val).toLocaleString('vi-VN') + ' ₫';
+async function fetchCategories() {
+  try {
+    const res = await fetch('/api/categories', { headers: { 'Accept': 'application/json' } }).then(r => r.json());
+    if (res && res.success && res.data) {
+      allCategories = res.data;
+    }
+  } catch (e) {
+    console.warn('Error fetching categories:', e);
+  }
+}
+
+async function fetchProducts(categorySlug) {
+  try {
+    let url = '/api/products?size=100'; // Default to a larger size to show all without pagination for now
+    if (categorySlug) {
+      url += `&category=${encodeURIComponent(categorySlug)}`;
+    }
+    const res = await fetch(url, { headers: { 'Accept': 'application/json' } }).then(r => r.json());
+    if (res && res.success && res.data && Array.isArray(res.data.content)) {
+      return res.data;
+    }
+    return { content: [], totalElements: 0 };
+  } catch (e) {
+    console.warn('Error fetching products:', e);
+    return { content: [], totalElements: 0 };
+  }
+}
+
+function renderCategoryList() {
+  const container = document.getElementById('categoryList');
+  if (!container) return;
+
+  if (allCategories.length === 0) {
+    container.innerHTML = '<div class="text-muted small">Không có danh mục nào.</div>';
+    return;
   }
 
-  /* ---------- Debounce helper ---------- */
-  function debounce(fn, delay = 400) {
-    let timer = null;
-    return function (...args) {
-      clearTimeout(timer);
-      timer = setTimeout(() => fn.apply(this, args), delay);
-    };
-  }
+  let html = '';
+  allCategories.forEach(cat => {
+    const isActive = currentCategory === cat.slug ? 'fw-bold text-primary' : 'text-body';
+    html += `
+      <div class="form-check cursor-pointer">
+        <input class="form-check-input js-cat-radio" type="radio" name="categoryFilter" 
+               id="cat_${cat.slug}" value="${cat.slug}" ${currentCategory === cat.slug ? 'checked' : ''}>
+        <label class="form-check-label ${isActive} w-100" for="cat_${cat.slug}" style="cursor:pointer">
+          ${typeof escapeHtml === 'function' ? escapeHtml(cat.name) : cat.name}
+        </label>
+      </div>`;
+  });
+  
+  container.innerHTML = html;
 
-  /* ---------- Price slider dynamic label & submit ---------- */
-  if (priceRange && priceValue) {
-    priceRange.addEventListener('input', () => {
-      priceValue.textContent = formatVnd(priceRange.value);
-    });
-
-    priceRange.addEventListener('change', () => {
-      if (formPage) formPage.value = '1';
-      if (filterForm) filterForm.submit();
-    });
-  }
-
-  /* ---------- Price Presets ---------- */
-  document.querySelectorAll('.price-preset').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const max = btn.getAttribute('data-max');
-      if (priceRange && max) {
-        priceRange.value = max;
-        if (priceValue) priceValue.textContent = formatVnd(max);
-        if (formPage) formPage.value = '1';
-        if (filterForm) filterForm.submit();
+  // Event listeners for radio buttons
+  container.querySelectorAll('.js-cat-radio').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      if (e.target.checked) {
+        currentCategory = e.target.value;
+        renderCategoryList(); // Re-render to update bold text
+        loadAndRenderProducts();
       }
     });
   });
+}
 
-  /* ---------- Checkbox / Radio Filter Changes ---------- */
-  document.querySelectorAll('.js-filter-input').forEach(input => {
-    input.addEventListener('change', () => {
-      if (formPage) formPage.value = '1';
-      if (filterForm) filterForm.submit();
-    });
-  });
+async function loadAndRenderProducts() {
+  const grid = document.getElementById('productGrid');
+  const countLabel = document.getElementById('resultCount');
+  
+  if (grid) {
+    grid.innerHTML = '<div class="col-12 text-center py-5"><i class="fas fa-spinner fa-spin fa-2x text-muted"></i></div>';
+  }
 
-  /* ---------- Search Input in Filter Panel ---------- */
-  const filterSearch = document.getElementById('filterSearch');
-  if (filterSearch) {
-    filterSearch.addEventListener('keydown', e => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        if (formPage) formPage.value = '1';
-        if (filterForm) filterForm.submit();
+  const data = await fetchProducts(currentCategory);
+  const products = data.content;
+
+  if (countLabel) {
+    countLabel.innerHTML = `Tìm thấy <strong>${data.totalElements || products.length}</strong> sản phẩm`;
+  }
+
+  if (grid) {
+    if (products.length === 0) {
+      grid.innerHTML = `
+        <div class="col-12 text-center py-5">
+          <div class="p-5">
+            <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+            <h3 class="h5">Không tìm thấy sản phẩm phù hợp</h3>
+          </div>
+        </div>`;
+    } else {
+      // Use renderProductGrid from main.js if available
+      if (typeof renderProductGrid === 'function') {
+        renderProductGrid(products, grid);
+      } else {
+        grid.innerHTML = '<div class="col-12 text-danger">Lỗi: Hàm hiển thị sản phẩm chưa được tải.</div>';
       }
-    });
+    }
   }
+}
 
-  /* ---------- Sorting Selection ---------- */
-  if (sortSelect && formSort && filterForm) {
-    sortSelect.addEventListener('change', () => {
-      formSort.value = sortSelect.value;
-      if (formPage) formPage.value = '1';
-      filterForm.submit();
-    });
-  }
+document.addEventListener('DOMContentLoaded', async () => {
+  // Read category from URL if present
+  const params = new URLSearchParams(window.location.search);
+  currentCategory = params.get('category');
 
-  /* ---------- Pagination Links ---------- */
-  document.querySelectorAll('.js-page-link').forEach(link => {
-    link.addEventListener('click', e => {
+  // Load categories and products concurrently
+  await fetchCategories();
+  renderCategoryList();
+  await loadAndRenderProducts();
+
+  // Clear button
+  const clearBtn = document.querySelector('.js-clear-category');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      const targetPage = link.getAttribute('data-page');
-      if (targetPage && formPage && filterForm) {
-        formPage.value = targetPage;
-        filterForm.submit();
-      }
-    });
-  });
-
-  /* ---------- Remove Single Filter Chip ---------- */
-  document.querySelectorAll('.js-remove-filter').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const field = btn.getAttribute('data-field');
-      const val = btn.getAttribute('data-val');
-
-      if (!filterForm) return;
-
-      if (field === 'q') {
-        const qInput = filterForm.querySelector('input[name="q"]');
-        if (qInput) qInput.value = '';
-      } else if (field === 'category' || field === 'brand') {
-        const targetInput = filterForm.querySelector(`input[name="${field}"][value="${val}"]`);
-        if (targetInput) targetInput.checked = false;
-      } else if (field === 'inStock' || field === 'onSale') {
-        const targetInput = filterForm.querySelector(`input[name="${field}"]`);
-        if (targetInput) targetInput.checked = false;
-      }
-
-      if (formPage) formPage.value = '1';
-      filterForm.submit();
-    });
-  });
-
-  /* ---------- Grid / List View Toggle ---------- */
-  if (gridViewBtn && listViewBtn && productGrid) {
-    gridViewBtn.addEventListener('click', () => {
-      gridViewBtn.classList.add('active');
-      listViewBtn.classList.remove('active');
-      productGrid.classList.remove('view-list');
-    });
-
-    listViewBtn.addEventListener('click', () => {
-      listViewBtn.classList.add('active');
-      gridViewBtn.classList.remove('active');
-      productGrid.classList.add('view-list');
+      currentCategory = null;
+      
+      // Update URL without reloading
+      const url = new URL(window.location);
+      url.searchParams.delete('category');
+      window.history.pushState({}, '', url);
+      
+      renderCategoryList();
+      loadAndRenderProducts();
     });
   }
 
-  /* ---------- Capture Phase Interception for Cart & Wishlist ---------- */
+  // Intercept cart/wishlist clicks
   document.body.addEventListener('click', e => {
     const addCartBtn = e.target.closest('.js-add-cart');
     if (addCartBtn) {
-      e.stopPropagation();
-      e.preventDefault();
-      if (window.showToast) {
-        window.showToast('Thông báo', 'Chức năng giỏ hàng đang được cập nhật!', 'info');
-      } else if (window.toast) {
-        window.toast('Chức năng giỏ hàng đang được cập nhật!');
-      } else {
-        alert('Chức năng giỏ hàng đang được cập nhật!');
-      }
+      e.stopPropagation(); e.preventDefault();
+      const msg = 'Chức năng giỏ hàng đang được cập nhật!';
+      if (window.showToast) window.showToast('Thông báo', msg, 'info'); else alert(msg);
       return;
     }
 
     const wishBtn = e.target.closest('.js-wishlist');
     if (wishBtn) {
-      e.stopPropagation();
-      e.preventDefault();
-      if (window.showToast) {
-        window.showToast('Thông báo', 'Chức năng danh sách yêu thích đang được cập nhật!', 'info');
-      } else if (window.toast) {
-        window.toast('Chức năng danh sách yêu thích đang được cập nhật!');
-      } else {
-        alert('Chức năng danh sách yêu thích đang được cập nhật!');
-      }
+      e.stopPropagation(); e.preventDefault();
+      const msg = 'Chức năng danh sách yêu thích đang được cập nhật!';
+      if (window.showToast) window.showToast('Thông báo', msg, 'info'); else alert(msg);
     }
-  }, true); // Use capture phase
+  }, true);
 });
