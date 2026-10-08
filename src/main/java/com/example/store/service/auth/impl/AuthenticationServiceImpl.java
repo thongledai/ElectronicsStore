@@ -23,6 +23,8 @@ import com.example.store.service.auth.IJwtService;
 import com.example.store.service.auth.IOtpService;
 import com.example.store.service.common.IEmailService;
 
+import java.util.Optional;
+import com.example.store.exception.AccountNotActivatedException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -49,8 +51,16 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         }
 
         String normalizedEmail = registerDTO.getEmail().toLowerCase().trim();
-        if (userRepository.existsByEmail(normalizedEmail)) {
-            throw new RuntimeException("This email is already in use!");
+        Optional<User> existingUserOpt = userRepository.findByEmail(normalizedEmail);
+        if (existingUserOpt.isPresent()) {
+            User existingUser = existingUserOpt.get();
+            if (Boolean.TRUE.equals(existingUser.getIsEmailActive())) {
+                throw new RuntimeException("This email is already in use! Please sign in.");
+            } else {
+                // DO NOT overwrite existing user data or credentials!
+                // Signal client to show confirmation modal to verify account
+                throw new AccountNotActivatedException(normalizedEmail);
+            }
         }
 
         String phone = registerDTO.getResolvedPhone();
@@ -89,10 +99,8 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         }
 
         if (Boolean.FALSE.equals(user.getIsEmailActive())) {
-            // Re-send OTP if needed
-            String otp = otpService.generateAndSaveOtp(user.getEmail(), OtpType.REGISTER);
-            emailService.sendOtpEmail(user.getEmail(), otp, "Activate your TechNova Account", "account activation");
-            throw new RuntimeException("Account is not activated! A new OTP code has been sent to your email.");
+            // Do NOT auto-send OTP yet; user must confirm via popup modal
+            throw new AccountNotActivatedException(user.getEmail());
         }
 
         long expiration = loginDTO.isRememberMe() ? (7L * 24 * 60 * 60 * 1000) : jwtService.getExpirationTime();

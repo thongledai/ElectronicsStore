@@ -298,6 +298,60 @@ function scorePassword(password) {
   return { score, ...levels[score] };
 }
 
+let pendingActivationEmail = '';
+
+function openActivationModal(email) {
+  pendingActivationEmail = email;
+  const emailEl = document.getElementById('activationModalEmail');
+  if (emailEl) emailEl.textContent = email;
+
+  const modalEl = document.getElementById('activationModal');
+  if (modalEl && window.bootstrap?.Modal) {
+    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    modal.show();
+  }
+}
+
+async function handleModalVerifyNow() {
+  if (!pendingActivationEmail) return;
+
+  const btn = document.getElementById('btnModalVerifyNow');
+  const originalHtml = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Sending OTP…';
+  }
+
+  try {
+    const res = await fetch('/auth/resend-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: pendingActivationEmail, type: 'REGISTER' })
+    });
+
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      notify('OTP Sent', 'A verification code has been sent to your email.', 'success');
+      setTimeout(() => {
+        location.href = '/verify-otp?email=' + encodeURIComponent(pendingActivationEmail) + '&type=REGISTER';
+      }, 700);
+    } else {
+      notify('Failed', data.message || 'Cannot send verification code.', 'danger');
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+      }
+    }
+  } catch (err) {
+    notify('Connection Error', 'Cannot connect to server.', 'danger');
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
+    }
+  }
+}
+
 /* ==========================================================================
    2. FORM: SIGN IN (/auth/login)
    ========================================================================== */
@@ -346,12 +400,11 @@ async function handleLogin(e) {
         location.href = data.data?.redirectUrl || '/customer/index';
       }, 900);
     } else {
-      bindServerErrors(form, data.data, data.message || 'Invalid email or password.');
-      if (data.message && data.message.toLowerCase().includes('activate')) {
-        setTimeout(() => {
-          location.href = '/verify-otp?email=' + encodeURIComponent(email) + '&type=REGISTER';
-        }, 1500);
+      if (data.message === 'ACCOUNT_NOT_ACTIVATED' || data.data?.pendingActivation) {
+        openActivationModal(data.data?.email || email);
+        return;
       }
+      bindServerErrors(form, data.data, data.message || 'Invalid email or password.');
     }
   } catch (err) {
     notify('Connection Error', 'Cannot connect to server.', 'danger');
@@ -406,6 +459,10 @@ async function handleRegister(e) {
         location.href = '/verify-otp?email=' + encodeURIComponent(email) + '&type=REGISTER';
       }, 1200);
     } else {
+      if (data.message === 'ACCOUNT_NOT_ACTIVATED' || data.data?.pendingActivation) {
+        openActivationModal(data.data?.email || email);
+        return;
+      }
       bindServerErrors(form, data.data, data.message || 'Registration failed.');
     }
   } catch (err) {
@@ -700,8 +757,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('otpForm')?.addEventListener('submit', handleVerifyOtp);
   document.getElementById('resetPassForm')?.addEventListener('submit', handleResetPassword);
 
-  // --- Resend OTP Button ---
+  // --- Resend OTP Button & Modal Verify Now ---
   document.getElementById('btnResendOtp')?.addEventListener('click', handleResendOtp);
+  document.getElementById('btnModalVerifyNow')?.addEventListener('click', handleModalVerifyNow);
 
   // --- Toggle Show / Hide Password ---
   document.querySelectorAll('.toggle-pass').forEach(btn => {

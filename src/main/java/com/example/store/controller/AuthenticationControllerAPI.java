@@ -1,25 +1,21 @@
 package com.example.store.controller;
 
 import java.security.Principal;
+
+import com.example.store.dto.auth.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.store.dto.auth.AuthResponseDTO;
-import com.example.store.dto.auth.ForgotPasswordDTO;
-import com.example.store.dto.auth.LoginDTO;
-import com.example.store.dto.auth.RegisterDTO;
-import com.example.store.dto.auth.ResetPasswordDTO;
-import com.example.store.dto.auth.VerifyOtpDTO;
 import com.example.store.dto.common.ApiResponse;
 import com.example.store.service.auth.IAuthenticationService;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
@@ -68,7 +64,7 @@ public class AuthenticationControllerAPI {
      * Gửi lại mã OTP (khi hết hạn hoặc người dùng yêu cầu)
      */
     @PostMapping("/resend-otp")
-    public ResponseEntity<ApiResponse<?>> resendOtp(@Valid @RequestBody com.example.store.dto.auth.ResendOtpDTO resendOtpDTO) {
+    public ResponseEntity<ApiResponse<?>> resendOtp(@Valid @RequestBody ResendOtpDTO resendOtpDTO) {
         ApiResponse<?> response = authenticationService.resendOtp(resendOtpDTO);
         return ResponseEntity.ok(response);
     }
