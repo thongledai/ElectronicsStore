@@ -241,9 +241,22 @@ document.addEventListener('DOMContentLoaded', () => {
         currentProductId = btn.dataset.id;
         document.getElementById('variantProductName').textContent = btn.dataset.name;
         try {
-          const styleValRes = await fetch('/api/manager/style-values/options', { headers: authHeaders(false) }).then(r => r.json());
-          if (styleValRes.success && styleValRes.data) {
-            styleValueOptions = styleValRes.data;
+          const productRes = await fetch(
+              `/api/manager/products/${currentProductId}`,
+              { headers: authHeaders(false) }
+          ).then(r => r.json());
+
+          if (productRes.success && productRes.data) {
+            const categoryId = productRes.data.category?.id;
+
+            const styleValRes = await fetch(
+                `/api/manager/style-values/options?categoryId=${categoryId}`,
+                { headers: authHeaders(false) }
+            ).then(r => r.json());
+
+            if (styleValRes.success) {
+              styleValueOptions = styleValRes.data || [];
+            }
           }
         } catch (e) {
           console.warn('Lỗi tải thuộc tính:', e);

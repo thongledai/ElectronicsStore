@@ -30,4 +30,6 @@ public interface IStyleValueService {
     void deleteStyleValue(UUID id);
 
     void restoreStyleValue(UUID id);
+
+    List<StyleValueOptionDTO> getStyleValueOptionsByCategoryId(UUID categoryId);
 }

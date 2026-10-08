@@ -178,25 +178,49 @@ public class ProductVariantServiceImpl implements IProductVariantService {
         }
     }
 
-    private Set<StyleValue> validateAndGetStyleValues(Product product, Set<UUID> styleValueIds) {
+    private Set<StyleValue> validateAndGetStyleValues(
+            Product product,
+            Set<UUID> styleValueIds) {
+
         if (styleValueIds == null || styleValueIds.isEmpty()) {
             return new HashSet<>();
         }
 
         List<StyleValue> styleValues = styleValueRepository.findAllById(styleValueIds);
+
         if (styleValues.size() != styleValueIds.size()) {
-            throw new ResourceNotFoundException("Một số thuộc tính lựa chọn không tồn tại!");
+            throw new ResourceNotFoundException(
+                    "Một số thuộc tính lựa chọn không tồn tại!");
         }
 
-        // Quy tắc: Mỗi variant có tối đa 1 StyleValue cho mỗi Style
+        UUID productCategoryId = product.getCategory().getId();
+
         Set<UUID> seenStyles = new HashSet<>();
+
         for (StyleValue sv : styleValues) {
+
             if (Boolean.TRUE.equals(sv.getIsDeleted())) {
-                throw new BusinessException("Giá trị thuộc tính '" + sv.getName() + "' đã bị xóa!");
+                throw new BusinessException(
+                        "Giá trị thuộc tính '" + sv.getName() + "' đã bị xóa!");
             }
+
+            boolean belongsToCategory = sv.getStyle()
+                    .getCategories()
+                    .stream()
+                    .anyMatch(category ->
+                            category.getId().equals(productCategoryId));
+
+            if (!belongsToCategory) {
+                throw new BusinessException(
+                        "Giá trị '" + sv.getName()
+                                + "' không thuộc danh mục '"
+                                + product.getCategory().getName() + "'!");
+            }
+
             if (!seenStyles.add(sv.getStyle().getId())) {
                 throw new BusinessException(
-                        "Mỗi biến thể chỉ được chọn tối đa 1 giá trị cho kiểu '" + sv.getStyle().getName() + "'!");
+                        "Mỗi biến thể chỉ được chọn tối đa 1 giá trị cho kiểu '"
+                                + sv.getStyle().getName() + "'!");
             }
         }
 

@@ -10,6 +10,7 @@ import com.example.store.dto.category.CategoryOptionDTO;
 import com.example.store.dto.category.CategoryRequestDTO;
 import com.example.store.dto.category.CategoryResponseDTO;
 import com.example.store.dto.common.PageResponse;
+import com.example.store.dto.style.StyleValueOptionDTO;
 
 public interface ICategoryService {
 
@@ -32,4 +33,6 @@ public interface ICategoryService {
     void restoreCategory(UUID id);
 
     List<UUID> getAllSubCategoryIds(UUID parentId);
+
+    List<StyleValueOptionDTO> getStyleValueOptionsByCategoryId(UUID categoryId);
 }

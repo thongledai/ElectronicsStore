@@ -19,6 +19,7 @@ import com.example.store.dto.category.CategoryOptionDTO;
 import com.example.store.dto.category.CategoryRequestDTO;
 import com.example.store.dto.category.CategoryResponseDTO;
 import com.example.store.dto.common.PageResponse;
+import com.example.store.dto.style.StyleValueOptionDTO;
 import com.example.store.entity.Category;
 import com.example.store.exception.BusinessException;
 import com.example.store.exception.DuplicateResourceException;
@@ -271,5 +272,18 @@ public class CategoryServiceImpl implements ICategoryService {
             slug = baseSlug + "-" + count++;
         }
         return slug;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<StyleValueOptionDTO> getStyleValueOptionsByCategoryId(UUID categoryId) {
+        return styleValueRepository.findActiveByCategoryId(categoryId).stream()
+                .map(sv -> StyleValueOptionDTO.builder()
+                        .id(sv.getId())
+                        .styleId(sv.getStyle().getId())
+                        .styleName(sv.getStyle().getName())
+                        .name(sv.getName())
+                        .build())
+                .toList();
     }
 }

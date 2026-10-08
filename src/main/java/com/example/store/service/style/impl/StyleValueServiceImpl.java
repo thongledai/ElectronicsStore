@@ -171,4 +171,17 @@ public class StyleValueServiceImpl implements IStyleValueService {
         styleValueRepository.save(styleValue);
         log.info("Khôi phục giá trị thuộc tính id={}", id);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<StyleValueOptionDTO> getStyleValueOptionsByCategoryId(UUID categoryId) {
+        return styleValueRepository.findActiveByCategoryId(categoryId).stream()
+                .map(sv -> StyleValueOptionDTO.builder()
+                        .id(sv.getId())
+                        .styleId(sv.getStyle().getId())
+                        .styleName(sv.getStyle().getName())
+                        .name(sv.getName())
+                        .build())
+                .toList();
+    }
 }

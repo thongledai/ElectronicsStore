@@ -53,9 +53,23 @@ public class StyleValueManagerControllerAPI {
 
     @GetMapping("/options")
     public ResponseEntity<ApiResponse<List<StyleValueOptionDTO>>> getStyleValueOptions(
-            @RequestParam(required = false) UUID styleId) {
-        List<StyleValueOptionDTO> result = styleValueService.getStyleValueOptions(styleId);
-        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách lựa chọn giá trị thuộc tính thành công", result));
+            @RequestParam(required = false) UUID styleId,
+            @RequestParam(required = false) UUID categoryId) {
+
+        List<StyleValueOptionDTO> result;
+
+        if (categoryId != null) {
+            result = styleValueService.getStyleValueOptionsByCategoryId(categoryId);
+        } else {
+            result = styleValueService.getStyleValueOptions(styleId);
+        }
+
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        "Lấy danh sách lựa chọn giá trị thuộc tính thành công",
+                        result
+                )
+        );
     }
 
     @GetMapping("/{id}")
