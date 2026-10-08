@@ -116,8 +116,10 @@ public class ProductServiceImpl implements IProductService {
 
         Page<Product> productPage = productRepository.searchPublicProducts(
                 filterDTO.getKeyword(),
-                categoryIds.isEmpty() ? null : categoryIds,
-                brandIds.isEmpty() ? null : brandIds,
+                !categoryIds.isEmpty(),
+                categoryIds.isEmpty() ? Set.of(new UUID(0L, 0L)) : categoryIds,
+                !brandIds.isEmpty(),
+                brandIds.isEmpty() ? Set.of(-1L) : brandIds,
                 filterDTO.getMinPrice(),
                 filterDTO.getMaxPrice(),
                 filterDTO.getMinRating(),
@@ -132,7 +134,7 @@ public class ProductServiceImpl implements IProductService {
 
         // Load variant info for all fetched products
         List<UUID> productIds = products.stream().map(Product::getId).toList();
-        List<ProductVariant> allVariants = productVariantRepository.findAll();
+        List<ProductVariant> allVariants = loadVariants(productIds);
         Map<UUID, List<ProductVariant>> variantsByProduct = allVariants.stream()
                 .filter(v -> productIds.contains(v.getProduct().getId()) && v.isActive() && v.isSelling())
                 .collect(Collectors.groupingBy(v -> v.getProduct().getId()));
@@ -153,6 +155,15 @@ public class ProductServiceImpl implements IProductService {
                             ? p.getMinPrice().subtract(p.getMinPromotionalPrice())
                             : BigDecimal.ZERO,
                     Comparator.reverseOrder()));
+        }
+
+        // Sắp xếp theo giá trong phạm vi trang hiện tại
+        if ("price-asc".equalsIgnoreCase(filterDTO.getSort())) {
+            dtoList.sort(Comparator.comparing(ProductResponseDTO::getEffectivePrice,
+                    Comparator.nullsLast(Comparator.naturalOrder())));
+        } else if ("price-desc".equalsIgnoreCase(filterDTO.getSort())) {
+            dtoList.sort(Comparator.comparing(ProductResponseDTO::getEffectivePrice,
+                    Comparator.nullsLast(Comparator.reverseOrder())));
         }
 
         return PageResponse.of(productPage, dtoList);
@@ -212,7 +223,7 @@ public class ProductServiceImpl implements IProductService {
         List<Product> products = productRepository.findRelatedProducts(productId, categoryId, brandId, pageable);
 
         List<UUID> productIds = products.stream().map(Product::getId).toList();
-        List<ProductVariant> allVariants = productVariantRepository.findAll();
+        List<ProductVariant> allVariants = loadVariants(productIds);
         Map<UUID, List<ProductVariant>> variantsByProduct = allVariants.stream()
                 .filter(v -> productIds.contains(v.getProduct().getId()) && v.isActive() && v.isSelling())
                 .collect(Collectors.groupingBy(v -> v.getProduct().getId()));
@@ -242,7 +253,7 @@ public class ProductServiceImpl implements IProductService {
         Page<Product> page = productRepository.search(search, categoryId, brandId, isActive, isSelling, pageable);
 
         List<UUID> productIds = page.getContent().stream().map(Product::getId).toList();
-        List<ProductVariant> allVariants = productVariantRepository.findAll();
+        List<ProductVariant> allVariants = loadVariants(productIds);
         Map<UUID, List<ProductVariant>> variantsByProduct = allVariants.stream()
                 .filter(v -> productIds.contains(v.getProduct().getId()))
                 .collect(Collectors.groupingBy(v -> v.getProduct().getId()));
@@ -305,7 +316,7 @@ public class ProductServiceImpl implements IProductService {
     @Override
     @Transactional
     public ProductDetailResponseDTO createProduct(ProductRequestDTO requestDTO) {
-        String slug = generateAndValidateSlug(requestDTO.getName(), requestDTO.getSlug(), null);
+        String slug = generateAndValidateSlug(requestDTO.getName(), null);
 
         Category category = categoryRepository.findById(requestDTO.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -343,7 +354,11 @@ public class ProductServiceImpl implements IProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm với ID: " + id));
 
-        String slug = generateAndValidateSlug(requestDTO.getName(), requestDTO.getSlug(), id);
+        // Chỉ tạo lại slug khi đổi tên, tránh làm hỏng đường dẫn cũ
+        String slug = (requestDTO.getName().trim().equals(product.getName())
+                && product.getSlug() != null && !product.getSlug().isBlank())
+                        ? product.getSlug()
+                        : generateAndValidateSlug(requestDTO.getName(), id);
 
         Category category = categoryRepository.findById(requestDTO.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -410,6 +425,15 @@ public class ProductServiceImpl implements IProductService {
         product.setActive(true);
         productRepository.save(product);
         log.info("Khôi phục sản phẩm id={}", id);
+    }
+
+    // Chỉ nạp biến thể của các sản phẩm đang hiển thị (thay cho findAll() toàn
+    // bảng)
+    private List<ProductVariant> loadVariants(List<UUID> productIds) {
+        if (productIds == null || productIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return productVariantRepository.findAllWithImagesByProductIdIn(productIds);
     }
 
     private ProductResponseDTO enrichProductResponseDTO(Product product, List<ProductVariant> variants) {
@@ -506,10 +530,13 @@ public class ProductServiceImpl implements IProductService {
         };
     }
 
-    private String generateAndValidateSlug(String name, String customSlug, UUID currentId) {
-        String baseSlug = (customSlug != null && !customSlug.trim().isEmpty())
-                ? SlugUtils.toSlug(customSlug)
-                : SlugUtils.toSlug(name);
+    // Slug luôn được tự tạo từ tên (không còn nhập tay). Trùng thì thêm hậu tố -1,
+    // -2...
+    private String generateAndValidateSlug(String name, UUID currentId) {
+        String baseSlug = SlugUtils.toSlug(name);
+        if (baseSlug.isEmpty()) {
+            baseSlug = "item";
+        }
 
         String slug = baseSlug;
         int count = 1;

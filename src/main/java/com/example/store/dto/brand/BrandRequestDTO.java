@@ -18,13 +18,7 @@ public class BrandRequestDTO {
     @Size(max = 100, message = "Tên thương hiệu không được vượt quá 100 ký tự")
     private String name;
 
-    @Size(max = 120, message = "Slug không được vượt quá 120 ký tự")
-    private String slug;
-
-    @Size(
-            max = 1000,
-            message = "Đường dẫn logo không được vượt quá 1000 ký tự"
-    )
+    @Size(max = 1000, message = "Đường dẫn logo không được vượt quá 1000 ký tự")
     private String logoUrl;
 
     @Size(max = 1000, message = "Mô tả không được vượt quá 1000 ký tự")

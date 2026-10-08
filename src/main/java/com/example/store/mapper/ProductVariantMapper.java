@@ -11,15 +11,13 @@ import com.example.store.dto.product.ProductVariantResponseDTO;
 import com.example.store.entity.ProductVariant;
 import com.example.store.entity.ProductVariantImage;
 
-@Mapper(
-        componentModel = "spring",
-        uses = {
-                StyleValueMapper.class
-        }
-)
+@Mapper(componentModel = "spring", uses = {
+        StyleValueMapper.class
+})
 public interface ProductVariantMapper {
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "sku", ignore = true)
     @Mapping(target = "product", ignore = true)
     @Mapping(target = "styleValues", ignore = true)
     @Mapping(target = "images", ignore = true)

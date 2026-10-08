@@ -87,7 +87,7 @@ public class BrandServiceImpl implements IBrandService {
     @Override
     @Transactional
     public BrandResponseDTO createBrand(BrandRequestDTO requestDTO, MultipartFile logoFile) {
-        String slug = generateAndValidateSlug(requestDTO.getName(), requestDTO.getSlug(), null);
+        String slug = generateAndValidateSlug(requestDTO.getName(), null);
 
         if (brandRepository.existsByName(requestDTO.getName())) {
             throw new DuplicateResourceException("Tên thương hiệu đã tồn tại: " + requestDTO.getName());
@@ -123,7 +123,11 @@ public class BrandServiceImpl implements IBrandService {
             throw new DuplicateResourceException("Tên thương hiệu đã tồn tại: " + requestDTO.getName());
         }
 
-        String slug = generateAndValidateSlug(requestDTO.getName(), requestDTO.getSlug(), id);
+        // Chỉ tạo lại slug khi đổi tên, tránh làm hỏng đường dẫn cũ
+        String slug = (requestDTO.getName().trim().equals(brand.getName())
+                && brand.getSlug() != null && !brand.getSlug().isBlank())
+                        ? brand.getSlug()
+                        : generateAndValidateSlug(requestDTO.getName(), id);
 
         if (logoFile != null && !logoFile.isEmpty()) {
             // Xóa logo cũ trên Cloudinary nếu có
@@ -175,10 +179,13 @@ public class BrandServiceImpl implements IBrandService {
         log.info("Kích hoạt lại thương hiệu id={}", id);
     }
 
-    private String generateAndValidateSlug(String name, String customSlug, Long currentId) {
-        String baseSlug = (customSlug != null && !customSlug.trim().isEmpty())
-                ? SlugUtils.toSlug(customSlug)
-                : SlugUtils.toSlug(name);
+    // Slug luôn được tự tạo từ tên (không còn nhập tay). Trùng thì thêm hậu tố -1,
+    // -2...
+    private String generateAndValidateSlug(String name, Long currentId) {
+        String baseSlug = SlugUtils.toSlug(name);
+        if (baseSlug.isEmpty()) {
+            baseSlug = "item";
+        }
 
         String slug = baseSlug;
         int count = 1;

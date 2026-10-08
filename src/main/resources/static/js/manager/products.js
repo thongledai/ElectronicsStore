@@ -139,7 +139,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 <img src="${p.thumbnailUrl || '/images/placeholder.webp'}" alt="" width="36" height="36" class="rounded border" style="object-fit:cover;" onerror="this.src='/images/placeholder.webp'">
                 <div>
                   <div class="fw-semibold">${p.name}</div>
-                  <small class="text-muted">${p.slug}</small>
                 </div>
               </div>
             </td>
@@ -152,9 +151,9 @@ document.addEventListener('DOMContentLoaded', () => {
               <button class="action js-manage-variants" data-id="${p.id}" data-name="${p.name}" title="Quản lý biến thể & Ảnh"><i class="fa-solid fa-layer-group"></i></button>
               <button class="action js-edit-product" data-id="${p.id}" title="Chỉnh sửa"><i class="fa-solid fa-pen"></i></button>
               ${p.isActive
-                ? `<button class="action text-danger js-delete-product" data-id="${p.id}" title="Vô hiệu hóa"><i class="fa-solid fa-trash"></i></button>`
-                : `<button class="action text-success js-restore-product" data-id="${p.id}" title="Khôi phục"><i class="fa-solid fa-rotate-left"></i></button>`
-              }
+            ? `<button class="action text-danger js-delete-product" data-id="${p.id}" title="Vô hiệu hóa"><i class="fa-solid fa-trash"></i></button>`
+            : `<button class="action text-success js-restore-product" data-id="${p.id}" title="Khôi phục"><i class="fa-solid fa-rotate-left"></i></button>`
+          }
             </td>
           </tr>
         `;
@@ -177,7 +176,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const p = res.data;
             document.getElementById('productId').value = p.id;
             document.getElementById('productName').value = p.name;
-            document.getElementById('productSlug').value = p.slug;
             document.getElementById('productCategory').value = p.category ? p.category.id : '';
             document.getElementById('productBrand').value = p.brand ? p.brand.id : '';
             document.getElementById('productDescription').value = p.description;
@@ -265,7 +263,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const id = document.getElementById('productId').value;
       const payload = {
         name: document.getElementById('productName').value.trim(),
-        slug: document.getElementById('productSlug').value.trim() || null,
         categoryId: document.getElementById('productCategory').value,
         brandId: document.getElementById('productBrand').value,
         description: document.getElementById('productDescription').value.trim(),
@@ -312,7 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('variantFormContainer').style.display = 'none';
     document.getElementById('variantImagesSection').style.display = 'none';
     const tbody = document.getElementById('variantTableBody');
-    tbody.innerHTML = `<tr><td colspan="9" class="text-center py-3 text-muted">Đang tải biến thể...</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="text-center py-3 text-muted">Đang tải biến thể...</td></tr>`;
 
     try {
       const res = await fetch(`/api/manager/products/${productId}/variants`, {
@@ -320,7 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }).then(r => r.json());
 
       if (!res.success || !res.data || res.data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="text-center py-3 text-muted">Chưa có biến thể nào</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-3 text-muted">Chưa có biến thể nào</td></tr>`;
         return;
       }
 
@@ -335,14 +332,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return `
           <tr>
-            <td><strong>${v.sku}</strong></td>
             <td>${stylesText}</td>
             <td>${formatVnd(v.price)}</td>
             <td>${v.promotionalPrice ? formatVnd(v.promotionalPrice) : '-'}</td>
             <td>${v.quantity}</td>
             <td>${v.sold || 0}</td>
             <td>
-              <button class="btn btn-xs btn-outline-info js-manage-images" data-variant-id="${v.id}" data-sku="${v.sku}">
+              <button class="btn btn-xs btn-outline-info js-manage-images" data-variant-id="${v.id}" data-label="${stylesText.replace(/"/g, '&quot;')}">
                 <i class="fa-regular fa-image me-1"></i>${imgCount} ảnh
               </button>
             </td>
@@ -350,9 +346,9 @@ document.addEventListener('DOMContentLoaded', () => {
             <td class="text-end">
               <button class="action js-edit-variant" data-id="${v.id}" title="Sửa biến thể"><i class="fa-solid fa-pen"></i></button>
               ${v.isActive
-                ? `<button class="action text-danger js-delete-variant" data-id="${v.id}" title="Vô hiệu hóa"><i class="fa-solid fa-trash"></i></button>`
-                : `<button class="action text-success js-restore-variant" data-id="${v.id}" title="Khôi phục"><i class="fa-solid fa-rotate-left"></i></button>`
-              }
+            ? `<button class="action text-danger js-delete-variant" data-id="${v.id}" title="Vô hiệu hóa"><i class="fa-solid fa-trash"></i></button>`
+            : `<button class="action text-success js-restore-variant" data-id="${v.id}" title="Khôi phục"><i class="fa-solid fa-rotate-left"></i></button>`
+          }
             </td>
           </tr>
         `;
@@ -360,7 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       attachVariantRowEvents(productId, res.data);
     } catch (e) {
-      tbody.innerHTML = `<tr><td colspan="9" class="text-center py-3 text-danger">Lỗi: ${e.message}</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="8" class="text-center py-3 text-danger">Lỗi: ${e.message}</td></tr>`;
     }
   }
 
@@ -388,7 +384,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!v) return;
 
         document.getElementById('variantId').value = v.id;
-        document.getElementById('variantSku').value = v.sku;
         document.getElementById('variantPrice').value = v.price;
         document.getElementById('variantPromoPrice').value = v.promotionalPrice || '';
         document.getElementById('variantQuantity').value = v.quantity;
@@ -396,7 +391,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const selIds = v.styleValues ? v.styleValues.map(sv => sv.id) : [];
         renderStyleValueCheckboxes(selIds);
 
-        document.getElementById('variantFormTitle').textContent = 'Chỉnh sửa biến thể: ' + v.sku;
+        document.getElementById('variantFormTitle').textContent = 'Chỉnh sửa biến thể';
         document.getElementById('variantFormContainer').style.display = 'block';
       });
     });
@@ -448,8 +443,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.js-manage-images').forEach(btn => {
       btn.addEventListener('click', () => {
         activeVariantId = btn.dataset.variantId;
-        const sku = btn.dataset.sku;
-        document.getElementById('imgVariantSku').textContent = sku;
+        const label = btn.dataset.label || '';
+        document.getElementById('imgVariantSku').textContent = label;
         loadVariantImages(productId, activeVariantId);
         document.getElementById('variantImagesSection').style.display = 'block';
       });
@@ -478,16 +473,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const selectedStyleIds = Array.from(document.querySelectorAll('.js-style-val-check:checked'))
         .map(el => el.value);
 
-      const sku = document.getElementById('variantSku').value.trim();
       const priceVal = parseFloat(document.getElementById('variantPrice').value);
       const promoRaw = document.getElementById('variantPromoPrice').value;
       const promoVal = promoRaw ? parseFloat(promoRaw) : null;
       const qtyVal = parseInt(document.getElementById('variantQuantity').value, 10);
 
-      if (!sku) {
-        notify('Vui lòng nhập mã SKU');
-        return;
-      }
       if (isNaN(priceVal) || priceVal < 0) {
         notify('Giá sản phẩm không hợp lệ');
         return;
@@ -498,7 +488,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const payload = {
-        sku: sku,
         price: priceVal,
         promotionalPrice: (promoVal !== null && !isNaN(promoVal)) ? promoVal : null,
         quantity: isNaN(qtyVal) ? 0 : qtyVal,

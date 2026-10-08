@@ -1,5 +1,7 @@
 package com.example.store.service.product.impl;
 
+import com.example.store.common.util.SkuUtils;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -74,17 +76,13 @@ public class ProductVariantServiceImpl implements IProductVariantService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm với ID: " + productId));
 
-        if (productVariantRepository.existsBySku(requestDTO.getSku().trim())) {
-            throw new DuplicateResourceException("Mã SKU đã tồn tại: " + requestDTO.getSku());
-        }
-
         validatePrices(requestDTO);
 
         Set<StyleValue> styleValues = validateAndGetStyleValues(product, requestDTO.getStyleValueIds());
 
         ProductVariant variant = ProductVariant.builder()
                 .product(product)
-                .sku(requestDTO.getSku().trim())
+                .sku(generateUniqueSku(product, styleValues))
                 .price(requestDTO.getPrice())
                 .promotionalPrice(requestDTO.getPromotionalPrice())
                 .quantity(requestDTO.getQuantity() != null ? requestDTO.getQuantity() : 0)
@@ -113,15 +111,10 @@ public class ProductVariantServiceImpl implements IProductVariantService {
             throw new BusinessException("Biến thể không thuộc về sản phẩm này!");
         }
 
-        if (productVariantRepository.existsBySkuAndIdNot(requestDTO.getSku().trim(), variantId)) {
-            throw new DuplicateResourceException("Mã SKU đã tồn tại: " + requestDTO.getSku());
-        }
-
         validatePrices(requestDTO);
 
         Set<StyleValue> styleValues = validateAndGetStyleValues(product, requestDTO.getStyleValueIds());
 
-        variant.setSku(requestDTO.getSku().trim());
         variant.setPrice(requestDTO.getPrice());
         variant.setPromotionalPrice(requestDTO.getPromotionalPrice());
         if (requestDTO.getQuantity() != null) {
@@ -208,5 +201,15 @@ public class ProductVariantServiceImpl implements IProductVariantService {
         }
 
         return new HashSet<>(styleValues);
+    }
+
+    // SKU luôn được tự tạo khi thêm biến thể và giữ nguyên khi cập nhật
+    private String generateUniqueSku(Product product, Set<StyleValue> styleValues) {
+        String baseSku = SkuUtils.generateSkuFromStyleValues(product.getName(), styleValues);
+        String sku = baseSku;
+        while (productVariantRepository.existsBySku(sku)) {
+            sku = SkuUtils.limitLength(baseSku, 93) + "-" + SkuUtils.randomSuffix(6);
+        }
+        return sku;
     }
 }

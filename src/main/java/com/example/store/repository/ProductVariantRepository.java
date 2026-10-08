@@ -1,5 +1,6 @@
 package com.example.store.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,15 +32,23 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
     boolean existsByStyleValuesId(UUID styleValueId);
 
     @Query("""
-        SELECT COUNT(v) > 0
-        FROM ProductVariant v
-        JOIN v.styleValues sv
-        WHERE sv.id = :styleValueId
-            AND v.isActive = true
-    """)
+                SELECT COUNT(v) > 0
+                FROM ProductVariant v
+                JOIN v.styleValues sv
+                WHERE sv.id = :styleValueId
+                    AND v.isActive = true
+            """)
     boolean existsActiveVariantByStyleValueId(@Param("styleValueId") UUID styleValueId);
 
     List<ProductVariant> findByProductId(UUID productId);
+
+    @Query("""
+                SELECT DISTINCT v
+                FROM ProductVariant v
+                LEFT JOIN FETCH v.images
+                WHERE v.product.id IN :productIds
+            """)
+    List<ProductVariant> findAllWithImagesByProductIdIn(@Param("productIds") Collection<UUID> productIds);
 
     List<ProductVariant> findByProductIdAndIsActiveTrue(UUID productId);
 
@@ -48,43 +57,43 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
     Page<ProductVariant> findByProductId(UUID productId, Pageable pageable);
 
     @Query("""
-        SELECT DISTINCT v
-        FROM ProductVariant v
-        LEFT JOIN FETCH v.images
-        WHERE v.product.id = :productId
-    """)
+                SELECT DISTINCT v
+                FROM ProductVariant v
+                LEFT JOIN FETCH v.images
+                WHERE v.product.id = :productId
+            """)
     List<ProductVariant> findAllWithImagesByProductId(@Param("productId") UUID productId);
 
     @Query("""
-        SELECT DISTINCT v
-        FROM ProductVariant v
-        LEFT JOIN FETCH v.styleValues sv
-        LEFT JOIN FETCH sv.style
-        WHERE v.product.id = :productId
-    """)
+                SELECT DISTINCT v
+                FROM ProductVariant v
+                LEFT JOIN FETCH v.styleValues sv
+                LEFT JOIN FETCH sv.style
+                WHERE v.product.id = :productId
+            """)
     List<ProductVariant> findAllWithStyleValuesByProductId(@Param("productId") UUID productId);
 
     @Query("""
-        SELECT v
-        FROM ProductVariant v
-        WHERE
-            (:productId IS NULL OR v.product.id = :productId)
-            AND (:q IS NULL OR :q = '' OR
-                LOWER(v.sku) LIKE LOWER(CONCAT('%', :q, '%'))
-            )
-            AND (:isActive IS NULL OR v.isActive = :isActive)
-            AND (:isSelling IS NULL OR v.isSelling = :isSelling)
-            AND (:inStock IS NULL OR
-                :inStock = false OR v.quantity > 0
-            )
-            AND (:onSale IS NULL OR
-                :onSale = false OR
-                (
-                    v.promotionalPrice IS NOT NULL
-                    AND v.promotionalPrice < v.price
+            SELECT v
+            FROM ProductVariant v
+            WHERE
+                (:productId IS NULL OR v.product.id = :productId)
+                AND (:q IS NULL OR :q = '' OR
+                    LOWER(v.sku) LIKE LOWER(CONCAT('%', :q, '%'))
                 )
-            )
-        """)
+                AND (:isActive IS NULL OR v.isActive = :isActive)
+                AND (:isSelling IS NULL OR v.isSelling = :isSelling)
+                AND (:inStock IS NULL OR
+                    :inStock = false OR v.quantity > 0
+                )
+                AND (:onSale IS NULL OR
+                    :onSale = false OR
+                    (
+                        v.promotionalPrice IS NOT NULL
+                        AND v.promotionalPrice < v.price
+                    )
+                )
+            """)
     Page<ProductVariant> search(
             @Param("productId") UUID productId,
             @Param("q") String q,
@@ -92,6 +101,5 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
             @Param("isSelling") Boolean isSelling,
             @Param("inStock") Boolean inStock,
             @Param("onSale") Boolean onSale,
-            Pageable pageable
-    );
+            Pageable pageable);
 }

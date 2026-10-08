@@ -9,9 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const currentPrice = document.getElementById('currentPrice');
   const currentOldPrice = document.getElementById('currentOldPrice');
   const currentDiscountBadge = document.getElementById('currentDiscountBadge');
-  const currentSku = document.getElementById('currentSku');
   const currentStockStatus = document.getElementById('currentStockStatus');
-  const specSku = document.getElementById('specSku');
   const qtyInput = document.getElementById('qtyInput');
   const btnQtyMinus = document.getElementById('btnQtyMinus');
   const btnQtyPlus = document.getElementById('btnQtyPlus');
@@ -110,11 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (currentDiscountBadge) currentDiscountBadge.hidden = true;
         }
 
-        // 2. Update SKU & Specs
-        if (currentSku) currentSku.textContent = variant.sku;
-        if (specSku) specSku.textContent = variant.sku;
-
-        // 3. Update Stock Status
+        // 2. Update Stock Status
         if (currentStockStatus) {
           if (variant.quantity > 0) {
             currentStockStatus.innerHTML = `<strong class="text-success">Còn hàng (${variant.quantity} sản phẩm)</strong>`;
@@ -126,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
 
-        // 4. Update Images
+        // 3. Update Images
         if (variant.imageUrls && variant.imageUrls.length > 0) {
           if (mainImage) mainImage.src = variant.imageUrls[0];
           if (thumbnailGallery) {

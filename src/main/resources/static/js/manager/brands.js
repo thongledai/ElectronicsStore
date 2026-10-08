@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (isActive) url += `&isActive=${isActive}`;
 
     const tbody = document.getElementById('brandTableBody');
-    if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">Đang tải dữ liệu...</td></tr>`;
+    if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted">Đang tải dữ liệu...</td></tr>`;
 
     try {
       const res = await fetch(url, { headers: authHeaders(false) }).then(r => r.json());
@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('btnNextPage').disabled = currentPage >= totalPages - 1;
 
       if (!data.content || data.content.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">Không tìm thấy thương hiệu nào</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted">Không tìm thấy thương hiệu nào</td></tr>`;
         return;
       }
 
@@ -77,15 +77,14 @@ document.addEventListener('DOMContentLoaded', () => {
               <img src="${b.logoUrl || '/images/placeholder.webp'}" alt="" width="36" height="36" class="rounded border" style="object-fit:contain; background:#f8fafc;" onerror="this.src='/images/placeholder.webp'">
             </td>
             <td><strong>${b.name}</strong></td>
-            <td><code>${b.slug}</code></td>
             <td>${b.description || '<span class="text-muted">-</span>'}</td>
             <td>${statusBadge}</td>
             <td class="text-end">
               <button class="action js-edit-brand" data-id="${b.id}" title="Chỉnh sửa"><i class="fa-solid fa-pen"></i></button>
               ${b.isActive
-                ? `<button class="action text-danger js-delete-brand" data-id="${b.id}" title="Ngừng hoạt động"><i class="fa-solid fa-ban"></i></button>`
-                : `<button class="action text-success js-restore-brand" data-id="${b.id}" title="Kích hoạt lại"><i class="fa-solid fa-rotate-left"></i></button>`
-              }
+            ? `<button class="action text-danger js-delete-brand" data-id="${b.id}" title="Ngừng hoạt động"><i class="fa-solid fa-ban"></i></button>`
+            : `<button class="action text-success js-restore-brand" data-id="${b.id}" title="Kích hoạt lại"><i class="fa-solid fa-rotate-left"></i></button>`
+          }
             </td>
           </tr>
         `;
@@ -93,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       attachEvents();
     } catch (e) {
-      if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger">Lỗi: ${e.message}</td></tr>`;
+      if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-danger">Lỗi: ${e.message}</td></tr>`;
     }
   }
 
@@ -108,7 +107,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const b = res.data;
             document.getElementById('brandId').value = b.id;
             document.getElementById('brandName').value = b.name;
-            document.getElementById('brandSlug').value = b.slug;
             document.getElementById('brandDescription').value = b.description || '';
             document.getElementById('brandIsActive').checked = b.isActive;
             document.getElementById('brandLogoFile').value = '';
@@ -184,9 +182,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const id = document.getElementById('brandId').value;
       const formData = new FormData();
       formData.append('name', document.getElementById('brandName').value.trim());
-
-      const slug = document.getElementById('brandSlug').value.trim();
-      if (slug) formData.append('slug', slug);
 
       const desc = document.getElementById('brandDescription').value.trim();
       if (desc) formData.append('description', desc);

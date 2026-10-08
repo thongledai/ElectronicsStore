@@ -11,6 +11,7 @@ import com.example.store.entity.Brand;
 public interface BrandMapper {
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "slug", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     Brand toEntity(BrandRequestDTO dto);

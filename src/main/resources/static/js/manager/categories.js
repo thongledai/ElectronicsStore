@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (isDeleted) url += `&isDeleted=${isDeleted}`;
 
     const tbody = document.getElementById('categoryTableBody');
-    if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">Đang tải dữ liệu...</td></tr>`;
+    if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted">Đang tải dữ liệu...</td></tr>`;
 
     try {
       const res = await fetch(url, { headers: authHeaders(false) }).then(r => r.json());
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('btnNextPage').disabled = currentPage >= totalPages - 1;
 
       if (!data.content || data.content.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">Không tìm thấy danh mục nào</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted">Không tìm thấy danh mục nào</td></tr>`;
         return;
       }
 
@@ -95,15 +95,14 @@ document.addEventListener('DOMContentLoaded', () => {
               <img src="${c.image || '/images/placeholder.webp'}" alt="" width="36" height="36" class="rounded border" style="object-fit:cover;" onerror="this.src='/images/placeholder.webp'">
             </td>
             <td><strong>${c.name}</strong></td>
-            <td><code>${c.slug}</code></td>
             <td>${c.parentName || '<span class="text-muted">Danh mục gốc</span>'}</td>
             <td>${statusBadge}</td>
             <td class="text-end">
               <button class="action js-edit-category" data-id="${c.id}" title="Chỉnh sửa"><i class="fa-solid fa-pen"></i></button>
               ${c.isDeleted
-                ? `<button class="action text-success js-restore-category" data-id="${c.id}" title="Khôi phục"><i class="fa-solid fa-rotate-left"></i></button>`
-                : `<button class="action text-danger js-delete-category" data-id="${c.id}" title="Xóa mềm"><i class="fa-solid fa-trash"></i></button>`
-              }
+            ? `<button class="action text-success js-restore-category" data-id="${c.id}" title="Khôi phục"><i class="fa-solid fa-rotate-left"></i></button>`
+            : `<button class="action text-danger js-delete-category" data-id="${c.id}" title="Xóa mềm"><i class="fa-solid fa-trash"></i></button>`
+          }
             </td>
           </tr>
         `;
@@ -111,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       attachEvents();
     } catch (e) {
-      if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger">Lỗi: ${e.message}</td></tr>`;
+      if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-danger">Lỗi: ${e.message}</td></tr>`;
     }
   }
 
@@ -126,7 +125,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const c = res.data;
             document.getElementById('categoryId').value = c.id;
             document.getElementById('categoryName').value = c.name;
-            document.getElementById('categorySlug').value = c.slug;
             document.getElementById('categoryParent').value = c.parentId || '';
             document.getElementById('categoryImageFile').value = '';
 
@@ -203,9 +201,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const id = document.getElementById('categoryId').value;
       const formData = new FormData();
       formData.append('name', document.getElementById('categoryName').value.trim());
-
-      const slug = document.getElementById('categorySlug').value.trim();
-      if (slug) formData.append('slug', slug);
 
       const parentId = document.getElementById('categoryParent').value;
       if (parentId) formData.append('parentId', parentId);

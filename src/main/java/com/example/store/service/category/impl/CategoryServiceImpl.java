@@ -93,7 +93,7 @@ public class CategoryServiceImpl implements ICategoryService {
     @Override
     @Transactional
     public CategoryResponseDTO createCategory(CategoryRequestDTO requestDTO, MultipartFile imageFile) {
-        String slug = generateAndValidateSlug(requestDTO.getName(), requestDTO.getSlug(), null);
+        String slug = generateAndValidateSlug(requestDTO.getName(), null);
 
         if (categoryRepository.existsByName(requestDTO.getName())) {
             throw new DuplicateResourceException("Tên danh mục đã tồn tại: " + requestDTO.getName());
@@ -139,7 +139,11 @@ public class CategoryServiceImpl implements ICategoryService {
             throw new DuplicateResourceException("Tên danh mục đã tồn tại: " + requestDTO.getName());
         }
 
-        String slug = generateAndValidateSlug(requestDTO.getName(), requestDTO.getSlug(), id);
+        // Chỉ tạo lại slug khi đổi tên, tránh làm hỏng đường dẫn cũ
+        String slug = (requestDTO.getName().trim().equals(category.getName())
+                && category.getSlug() != null && !category.getSlug().isBlank())
+                        ? category.getSlug()
+                        : generateAndValidateSlug(requestDTO.getName(), id);
 
         Category parent = null;
         if (requestDTO.getParentId() != null) {
@@ -252,10 +256,13 @@ public class CategoryServiceImpl implements ICategoryService {
         return false;
     }
 
-    private String generateAndValidateSlug(String name, String customSlug, UUID currentId) {
-        String baseSlug = (customSlug != null && !customSlug.trim().isEmpty())
-                ? SlugUtils.toSlug(customSlug)
-                : SlugUtils.toSlug(name);
+    // Slug luôn được tự tạo từ tên (không còn nhập tay). Trùng thì thêm hậu tố -1,
+    // -2...
+    private String generateAndValidateSlug(String name, UUID currentId) {
+        String baseSlug = SlugUtils.toSlug(name);
+        if (baseSlug.isEmpty()) {
+            baseSlug = "item";
+        }
 
         String slug = baseSlug;
         int count = 1;

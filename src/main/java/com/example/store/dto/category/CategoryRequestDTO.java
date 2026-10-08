@@ -20,15 +20,9 @@ public class CategoryRequestDTO {
     @Size(max = 100, message = "Tên danh mục không được vượt quá 100 ký tự")
     private String name;
 
-    @Size(max = 255, message = "Slug không được vượt quá 255 ký tự")
-    private String slug;
-
     private UUID parentId;
 
-    @Size(
-            max = 1000,
-            message = "Đường dẫn hình ảnh không được vượt quá 1000 ký tự"
-    )
+    @Size(max = 1000, message = "Đường dẫn hình ảnh không được vượt quá 1000 ký tự")
     private String image;
 
     private Boolean isDeleted;

@@ -43,6 +43,9 @@ public class StyleServiceImpl implements IStyleService {
     private final ProductVariantRepository productVariantRepository;
     private final StyleMapper styleMapper;
 
+    // Dùng thay cho null khi tạo mới (không có style nào bị loại trừ)
+    private static final UUID NO_ID = new UUID(0L, 0L);
+
     @Override
     @Transactional(readOnly = true)
     public PageResponse<StyleResponseDTO> getAllStyles(String search, Boolean isDeleted, Pageable pageable) {
@@ -90,13 +93,14 @@ public class StyleServiceImpl implements IStyleService {
 
     private void validateStyleNameUniqueness(String name, Set<UUID> categoryIds, UUID excludeId) {
         String trimmedName = name != null ? name.trim() : "";
+        UUID excludeIdSafe = excludeId != null ? excludeId : NO_ID;
         if (categoryIds != null && !categoryIds.isEmpty()) {
-            if (styleRepository.existsByNameAndCategoryIds(trimmedName, categoryIds, excludeId)) {
+            if (styleRepository.existsByNameAndCategoryIds(trimmedName, categoryIds, excludeIdSafe)) {
                 throw new DuplicateResourceException(
                         "Tên kiểu thuộc tính '" + trimmedName + "' đã tồn tại trong danh mục được chọn!");
             }
         } else {
-            if (styleRepository.existsByNameAndCategoriesIsEmpty(trimmedName, excludeId)) {
+            if (styleRepository.existsByNameAndCategoriesIsEmpty(trimmedName, excludeIdSafe)) {
                 throw new DuplicateResourceException(
                         "Tên kiểu thuộc tính '" + trimmedName + "' chưa gán danh mục đã tồn tại!");
             }
