@@ -7,6 +7,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -57,7 +61,19 @@ public class ProductVariantServiceImpl implements IProductVariantService {
     @Override
     @Transactional(readOnly = true)
     public List<ProductVariantResponseDTO> getAllVariantsByProductId(UUID productId) {
-        return productVariantRepository.findByProductId(productId).stream()
+        List<ProductVariant> variants = productVariantRepository.findAllWithImagesByProductId(productId);
+        List<ProductVariant> styleVariants = productVariantRepository.findAllWithStyleValuesByProductId(productId);
+
+        Map<UUID, ProductVariant> variantMap = variants.stream()
+                .collect(Collectors.toMap(ProductVariant::getId, Function.identity(), (v1, v2) -> v1));
+        for (ProductVariant svVar : styleVariants) {
+            ProductVariant existing = variantMap.get(svVar.getId());
+            if (existing != null) {
+                existing.setStyleValues(svVar.getStyleValues());
+            }
+        }
+
+        return variants.stream()
                 .map(productVariantMapper::toResponseDTO)
                 .toList();
     }
@@ -67,6 +83,16 @@ public class ProductVariantServiceImpl implements IProductVariantService {
     public ProductVariantResponseDTO getVariantById(UUID id) {
         ProductVariant variant = productVariantRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy biến thể với ID: " + id));
+        if (variant.getStyleValues() != null) {
+            variant.getStyleValues().forEach(sv -> {
+                if (sv.getStyle() != null) {
+                    sv.getStyle().getName();
+                }
+            });
+        }
+        if (variant.getImages() != null) {
+            variant.getImages().size();
+        }
         return productVariantMapper.toResponseDTO(variant);
     }
 

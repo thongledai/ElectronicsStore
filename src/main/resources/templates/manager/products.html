@@ -171,7 +171,7 @@
             </div>
 
             <!-- Section: Form thêm / sửa biến thể -->
-            <div id="variantFormContainer" class="p-3 border rounded bg-light" style="display:none;">
+            <div id="variantFormContainer" class="p-3 border rounded bg-light mb-4" style="display:none;">
               <h6 id="variantFormTitle" class="mb-3 fw-bold">Thêm mới biến thể</h6>
               <form id="variantForm">
                 <input type="hidden" id="variantId">
@@ -189,21 +189,24 @@
                     <input type="number" class="form-control form-control-sm" id="variantQuantity" required min="0"
                       value="0">
                   </div>
-                  <div class="col-md-8">
+                  <div class="col-md-12">
                     <label class="form-label fw-semibold">Thuộc tính (Style Values)</label>
-                    <div id="variantStyleValuesContainer" class="d-flex flex-wrap gap-2"></div>
+                    <div id="variantStyleValuesContainer" class="p-2 border rounded bg-white"></div>
                   </div>
                   <div class="col-md-12 text-end">
                     <button type="button" class="btn btn-sm btn-secondary me-2" id="btnCancelVariantForm">Hủy</button>
-                    <button type="submit" class="btn btn-sm btn-primary" id="btnSaveVariant">Lưu biến thể</button>
+                    <button type="submit" class="btn btn-sm btn-primary" id="btnSaveVariant">Lưu</button>
                   </div>
                 </div>
               </form>
             </div>
 
             <!-- Section: Upload và xem ảnh cho biến thể -->
-            <div id="variantImagesSection" class="mt-4 p-3 border rounded" style="display:none;">
-              <h6 class="fw-bold mb-3">Hình ảnh biến thể: <span id="imgVariantSku" class="text-primary"></span></h6>
+            <div id="variantImagesSection" class="p-3 border rounded bg-light" style="display:none;">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold mb-0">Hình ảnh biến thể: <span id="imgVariantSku" class="text-primary"></span></h6>
+                <button type="button" class="btn-close" id="btnCloseVariantImages" aria-label="Đóng"></button>
+              </div>
               <div class="d-flex gap-2 align-items-center mb-3">
                 <input type="file" id="variantImageFiles" class="form-control form-control-sm" multiple
                   accept="image/jpeg,image/png,image/webp">
@@ -212,11 +215,17 @@
               </div>
               <div class="d-flex gap-3 flex-wrap" id="variantImagesGallery"></div>
             </div>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
           </div>
         </div>
       </div>
-      <!-- Script nạp cho quản lý sản phẩm -->
-      <script th:src="@{/js/manager/products.js}"></script>
+    </div>
+
+    <!-- Script nạp cho quản lý sản phẩm -->
+    <script th:src="@{/js/manager/products.js}"></script>
   </section>
 </body>
 
