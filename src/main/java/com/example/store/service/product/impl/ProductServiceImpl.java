@@ -78,7 +78,7 @@ public class ProductServiceImpl implements IProductService {
 					UUID catUuid = UUID.fromString(catParam.trim());
 					categoryIds.addAll(categoryService.getAllSubCategoryIds(catUuid));
 				} catch (IllegalArgumentException e) {
-					categoryRepository.findBySlugAndIsDeletedFalse(catParam.trim())
+					categoryRepository.findBySlugAndIsActiveTrue(catParam.trim())
 							.ifPresent(c -> categoryIds.addAll(categoryService.getAllSubCategoryIds(c.getId())));
 				}
 			}
@@ -166,7 +166,7 @@ public class ProductServiceImpl implements IProductService {
 		}
 
 		return ProductDetailResponseDTO.builder().id(product.getId()).name(product.getName()).slug(product.getSlug())
-				.description(product.getDescription()).isActive(product.isActive()).isSelling(product.isSelling())
+				.description(product.getDescription()).isSelling(product.isSelling()).isActive(product.isActive())
 				.rating(product.getRating()).category(categoryMapper.toResponseDTO(product.getCategory()))
 				.brand(brandMapper.toResponseDTO(product.getBrand())).variants(variantDTOs)
 				.createdAt(product.getCreatedAt()).updatedAt(product.getUpdatedAt()).build();
@@ -198,8 +198,8 @@ public class ProductServiceImpl implements IProductService {
 	@Override
 	@Transactional(readOnly = true)
 	public PageResponse<ProductResponseDTO> getManagerProducts(String search, UUID categoryId, Long brandId,
-			Boolean isActive, Boolean isSelling, Pageable pageable) {
-		Page<Product> page = productRepository.search(search, categoryId, brandId, isActive, isSelling, pageable);
+			Boolean isSelling, Boolean isActive, Pageable pageable) {
+		Page<Product> page = productRepository.search(search, categoryId, brandId, isSelling, isActive, pageable);
 
 		List<UUID> productIds = page.getContent().stream().map(Product::getId).toList();
 		List<ProductVariant> allVariants = loadVariants(productIds);
@@ -244,7 +244,7 @@ public class ProductServiceImpl implements IProductService {
 				.toList();
 
 		return ProductDetailResponseDTO.builder().id(product.getId()).name(product.getName()).slug(product.getSlug())
-				.description(product.getDescription()).isActive(product.isActive()).isSelling(product.isSelling())
+				.description(product.getDescription()).isSelling(product.isSelling()).isActive(product.isActive())
 				.rating(product.getRating()).category(categoryMapper.toResponseDTO(product.getCategory()))
 				.brand(brandMapper.toResponseDTO(product.getBrand())).variants(variantDTOs)
 				.createdAt(product.getCreatedAt()).updatedAt(product.getUpdatedAt()).build();
@@ -257,7 +257,7 @@ public class ProductServiceImpl implements IProductService {
 
 		Category category = categoryRepository.findById(requestDTO.getCategoryId()).orElseThrow(
 				() -> new ResourceNotFoundException("Không tìm thấy danh mục với ID: " + requestDTO.getCategoryId()));
-		if (Boolean.TRUE.equals(category.getIsDeleted())) {
+		if (!Boolean.TRUE.equals(category.getIsActive())) {
 			throw new BusinessException("Không thể gán sản phẩm vào danh mục đã bị xóa!");
 		}
 
@@ -269,8 +269,8 @@ public class ProductServiceImpl implements IProductService {
 
 		Product product = Product.builder().name(requestDTO.getName().trim()).slug(slug)
 				.description(requestDTO.getDescription().trim()).category(category).brand(brand)
-				.isActive(requestDTO.getIsActive() != null ? requestDTO.getIsActive() : true)
-				.isSelling(requestDTO.getIsSelling() != null ? requestDTO.getIsSelling() : true).rating(5.0).build();
+				.isSelling(requestDTO.getIsSelling() != null ? requestDTO.getIsSelling() : true)
+				.isActive(requestDTO.getIsActive() == null || requestDTO.getIsActive()).rating(5.0).build();
 		validateProductState(product);
 
 		Product saved = productRepository.save(product);
@@ -291,7 +291,7 @@ public class ProductServiceImpl implements IProductService {
 
 		Category category = categoryRepository.findById(requestDTO.getCategoryId()).orElseThrow(
 				() -> new ResourceNotFoundException("Không tìm thấy danh mục với ID: " + requestDTO.getCategoryId()));
-		if (Boolean.TRUE.equals(category.getIsDeleted())) {
+		if (!Boolean.TRUE.equals(category.getIsActive())) {
 			throw new BusinessException("Không thể gán sản phẩm vào danh mục đã bị xóa!");
 		}
 
@@ -306,14 +306,18 @@ public class ProductServiceImpl implements IProductService {
 		product.setDescription(requestDTO.getDescription().trim());
 		product.setCategory(category);
 		product.setBrand(brand);
-		if (requestDTO.getIsActive() != null) {
-			product.setActive(requestDTO.getIsActive());
-		}
 		if (requestDTO.getIsSelling() != null) {
+			if (!requestDTO.getIsSelling() && product.isSelling()
+					&& productVariantRepository.existsByProductIdAndIsSellingTrue(id)) {
+				throw new BusinessException("Hãy tắt trạng thái đang bán của tất cả biến thể trước khi tắt bán sản phẩm.");
+			}
 			product.setSelling(requestDTO.getIsSelling());
 		}
-		if (Boolean.TRUE.equals(requestDTO.getIsSelling()) && !product.isActive()) {
-			throw new BusinessException("Không thể bật bán sản phẩm chưa hoạt động.");
+		if (requestDTO.getIsActive() != null) {
+			if (!requestDTO.getIsActive() && product.isActive()) {
+				validateProductCanBeDeleted(id);
+			}
+			product.setActive(requestDTO.getIsActive());
 		}
 		validateProductState(product);
 
@@ -326,14 +330,10 @@ public class ProductServiceImpl implements IProductService {
 	@Transactional
 	public void deleteProduct(UUID id) {
 		Product product = productRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm với ID: " + id));
-
-		if (productVariantRepository.existsByProductIdAndIsActiveTrue(id)) {
-			throw new BusinessException("Không thể ngừng hoạt động sản phẩm vì vẫn còn biến thể đang hoạt động. Hãy tắt từng biến thể trước.");
-		}
-		product.setActive(false);
-		productRepository.save(product);
-		log.info("Vô hiệu hóa sản phẩm và các biến thể của id={}", id);
+				.orElseThrow(() -> new ResourceNotFoundException("Product not found: " + id));
+		validateProductCanBeDeleted(id);
+		productRepository.delete(product);
+		log.info("Xóa vĩnh viễn sản phẩm id={}", id);
 	}
 
 	@Override
@@ -341,23 +341,21 @@ public class ProductServiceImpl implements IProductService {
 	public void restoreProduct(UUID id) {
 		Product product = productRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm với ID: " + id));
-
-		// Ràng buộc: chỉ khi category và brand của nó đang hợp lệ
-		if (Boolean.TRUE.equals(product.getCategory().getIsDeleted())) {
-			throw new BusinessException("Không thể khôi phục sản phẩm vì danh mục đang bị xóa!");
-		}
-		if (Boolean.FALSE.equals(product.getBrand().getIsActive())) {
-			throw new BusinessException("Không thể khôi phục sản phẩm vì thương hiệu đang ngừng hoạt động!");
-		}
-
 		product.setActive(true);
 		productRepository.save(product);
+	}
 
+	private void validateProductCanBeDeleted(UUID id) {
+		if (productVariantRepository.existsByProductId(id)
+				|| productRepository.existsReviewReference(id)
+				|| productRepository.existsFollowReference(id)) {
+			throw new BusinessException("Không thể xóa mềm hoặc xóa vĩnh viễn sản phẩm vì còn biến thể, đánh giá hoặc danh sách theo dõi tham chiếu!");
+		}
 	}
 
 	private void validateProductState(Product product) {
-		if (product.isActive() || product.isSelling()) {
-			if (Boolean.TRUE.equals(product.getCategory().getIsDeleted())) {
+		if (product.isSelling()) {
+			if (!Boolean.TRUE.equals(product.getCategory().getIsActive())) {
 				throw new BusinessException("Không thể kích hoạt/bán sản phẩm thuộc danh mục đã xóa.");
 			}
 			if (!Boolean.TRUE.equals(product.getBrand().getIsActive())) {
@@ -459,8 +457,7 @@ public class ProductServiceImpl implements IProductService {
 				end)
 				from ProductVariant v
 				where v.product = p
-					and v.isActive = true
-					and v.isSelling = true)
+										and v.isSelling = true)
 				""";
 
 		return switch (sortParam.toLowerCase()) {
@@ -469,10 +466,10 @@ public class ProductServiceImpl implements IProductService {
 		case "price-desc" ->
 			JpaSort.unsafe(Sort.Direction.DESC, effectivePriceExpression).and(Sort.by(Sort.Direction.ASC, "name"));
 		case "popular" -> JpaSort.unsafe(Sort.Direction.DESC,
-				"(select coalesce(sum(v.sold), 0) from ProductVariant v where v.product = p and v.isActive = true and v.isSelling = true)")
+				"(select coalesce(sum(v.sold), 0) from ProductVariant v where v.product = p and v.isSelling = true)")
 				.and(Sort.by(Sort.Direction.DESC, "createdAt"));
 		case "discount" -> JpaSort.unsafe(Sort.Direction.DESC,
-				"(select max(case when v.promotionalPrice is not null and v.promotionalPrice < v.price then v.price - v.promotionalPrice else 0 end) from ProductVariant v where v.product = p and v.isActive = true and v.isSelling = true)")
+				"(select max(case when v.promotionalPrice is not null and v.promotionalPrice < v.price then v.price - v.promotionalPrice else 0 end) from ProductVariant v where v.product = p and v.isSelling = true)")
 				.and(Sort.by(Sort.Direction.DESC, "createdAt"));
 		case "rating" -> Sort.by(Sort.Direction.DESC, "rating").and(Sort.by(Sort.Direction.DESC, "createdAt"));
 		case "name-asc" -> Sort.by(Sort.Direction.ASC, "name");

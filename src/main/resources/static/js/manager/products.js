@@ -89,13 +89,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const categoryId = document.getElementById('categoryFilter')?.value || '';
         const status = document.getElementById('statusFilter')?.value || '';
 
+        let isSelling = '';
         let isActive = '';
-        if (status === 'active') isActive = 'true';
-        if (status === 'inactive') isActive = 'false';
+        if (status === 'active') isSelling = 'true';
+        if (status === 'inactive') isSelling = 'false';
+        if (status === 'deleted') isActive = 'false';
 
         let url = `/api/manager/products?page=${page}&size=${pageSize}`;
         if (search) url += `&search=${encodeURIComponent(search)}`;
         if (categoryId) url += `&categoryId=${encodeURIComponent(categoryId)}`;
+        if (isSelling) url += `&isSelling=${isSelling}`;
         if (isActive) url += `&isActive=${isActive}`;
 
         const tbody = document.getElementById('productTableBody');
@@ -150,10 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <td class="text-end">
               <button class="action js-manage-variants" data-id="${p.id}" data-name="${p.name}" title="Quản lý biến thể & Ảnh"><i class="fa-solid fa-layer-group"></i></button>
               <button class="action js-edit-product" data-id="${p.id}" title="Chỉnh sửa"><i class="fa-solid fa-pen"></i></button>
-              ${p.isActive
-                        ? `<button class="action text-danger js-delete-product" data-id="${p.id}" title="Vô hiệu hóa"><i class="fa-solid fa-trash"></i></button>`
-                        : `<button class="action text-success js-restore-product" data-id="${p.id}" title="Khôi phục"><i class="fa-solid fa-rotate-left"></i></button>`
-                    }
+              <button class="action text-danger js-delete-product" data-id="${p.id}" title="Xóa vĩnh viễn"><i class="fa-solid fa-trash"></i></button>
             </td>
           </tr>
         `;
@@ -179,8 +179,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         document.getElementById('productCategory').value = p.category ? p.category.id : (p.categoryId || '');
                         document.getElementById('productBrand').value = p.brand ? p.brand.id : (p.brandId || '');
                         document.getElementById('productDescription').value = p.description || '';
-                        document.getElementById('productIsActive').checked = p.isActive !== false;
                         document.getElementById('productIsSelling').checked = p.isSelling !== false;
+                        document.getElementById('productIsActive').checked = p.isActive !== false;
                         document.getElementById('productModalTitle').textContent = 'Chỉnh sửa sản phẩm';
 
                         const modal = new bootstrap.Modal(document.getElementById('productFormModal'));
@@ -195,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Delete Product
         document.querySelectorAll('.js-delete-product').forEach(btn => {
             btn.addEventListener('click', async () => {
-                if (!confirm('Bạn có chắc chắn muốn vô hiệu hóa sản phẩm này?')) return;
+                if (!confirm('Bạn có chắc chắn muốn xóa vĩnh viễn sản phẩm này khỏi cơ sở dữ liệu?')) return;
                 const id = btn.dataset.id;
                 try {
                     const res = await fetch(`/api/manager/products/${id}`, {
@@ -203,28 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         headers: authHeaders(false)
                     }).then(r => r.json());
                     if (res.success) {
-                        notify('Đã vô hiệu hóa sản phẩm');
-                        loadProducts(currentPage);
-                    } else {
-                        notify('Lỗi: ' + res.message);
-                    }
-                } catch (e) {
-                    notify('Lỗi: ' + e.message);
-                }
-            });
-        });
-
-        // Restore Product
-        document.querySelectorAll('.js-restore-product').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const id = btn.dataset.id;
-                try {
-                    const res = await fetch(`/api/manager/products/${id}/restore`, {
-                        method: 'POST',
-                        headers: authHeaders(false)
-                    }).then(r => r.json());
-                    if (res.success) {
-                        notify('Đã khôi phục sản phẩm');
+                        notify('Đã xóa vĩnh viễn sản phẩm');
                         loadProducts(currentPage);
                     } else {
                         notify('Lỗi: ' + res.message);
@@ -289,7 +268,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const categoryId = document.getElementById('productCategory').value;
             const brandId = document.getElementById('productBrand').value;
             const description = document.getElementById('productDescription').value.trim();
-            const isActive = document.getElementById('productIsActive').checked;
             const isSelling = document.getElementById('productIsSelling').checked;
 
             if (!name) {
@@ -310,8 +288,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 categoryId,
                 brandId: Number(brandId),
                 description,
-                isActive,
-                isSelling
+                isSelling,
+                isActive: document.getElementById('productIsActive').checked
             };
 
             try {
@@ -342,8 +320,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btnOpenCreateModal')?.addEventListener('click', () => {
         document.getElementById('productId').value = '';
         document.getElementById('productForm').reset();
-        document.getElementById('productIsActive').checked = true;
         document.getElementById('productIsSelling').checked = true;
+        document.getElementById('productIsActive').checked = true;
         document.getElementById('productModalTitle').textContent = 'Thêm mới sản phẩm';
         const modal = new bootstrap.Modal(document.getElementById('productFormModal'));
         modal.show();
@@ -371,9 +349,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     ? v.styleValues.map(sv => `${sv.styleName}: ${sv.name}`).join(' | ')
                     : '-';
                 const imgCount = v.imageUrls ? v.imageUrls.length : 0;
-                const statusBadge = v.isActive
-                    ? '<span class="status green">Hoạt động</span>'
-                    : '<span class="status red">Đã tắt</span>';
+                const statusBadge = !v.isActive
+                    ? '<span class="status red">Đã xóa mềm</span>'
+                    : v.isSelling
+                        ? '<span class="status green">Đang bán</span>'
+                        : '<span class="status yellow">Tạm ngưng bán</span>';
 
                 return `
           <tr>
@@ -390,10 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <td>${statusBadge}</td>
             <td class="text-end">
               <button class="action js-edit-variant" data-id="${v.id}" title="Sửa biến thể"><i class="fa-solid fa-pen"></i></button>
-              ${v.isActive
-                        ? `<button class="action text-danger js-delete-variant" data-id="${v.id}" title="Vô hiệu hóa"><i class="fa-solid fa-trash"></i></button>`
-                        : `<button class="action text-success js-restore-variant" data-id="${v.id}" title="Khôi phục"><i class="fa-solid fa-rotate-left"></i></button>`
-                    }
+              <button class="action text-danger js-delete-variant" data-id="${v.id}" title="Xóa vĩnh viễn"><i class="fa-solid fa-trash"></i></button>
             </td>
           </tr>
         `;
@@ -424,11 +401,11 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = Object.entries(grouped).map(([styleName, items]) => `
           <div class="mb-2">
             <div class="fw-semibold text-secondary small mb-1">${styleName}:</div>
-            <div class="d-flex flex-wrap gap-2">
+                        <div class="d-flex flex-wrap gap-2">
               ${items.map(sv => `
-                <div class="form-check form-check-inline border rounded p-1 px-2 bg-light">
-                  <input class="form-check-input js-style-val-check" type="checkbox" id="sv_${sv.id}" value="${sv.id}" ${selectedIds.includes(sv.id) ? 'checked' : ''}>
-                  <label class="form-check-label small" for="sv_${sv.id}">${sv.name}</label>
+                                <div class="d-inline-flex align-items-center gap-2 border rounded px-2 py-1 bg-light">
+                                    <input class="form-check-input m-0 js-style-val-check" type="checkbox" id="sv_${sv.id}" value="${sv.id}" ${selectedIds.includes(sv.id) ? 'checked' : ''}>
+                                    <label class="form-check-label small mb-0" for="sv_${sv.id}">${sv.name}</label>
                 </div>
               `).join('')}
             </div>
@@ -448,6 +425,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('variantPrice').value = v.price;
                 document.getElementById('variantPromoPrice').value = v.promotionalPrice || '';
                 document.getElementById('variantQuantity').value = v.quantity;
+                document.getElementById('variantIsActive').checked = v.isActive !== false;
+                document.getElementById('variantIsSelling').checked = v.isSelling !== false;
 
                 const selIds = v.styleValues ? v.styleValues.map(sv => sv.id) : [];
                 renderStyleValueCheckboxes(selIds);
@@ -461,7 +440,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Delete Variant
         document.querySelectorAll('.js-delete-variant').forEach(btn => {
             btn.addEventListener('click', async () => {
-                if (!confirm('Bạn có chắc muốn vô hiệu hóa biến thể này?')) return;
+                if (!confirm('Bạn có chắc chắn muốn xóa vĩnh viễn biến thể này khỏi cơ sở dữ liệu?')) return;
                 const vId = btn.dataset.id;
                 try {
                     const res = await fetch(`/api/manager/products/${productId}/variants/${vId}`, {
@@ -469,28 +448,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         headers: authHeaders(false)
                     }).then(r => r.json());
                     if (res.success) {
-                        notify('Đã vô hiệu hóa biến thể');
-                        loadVariants(productId);
-                    } else {
-                        notify('Lỗi: ' + res.message);
-                    }
-                } catch (e) {
-                    notify('Lỗi: ' + e.message);
-                }
-            });
-        });
-
-        // Restore Variant
-        document.querySelectorAll('.js-restore-variant').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const vId = btn.dataset.id;
-                try {
-                    const res = await fetch(`/api/manager/products/${productId}/variants/${vId}/restore`, {
-                        method: 'POST',
-                        headers: authHeaders(false)
-                    }).then(r => r.json());
-                    if (res.success) {
-                        notify('Đã khôi phục biến thể');
+                        notify('Đã xóa vĩnh viễn biến thể');
                         loadVariants(productId);
                     } else {
                         notify('Lỗi: ' + res.message);
@@ -559,8 +517,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 price: priceVal,
                 promotionalPrice: promoVal,
                 quantity: isNaN(qtyVal) ? 0 : qtyVal,
-                isActive: true,
-                isSelling: true,
+                isSelling: document.getElementById('variantIsSelling').checked,
+                isActive: document.getElementById('variantIsActive').checked,
                 styleValueIds: selectedStyleIds
             };
 

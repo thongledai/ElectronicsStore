@@ -23,9 +23,9 @@ public class ProductResponseDTO {
 
     private String description;
 
-    private Boolean isActive;
-
     private Boolean isSelling;
+
+    private Boolean isActive;
 
     private Double rating;
 

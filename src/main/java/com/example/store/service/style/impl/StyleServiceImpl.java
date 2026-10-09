@@ -46,8 +46,8 @@ public class StyleServiceImpl implements IStyleService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public PageResponse<StyleResponseDTO> getAllStyles(String search, Boolean isDeleted, Pageable pageable) {
-		Page<Style> page = styleRepository.search(search, isDeleted, pageable);
+	public PageResponse<StyleResponseDTO> getAllStyles(String search, Boolean isActive, Pageable pageable) {
+		Page<Style> page = styleRepository.search(search, isActive, pageable);
 		List<StyleResponseDTO> dtoList = page.getContent().stream().map(styleMapper::toResponseDTO).toList();
 		return PageResponse.of(page, dtoList);
 	}
@@ -55,13 +55,13 @@ public class StyleServiceImpl implements IStyleService {
 	@Override
 	@Transactional(readOnly = true)
 	public List<StyleResponseDTO> getActiveStyles() {
-		return styleRepository.findByIsDeletedFalse().stream().map(styleMapper::toResponseDTO).toList();
+		return styleRepository.findByIsActiveTrue().stream().map(styleMapper::toResponseDTO).toList();
 	}
 
 	@Override
 	@Transactional(readOnly = true)
 	public List<StyleOptionDTO> getStyleOptions() {
-		return styleRepository.findByIsDeletedFalse().stream()
+		return styleRepository.findByIsActiveTrue().stream()
 				.map(s -> StyleOptionDTO.builder().id(s.getId()).name(s.getName()).build()).toList();
 	}
 
@@ -107,7 +107,7 @@ public class StyleServiceImpl implements IStyleService {
 		}
 
 		Style style = Style.builder().name(requestDTO.getName().trim()).categories(categories)
-				.isDeleted(requestDTO.getIsDeleted() != null ? requestDTO.getIsDeleted() : false).build();
+				.isActive(requestDTO.getIsActive() != null ? requestDTO.getIsActive() : true).build();
 
 		Style saved = styleRepository.save(style);
 		log.info("Tạo mới kiểu thuộc tính thành công: id={}, name={}", saved.getId(), saved.getName());
@@ -130,14 +130,11 @@ public class StyleServiceImpl implements IStyleService {
 
 		style.setName(requestDTO.getName().trim());
 		style.setCategories(categories);
-		if (requestDTO.getIsDeleted() != null) {
-			if (requestDTO.getIsDeleted() && !Boolean.TRUE.equals(style.getIsDeleted())) {
+		if (requestDTO.getIsActive() != null) {
+			if (!requestDTO.getIsActive() && Boolean.TRUE.equals(style.getIsActive())) {
 				ensureNoActiveValues(id);
 			}
-			if (!requestDTO.getIsDeleted() && Boolean.TRUE.equals(style.getIsDeleted())) {
-				// Restore only this style; values retain their own state.
-			}
-			style.setIsDeleted(requestDTO.getIsDeleted());
+			style.setIsActive(requestDTO.getIsActive());
 		}
 
 		Style updated = styleRepository.save(style);
@@ -151,10 +148,17 @@ public class StyleServiceImpl implements IStyleService {
 		Style style = styleRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy kiểu thuộc tính với ID: " + id));
 
-		ensureNoActiveValues(id);
-		style.setIsDeleted(true);
-		styleRepository.save(style);
-		log.info("Xóa mềm kiểu thuộc tính id={}", id);
+		List<StyleValue> values = styleValueRepository.findByStyleId(id);
+		for (StyleValue value : values) {
+			if (productVariantRepository.existsByStyleValuesId(value.getId())) {
+				throw new BusinessException("Không thể xóa vĩnh viễn kiểu thuộc tính vì giá trị '"
+						+ value.getName() + "' vẫn được biến thể sản phẩm tham chiếu!");
+			}
+		}
+
+		styleValueRepository.deleteAll(values);
+		styleRepository.delete(style);
+		log.info("Xóa vĩnh viễn kiểu thuộc tính id={}", id);
 	}
 
 	@Override
@@ -163,7 +167,7 @@ public class StyleServiceImpl implements IStyleService {
 		Style style = styleRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy kiểu thuộc tính với ID: " + id));
 
-		style.setIsDeleted(false);
+		style.setIsActive(true);
 		styleRepository.save(style);
 
 	}
@@ -172,7 +176,7 @@ public class StyleServiceImpl implements IStyleService {
 		if (found.size() != requestedIds.size()) {
 			throw new ResourceNotFoundException("Một hoặc nhiều danh mục không tồn tại.");
 		}
-		if (found.stream().anyMatch(c -> Boolean.TRUE.equals(c.getIsDeleted()))) {
+		if (found.stream().anyMatch(c -> !Boolean.TRUE.equals(c.getIsActive()))) {
 			throw new BusinessException("Không thể gán kiểu thuộc tính vào danh mục đã xóa.");
 		}
 	}
@@ -180,12 +184,12 @@ public class StyleServiceImpl implements IStyleService {
 	private void ensureNoActiveValues(UUID styleId) {
 		List<StyleValue> values = styleValueRepository.findByStyleId(styleId);
 		for (StyleValue value : values) {
-			if (productVariantRepository.existsActiveVariantByStyleValueId(value.getId())) {
+			if (productVariantRepository.existsByStyleValuesId(value.getId())) {
 				throw new BusinessException("Không thể tắt kiểu thuộc tính vì giá trị '" + value.getName()
 						+ "' vẫn được biến thể hoạt động sử dụng.");
 			}
 		}
-		long activeValues = values.stream().filter(value -> !Boolean.TRUE.equals(value.getIsDeleted())).count();
+		long activeValues = values.stream().filter(value -> Boolean.TRUE.equals(value.getIsActive())).count();
 		if (activeValues > 0) {
 			throw new BusinessException("Không thể tắt kiểu thuộc tính vì vẫn còn " + activeValues
 					+ " giá trị đang hoạt động. Hãy tắt từng giá trị trước.");

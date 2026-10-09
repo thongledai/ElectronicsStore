@@ -26,5 +26,5 @@ public class StyleRequestDTO {
 
     private Set<UUID> categoryIds;
 
-    private Boolean isDeleted;
+    private Boolean isActive;
 }

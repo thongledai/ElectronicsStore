@@ -26,6 +26,7 @@ import com.example.store.exception.ResourceNotFoundException;
 import com.example.store.mapper.CategoryMapper;
 import com.example.store.repository.CategoryRepository;
 import com.example.store.repository.ProductRepository;
+import com.example.store.repository.StyleRepository;
 import com.example.store.repository.StyleValueRepository;
 import com.example.store.service.category.ICategoryService;
 
@@ -43,12 +44,13 @@ public class CategoryServiceImpl implements ICategoryService {
 	private final ProductRepository productRepository;
 	private final CategoryMapper categoryMapper;
 	private final ICloudinaryService cloudinaryService;
+	private final StyleRepository styleRepository;
 	private final StyleValueRepository styleValueRepository;
 
 	@Override
 	@Transactional(readOnly = true)
-	public PageResponse<CategoryResponseDTO> getAllCategories(String search, Boolean isDeleted, Pageable pageable) {
-		Page<Category> page = categoryRepository.search(search, isDeleted, pageable);
+	public PageResponse<CategoryResponseDTO> getAllCategories(String search, Boolean isActive, Pageable pageable) {
+		Page<Category> page = categoryRepository.search(search, isActive, pageable);
 		List<CategoryResponseDTO> dtoList = page.getContent().stream().map(categoryMapper::toResponseDTO).toList();
 		return PageResponse.of(page, dtoList);
 	}
@@ -56,7 +58,7 @@ public class CategoryServiceImpl implements ICategoryService {
 	@Override
 	@Transactional(readOnly = true)
 	public List<CategoryResponseDTO> getActiveCategories() {
-		return categoryRepository.findByIsDeletedFalseOrderByCreatedAtDesc().stream().map(categoryMapper::toResponseDTO)
+		return categoryRepository.findByIsActiveTrueOrderByCreatedAtDesc().stream().map(categoryMapper::toResponseDTO)
 				.toList();
 	}
 
@@ -64,7 +66,7 @@ public class CategoryServiceImpl implements ICategoryService {
 	@Transactional(readOnly = true)
 	public List<CategoryOptionDTO> getCategoryOptions() {
 		return categoryRepository
-				.findByIsDeletedFalse().stream().map(c -> CategoryOptionDTO.builder().id(c.getId()).name(c.getName())
+				.findByIsActiveTrue().stream().map(c -> CategoryOptionDTO.builder().id(c.getId()).name(c.getName())
 						.slug(c.getSlug()).parentId(c.getParent() != null ? c.getParent().getId() : null).build())
 				.toList();
 	}
@@ -99,7 +101,7 @@ public class CategoryServiceImpl implements ICategoryService {
 			parent = categoryRepository.findById(requestDTO.getParentId())
 					.orElseThrow(() -> new ResourceNotFoundException(
 							"Không tìm thấy danh mục cha với ID: " + requestDTO.getParentId()));
-			if (Boolean.TRUE.equals(parent.getIsDeleted())) {
+			if (!Boolean.TRUE.equals(parent.getIsActive())) {
 				throw new BusinessException("Không thể chọn danh mục cha đã bị xóa!");
 			}
 		}
@@ -112,7 +114,7 @@ public class CategoryServiceImpl implements ICategoryService {
 		}
 
 		Category category = Category.builder().name(requestDTO.getName().trim()).slug(slug).parent(parent)
-				.image(imageUrl).isDeleted(requestDTO.getIsDeleted() != null ? requestDTO.getIsDeleted() : false)
+				.image(imageUrl).isActive(requestDTO.getIsActive() != null ? requestDTO.getIsActive() : true)
 				.build();
 
 		Category saved = categoryRepository.save(category);
@@ -147,7 +149,7 @@ public class CategoryServiceImpl implements ICategoryService {
 			parent = categoryRepository.findById(requestDTO.getParentId())
 					.orElseThrow(() -> new ResourceNotFoundException(
 							"Không tìm thấy danh mục cha với ID: " + requestDTO.getParentId()));
-			if (Boolean.TRUE.equals(parent.getIsDeleted())) {
+			if (!Boolean.TRUE.equals(parent.getIsActive())) {
 				throw new BusinessException("Không thể chọn danh mục cha đã bị xóa!");
 			}
 		}
@@ -165,15 +167,15 @@ public class CategoryServiceImpl implements ICategoryService {
 		category.setName(requestDTO.getName().trim());
 		category.setSlug(slug);
 		category.setParent(parent);
-		if (requestDTO.getIsDeleted() != null) {
-			if (requestDTO.getIsDeleted() && !Boolean.TRUE.equals(category.getIsDeleted())) {
+		if (requestDTO.getIsActive() != null) {
+			if (!requestDTO.getIsActive() && Boolean.TRUE.equals(category.getIsActive())) {
 				validateCanDeleteCategory(id);
 			}
-			if (!requestDTO.getIsDeleted() && Boolean.TRUE.equals(category.getIsDeleted())
-					&& parent != null && Boolean.TRUE.equals(parent.getIsDeleted())) {
+			if (requestDTO.getIsActive() && !Boolean.TRUE.equals(category.getIsActive())
+					&& parent != null && !Boolean.TRUE.equals(parent.getIsActive())) {
 				throw new BusinessException("Không thể khôi phục danh mục khi danh mục cha đang bị xóa.");
 			}
-			category.setIsDeleted(requestDTO.getIsDeleted());
+			category.setIsActive(requestDTO.getIsActive());
 		}
 
 		Category updated = categoryRepository.save(category);
@@ -187,11 +189,18 @@ public class CategoryServiceImpl implements ICategoryService {
 		Category category = categoryRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục với ID: " + id));
 
-		validateCanDeleteCategory(id);
+		if (productRepository.existsByCategoryId(id)) {
+			throw new BusinessException("Không thể xóa vĩnh viễn danh mục vì vẫn còn sản phẩm tham chiếu!");
+		}
+		if (categoryRepository.existsByParentId(id)) {
+			throw new BusinessException("Không thể xóa vĩnh viễn danh mục vì vẫn còn danh mục con!");
+		}
+		if (styleRepository.existsByCategoriesId(id)) {
+			throw new BusinessException("Hãy gỡ danh mục khỏi các kiểu thuộc tính trước khi xóa vĩnh viễn!");
+		}
 
-		category.setIsDeleted(true);
-		categoryRepository.save(category);
-		log.info("Xóa mềm danh mục id={}", id);
+		categoryRepository.delete(category);
+		log.info("Xóa vĩnh viễn danh mục id={}", id);
 	}
 
 	@Override
@@ -201,20 +210,20 @@ public class CategoryServiceImpl implements ICategoryService {
 				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục với ID: " + id));
 
 		// Khôi phục: chỉ khi category cha chưa bị xóa
-		if (category.getParent() != null && Boolean.TRUE.equals(category.getParent().getIsDeleted())) {
+		if (category.getParent() != null && !Boolean.TRUE.equals(category.getParent().getIsActive())) {
 			throw new BusinessException("Không thể khôi phục danh mục vì danh mục cha đang bị xóa!");
 		}
 
-		category.setIsDeleted(false);
+		category.setIsActive(true);
 		categoryRepository.save(category);
 		log.info("Khôi phục danh mục id={}", id);
 	}
 
 	private void validateCanDeleteCategory(UUID id) {
-		if (productRepository.existsByCategoryIdAndIsActiveTrue(id)) {
-			throw new BusinessException("Không thể xóa danh mục vì vẫn còn sản phẩm đang hoạt động!");
+		if (productRepository.existsByCategoryId(id)) {
+			throw new BusinessException("Không thể xóa mềm danh mục vì vẫn còn sản phẩm tham chiếu!");
 		}
-		if (categoryRepository.existsByParentIdAndIsDeletedFalse(id)) {
+		if (categoryRepository.existsByParentIdAndIsActiveTrue(id)) {
 			throw new BusinessException("Không thể xóa danh mục vì vẫn còn danh mục con đang hoạt động!");
 		}
 	}
@@ -229,7 +238,7 @@ public class CategoryServiceImpl implements ICategoryService {
 	}
 
 	private void collectSubCategories(UUID currentId, List<UUID> accumulator) {
-		List<Category> children = categoryRepository.findByParentIdAndIsDeletedFalse(currentId);
+		List<Category> children = categoryRepository.findByParentIdAndIsActiveTrue(currentId);
 		for (Category child : children) {
 			if (!accumulator.contains(child.getId())) {
 				accumulator.add(child.getId());

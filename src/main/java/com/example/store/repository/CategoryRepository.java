@@ -18,13 +18,13 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
 
     Optional<Category> findBySlug(String slug);
 
-    Optional<Category> findBySlugAndIsDeletedFalse(String slug);
+    Optional<Category> findBySlugAndIsActiveTrue(String slug);
 
-    List<Category> findByIsDeletedFalse();
+    List<Category> findByIsActiveTrue();
 
-    List<Category> findByIsDeletedFalseOrderByCreatedAtDesc();
+    List<Category> findByIsActiveTrueOrderByCreatedAtDesc();
 
-    List<Category> findByParentIdAndIsDeletedFalse(UUID parentId);
+    List<Category> findByParentIdAndIsActiveTrue(UUID parentId);
 
     boolean existsBySlug(String slug);
 
@@ -32,7 +32,7 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
 
     boolean existsByParentId(UUID parentId);
 
-    boolean existsByParentIdAndIsDeletedFalse(UUID parentId);
+    boolean existsByParentIdAndIsActiveTrue(UUID parentId);
 
     boolean existsByName(String name);
 
@@ -47,18 +47,18 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
                 LOWER(c.name) LIKE LOWER(CONCAT('%', :q, '%')) OR
                 LOWER(c.slug) LIKE LOWER(CONCAT('%', :q, '%'))
             )
-            AND (:isDeleted IS NULL OR c.isDeleted = :isDeleted)
+            AND (:isActive IS NULL OR c.isActive = :isActive)
         """)
     Page<Category> search(
             @Param("q") String q,
-            @Param("isDeleted") Boolean isDeleted,
+            @Param("isActive") Boolean isActive,
             Pageable pageable
     );
 
     @Query("""
         SELECT c
         FROM Category c
-        WHERE c.isDeleted = false
+        WHERE c.isActive = true
         """)
     Page<Category> findAllActive(Pageable pageable);
 }

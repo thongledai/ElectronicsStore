@@ -1,6 +1,5 @@
 package com.example.store.service.product.impl;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -16,7 +15,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.example.store.entity.Brand;
-import com.example.store.entity.Category;
 import com.example.store.entity.Product;
 import com.example.store.exception.BusinessException;
 import com.example.store.mapper.BrandMapper;
@@ -47,9 +45,9 @@ class ProductServiceStateTest {
 	@Test
 	void disablingProductWithActiveVariantIsRejectedWithoutChangingEitherRecord() {
 		UUID productId = UUID.randomUUID();
-		Product product = Product.builder().id(productId).isActive(true).isSelling(true).build();
+		Product product = Product.builder().id(productId).isSelling(true).build();
 		when(productRepository.findById(productId)).thenReturn(Optional.of(product));
-		when(productVariantRepository.existsByProductIdAndIsActiveTrue(productId)).thenReturn(true);
+		when(productVariantRepository.existsByProductId(productId)).thenReturn(true);
 
 		assertThrows(BusinessException.class, () -> service.deleteProduct(productId));
 
@@ -58,12 +56,12 @@ class ProductServiceStateTest {
 	}
 
 	@Test
-	void restoringProductDoesNotRestoreItsVariantsOrChangeSellingState() {
+	void productsDoNotSupportSoftDeleteRestore() {
 		UUID productId = UUID.randomUUID();
-		Category category = Category.builder().isDeleted(false).build();
-		Brand brand = Brand.builder().isActive(true).build();
+		Category category = Category.builder().isActive(true).build();
+		Brand brand = Brand.builder().build();
 		Product product = Product.builder().id(productId).category(category).brand(brand)
-				.isActive(false).isSelling(false).build();
+				.isSelling(false).build();
 		when(productRepository.findById(productId)).thenReturn(Optional.of(product));
 
 		service.restoreProduct(productId);

@@ -81,10 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <td>${statusBadge}</td>
             <td class="text-end">
               <button class="action js-edit-brand" data-id="${b.id}" title="Chỉnh sửa"><i class="fa-solid fa-pen"></i></button>
-              ${b.isActive
-            ? `<button class="action text-danger js-delete-brand" data-id="${b.id}" title="Ngừng hoạt động"><i class="fa-solid fa-ban"></i></button>`
-            : `<button class="action text-success js-restore-brand" data-id="${b.id}" title="Kích hoạt lại"><i class="fa-solid fa-rotate-left"></i></button>`
-          }
+              <button class="action text-danger js-delete-brand" data-id="${b.id}" title="Xóa vĩnh viễn"><i class="fa-solid fa-trash"></i></button>
             </td>
           </tr>
         `;
@@ -130,10 +127,10 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    // Delete Brand (Ngừng hoạt động)
+    // Permanently delete Brand
     document.querySelectorAll('.js-delete-brand').forEach(btn => {
       btn.addEventListener('click', async () => {
-        if (!confirm('Bạn có chắc chắn muốn ngừng hoạt động thương hiệu này?')) return;
+        if (!confirm('Bạn có chắc chắn muốn xóa vĩnh viễn thương hiệu này khỏi cơ sở dữ liệu?')) return;
         const id = btn.dataset.id;
         try {
           const res = await fetch(`/api/manager/brands/${id}`, {
@@ -141,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
             headers: authHeaders(false)
           }).then(r => r.json());
           if (res.success) {
-            notify('Đã ngừng hoạt động thương hiệu');
+            notify('Đã xóa vĩnh viễn thương hiệu');
             loadBrands(currentPage);
           } else {
             notify('Lỗi: ' + res.message);
@@ -152,26 +149,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    // Restore Brand (Kích hoạt lại)
-    document.querySelectorAll('.js-restore-brand').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const id = btn.dataset.id;
-        try {
-          const res = await fetch(`/api/manager/brands/${id}/restore`, {
-            method: 'POST',
-            headers: authHeaders(false)
-          }).then(r => r.json());
-          if (res.success) {
-            notify('Đã kích hoạt lại thương hiệu');
-            loadBrands(currentPage);
-          } else {
-            notify('Lỗi: ' + res.message);
-          }
-        } catch (e) {
-          notify('Lỗi: ' + e.message);
-        }
-      });
-    });
   }
 
   /* ---------- Form Submit (Create / Edit via multipart) ---------- */

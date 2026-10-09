@@ -26,7 +26,7 @@ public class CategoryResponseDTO {
 
     private String image;
 
-    private Boolean isDeleted;
+    private Boolean isActive;
 
     private LocalDateTime createdAt;
 

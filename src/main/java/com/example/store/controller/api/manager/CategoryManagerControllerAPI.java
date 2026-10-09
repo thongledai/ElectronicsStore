@@ -45,11 +45,11 @@ public class CategoryManagerControllerAPI {
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<CategoryResponseDTO>>> getAllCategories(
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) Boolean isDeleted,
+            @RequestParam(required = false) Boolean isActive,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, Math.min(size, 50), Sort.by(Sort.Direction.DESC, "createdAt"));
-        PageResponse<CategoryResponseDTO> result = categoryService.getAllCategories(search, isDeleted, pageable);
+        PageResponse<CategoryResponseDTO> result = categoryService.getAllCategories(search, isActive, pageable);
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách danh mục thành công", result));
     }
 
@@ -104,10 +104,10 @@ public class CategoryManagerControllerAPI {
     }
 
     @DeleteMapping("/{id}")
-    @AuditAction("Xóa mềm danh mục")
+    @AuditAction("Xóa vĩnh viễn danh mục")
     public ResponseEntity<ApiResponse<Void>> deleteCategory(@PathVariable UUID id) {
         categoryService.deleteCategory(id);
-        return ResponseEntity.ok(ApiResponse.success("Xóa mềm danh mục thành công"));
+        return ResponseEntity.ok(ApiResponse.success("Xóa vĩnh viễn danh mục thành công"));
     }
 
     @PostMapping("/{id}/restore")

@@ -41,11 +41,11 @@ public class StyleManagerControllerAPI {
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<StyleResponseDTO>>> getAllStyles(
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) Boolean isDeleted,
+            @RequestParam(required = false) Boolean isActive,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, Math.min(size, 50), Sort.by(Sort.Direction.DESC, "createdAt"));
-        PageResponse<StyleResponseDTO> result = styleService.getAllStyles(search, isDeleted, pageable);
+        PageResponse<StyleResponseDTO> result = styleService.getAllStyles(search, isActive, pageable);
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách kiểu thuộc tính thành công", result));
     }
 
@@ -86,10 +86,10 @@ public class StyleManagerControllerAPI {
     }
 
     @DeleteMapping("/{id}")
-    @AuditAction("Xóa mềm kiểu thuộc tính")
+    @AuditAction("Xóa vĩnh viễn kiểu thuộc tính")
     public ResponseEntity<ApiResponse<Void>> deleteStyle(@PathVariable UUID id) {
         styleService.deleteStyle(id);
-        return ResponseEntity.ok(ApiResponse.success("Xóa mềm kiểu thuộc tính thành công"));
+        return ResponseEntity.ok(ApiResponse.success("Xóa vĩnh viễn kiểu thuộc tính thành công"));
     }
 
     @PostMapping("/{id}/restore")

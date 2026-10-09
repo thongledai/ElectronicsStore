@@ -23,7 +23,7 @@ public class StyleResponseDTO {
 
     private List<String> categoryNames;
 
-    private Boolean isDeleted;
+    private Boolean isActive;
 
     private LocalDateTime createdAt;
 

@@ -54,13 +54,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const search = document.getElementById('searchInput')?.value.trim() || '';
     const status = document.getElementById('statusFilter')?.value || '';
 
-    let isDeleted = '';
-    if (status === 'active') isDeleted = 'false';
-    if (status === 'deleted') isDeleted = 'true';
+    let isActive = '';
+    if (status === 'active') isActive = 'true';
+    if (status === 'deleted') isActive = 'false';
 
     let url = `/api/manager/categories?page=${page}&size=${pageSize}`;
     if (search) url += `&search=${encodeURIComponent(search)}`;
-    if (isDeleted) url += `&isDeleted=${isDeleted}`;
+    if (isActive) url += `&isActive=${isActive}`;
 
     const tbody = document.getElementById('categoryTableBody');
     if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted">Đang tải dữ liệu...</td></tr>`;
@@ -85,9 +85,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       tbody.innerHTML = data.content.map(c => {
-        const statusBadge = c.isDeleted
-          ? '<span class="status red">Đã xóa mềm</span>'
-          : '<span class="status green">Hoạt động</span>';
+        const statusBadge = c.isActive
+          ? '<span class="status green">Hoạt động</span>'
+          : '<span class="status red">Đã xóa mềm</span>';
 
         return `
           <tr>
@@ -99,10 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <td>${statusBadge}</td>
             <td class="text-end">
               <button class="action js-edit-category" data-id="${c.id}" title="Chỉnh sửa"><i class="fa-solid fa-pen"></i></button>
-              ${c.isDeleted
-            ? `<button class="action text-success js-restore-category" data-id="${c.id}" title="Khôi phục"><i class="fa-solid fa-rotate-left"></i></button>`
-            : `<button class="action text-danger js-delete-category" data-id="${c.id}" title="Xóa mềm"><i class="fa-solid fa-trash"></i></button>`
-          }
+              <button class="action text-danger js-delete-category" data-id="${c.id}" title="Xóa vĩnh viễn"><i class="fa-solid fa-trash"></i></button>
             </td>
           </tr>
         `;
@@ -126,6 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('categoryId').value = c.id;
             document.getElementById('categoryName').value = c.name;
             document.getElementById('categoryParent').value = c.parentId || '';
+            document.getElementById('categoryIsActive').checked = c.isActive;
             document.getElementById('categoryImageFile').value = '';
 
             const preview = document.getElementById('currentCategoryImgPreview');
@@ -147,10 +145,10 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    // Delete Category
+    // Permanently delete Category
     document.querySelectorAll('.js-delete-category').forEach(btn => {
       btn.addEventListener('click', async () => {
-        if (!confirm('Bạn có chắc chắn muốn xóa mềm danh mục này?')) return;
+        if (!confirm('Bạn có chắc chắn muốn xóa vĩnh viễn danh mục này khỏi cơ sở dữ liệu?')) return;
         const id = btn.dataset.id;
         try {
           const res = await fetch(`/api/manager/categories/${id}`, {
@@ -158,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
             headers: authHeaders(false)
           }).then(r => r.json());
           if (res.success) {
-            notify('Đã xóa mềm danh mục');
+            notify('Đã xóa vĩnh viễn danh mục');
             loadCategories(currentPage);
             loadCategoryOptions();
           } else {
@@ -170,27 +168,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    // Restore Category
-    document.querySelectorAll('.js-restore-category').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const id = btn.dataset.id;
-        try {
-          const res = await fetch(`/api/manager/categories/${id}/restore`, {
-            method: 'POST',
-            headers: authHeaders(false)
-          }).then(r => r.json());
-          if (res.success) {
-            notify('Đã khôi phục danh mục');
-            loadCategories(currentPage);
-            loadCategoryOptions();
-          } else {
-            notify('Lỗi: ' + res.message);
-          }
-        } catch (e) {
-          notify('Lỗi: ' + e.message);
-        }
-      });
-    });
   }
 
   /* ---------- Form Submit (Create / Edit via multipart) ---------- */
@@ -209,6 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (fileInput.files && fileInput.files[0]) {
         formData.append('imageFile', fileInput.files[0]);
       }
+      formData.append('isActive', document.getElementById('categoryIsActive').checked);
 
       try {
         const url = id ? `/api/manager/categories/${id}` : '/api/manager/categories';
@@ -241,6 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnOpenCreateCategoryModal')?.addEventListener('click', () => {
     document.getElementById('categoryId').value = '';
     document.getElementById('categoryForm').reset();
+    document.getElementById('categoryIsActive').checked = true;
     document.getElementById('currentCategoryImgPreview').style.display = 'none';
     document.getElementById('categoryModalTitle').textContent = 'Thêm mới danh mục';
     const modal = new bootstrap.Modal(document.getElementById('categoryFormModal'));

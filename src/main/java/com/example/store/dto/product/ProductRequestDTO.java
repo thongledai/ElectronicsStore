@@ -31,7 +31,7 @@ public class ProductRequestDTO {
     @NotNull(message = "Thương hiệu sản phẩm không được để trống")
     private Long brandId;
 
-    private Boolean isActive;
-
     private Boolean isSelling;
+
+    private Boolean isActive;
 }

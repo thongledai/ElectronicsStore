@@ -14,7 +14,7 @@ import com.example.store.dto.style.StyleValueOptionDTO;
 
 public interface ICategoryService {
 
-    PageResponse<CategoryResponseDTO> getAllCategories(String search, Boolean isDeleted, Pageable pageable);
+    PageResponse<CategoryResponseDTO> getAllCategories(String search, Boolean isActive, Pageable pageable);
 
     List<CategoryResponseDTO> getActiveCategories();
 

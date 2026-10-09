@@ -37,6 +37,7 @@
             <option value="">-- Trạng thái --</option>
             <option value="active">Đang hoạt động</option>
             <option value="inactive">Đã ngừng/vô hiệu hóa</option>
+            <option value="deleted">Đã xóa mềm</option>
           </select>
         </div>
         <div class="col-md-2 text-md-end">
@@ -109,7 +110,7 @@
                   <div class="d-flex gap-4 mt-2">
                     <div class="form-check form-switch">
                       <input class="form-check-input" type="checkbox" id="productIsActive" checked>
-                      <label class="form-check-label" for="productIsActive">Kích hoạt</label>
+                      <label class="form-check-label" for="productIsActive">Hoạt động</label>
                     </div>
                     <div class="form-check form-switch">
                       <input class="form-check-input" type="checkbox" id="productIsSelling" checked>
@@ -189,9 +190,21 @@
                     <input type="number" class="form-control form-control-sm" id="variantQuantity" required min="0"
                       value="0">
                   </div>
+                  <div class="col-12">
+                    <div class="d-flex flex-wrap align-items-center gap-4">
+                      <div class="form-check form-switch mb-0">
+                      <input class="form-check-input" type="checkbox" id="variantIsActive" checked>
+                      <label class="form-check-label" for="variantIsActive">Hoạt động</label>
+                      </div>
+                      <div class="form-check form-switch mb-0">
+                      <input class="form-check-input" type="checkbox" id="variantIsSelling" checked>
+                      <label class="form-check-label" for="variantIsSelling">Đang bán</label>
+                      </div>
+                    </div>
+                  </div>
                   <div class="col-md-12">
                     <label class="form-label fw-semibold">Thuộc tính (Style Values)</label>
-                    <div id="variantStyleValuesContainer" class="p-2 border rounded bg-white"></div>
+                    <div id="variantStyleValuesContainer" class="p-3 border rounded bg-white"></div>
                   </div>
                   <div class="col-md-12 text-end">
                     <button type="button" class="btn btn-sm btn-secondary me-2" id="btnCancelVariantForm">Hủy</button>

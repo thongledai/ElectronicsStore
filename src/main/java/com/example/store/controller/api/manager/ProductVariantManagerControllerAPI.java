@@ -84,12 +84,12 @@ public class ProductVariantManagerControllerAPI {
     }
 
     @DeleteMapping("/{variantId}")
-    @AuditAction("Vô hiệu hóa biến thể sản phẩm")
+    @AuditAction("Xóa vĩnh viễn biến thể sản phẩm")
     public ResponseEntity<ApiResponse<Void>> deleteVariant(
             @PathVariable UUID productId,
             @PathVariable UUID variantId) {
         productVariantService.deleteVariant(productId, variantId);
-        return ResponseEntity.ok(ApiResponse.success("Vô hiệu hóa biến thể thành công"));
+        return ResponseEntity.ok(ApiResponse.success("Xóa vĩnh viễn biến thể thành công"));
     }
 
     @PostMapping("/{variantId}/restore")

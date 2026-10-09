@@ -32,11 +32,11 @@ public interface StyleValueRepository extends JpaRepository<StyleValue, UUID> {
 
 	boolean existsByStyleId(UUID styleId);
 
-	boolean existsByStyleIdAndIsDeletedFalse(UUID styleId);
+	boolean existsByStyleIdAndIsActiveTrue(UUID styleId);
 
-	List<StyleValue> findByStyleIdAndIsDeletedFalse(UUID styleId);
+	List<StyleValue> findByStyleIdAndIsActiveTrue(UUID styleId);
 
-	List<StyleValue> findByIsDeletedFalse();
+	List<StyleValue> findByIsActiveTrue();
 
 	@Query("""
 			SELECT sv
@@ -47,23 +47,23 @@ public interface StyleValueRepository extends JpaRepository<StyleValue, UUID> {
 			        LOWER(sv.name) LIKE LOWER(CONCAT('%', :q, '%'))
 			    )
 			    AND (:styleId IS NULL OR sv.style.id = :styleId)
-			    AND (:isDeleted IS NULL OR sv.isDeleted = :isDeleted)
+			    AND (:isActive IS NULL OR sv.isActive = :isActive)
 			""")
-	Page<StyleValue> search(@Param("q") String q, @Param("styleId") UUID styleId, @Param("isDeleted") Boolean isDeleted,
+	Page<StyleValue> search(@Param("q") String q, @Param("styleId") UUID styleId, @Param("isActive") Boolean isActive,
 			Pageable pageable);
 
 	@Query("""
 			SELECT sv
 			FROM StyleValue sv
 			WHERE sv.style.id = :styleId
-			    AND sv.isDeleted = false
+			    AND sv.isActive = true
 			""")
 	Page<StyleValue> findActiveByStyleId(@Param("styleId") UUID styleId, Pageable pageable);
 
 	@Query("""
 			SELECT sv
 			FROM StyleValue sv
-			WHERE sv.isDeleted = false
+			WHERE sv.isActive = true
 			""")
 	Page<StyleValue> findAllActive(Pageable pageable);
 
@@ -73,8 +73,8 @@ public interface StyleValueRepository extends JpaRepository<StyleValue, UUID> {
 			JOIN FETCH sv.style s
 			JOIN s.categories c
 			WHERE c.id = :categoryId
-			    AND sv.isDeleted = false
-			    AND s.isDeleted = false
+			    AND sv.isActive = true
+			    AND s.isActive = true
 			ORDER BY s.name ASC, sv.name ASC
 			""")
 	List<StyleValue> findActiveByCategoryId(@Param("categoryId") UUID categoryId);

@@ -12,7 +12,7 @@ import com.example.store.dto.style.StyleValueResponseDTO;
 
 public interface IStyleValueService {
 
-    PageResponse<StyleValueResponseDTO> getAllStyleValues(String search, UUID styleId, Boolean isDeleted,
+    PageResponse<StyleValueResponseDTO> getAllStyleValues(String search, UUID styleId, Boolean isActive,
             Pageable pageable);
 
     List<StyleValueResponseDTO> getActiveStyleValues();

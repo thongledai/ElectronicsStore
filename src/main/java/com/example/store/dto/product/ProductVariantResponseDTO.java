@@ -34,9 +34,9 @@ public class ProductVariantResponseDTO {
 
     private Integer sold;
 
-    private Boolean isActive;
-
     private Boolean isSelling;
+
+    private Boolean isActive;
 
     private List<String> imageUrls;
 

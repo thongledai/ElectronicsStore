@@ -12,7 +12,7 @@ import com.example.store.dto.style.StyleResponseDTO;
 
 public interface IStyleService {
 
-    PageResponse<StyleResponseDTO> getAllStyles(String search, Boolean isDeleted, Pageable pageable);
+    PageResponse<StyleResponseDTO> getAllStyles(String search, Boolean isActive, Pageable pageable);
 
     List<StyleResponseDTO> getActiveStyles();
 

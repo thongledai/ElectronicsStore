@@ -22,7 +22,7 @@ public class StyleValueResponseDTO {
 
     private String styleName;
 
-    private Boolean isDeleted;
+    private Boolean isActive;
 
     private LocalDateTime createdAt;
 

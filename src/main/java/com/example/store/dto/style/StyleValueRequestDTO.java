@@ -27,5 +27,5 @@ public class StyleValueRequestDTO {
     @NotNull(message = "Style không được để trống")
     private UUID styleId;
 
-    private Boolean isDeleted;
+    private Boolean isActive;
 }

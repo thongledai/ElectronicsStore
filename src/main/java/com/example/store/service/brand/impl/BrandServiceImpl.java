@@ -144,8 +144,8 @@ public class BrandServiceImpl implements IBrandService {
         brand.setDescription(requestDTO.getDescription());
         if (requestDTO.getIsActive() != null) {
             if (!requestDTO.getIsActive() && !Boolean.FALSE.equals(brand.getIsActive())
-                    && productRepository.existsByBrandIdAndIsActiveTrue(id)) {
-                throw new BusinessException("Không thể tắt thương hiệu vì vẫn còn sản phẩm đang hoạt động. Hãy tắt sản phẩm và biến thể trước.");
+                    && productRepository.existsByBrandId(id)) {
+                throw new BusinessException("Không thể xóa mềm thương hiệu vì vẫn còn sản phẩm tham chiếu!");
             }
             brand.setIsActive(requestDTO.getIsActive());
         }
@@ -161,15 +161,12 @@ public class BrandServiceImpl implements IBrandService {
         Brand brand = brandRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thương hiệu với ID: " + id));
 
-        // Ràng buộc: chỉ ngừng hoạt động (isActive=false) khi không còn Product đang
-        // active
-        if (productRepository.existsByBrandIdAndIsActiveTrue(id)) {
-            throw new BusinessException("Không thể ngừng hoạt động thương hiệu vì vẫn còn sản phẩm đang hoạt động!");
+        if (productRepository.existsByBrandId(id)) {
+            throw new BusinessException("Không thể xóa vĩnh viễn thương hiệu vì vẫn còn sản phẩm tham chiếu!");
         }
 
-        brand.setIsActive(false);
-        brandRepository.save(brand);
-        log.info("Ngừng hoạt động thương hiệu id={}", id);
+        brandRepository.delete(brand);
+        log.info("Xóa vĩnh viễn thương hiệu id={}", id);
     }
 
     @Override

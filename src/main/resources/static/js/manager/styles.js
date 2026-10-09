@@ -33,6 +33,16 @@ document.addEventListener('DOMContentLoaded', () => {
     else alert(msg);
   }
 
+  function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, character => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    })[character]);
+  }
+
   /* ---------- Load Category Options for Checkboxes ---------- */
   async function loadCategoryOptions() {
     try {
@@ -61,13 +71,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const search = document.getElementById('searchInput')?.value.trim() || '';
     const status = document.getElementById('statusFilter')?.value || '';
 
-    let isDeleted = '';
-    if (status === 'active') isDeleted = 'false';
-    if (status === 'deleted') isDeleted = 'true';
+    let isActive = '';
+    if (status === 'active') isActive = 'true';
+    if (status === 'deleted') isActive = 'false';
 
     let url = `/api/manager/styles?page=${page}&size=${pageSize}`;
     if (search) url += `&search=${encodeURIComponent(search)}`;
-    if (isDeleted) url += `&isDeleted=${isDeleted}`;
+    if (isActive) url += `&isActive=${isActive}`;
 
     const tbody = document.getElementById('styleTableBody');
     if (tbody) tbody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-muted">Đang tải dữ liệu...</td></tr>`;
@@ -96,9 +106,9 @@ document.addEventListener('DOMContentLoaded', () => {
           ? s.categoryNames.map(name => `<span class="badge bg-secondary me-1 mb-1">${name}</span>`).join('')
           : '<span class="text-muted">Chưa gán danh mục</span>';
 
-        const statusBadge = s.isDeleted
-          ? '<span class="status red">Đã xóa mềm</span>'
-          : '<span class="status green">Hoạt động</span>';
+        const statusBadge = s.isActive
+          ? '<span class="status green">Hoạt động</span>'
+          : '<span class="status red">Đã xóa mềm</span>';
 
         return `
           <tr>
@@ -108,10 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <td class="text-end">
               <button class="action js-manage-values" data-id="${s.id}" data-name="${s.name}" title="Quản lý giá trị"><i class="fa-solid fa-list-ul"></i></button>
               <button class="action js-edit-style" data-id="${s.id}" title="Chỉnh sửa"><i class="fa-solid fa-pen"></i></button>
-              ${s.isDeleted
-                ? `<button class="action text-success js-restore-style" data-id="${s.id}" title="Khôi phục"><i class="fa-solid fa-rotate-left"></i></button>`
-                : `<button class="action text-danger js-delete-style" data-id="${s.id}" title="Xóa mềm"><i class="fa-solid fa-trash"></i></button>`
-              }
+              <button class="action text-danger js-delete-style" data-id="${s.id}" title="Xóa vĩnh viễn"><i class="fa-solid fa-trash"></i></button>
             </td>
           </tr>
         `;
@@ -134,6 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const s = res.data;
             document.getElementById('styleId').value = s.id;
             document.getElementById('styleName').value = s.name;
+            document.getElementById('styleIsActive').checked = s.isActive;
             renderCategoryCheckboxes(s.categoryIds || []);
             document.getElementById('styleModalTitle').textContent = 'Chỉnh sửa kiểu thuộc tính';
             const modal = new bootstrap.Modal(document.getElementById('styleFormModal'));
@@ -145,10 +153,10 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    // Delete Style
+    // Permanently delete Style
     document.querySelectorAll('.js-delete-style').forEach(btn => {
       btn.addEventListener('click', async () => {
-        if (!confirm('Bạn có chắc chắn muốn xóa mềm kiểu thuộc tính này cùng các giá trị của nó?')) return;
+        if (!confirm('Bạn có chắc chắn muốn xóa vĩnh viễn kiểu thuộc tính và các giá trị của nó khỏi cơ sở dữ liệu?')) return;
         const id = btn.dataset.id;
         try {
           const res = await fetch(`/api/manager/styles/${id}`, {
@@ -156,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
             headers: authHeaders(false)
           }).then(r => r.json());
           if (res.success) {
-            notify('Đã xóa mềm kiểu thuộc tính');
+            notify('Đã xóa vĩnh viễn kiểu thuộc tính');
             loadStyles(currentPage);
           } else {
             notify('Lỗi: ' + res.message);
@@ -167,26 +175,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    // Restore Style
-    document.querySelectorAll('.js-restore-style').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const id = btn.dataset.id;
-        try {
-          const res = await fetch(`/api/manager/styles/${id}/restore`, {
-            method: 'POST',
-            headers: authHeaders(false)
-          }).then(r => r.json());
-          if (res.success) {
-            notify('Đã khôi phục kiểu thuộc tính');
-            loadStyles(currentPage);
-          } else {
-            notify('Lỗi: ' + res.message);
-          }
-        } catch (e) {
-          notify('Lỗi: ' + e.message);
-        }
-      });
-    });
 
     // Manage StyleValues
     document.querySelectorAll('.js-manage-values').forEach(btn => {
@@ -212,7 +200,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const payload = {
         name: document.getElementById('styleName').value.trim(),
-        categoryIds: selectedCatIds
+        categoryIds: selectedCatIds,
+        isActive: document.getElementById('styleIsActive').checked
       };
 
       try {
@@ -241,6 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnOpenCreateStyleModal')?.addEventListener('click', () => {
     document.getElementById('styleId').value = '';
     document.getElementById('styleForm').reset();
+    document.getElementById('styleIsActive').checked = true;
     renderCategoryCheckboxes([]);
     document.getElementById('styleModalTitle').textContent = 'Thêm mới kiểu thuộc tính';
     const modal = new bootstrap.Modal(document.getElementById('styleFormModal'));
@@ -263,28 +253,112 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       tbody.innerHTML = res.data.content.map(sv => {
-        const statusBadge = sv.isDeleted
-          ? '<span class="status red">Đã xóa mềm</span>'
-          : '<span class="status green">Hoạt động</span>';
+        const statusBadge = sv.isActive
+          ? '<span class="status green">Hoạt động</span>'
+          : '<span class="status red">Đã xóa mềm</span>';
 
         return `
           <tr>
-            <td><strong>${sv.name}</strong></td>
+            <td class="js-sv-name-cell"><strong>${escapeHtml(sv.name)}</strong></td>
             <td>${statusBadge}</td>
             <td class="text-end">
-              ${sv.isDeleted
-                ? `<button class="action text-success js-restore-sv" data-id="${sv.id}" title="Khôi phục"><i class="fa-solid fa-rotate-left"></i></button>`
-                : `<button class="action text-danger js-delete-sv" data-id="${sv.id}" title="Xóa mềm"><i class="fa-solid fa-trash"></i></button>`
-              }
+              <div class="form-check form-switch d-inline-block mb-0 js-sv-toggle-wrap">
+                <input class="form-check-input js-toggle-sv" type="checkbox" data-id="${sv.id}" ${sv.isActive ? 'checked' : ''} aria-label="Trạng thái ${escapeHtml(sv.name)}">
+              </div>
+              <button class="action js-edit-sv" data-id="${sv.id}" title="Sửa tên"><i class="fa-solid fa-pen"></i></button>
+              <button class="action text-success js-save-sv d-none" data-id="${sv.id}" title="Lưu"><i class="fa-solid fa-check"></i></button>
+              <button class="action js-cancel-sv d-none" data-id="${sv.id}" title="Hủy"><i class="fa-solid fa-xmark"></i></button>
+              <button class="action text-danger js-delete-sv" data-id="${sv.id}" title="Xóa vĩnh viễn"><i class="fa-solid fa-trash"></i></button>
             </td>
           </tr>
         `;
       }).join('');
 
-      // Delete SV
+      // Update the soft-delete state
+      tbody.querySelectorAll('.js-toggle-sv').forEach(input => {
+        input.addEventListener('change', async () => {
+          const value = res.data.content.find(item => item.id === input.dataset.id);
+          const isActive = input.checked;
+          try {
+            const updateRes = await fetch(`/api/manager/style-values/${input.dataset.id}`, {
+              method: 'PUT',
+              headers: authHeaders(true),
+              body: JSON.stringify({ name: value.name, styleId, isActive })
+            }).then(r => r.json());
+            if (updateRes.success) {
+              notify(isActive ? 'Đã kích hoạt giá trị' : 'Đã ngừng hoạt động giá trị');
+              loadStyleValues(styleId);
+            } else {
+              input.checked = !isActive;
+              notify('Lỗi: ' + updateRes.message);
+            }
+          } catch (e) {
+            input.checked = !isActive;
+            notify('Lỗi: ' + e.message);
+          }
+        });
+      });
+
+      tbody.querySelectorAll('.js-edit-sv').forEach(button => {
+        button.addEventListener('click', () => {
+          const row = button.closest('tr');
+          const value = res.data.content.find(item => item.id === button.dataset.id);
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.maxLength = 100;
+          input.className = 'form-control form-control-sm js-sv-name-input';
+          input.value = value.name;
+          row.querySelector('.js-sv-name-cell').replaceChildren(input);
+          row.querySelector('.js-sv-toggle-wrap').classList.add('d-none');
+          button.classList.add('d-none');
+          row.querySelector('.js-save-sv').classList.remove('d-none');
+          row.querySelector('.js-cancel-sv').classList.remove('d-none');
+          input.addEventListener('keydown', event => {
+            if (event.key === 'Enter') row.querySelector('.js-save-sv').click();
+            if (event.key === 'Escape') row.querySelector('.js-cancel-sv').click();
+          });
+          input.focus();
+          input.select();
+        });
+      });
+
+      tbody.querySelectorAll('.js-save-sv').forEach(button => {
+        button.addEventListener('click', async () => {
+          const id = button.dataset.id;
+          const row = button.closest('tr');
+          const value = res.data.content.find(item => item.id === id);
+          const name = row.querySelector('.js-sv-name-input').value.trim();
+          if (!name) {
+            notify('Vui lòng nhập tên giá trị');
+            return;
+          }
+
+          try {
+            const updateRes = await fetch(`/api/manager/style-values/${id}`, {
+              method: 'PUT',
+              headers: authHeaders(true),
+              body: JSON.stringify({ name, styleId, isActive: value.isActive })
+            }).then(r => r.json());
+            if (updateRes.success) {
+              notify('Cập nhật tên giá trị thành công');
+              loadStyleValues(styleId);
+            } else {
+              notify('Lỗi: ' + updateRes.message);
+            }
+          } catch (e) {
+            notify('Lỗi: ' + e.message);
+          }
+        });
+      });
+
+      tbody.querySelectorAll('.js-cancel-sv').forEach(button => {
+        button.addEventListener('click', () => loadStyleValues(styleId));
+      });
+
+      // Permanently delete SV
       tbody.querySelectorAll('.js-delete-sv').forEach(btn => {
         btn.addEventListener('click', async () => {
-          if (!confirm('Bạn có chắc muốn xóa mềm giá trị này?')) return;
+          if (!confirm('Bạn có chắc chắn muốn xóa vĩnh viễn giá trị này khỏi cơ sở dữ liệu?')) return;
           const id = btn.dataset.id;
           try {
             const delRes = await fetch(`/api/manager/style-values/${id}`, {
@@ -292,7 +366,7 @@ document.addEventListener('DOMContentLoaded', () => {
               headers: authHeaders(false)
             }).then(r => r.json());
             if (delRes.success) {
-              notify('Đã xóa giá trị');
+              notify('Đã xóa vĩnh viễn giá trị');
               loadStyleValues(styleId);
             } else {
               notify('Lỗi: ' + delRes.message);
@@ -303,26 +377,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       });
 
-      // Restore SV
-      tbody.querySelectorAll('.js-restore-sv').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          const id = btn.dataset.id;
-          try {
-            const res = await fetch(`/api/manager/style-values/${id}/restore`, {
-              method: 'POST',
-              headers: authHeaders(false)
-            }).then(r => r.json());
-            if (res.success) {
-              notify('Đã khôi phục giá trị');
-              loadStyleValues(styleId);
-            } else {
-              notify('Lỗi: ' + res.message);
-            }
-          } catch (e) {
-            notify('Lỗi: ' + e.message);
-          }
-        });
-      });
     } catch (e) {
       tbody.innerHTML = `<tr><td colspan="3" class="text-center py-3 text-danger">Lỗi: ${e.message}</td></tr>`;
     }

@@ -35,9 +35,9 @@ public class ProductVariantRequestDTO {
         @Min(value = 0, message = "Số lượng sản phẩm không được nhỏ hơn 0")
         private Integer quantity;
 
-        private Boolean isActive;
-
         private Boolean isSelling;
+
+        private Boolean isActive;
 
         private Set<UUID> styleValueIds;
 

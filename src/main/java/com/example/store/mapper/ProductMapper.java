@@ -23,7 +23,6 @@ public interface ProductMapper {
         @Mapping(target = "rating", ignore = true)
         @Mapping(target = "createdAt", ignore = true)
         @Mapping(target = "updatedAt", ignore = true)
-        @Mapping(target = "isActive", source = "isActive")
         @Mapping(target = "isSelling", source = "isSelling")
         Product toEntity(ProductRequestDTO dto);
 
@@ -33,8 +32,8 @@ public interface ProductMapper {
         @Mapping(target = "brandId", source = "brand.id")
         @Mapping(target = "brandName", source = "brand.name")
         @Mapping(target = "brandSlug", source = "brand.slug")
-        @Mapping(target = "isActive", source = "active")
         @Mapping(target = "isSelling", source = "selling")
+        @Mapping(target = "isActive", source = "active")
         @Mapping(target = "variantCount", expression = "java(product.getVariants() == null ? 0 : product.getVariants().size())")
         @Mapping(target = "minPrice", ignore = true)
         @Mapping(target = "minPromotionalPrice", ignore = true)
@@ -48,7 +47,7 @@ public interface ProductMapper {
         @Mapping(target = "category", source = "category")
         @Mapping(target = "brand", source = "brand")
         @Mapping(target = "variants", source = "variants")
-        @Mapping(target = "isActive", source = "active")
         @Mapping(target = "isSelling", source = "selling")
+        @Mapping(target = "isActive", source = "active")
         ProductDetailResponseDTO toDetailResponseDTO(Product product);
 }

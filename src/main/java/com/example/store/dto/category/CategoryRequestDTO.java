@@ -25,5 +25,5 @@ public class CategoryRequestDTO {
     @Size(max = 1000, message = "Đường dẫn hình ảnh không được vượt quá 1000 ký tự")
     private String image;
 
-    private Boolean isDeleted;
+    private Boolean isActive;
 }

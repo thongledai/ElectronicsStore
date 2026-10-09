@@ -24,7 +24,6 @@ public interface ProductVariantMapper {
     @Mapping(target = "sold", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    @Mapping(target = "isActive", source = "isActive")
     @Mapping(target = "isSelling", source = "isSelling")
     ProductVariant toEntity(ProductVariantRequestDTO dto);
 
@@ -32,8 +31,8 @@ public interface ProductVariantMapper {
     @Mapping(target = "productName", source = "product.name")
     @Mapping(target = "imageUrls", source = "images")
     @Mapping(target = "styleValues", source = "styleValues")
-    @Mapping(target = "isActive", source = "active")
     @Mapping(target = "isSelling", source = "selling")
+    @Mapping(target = "isActive", source = "active")
     ProductVariantResponseDTO toResponseDTO(ProductVariant variant);
 
     default List<String> mapImagesToUrls(List<ProductVariantImage> images) {

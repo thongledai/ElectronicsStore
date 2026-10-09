@@ -103,10 +103,10 @@ public class BrandManagerControllerAPI {
     }
 
     @DeleteMapping("/{id}")
-    @AuditAction("Ngừng hoạt động thương hiệu")
+    @AuditAction("Xóa vĩnh viễn thương hiệu")
     public ResponseEntity<ApiResponse<Void>> deleteBrand(@PathVariable Long id) {
         brandService.deleteBrand(id);
-        return ResponseEntity.ok(ApiResponse.success("Ngừng hoạt động thương hiệu thành công"));
+        return ResponseEntity.ok(ApiResponse.success("Xóa vĩnh viễn thương hiệu thành công"));
     }
 
     @PostMapping("/{id}/restore")

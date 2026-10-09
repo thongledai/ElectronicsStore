@@ -42,11 +42,11 @@ public class StyleValueManagerControllerAPI {
     public ResponseEntity<ApiResponse<PageResponse<StyleValueResponseDTO>>> getAllStyleValues(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) UUID styleId,
-            @RequestParam(required = false) Boolean isDeleted,
+            @RequestParam(required = false) Boolean isActive,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, Math.min(size, 50), Sort.by(Sort.Direction.DESC, "createdAt"));
-        PageResponse<StyleValueResponseDTO> result = styleValueService.getAllStyleValues(search, styleId, isDeleted,
+        PageResponse<StyleValueResponseDTO> result = styleValueService.getAllStyleValues(search, styleId, isActive,
                 pageable);
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách giá trị thuộc tính thành công", result));
     }
@@ -97,10 +97,10 @@ public class StyleValueManagerControllerAPI {
     }
 
     @DeleteMapping("/{id}")
-    @AuditAction("Xóa mềm giá trị thuộc tính")
+    @AuditAction("Xóa vĩnh viễn giá trị thuộc tính")
     public ResponseEntity<ApiResponse<Void>> deleteStyleValue(@PathVariable UUID id) {
         styleValueService.deleteStyleValue(id);
-        return ResponseEntity.ok(ApiResponse.success("Xóa mềm giá trị thuộc tính thành công"));
+        return ResponseEntity.ok(ApiResponse.success("Xóa vĩnh viễn giá trị thuộc tính thành công"));
     }
 
     @PostMapping("/{id}/restore")

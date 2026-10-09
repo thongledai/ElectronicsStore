@@ -42,13 +42,13 @@ public class ProductManagerControllerAPI {
             @RequestParam(required = false) String search,
             @RequestParam(required = false) UUID categoryId,
             @RequestParam(required = false) Long brandId,
-            @RequestParam(required = false) Boolean isActive,
             @RequestParam(required = false) Boolean isSelling,
+            @RequestParam(required = false) Boolean isActive,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, Math.min(size, 50), Sort.by(Sort.Direction.DESC, "createdAt"));
         PageResponse<ProductResponseDTO> result = productService.getManagerProducts(
-                search, categoryId, brandId, isActive, isSelling, pageable);
+            search, categoryId, brandId, isSelling, isActive, pageable);
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách sản phẩm thành công", result));
     }
 
@@ -77,10 +77,10 @@ public class ProductManagerControllerAPI {
     }
 
     @DeleteMapping("/{id}")
-    @AuditAction("Xóa mềm sản phẩm")
+    @AuditAction("Xóa vĩnh viễn sản phẩm")
     public ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable UUID id) {
         productService.deleteProduct(id);
-        return ResponseEntity.ok(ApiResponse.success("Vô hiệu hóa sản phẩm thành công"));
+        return ResponseEntity.ok(ApiResponse.success("Xóa vĩnh viễn sản phẩm thành công"));
     }
 
     @PostMapping("/{id}/restore")

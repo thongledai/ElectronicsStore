@@ -32,9 +32,9 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
                 JOIN FETCH p.category
                 JOIN FETCH p.brand
                 WHERE p.slug = :slug
-                    AND p.isActive = true
                     AND p.isSelling = true
-                    AND COALESCE(p.category.isDeleted, false) = false
+                    AND p.isActive = true
+                    AND p.category.isActive = true
                     AND p.brand.isActive = true
             """)
     Optional<Product> findPublicBySlug(@Param("slug") String slug);
@@ -45,11 +45,17 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
 
     boolean existsByCategoryId(UUID categoryId);
 
+    boolean existsByCategoryIdAndIsSellingTrue(UUID categoryId);
+
     boolean existsByBrandId(Long brandId);
 
-    boolean existsByCategoryIdAndIsActiveTrue(UUID categoryId);
+    boolean existsByBrandIdAndIsSellingTrue(Long brandId);
 
-    boolean existsByBrandIdAndIsActiveTrue(Long brandId);
+    @Query("SELECT COUNT(r) > 0 FROM Review r WHERE r.product.id = :productId")
+    boolean existsReviewReference(@Param("productId") UUID productId);
+
+    @Query("SELECT COUNT(f) > 0 FROM UserFollowProduct f WHERE f.product.id = :productId")
+    boolean existsFollowReference(@Param("productId") UUID productId);
 
     @Query("""
             SELECT p
@@ -64,15 +70,15 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
                 )
                 AND (:categoryId IS NULL OR p.category.id = :categoryId)
                 AND (:brandId IS NULL OR p.brand.id = :brandId)
-                AND (:isActive IS NULL OR p.isActive = :isActive)
                 AND (:isSelling IS NULL OR p.isSelling = :isSelling)
+                AND (:isActive IS NULL OR p.isActive = :isActive)
             """)
     Page<Product> search(
             @Param("q") String q,
             @Param("categoryId") UUID categoryId,
             @Param("brandId") Long brandId,
-            @Param("isActive") Boolean isActive,
             @Param("isSelling") Boolean isSelling,
+            @Param("isActive") Boolean isActive,
             Pageable pageable);
 
     @EntityGraph(attributePaths = { "category", "brand" })
@@ -81,17 +87,16 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
             FROM Product p
             JOIN p.category c
             JOIN p.brand b
-            WHERE
-                p.isActive = true
-                AND p.isSelling = true
-                AND COALESCE(c.isDeleted, false) = false
+            WHERE p.isSelling = true
+                AND p.isActive = true
+                AND c.isActive = true
                 AND b.isActive = true
                 AND EXISTS (
                     SELECT 1
                     FROM ProductVariant v
                     WHERE v.product = p
-                        AND v.isActive = true
                         AND v.isSelling = true
+                        AND v.isActive = true
                 )
                 AND (:q IS NULL OR :q = '' OR
                     LOWER(p.name) LIKE LOWER(CONCAT('%', :q, '%')) OR
@@ -107,8 +112,8 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
                         SELECT 1
                         FROM ProductVariant v
                         WHERE v.product = p
-                            AND v.isActive = true
                             AND v.isSelling = true
+                            AND v.isActive = true
                             AND (
                                 CASE
                                     WHEN v.promotionalPrice IS NOT NULL AND v.promotionalPrice > 0
@@ -124,8 +129,8 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
                         SELECT 1
                         FROM ProductVariant v
                         WHERE v.product = p
-                            AND v.isActive = true
                             AND v.isSelling = true
+                            AND v.isActive = true
                             AND (
                                 CASE
                                     WHEN v.promotionalPrice IS NOT NULL AND v.promotionalPrice > 0
@@ -142,8 +147,8 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
                         SELECT 1
                         FROM ProductVariant v
                         WHERE v.product = p
-                            AND v.isActive = true
                             AND v.isSelling = true
+                            AND v.isActive = true
                             AND v.quantity > 0
                     )
                 )
@@ -154,8 +159,8 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
                         SELECT 1
                         FROM ProductVariant v
                         WHERE v.product = p
-                            AND v.isActive = true
                             AND v.isSelling = true
+                            AND v.isActive = true
                             AND v.promotionalPrice IS NOT NULL
                             AND v.promotionalPrice < v.price
                     )
@@ -183,10 +188,10 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
                     END
                 )
                 FROM ProductVariant v
-                WHERE v.isActive = true
-                    AND v.isSelling = true
-                    AND v.product.isActive = true
+                WHERE v.isSelling = true
+                    AND v.isActive = true
                     AND v.product.isSelling = true
+                    AND v.product.isActive = true
             """)
     BigDecimal findMaxEffectivePrice();
 
@@ -195,9 +200,9 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
                 FROM Product p
                 JOIN FETCH p.category c
                 JOIN FETCH p.brand b
-                WHERE p.isActive = true
-                    AND p.isSelling = true
-                    AND COALESCE(c.isDeleted, false) = false
+                WHERE p.isSelling = true
+                    AND p.isActive = true
+                    AND c.isActive = true
                     AND b.isActive = true
                     AND p.id <> :excludeId
                     AND (c.id = :categoryId OR b.id = :brandId)
@@ -205,8 +210,8 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
                         SELECT 1
                         FROM ProductVariant v
                         WHERE v.product = p
-                            AND v.isActive = true
                             AND v.isSelling = true
+                            AND v.isActive = true
                     )
                 ORDER BY CASE WHEN c.id = :categoryId THEN 0 ELSE 1 END, p.createdAt DESC
             """)

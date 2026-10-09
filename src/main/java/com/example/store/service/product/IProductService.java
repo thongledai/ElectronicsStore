@@ -26,8 +26,8 @@ public interface IProductService {
             String search,
             UUID categoryId,
             Long brandId,
-            Boolean isActive,
             Boolean isSelling,
+            Boolean isActive,
             Pageable pageable);
 
     ProductResponseDTO getProductById(UUID id);

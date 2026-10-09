@@ -52,11 +52,11 @@ public class ProductVariant {
 
     @Builder.Default
     @Column(nullable = false)
-    private boolean isActive = true;
-
-    @Builder.Default
-    @Column(nullable = false)
     private boolean isSelling = true;
+
+        @Builder.Default
+        @Column(nullable = false, columnDefinition = "boolean not null default true")
+        private boolean isActive = true;
 
     @Builder.Default
     @OneToMany(

@@ -30,7 +30,7 @@ public interface StyleRepository extends JpaRepository<Style, UUID> {
             JOIN s.categories c
             WHERE LOWER(TRIM(s.name)) = LOWER(TRIM(:name))
               AND c.id IN :categoryIds
-              AND s.isDeleted = false
+              AND s.isActive = true
               AND s.id <> :excludeId
             """)
     boolean existsByNameAndCategoryIds(
@@ -43,14 +43,14 @@ public interface StyleRepository extends JpaRepository<Style, UUID> {
             FROM Style s
             WHERE LOWER(TRIM(s.name)) = LOWER(TRIM(:name))
               AND s.categories IS EMPTY
-              AND s.isDeleted = false
+              AND s.isActive = true
               AND s.id <> :excludeId
             """)
     boolean existsByNameAndCategoriesIsEmpty(
             @Param("name") String name,
             @Param("excludeId") UUID excludeId);
 
-    List<Style> findByIsDeletedFalse();
+    List<Style> findByIsActiveTrue();
 
     @Query("""
             SELECT DISTINCT s
@@ -60,11 +60,11 @@ public interface StyleRepository extends JpaRepository<Style, UUID> {
                 (:q IS NULL OR :q = '' OR
                     LOWER(s.name) LIKE LOWER(CONCAT('%', :q, '%'))
                 )
-                AND (:isDeleted IS NULL OR s.isDeleted = :isDeleted)
+                AND (:isActive IS NULL OR s.isActive = :isActive)
             """)
     Page<Style> search(
             @Param("q") String q,
-            @Param("isDeleted") Boolean isDeleted,
+            @Param("isActive") Boolean isActive,
             Pageable pageable);
 
     @Query("""
@@ -72,7 +72,7 @@ public interface StyleRepository extends JpaRepository<Style, UUID> {
             FROM Style s
             JOIN s.categories c
             WHERE c.id = :categoryId
-                AND s.isDeleted = false
+                AND s.isActive = true
             """)
     List<Style> findAllActiveByCategoryId(@Param("categoryId") UUID categoryId);
 
@@ -81,7 +81,7 @@ public interface StyleRepository extends JpaRepository<Style, UUID> {
             FROM Style s
             JOIN s.categories c
             WHERE c.id = :categoryId
-                AND s.isDeleted = false
+                AND s.isActive = true
             """)
     Page<Style> findActiveByCategoryId(
             @Param("categoryId") UUID categoryId,
@@ -90,7 +90,7 @@ public interface StyleRepository extends JpaRepository<Style, UUID> {
     @Query("""
             SELECT s
             FROM Style s
-            WHERE s.isDeleted = false
+            WHERE s.isActive = true
             """)
     Page<Style> findAllActive(Pageable pageable);
 }
