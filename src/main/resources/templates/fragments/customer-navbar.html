@@ -61,10 +61,11 @@
                 <h6 class="dropdown-header js-account-greeting">My Account</h6>
               </li>
               <li class="js-auth-user" style="display: none;">
-                <a class="dropdown-item py-2" th:href="@{/customer/reset-password}">
-                  <i class="fas fa-key me-2 text-warning"></i>Change Password
+                <a class="dropdown-item py-2 js-password-link" th:href="@{/customer/reset-password}">
+                  <i class="fas fa-key me-2 text-warning"></i><span class="js-password-link-text">Change Password</span>
                 </a>
               </li>
+
               <li class="js-auth-user" style="display: none;">
                 <hr class="dropdown-divider my-1">
               </li>

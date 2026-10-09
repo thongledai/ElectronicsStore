@@ -23,7 +23,12 @@ import com.example.store.service.auth.IJwtService;
 import com.example.store.service.auth.IOtpService;
 import com.example.store.service.common.IEmailService;
 
+import java.math.BigDecimal;
 import java.util.Optional;
+import java.util.UUID;
+import com.example.store.dto.auth.GoogleLoginDTO;
+import com.example.store.dto.auth.GoogleUserInfo;
+import com.example.store.service.auth.GoogleAuthService;
 import com.example.store.exception.AccountNotActivatedException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -42,6 +47,8 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     private final IOtpService otpService;
     private final IEmailService emailService;
     private final UserMapper userMapper;
+    private final GoogleAuthService googleAuthService;
+
 
     @Override
     @Transactional
@@ -129,6 +136,76 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
 
     @Override
     @Transactional
+    public AuthResponseDTO loginWithGoogle(GoogleLoginDTO googleLoginDTO, HttpServletResponse response) {
+        GoogleUserInfo googleUser = googleAuthService.verifyToken(googleLoginDTO.getIdToken(), googleLoginDTO.getAccessToken());
+
+        String email = googleUser.getEmail().toLowerCase().trim();
+
+        Optional<User> existingUserOpt = userRepository.findByEmail(email);
+        User user;
+
+        if (existingUserOpt.isPresent()) {
+            user = existingUserOpt.get();
+            // Automatically activate email since it is verified by Google
+            if (Boolean.FALSE.equals(user.getIsEmailActive())) {
+                user.setIsEmailActive(true);
+            }
+            // Update profile avatar if missing and provided by Google
+            if ((user.getAvatar() == null || user.getAvatar().isBlank()) && googleUser.getPicture() != null) {
+                user.setAvatar(googleUser.getPicture());
+            }
+            user = userRepository.save(user);
+        } else {
+            // New user registered via Google
+            Role customerRole = roleRepository.findByName("CUSTOMER").orElseGet(() ->
+                    roleRepository.save(Role.builder().name("CUSTOMER").build())
+            );
+
+            user = User.builder()
+                    .fullName(googleUser.getName())
+                    .email(email)
+                    .slug(UUID.randomUUID().toString())
+                    .hashedPassword(null)
+                    .isEmailActive(true)
+
+
+                    .isPhoneActive(false)
+                    .avatar(googleUser.getPicture())
+                    .role(customerRole)
+                    .point(0)
+                    .eWallet(BigDecimal.ZERO)
+                    .build();
+
+            user = userRepository.save(user);
+        }
+
+        long expiration = 7L * 24 * 60 * 60 * 1000; // 7 days expiration for Google login
+        String token = jwtService.generateToken(user, expiration);
+
+        if (response != null) {
+            Cookie jwtCookie = new Cookie("JWT_TOKEN", token);
+            jwtCookie.setHttpOnly(true);
+            jwtCookie.setPath("/");
+            jwtCookie.setMaxAge((int) (expiration / 1000));
+            response.addCookie(jwtCookie);
+        }
+
+        String roleName = user.getRole() != null ? user.getRole().getName() : "CUSTOMER";
+        String redirectUrl = getRedirectUrlForRole(roleName);
+        UserResponseDTO userResponse = userMapper.toUserResponseDTO(user);
+
+        return AuthResponseDTO.builder()
+                .token(token)
+                .tokenType("Bearer")
+                .expiresIn(expiration)
+                .redirectUrl(redirectUrl)
+                .user(userResponse)
+                .build();
+    }
+
+
+    @Override
+    @Transactional
     public ApiResponse<?> forgotPassword(ForgotPasswordDTO forgotPasswordDTO) {
         String email = forgotPasswordDTO.getEmail().toLowerCase().trim();
         User user = userRepository.findByEmail(email)
@@ -208,6 +285,10 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         User user = userRepository.findByEmail(currentUserEmail.toLowerCase().trim())
                 .orElseThrow(() -> new RuntimeException("User account not found!"));
 
+        if (user.getHashedPassword() == null || user.getHashedPassword().isBlank()) {
+            throw new RuntimeException("This account has not set a password yet. Please use Set Password instead!");
+        }
+
         if (!passwordEncoder.matches(resetPasswordDTO.getOldPassword(), user.getHashedPassword())) {
             throw new RuntimeException("Current password is incorrect!");
         }
@@ -223,8 +304,42 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         user.setHashedPassword(passwordEncoder.encode(resetPasswordDTO.getNewPassword()));
         userRepository.save(user);
 
-        return ApiResponse.success("Password changed successfully!");
+        return ApiResponse.success("Password updated successfully!");
     }
+
+    @Override
+    @Transactional
+    public ApiResponse<?> setPassword(String currentUserEmail, com.example.store.dto.auth.SetPasswordDTO setPasswordDTO) {
+        if (currentUserEmail == null || currentUserEmail.isBlank()) {
+            throw new RuntimeException("User is not authenticated!");
+        }
+
+        User user = userRepository.findByEmail(currentUserEmail.toLowerCase().trim())
+                .orElseThrow(() -> new RuntimeException("User account not found!"));
+
+        if (user.getHashedPassword() != null && !user.getHashedPassword().isBlank()) {
+            throw new RuntimeException("This account already has a password. Please use Change Password instead!");
+        }
+
+        if (!setPasswordDTO.getNewPassword().equals(setPasswordDTO.getConfirmNewPassword())) {
+            throw new RuntimeException("Confirm new password does not match!");
+        }
+
+        user.setHashedPassword(passwordEncoder.encode(setPasswordDTO.getNewPassword()));
+        userRepository.save(user);
+
+        return ApiResponse.success("Password set successfully! You can now sign in using your email and password.");
+    }
+
+    @Override
+    public boolean hasPassword(String email) {
+        if (email == null || email.isBlank()) return true;
+        return userRepository.findByEmail(email.toLowerCase().trim())
+                .map(u -> u.getHashedPassword() != null && !u.getHashedPassword().isBlank())
+                .orElse(true);
+    }
+
+
 
     @Override
     public String getRedirectUrlForRole(String roleName) {
