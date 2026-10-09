@@ -1,4 +1,4 @@
-package com.example.store.dto;
+package com.example.store.dto.auth;
 
 import com.example.store.enums.OtpType;
 import jakarta.validation.constraints.Email;
