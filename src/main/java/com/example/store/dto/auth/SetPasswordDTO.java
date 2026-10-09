@@ -11,9 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ResetPasswordDTO {
-    @NotBlank(message = "Current password is required")
-    private String oldPassword;
+public class SetPasswordDTO {
+
     @NotBlank(message = "New password is required")
     @Size(min = 6, message = "New password must be at least 6 characters")
     private String newPassword;

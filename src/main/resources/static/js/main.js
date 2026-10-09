@@ -872,6 +872,39 @@ function initAccountLabel() {
     el.style.display = isLoggedIn ? 'block' : 'none';
   });
 
+  const updatePasswordLinks = (hasPass) => {
+    document.querySelectorAll('.js-password-link').forEach(el => {
+      if (isLoggedIn && hasPass === false) {
+        el.setAttribute('href', '/customer/set-password');
+        const textEl = el.querySelector('.js-password-link-text');
+        if (textEl) textEl.textContent = 'Set Password';
+      } else {
+        el.setAttribute('href', '/customer/reset-password');
+        const textEl = el.querySelector('.js-password-link-text');
+        if (textEl) textEl.textContent = 'Change Password';
+      }
+    });
+  };
+
+  updatePasswordLinks(user?.hasPassword);
+
+  if (isLoggedIn && (typeof user?.hasPassword === 'undefined' || window.__CHECKED_PASS_STATUS__ !== true)) {
+    window.__CHECKED_PASS_STATUS__ = true;
+    fetch('/auth/has-password')
+      .then(r => r.ok ? r.json() : null)
+      .then(res => {
+        if (res && res.success && typeof res.data === 'boolean') {
+          if (user && user.hasPassword !== res.data) {
+            user.hasPassword = res.data;
+            storageSet(STORE.user, user);
+          }
+          updatePasswordLinks(res.data);
+        }
+      })
+      .catch(() => {});
+  }
+
+
   if (new URLSearchParams(location.search).get('logout') === 'true') {
     localStorage.removeItem('technova_jwt');
     localStorage.removeItem('technova_role');
