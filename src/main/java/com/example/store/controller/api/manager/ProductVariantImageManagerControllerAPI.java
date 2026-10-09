@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.store.common.annotation.AuditAction;
 import com.example.store.dto.common.ApiResponse;
+import com.example.store.enums.ApiMessage;
 import com.example.store.service.product.IProductVariantImageService;
 
 import lombok.RequiredArgsConstructor;
@@ -36,7 +37,7 @@ public class ProductVariantImageManagerControllerAPI {
             @PathVariable UUID variantId
     ) {
         List<String> urls = imageService.getVariantImageUrls(variantId);
-        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách ảnh thành công", urls));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.PRODUCT_IMAGE_LIST_SUCCESS, urls));
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -48,7 +49,7 @@ public class ProductVariantImageManagerControllerAPI {
     ) {
         List<String> uploadedUrls = imageService.uploadVariantImages(productId, variantId, files);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Tải ảnh lên thành công", uploadedUrls));
+                .body(ApiResponse.success(ApiMessage.PRODUCT_IMAGE_UPLOAD_SUCCESS, uploadedUrls));
     }
 
     @DeleteMapping
@@ -59,6 +60,6 @@ public class ProductVariantImageManagerControllerAPI {
             @RequestParam("url") String imageUrl
     ) {
         imageService.deleteVariantImage(productId, variantId, imageUrl);
-        return ResponseEntity.ok(ApiResponse.success("Xóa ảnh thành công"));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.PRODUCT_IMAGE_DELETE_SUCCESS));
     }
 }

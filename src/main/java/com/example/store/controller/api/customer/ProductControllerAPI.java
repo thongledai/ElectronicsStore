@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.store.dto.common.ApiResponse;
+import com.example.store.enums.ApiMessage;
 import com.example.store.dto.common.PageResponse;
 import com.example.store.dto.product.ProductDetailResponseDTO;
 import com.example.store.dto.product.ProductFilterDTO;
@@ -28,13 +29,13 @@ public class ProductControllerAPI {
     public ResponseEntity<ApiResponse<PageResponse<ProductResponseDTO>>> getPublicProducts(
             @Valid @ModelAttribute ProductFilterDTO filterDTO) {
         PageResponse<ProductResponseDTO> result = productService.getPublicProducts(filterDTO);
-        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách sản phẩm thành công", result));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.PRODUCT_LIST_SUCCESS, result));
     }
 
     @GetMapping("/{slug}")
     public ResponseEntity<ApiResponse<ProductDetailResponseDTO>> getPublicProductDetail(
             @PathVariable String slug) {
         ProductDetailResponseDTO result = productService.getPublicProductDetailBySlug(slug);
-        return ResponseEntity.ok(ApiResponse.success("Lấy thông tin chi tiết sản phẩm thành công", result));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.PRODUCT_DETAIL_SUCCESS, result));
     }
 }

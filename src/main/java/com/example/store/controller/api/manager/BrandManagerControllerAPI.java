@@ -27,6 +27,7 @@ import com.example.store.dto.brand.BrandOptionDTO;
 import com.example.store.dto.brand.BrandRequestDTO;
 import com.example.store.dto.brand.BrandResponseDTO;
 import com.example.store.dto.common.ApiResponse;
+import com.example.store.enums.ApiMessage;
 import com.example.store.dto.common.PageResponse;
 import com.example.store.service.brand.IBrandService;
 
@@ -49,19 +50,19 @@ public class BrandManagerControllerAPI {
             @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, Math.min(size, 50), Sort.by(Sort.Direction.DESC, "createdAt"));
         PageResponse<BrandResponseDTO> result = brandService.getAllBrands(search, isActive, pageable);
-        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách thương hiệu thành công", result));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.BRAND_LIST_SUCCESS, result));
     }
 
     @GetMapping("/options")
     public ResponseEntity<ApiResponse<List<BrandOptionDTO>>> getBrandOptions() {
         List<BrandOptionDTO> result = brandService.getBrandOptions();
-        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách lựa chọn thương hiệu thành công", result));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.BRAND_OPTIONS_SUCCESS, result));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<BrandResponseDTO>> getBrandById(@PathVariable Long id) {
         BrandResponseDTO result = brandService.getBrandById(id);
-        return ResponseEntity.ok(ApiResponse.success("Lấy thông tin thương hiệu thành công", result));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.BRAND_DETAIL_SUCCESS, result));
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -71,7 +72,7 @@ public class BrandManagerControllerAPI {
             @RequestPart(value = "logoFile", required = false) MultipartFile logoFile) {
         BrandResponseDTO result = brandService.createBrand(requestDTO, logoFile);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Tạo mới thương hiệu thành công", result));
+                .body(ApiResponse.success(ApiMessage.BRAND_CREATE_SUCCESS, result));
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -80,7 +81,7 @@ public class BrandManagerControllerAPI {
             @Valid @RequestBody BrandRequestDTO requestDTO) {
         BrandResponseDTO result = brandService.createBrand(requestDTO, null);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Tạo mới thương hiệu thành công", result));
+                .body(ApiResponse.success(ApiMessage.BRAND_CREATE_SUCCESS, result));
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -90,7 +91,7 @@ public class BrandManagerControllerAPI {
             @Valid @ModelAttribute BrandRequestDTO requestDTO,
             @RequestPart(value = "logoFile", required = false) MultipartFile logoFile) {
         BrandResponseDTO result = brandService.updateBrand(id, requestDTO, logoFile);
-        return ResponseEntity.ok(ApiResponse.success("Cập nhật thương hiệu thành công", result));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.BRAND_UPDATE_SUCCESS, result));
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -99,20 +100,20 @@ public class BrandManagerControllerAPI {
             @PathVariable Long id,
             @Valid @RequestBody BrandRequestDTO requestDTO) {
         BrandResponseDTO result = brandService.updateBrand(id, requestDTO, null);
-        return ResponseEntity.ok(ApiResponse.success("Cập nhật thương hiệu thành công", result));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.BRAND_UPDATE_SUCCESS, result));
     }
 
     @DeleteMapping("/{id}")
     @AuditAction("Xóa vĩnh viễn thương hiệu")
     public ResponseEntity<ApiResponse<Void>> deleteBrand(@PathVariable Long id) {
         brandService.deleteBrand(id);
-        return ResponseEntity.ok(ApiResponse.success("Xóa vĩnh viễn thương hiệu thành công"));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.BRAND_DELETE_SUCCESS));
     }
 
     @PostMapping("/{id}/restore")
     @AuditAction("Kích hoạt lại thương hiệu")
     public ResponseEntity<ApiResponse<Void>> restoreBrand(@PathVariable Long id) {
         brandService.restoreBrand(id);
-        return ResponseEntity.ok(ApiResponse.success("Kích hoạt lại thương hiệu thành công"));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.BRAND_RESTORE_SUCCESS));
     }
 }

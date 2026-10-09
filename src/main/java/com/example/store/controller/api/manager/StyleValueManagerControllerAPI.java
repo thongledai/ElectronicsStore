@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.store.common.annotation.AuditAction;
 import com.example.store.dto.common.ApiResponse;
+import com.example.store.enums.ApiMessage;
 import com.example.store.dto.common.PageResponse;
 import com.example.store.dto.style.StyleValueOptionDTO;
 import com.example.store.dto.style.StyleValueRequestDTO;
@@ -48,7 +49,7 @@ public class StyleValueManagerControllerAPI {
         Pageable pageable = PageRequest.of(page, Math.min(size, 50), Sort.by(Sort.Direction.DESC, "createdAt"));
         PageResponse<StyleValueResponseDTO> result = styleValueService.getAllStyleValues(search, styleId, isActive,
                 pageable);
-        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách giá trị thuộc tính thành công", result));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.STYLE_VALUE_LIST_SUCCESS, result));
     }
 
     @GetMapping("/options")
@@ -66,7 +67,7 @@ public class StyleValueManagerControllerAPI {
 
         return ResponseEntity.ok(
                 ApiResponse.success(
-                        "Lấy danh sách lựa chọn giá trị thuộc tính thành công",
+                        ApiMessage.STYLE_VALUE_OPTIONS_SUCCESS,
                         result
                 )
         );
@@ -75,7 +76,7 @@ public class StyleValueManagerControllerAPI {
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<StyleValueResponseDTO>> getStyleValueById(@PathVariable UUID id) {
         StyleValueResponseDTO result = styleValueService.getStyleValueById(id);
-        return ResponseEntity.ok(ApiResponse.success("Lấy thông tin giá trị thuộc tính thành công", result));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.STYLE_VALUE_DETAIL_SUCCESS, result));
     }
 
     @PostMapping
@@ -84,7 +85,7 @@ public class StyleValueManagerControllerAPI {
             @Valid @RequestBody StyleValueRequestDTO requestDTO) {
         StyleValueResponseDTO result = styleValueService.createStyleValue(requestDTO);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Tạo mới giá trị thuộc tính thành công", result));
+                .body(ApiResponse.success(ApiMessage.STYLE_VALUE_CREATE_SUCCESS, result));
     }
 
     @PutMapping("/{id}")
@@ -93,20 +94,20 @@ public class StyleValueManagerControllerAPI {
             @PathVariable UUID id,
             @Valid @RequestBody StyleValueRequestDTO requestDTO) {
         StyleValueResponseDTO result = styleValueService.updateStyleValue(id, requestDTO);
-        return ResponseEntity.ok(ApiResponse.success("Cập nhật giá trị thuộc tính thành công", result));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.STYLE_VALUE_UPDATE_SUCCESS, result));
     }
 
     @DeleteMapping("/{id}")
     @AuditAction("Xóa vĩnh viễn giá trị thuộc tính")
     public ResponseEntity<ApiResponse<Void>> deleteStyleValue(@PathVariable UUID id) {
         styleValueService.deleteStyleValue(id);
-        return ResponseEntity.ok(ApiResponse.success("Xóa vĩnh viễn giá trị thuộc tính thành công"));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.STYLE_VALUE_DELETE_SUCCESS));
     }
 
     @PostMapping("/{id}/restore")
     @AuditAction("Khôi phục giá trị thuộc tính")
     public ResponseEntity<ApiResponse<Void>> restoreStyleValue(@PathVariable UUID id) {
         styleValueService.restoreStyleValue(id);
-        return ResponseEntity.ok(ApiResponse.success("Khôi phục giá trị thuộc tính thành công"));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.STYLE_VALUE_RESTORE_SUCCESS));
     }
 }

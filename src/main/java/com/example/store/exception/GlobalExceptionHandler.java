@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import com.example.store.dto.common.ApiResponse;
+import com.example.store.enums.ApiMessage;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -48,7 +49,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<?>> handleMaxUploadSizeExceeded(MaxUploadSizeExceededException ex) {
         log.warn("Dung lượng tải lên vượt quá giới hạn: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
-                .body(ApiResponse.error("Dung lượng file tải lên vượt quá giới hạn cho phép (tối đa 10MB mỗi file)!"));
+                .body(ApiResponse.error(ApiMessage.FILE_TOO_LARGE));
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -59,8 +60,8 @@ public class GlobalExceptionHandler {
             errors.putIfAbsent(property, violation.getMessage());
         }
         String message = errors.size() > 1
-                ? "Dữ liệu không hợp lệ, vui lòng kiểm tra lại!"
-                : errors.values().stream().findFirst().orElse("Dữ liệu không hợp lệ!");
+                ? ApiMessage.INVALID_FIELDS.getMessage()
+                : errors.values().stream().findFirst().orElse(ApiMessage.INVALID_DATA.getMessage());
         return ResponseEntity.badRequest().body(new ApiResponse<>(false, message, errors));
     }
 
@@ -71,21 +72,21 @@ public class GlobalExceptionHandler {
             errors.putIfAbsent(error.getField(), error.getDefaultMessage());
         }
         String message = errors.size() > 1
-                ? "Vui lòng kiểm tra lại các trường thông tin!"
-                : errors.values().stream().findFirst().orElse("Dữ liệu nhập vào không hợp lệ!");
+                ? ApiMessage.INVALID_FIELDS.getMessage()
+                : errors.values().stream().findFirst().orElse(ApiMessage.INVALID_DATA.getMessage());
         return ResponseEntity.badRequest().body(new ApiResponse<>(false, message, errors));
     }
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ApiResponse<?>> handleBadCredentials(BadCredentialsException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(ApiResponse.error("Email hoặc mật khẩu không chính xác!"));
+                .body(ApiResponse.error(ApiMessage.INVALID_CREDENTIALS));
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiResponse<?>> handleAccessDenied(AccessDeniedException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(ApiResponse.error("Bạn không có quyền thực hiện thao tác này!"));
+                .body(ApiResponse.error(ApiMessage.ACCESS_DENIED));
     }
 
     @ExceptionHandler(RuntimeException.class)
@@ -98,6 +99,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<?>> handleGeneralException(Exception ex) {
         log.error("Lỗi hệ thống bất ngờ: ", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("Đã xảy ra lỗi hệ thống: " + ex.getMessage()));
+                .body(ApiResponse.error(ApiMessage.INTERNAL_ERROR));
     }
 }

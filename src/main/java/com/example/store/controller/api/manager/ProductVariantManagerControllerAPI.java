@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.store.common.annotation.AuditAction;
 import com.example.store.dto.common.ApiResponse;
+import com.example.store.enums.ApiMessage;
 import com.example.store.dto.common.PageResponse;
 import com.example.store.dto.product.ProductVariantRequestDTO;
 import com.example.store.dto.product.ProductVariantResponseDTO;
@@ -41,7 +42,7 @@ public class ProductVariantManagerControllerAPI {
     public ResponseEntity<ApiResponse<List<ProductVariantResponseDTO>>> getVariantsByProductId(
             @PathVariable UUID productId) {
         List<ProductVariantResponseDTO> result = productVariantService.getAllVariantsByProductId(productId);
-        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách biến thể thành công", result));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.PRODUCT_VARIANT_LIST_SUCCESS, result));
     }
 
     @GetMapping("/page")
@@ -52,7 +53,7 @@ public class ProductVariantManagerControllerAPI {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "price"));
         PageResponse<ProductVariantResponseDTO> result = productVariantService.getVariantsByProductId(productId,
                 pageable);
-        return ResponseEntity.ok(ApiResponse.success("Lấy trang danh sách biến thể thành công", result));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.PRODUCT_VARIANT_PAGE_SUCCESS, result));
     }
 
     @GetMapping("/{variantId}")
@@ -60,7 +61,7 @@ public class ProductVariantManagerControllerAPI {
             @PathVariable UUID productId,
             @PathVariable UUID variantId) {
         ProductVariantResponseDTO result = productVariantService.getVariantById(variantId);
-        return ResponseEntity.ok(ApiResponse.success("Lấy thông tin biến thể thành công", result));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.PRODUCT_VARIANT_DETAIL_SUCCESS, result));
     }
 
     @PostMapping
@@ -70,7 +71,7 @@ public class ProductVariantManagerControllerAPI {
             @Valid @RequestBody ProductVariantRequestDTO requestDTO) {
         ProductVariantResponseDTO result = productVariantService.createVariant(productId, requestDTO);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Tạo mới biến thể thành công", result));
+                .body(ApiResponse.success(ApiMessage.PRODUCT_VARIANT_CREATE_SUCCESS, result));
     }
 
     @PutMapping("/{variantId}")
@@ -80,7 +81,7 @@ public class ProductVariantManagerControllerAPI {
             @PathVariable UUID variantId,
             @Valid @RequestBody ProductVariantRequestDTO requestDTO) {
         ProductVariantResponseDTO result = productVariantService.updateVariant(productId, variantId, requestDTO);
-        return ResponseEntity.ok(ApiResponse.success("Cập nhật biến thể thành công", result));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.PRODUCT_VARIANT_UPDATE_SUCCESS, result));
     }
 
     @DeleteMapping("/{variantId}")
@@ -89,7 +90,7 @@ public class ProductVariantManagerControllerAPI {
             @PathVariable UUID productId,
             @PathVariable UUID variantId) {
         productVariantService.deleteVariant(productId, variantId);
-        return ResponseEntity.ok(ApiResponse.success("Xóa vĩnh viễn biến thể thành công"));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.PRODUCT_VARIANT_DELETE_SUCCESS));
     }
 
     @PostMapping("/{variantId}/restore")
@@ -98,6 +99,6 @@ public class ProductVariantManagerControllerAPI {
             @PathVariable UUID productId,
             @PathVariable UUID variantId) {
         productVariantService.restoreVariant(productId, variantId);
-        return ResponseEntity.ok(ApiResponse.success("Khôi phục biến thể thành công"));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.PRODUCT_VARIANT_RESTORE_SUCCESS));
     }
 }

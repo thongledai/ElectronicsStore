@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.store.dto.category.CategoryResponseDTO;
 import com.example.store.dto.common.ApiResponse;
+import com.example.store.enums.ApiMessage;
 import com.example.store.service.category.ICategoryService;
 
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,6 @@ public class CategoryControllerAPI {
     @GetMapping
     public ResponseEntity<ApiResponse<List<CategoryResponseDTO>>> getActiveCategories() {
         List<CategoryResponseDTO> result = categoryService.getActiveCategories();
-        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách danh mục thành công", result));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.CATEGORY_LIST_SUCCESS, result));
     }
 }

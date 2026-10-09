@@ -28,6 +28,7 @@ import com.example.store.dto.category.CategoryOptionDTO;
 import com.example.store.dto.category.CategoryRequestDTO;
 import com.example.store.dto.category.CategoryResponseDTO;
 import com.example.store.dto.common.ApiResponse;
+import com.example.store.enums.ApiMessage;
 import com.example.store.dto.common.PageResponse;
 import com.example.store.service.category.ICategoryService;
 
@@ -50,19 +51,19 @@ public class CategoryManagerControllerAPI {
             @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, Math.min(size, 50), Sort.by(Sort.Direction.DESC, "createdAt"));
         PageResponse<CategoryResponseDTO> result = categoryService.getAllCategories(search, isActive, pageable);
-        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách danh mục thành công", result));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.CATEGORY_LIST_SUCCESS, result));
     }
 
     @GetMapping("/options")
     public ResponseEntity<ApiResponse<List<CategoryOptionDTO>>> getCategoryOptions() {
         List<CategoryOptionDTO> result = categoryService.getCategoryOptions();
-        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách lựa chọn danh mục thành công", result));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.CATEGORY_OPTIONS_SUCCESS, result));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<CategoryResponseDTO>> getCategoryById(@PathVariable UUID id) {
         CategoryResponseDTO result = categoryService.getCategoryById(id);
-        return ResponseEntity.ok(ApiResponse.success("Lấy thông tin danh mục thành công", result));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.CATEGORY_DETAIL_SUCCESS, result));
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -72,7 +73,7 @@ public class CategoryManagerControllerAPI {
             @RequestPart(value = "imageFile", required = false) MultipartFile imageFile) {
         CategoryResponseDTO result = categoryService.createCategory(requestDTO, imageFile);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Tạo mới danh mục thành công", result));
+                .body(ApiResponse.success(ApiMessage.CATEGORY_CREATE_SUCCESS, result));
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -81,7 +82,7 @@ public class CategoryManagerControllerAPI {
             @Valid @RequestBody CategoryRequestDTO requestDTO) {
         CategoryResponseDTO result = categoryService.createCategory(requestDTO, null);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Tạo mới danh mục thành công", result));
+                .body(ApiResponse.success(ApiMessage.CATEGORY_CREATE_SUCCESS, result));
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -91,7 +92,7 @@ public class CategoryManagerControllerAPI {
             @Valid @ModelAttribute CategoryRequestDTO requestDTO,
             @RequestPart(value = "imageFile", required = false) MultipartFile imageFile) {
         CategoryResponseDTO result = categoryService.updateCategory(id, requestDTO, imageFile);
-        return ResponseEntity.ok(ApiResponse.success("Cập nhật danh mục thành công", result));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.CATEGORY_UPDATE_SUCCESS, result));
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -100,20 +101,20 @@ public class CategoryManagerControllerAPI {
             @PathVariable UUID id,
             @Valid @RequestBody CategoryRequestDTO requestDTO) {
         CategoryResponseDTO result = categoryService.updateCategory(id, requestDTO, null);
-        return ResponseEntity.ok(ApiResponse.success("Cập nhật danh mục thành công", result));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.CATEGORY_UPDATE_SUCCESS, result));
     }
 
     @DeleteMapping("/{id}")
     @AuditAction("Xóa vĩnh viễn danh mục")
     public ResponseEntity<ApiResponse<Void>> deleteCategory(@PathVariable UUID id) {
         categoryService.deleteCategory(id);
-        return ResponseEntity.ok(ApiResponse.success("Xóa vĩnh viễn danh mục thành công"));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.CATEGORY_DELETE_SUCCESS));
     }
 
     @PostMapping("/{id}/restore")
     @AuditAction("Khôi phục danh mục")
     public ResponseEntity<ApiResponse<Void>> restoreCategory(@PathVariable UUID id) {
         categoryService.restoreCategory(id);
-        return ResponseEntity.ok(ApiResponse.success("Khôi phục danh mục thành công"));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.CATEGORY_RESTORE_SUCCESS));
     }
 }

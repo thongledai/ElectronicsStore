@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.store.common.annotation.AuditAction;
 import com.example.store.dto.common.ApiResponse;
+import com.example.store.enums.ApiMessage;
 import com.example.store.dto.common.PageResponse;
 import com.example.store.dto.product.ProductDetailResponseDTO;
 import com.example.store.dto.product.ProductRequestDTO;
@@ -49,13 +50,13 @@ public class ProductManagerControllerAPI {
         Pageable pageable = PageRequest.of(page, Math.min(size, 50), Sort.by(Sort.Direction.DESC, "createdAt"));
         PageResponse<ProductResponseDTO> result = productService.getManagerProducts(
             search, categoryId, brandId, isSelling, isActive, pageable);
-        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách sản phẩm thành công", result));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.PRODUCT_LIST_SUCCESS, result));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<ProductDetailResponseDTO>> getProductById(@PathVariable UUID id) {
         ProductDetailResponseDTO result = productService.getProductDetailById(id);
-        return ResponseEntity.ok(ApiResponse.success("Lấy thông tin sản phẩm thành công", result));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.PRODUCT_DETAIL_SUCCESS, result));
     }
 
     @PostMapping
@@ -64,7 +65,7 @@ public class ProductManagerControllerAPI {
             @Valid @RequestBody ProductRequestDTO requestDTO) {
         ProductDetailResponseDTO result = productService.createProduct(requestDTO);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Tạo mới sản phẩm thành công", result));
+                .body(ApiResponse.success(ApiMessage.PRODUCT_CREATE_SUCCESS, result));
     }
 
     @PutMapping("/{id}")
@@ -73,20 +74,20 @@ public class ProductManagerControllerAPI {
             @PathVariable UUID id,
             @Valid @RequestBody ProductRequestDTO requestDTO) {
         ProductDetailResponseDTO result = productService.updateProduct(id, requestDTO);
-        return ResponseEntity.ok(ApiResponse.success("Cập nhật sản phẩm thành công", result));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.PRODUCT_UPDATE_SUCCESS, result));
     }
 
     @DeleteMapping("/{id}")
     @AuditAction("Xóa vĩnh viễn sản phẩm")
     public ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable UUID id) {
         productService.deleteProduct(id);
-        return ResponseEntity.ok(ApiResponse.success("Xóa vĩnh viễn sản phẩm thành công"));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.PRODUCT_DELETE_SUCCESS));
     }
 
     @PostMapping("/{id}/restore")
     @AuditAction("Khôi phục sản phẩm")
     public ResponseEntity<ApiResponse<Void>> restoreProduct(@PathVariable UUID id) {
         productService.restoreProduct(id);
-        return ResponseEntity.ok(ApiResponse.success("Khôi phục sản phẩm thành công"));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.PRODUCT_RESTORE_SUCCESS));
     }
 }

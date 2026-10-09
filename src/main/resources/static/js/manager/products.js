@@ -125,9 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             tbody.innerHTML = data.content.map(p => {
                 let statusBadge = '<span class="status green">Đang bán</span>';
-                if (!p.isActive) {
-                    statusBadge = '<span class="status red">Ngừng hoạt động</span>';
-                } else if (!p.isSelling) {
+                if (!p.isSelling) {
                     statusBadge = '<span class="status yellow">Tạm ngưng bán</span>';
                 } else if (p.totalStock === 0) {
                     statusBadge = '<span class="status red">Hết hàng</span>';

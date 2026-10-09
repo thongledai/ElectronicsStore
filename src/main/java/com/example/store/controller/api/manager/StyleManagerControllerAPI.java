@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.store.common.annotation.AuditAction;
 import com.example.store.dto.common.ApiResponse;
+import com.example.store.enums.ApiMessage;
 import com.example.store.dto.common.PageResponse;
 import com.example.store.dto.style.StyleOptionDTO;
 import com.example.store.dto.style.StyleRequestDTO;
@@ -46,25 +47,25 @@ public class StyleManagerControllerAPI {
             @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, Math.min(size, 50), Sort.by(Sort.Direction.DESC, "createdAt"));
         PageResponse<StyleResponseDTO> result = styleService.getAllStyles(search, isActive, pageable);
-        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách kiểu thuộc tính thành công", result));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.STYLE_LIST_SUCCESS, result));
     }
 
     @GetMapping("/options")
     public ResponseEntity<ApiResponse<List<StyleOptionDTO>>> getStyleOptions() {
         List<StyleOptionDTO> result = styleService.getStyleOptions();
-        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách lựa chọn kiểu thuộc tính thành công", result));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.STYLE_OPTIONS_SUCCESS, result));
     }
 
     @GetMapping("/by-category/{categoryId}")
     public ResponseEntity<ApiResponse<List<StyleResponseDTO>>> getStylesByCategoryId(@PathVariable UUID categoryId) {
         List<StyleResponseDTO> result = styleService.getStylesByCategoryId(categoryId);
-        return ResponseEntity.ok(ApiResponse.success("Lấy kiểu thuộc tính theo danh mục thành công", result));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.STYLE_BY_CATEGORY_SUCCESS, result));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<StyleResponseDTO>> getStyleById(@PathVariable UUID id) {
         StyleResponseDTO result = styleService.getStyleById(id);
-        return ResponseEntity.ok(ApiResponse.success("Lấy thông tin kiểu thuộc tính thành công", result));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.STYLE_DETAIL_SUCCESS, result));
     }
 
     @PostMapping
@@ -73,7 +74,7 @@ public class StyleManagerControllerAPI {
             @Valid @RequestBody StyleRequestDTO requestDTO) {
         StyleResponseDTO result = styleService.createStyle(requestDTO);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Tạo mới kiểu thuộc tính thành công", result));
+                .body(ApiResponse.success(ApiMessage.STYLE_CREATE_SUCCESS, result));
     }
 
     @PutMapping("/{id}")
@@ -82,20 +83,20 @@ public class StyleManagerControllerAPI {
             @PathVariable UUID id,
             @Valid @RequestBody StyleRequestDTO requestDTO) {
         StyleResponseDTO result = styleService.updateStyle(id, requestDTO);
-        return ResponseEntity.ok(ApiResponse.success("Cập nhật kiểu thuộc tính thành công", result));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.STYLE_UPDATE_SUCCESS, result));
     }
 
     @DeleteMapping("/{id}")
     @AuditAction("Xóa vĩnh viễn kiểu thuộc tính")
     public ResponseEntity<ApiResponse<Void>> deleteStyle(@PathVariable UUID id) {
         styleService.deleteStyle(id);
-        return ResponseEntity.ok(ApiResponse.success("Xóa vĩnh viễn kiểu thuộc tính thành công"));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.STYLE_DELETE_SUCCESS));
     }
 
     @PostMapping("/{id}/restore")
     @AuditAction("Khôi phục kiểu thuộc tính")
     public ResponseEntity<ApiResponse<Void>> restoreStyle(@PathVariable UUID id) {
         styleService.restoreStyle(id);
-        return ResponseEntity.ok(ApiResponse.success("Khôi phục kiểu thuộc tính thành công"));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.STYLE_RESTORE_SUCCESS));
     }
 }
