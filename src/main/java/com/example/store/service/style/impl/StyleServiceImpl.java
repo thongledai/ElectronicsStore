@@ -103,6 +103,7 @@ public class StyleServiceImpl implements IStyleService {
 		Set<Category> categories = new HashSet<>();
 		if (requestDTO.getCategoryIds() != null && !requestDTO.getCategoryIds().isEmpty()) {
 			categories.addAll(categoryRepository.findAllById(requestDTO.getCategoryIds()));
+			validateCategories(requestDTO.getCategoryIds(), categories);
 		}
 
 		Style style = Style.builder().name(requestDTO.getName().trim()).categories(categories)
@@ -124,11 +125,18 @@ public class StyleServiceImpl implements IStyleService {
 		Set<Category> categories = new HashSet<>();
 		if (requestDTO.getCategoryIds() != null) {
 			categories.addAll(categoryRepository.findAllById(requestDTO.getCategoryIds()));
+			validateCategories(requestDTO.getCategoryIds(), categories);
 		}
 
 		style.setName(requestDTO.getName().trim());
 		style.setCategories(categories);
 		if (requestDTO.getIsDeleted() != null) {
+			if (requestDTO.getIsDeleted() && !Boolean.TRUE.equals(style.getIsDeleted())) {
+				ensureNoActiveValues(id);
+			}
+			if (!requestDTO.getIsDeleted() && Boolean.TRUE.equals(style.getIsDeleted())) {
+				// Restore only this style; values retain their own state.
+			}
 			style.setIsDeleted(requestDTO.getIsDeleted());
 		}
 
@@ -143,21 +151,8 @@ public class StyleServiceImpl implements IStyleService {
 		Style style = styleRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy kiểu thuộc tính với ID: " + id));
 
-		// Ràng buộc: Chặn nếu có StyleValue đang được variant active sử dụng
-		List<StyleValue> values = styleValueRepository.findByStyleIdAndIsDeletedFalse(id);
-		for (StyleValue val : values) {
-			if (productVariantRepository.existsActiveVariantByStyleValueId(val.getId())) {
-				throw new BusinessException("Không thể xóa kiểu thuộc tính vì giá trị '" + val.getName()
-						+ "' đang được dùng bởi biến thể sản phẩm hoạt động!");
-			}
-		}
-
-		// Xóa mềm style cùng các style value của nó
+		ensureNoActiveValues(id);
 		style.setIsDeleted(true);
-		for (StyleValue val : values) {
-			val.setIsDeleted(true);
-			styleValueRepository.save(val);
-		}
 		styleRepository.save(style);
 		log.info("Xóa mềm kiểu thuộc tính id={}", id);
 	}
@@ -171,12 +166,29 @@ public class StyleServiceImpl implements IStyleService {
 		style.setIsDeleted(false);
 		styleRepository.save(style);
 
-		List<StyleValue> values = styleValueRepository.findByStyleId(id);
+	}
 
-		for (StyleValue value : values) {
-			value.setIsDeleted(false);
+	private void validateCategories(Set<UUID> requestedIds, Set<Category> found) {
+		if (found.size() != requestedIds.size()) {
+			throw new ResourceNotFoundException("Một hoặc nhiều danh mục không tồn tại.");
 		}
+		if (found.stream().anyMatch(c -> Boolean.TRUE.equals(c.getIsDeleted()))) {
+			throw new BusinessException("Không thể gán kiểu thuộc tính vào danh mục đã xóa.");
+		}
+	}
 
-		styleValueRepository.saveAll(values);
+	private void ensureNoActiveValues(UUID styleId) {
+		List<StyleValue> values = styleValueRepository.findByStyleId(styleId);
+		for (StyleValue value : values) {
+			if (productVariantRepository.existsActiveVariantByStyleValueId(value.getId())) {
+				throw new BusinessException("Không thể tắt kiểu thuộc tính vì giá trị '" + value.getName()
+						+ "' vẫn được biến thể hoạt động sử dụng.");
+			}
+		}
+		long activeValues = values.stream().filter(value -> !Boolean.TRUE.equals(value.getIsDeleted())).count();
+		if (activeValues > 0) {
+			throw new BusinessException("Không thể tắt kiểu thuộc tính vì vẫn còn " + activeValues
+					+ " giá trị đang hoạt động. Hãy tắt từng giá trị trước.");
+		}
 	}
 }

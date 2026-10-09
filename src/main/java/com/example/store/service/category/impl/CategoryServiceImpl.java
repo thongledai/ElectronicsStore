@@ -166,6 +166,13 @@ public class CategoryServiceImpl implements ICategoryService {
 		category.setSlug(slug);
 		category.setParent(parent);
 		if (requestDTO.getIsDeleted() != null) {
+			if (requestDTO.getIsDeleted() && !Boolean.TRUE.equals(category.getIsDeleted())) {
+				validateCanDeleteCategory(id);
+			}
+			if (!requestDTO.getIsDeleted() && Boolean.TRUE.equals(category.getIsDeleted())
+					&& parent != null && Boolean.TRUE.equals(parent.getIsDeleted())) {
+				throw new BusinessException("Không thể khôi phục danh mục khi danh mục cha đang bị xóa.");
+			}
 			category.setIsDeleted(requestDTO.getIsDeleted());
 		}
 
@@ -180,15 +187,7 @@ public class CategoryServiceImpl implements ICategoryService {
 		Category category = categoryRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục với ID: " + id));
 
-		// Ràng buộc: chỉ xóa mềm khi không còn Product chưa xóa và không còn category
-		// con chưa xóa
-		if (productRepository.existsByCategoryIdAndIsActiveTrue(id)) {
-			throw new BusinessException("Không thể xóa danh mục vì vẫn còn sản phẩm đang hoạt động!");
-		}
-
-		if (categoryRepository.existsByParentIdAndIsDeletedFalse(id)) {
-			throw new BusinessException("Không thể xóa danh mục vì vẫn còn danh mục con đang hoạt động!");
-		}
+		validateCanDeleteCategory(id);
 
 		category.setIsDeleted(true);
 		categoryRepository.save(category);
@@ -209,6 +208,15 @@ public class CategoryServiceImpl implements ICategoryService {
 		category.setIsDeleted(false);
 		categoryRepository.save(category);
 		log.info("Khôi phục danh mục id={}", id);
+	}
+
+	private void validateCanDeleteCategory(UUID id) {
+		if (productRepository.existsByCategoryIdAndIsActiveTrue(id)) {
+			throw new BusinessException("Không thể xóa danh mục vì vẫn còn sản phẩm đang hoạt động!");
+		}
+		if (categoryRepository.existsByParentIdAndIsDeletedFalse(id)) {
+			throw new BusinessException("Không thể xóa danh mục vì vẫn còn danh mục con đang hoạt động!");
+		}
 	}
 
 	@Override

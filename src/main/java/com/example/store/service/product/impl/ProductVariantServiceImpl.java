@@ -94,13 +94,20 @@ public class ProductVariantServiceImpl implements IProductVariantService {
 		Product product = productRepository.findById(productId)
 				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm với ID: " + productId));
 
-		if (!product.isActive()) {
+		if (!product.isActive() || Boolean.TRUE.equals(product.getCategory().getIsDeleted())
+				|| !Boolean.TRUE.equals(product.getBrand().getIsActive())) {
 			throw new BusinessException("Không thể tạo biến thể cho sản phẩm đã ngừng hoạt động!");
 		}
 
 		validatePrices(requestDTO);
 
 		Set<StyleValue> styleValues = validateAndGetStyleValues(product, requestDTO.getStyleValueIds());
+		boolean selling = requestDTO.getIsSelling() == null || requestDTO.getIsSelling();
+		if (selling && (!product.isActive() || !product.isSelling()
+				|| !Boolean.TRUE.equals(product.getBrand().getIsActive())
+				|| Boolean.TRUE.equals(product.getCategory().getIsDeleted()))) {
+			throw new BusinessException("Không thể tạo biến thể đang bán khi sản phẩm hoặc điều kiện phụ thuộc không hợp lệ.");
+		}
 
 		ProductVariant variant = ProductVariant.builder().product(product).sku(generateUniqueSku(product, styleValues))
 				.price(requestDTO.getPrice()).promotionalPrice(requestDTO.getPromotionalPrice())
@@ -108,6 +115,7 @@ public class ProductVariantServiceImpl implements IProductVariantService {
 				.isActive(requestDTO.getIsActive() != null ? requestDTO.getIsActive() : true)
 				.isSelling(requestDTO.getIsSelling() != null ? requestDTO.getIsSelling() : true)
 				.styleValues(styleValues).build();
+		validateVariantState(product, variant, styleValues);
 
 		ProductVariant saved = productVariantRepository.save(variant);
 		log.info("Tạo mới biến thể thành công: id={}, sku={}", saved.getId(), saved.getSku());
@@ -131,6 +139,15 @@ public class ProductVariantServiceImpl implements IProductVariantService {
 		validatePrices(requestDTO);
 
 		Set<StyleValue> styleValues = validateAndGetStyleValues(product, requestDTO.getStyleValueIds());
+		boolean active = requestDTO.getIsActive() != null ? requestDTO.getIsActive() : variant.isActive();
+		boolean selling = requestDTO.getIsSelling() != null ? requestDTO.getIsSelling() : variant.isSelling();
+		if (Boolean.TRUE.equals(requestDTO.getIsSelling()) && (!product.isActive() || !product.isSelling()
+				|| !Boolean.TRUE.equals(product.getBrand().getIsActive())
+				|| Boolean.TRUE.equals(product.getCategory().getIsDeleted()))) {
+			throw new BusinessException("Không thể bật bán biến thể khi sản phẩm hoặc điều kiện phụ thuộc không hợp lệ.");
+		}
+		ProductVariant proposed = ProductVariant.builder().product(product).isActive(active).isSelling(selling).build();
+		validateVariantState(product, proposed, styleValues);
 
 		variant.setPrice(requestDTO.getPrice());
 		variant.setPromotionalPrice(requestDTO.getPromotionalPrice());
@@ -171,7 +188,8 @@ public class ProductVariantServiceImpl implements IProductVariantService {
 		Product product = productRepository.findById(productId)
 				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm với ID: " + productId));
 
-		if (!product.isActive()) {
+		if (!product.isActive() || Boolean.TRUE.equals(product.getCategory().getIsDeleted())
+				|| !Boolean.TRUE.equals(product.getBrand().getIsActive())) {
 			throw new BusinessException("Không thể khôi phục biến thể khi sản phẩm cha đang ngừng hoạt động!");
 		}
 
@@ -181,6 +199,10 @@ public class ProductVariantServiceImpl implements IProductVariantService {
 		if (!variant.getProduct().getId().equals(productId)) {
 			throw new BusinessException("Biến thể không thuộc về sản phẩm này!");
 		}
+		Set<UUID> styleValueIds = variant.getStyleValues().stream().map(StyleValue::getId)
+				.collect(Collectors.toSet());
+		Set<StyleValue> styleValues = validateAndGetStyleValues(product, styleValueIds);
+		validateVariantState(product, variant, styleValues);
 
 		variant.setActive(true);
 		productVariantRepository.save(variant);
@@ -212,6 +234,9 @@ public class ProductVariantServiceImpl implements IProductVariantService {
 		Set<UUID> seenStyles = new HashSet<>();
 
 		for (StyleValue sv : styleValues) {
+			if (Boolean.TRUE.equals(sv.getIsDeleted())) {
+				throw new BusinessException("Giá trị thuộc tính '" + sv.getName() + "' đã bị xóa.");
+			}
 
 			if (Boolean.TRUE.equals(sv.getStyle().getIsDeleted())) {
 				throw new BusinessException("Kiểu thuộc tính '" + sv.getStyle().getName() + "' đã bị xóa!");
@@ -232,6 +257,19 @@ public class ProductVariantServiceImpl implements IProductVariantService {
 		}
 
 		return new HashSet<>(styleValues);
+	}
+
+	private void validateVariantState(Product product, ProductVariant variant, Set<StyleValue> values) {
+		if (variant.isActive() && !product.isActive()) {
+			throw new BusinessException("Không thể bật biến thể khi sản phẩm cha đang tắt.");
+		}
+		if (variant.isActive() || variant.isSelling()) {
+			for (StyleValue value : values) {
+				if (Boolean.TRUE.equals(value.getIsDeleted()) || Boolean.TRUE.equals(value.getStyle().getIsDeleted())) {
+					throw new BusinessException("Biến thể tham chiếu giá trị/kiểu thuộc tính không hoạt động: " + value.getName());
+				}
+			}
+		}
 	}
 
 	// SKU luôn được tự tạo khi thêm biến thể và giữ nguyên khi cập nhật

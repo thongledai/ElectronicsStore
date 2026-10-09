@@ -115,9 +115,21 @@ public class StyleValueServiceImpl implements IStyleValueService {
 					"Giá trị thuộc tính '" + requestDTO.getName() + "' đã tồn tại trong kiểu này!");
 		}
 
+		if (!styleValue.getStyle().getId().equals(style.getId())
+				&& productVariantRepository.existsByStyleValuesId(id)) {
+			throw new BusinessException("Không thể chuyển giá trị sang kiểu khác khi biến thể đang tham chiếu giá trị này.");
+		}
 		styleValue.setName(requestDTO.getName().trim());
 		styleValue.setStyle(style);
 		if (requestDTO.getIsDeleted() != null) {
+			if (requestDTO.getIsDeleted() && !Boolean.TRUE.equals(styleValue.getIsDeleted())
+					&& productVariantRepository.existsActiveVariantByStyleValueId(id)) {
+				throw new BusinessException("Không thể tắt giá trị thuộc tính vì đang được biến thể hoạt động sử dụng. Hãy tắt biến thể trước.");
+			}
+			if (!requestDTO.getIsDeleted() && Boolean.TRUE.equals(styleValue.getIsDeleted())
+					&& Boolean.TRUE.equals(style.getIsDeleted())) {
+				throw new BusinessException("Không thể khôi phục giá trị khi kiểu thuộc tính đang tắt.");
+			}
 			styleValue.setIsDeleted(requestDTO.getIsDeleted());
 		}
 

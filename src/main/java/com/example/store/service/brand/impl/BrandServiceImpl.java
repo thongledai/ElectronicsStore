@@ -143,6 +143,10 @@ public class BrandServiceImpl implements IBrandService {
         brand.setSlug(slug);
         brand.setDescription(requestDTO.getDescription());
         if (requestDTO.getIsActive() != null) {
+            if (!requestDTO.getIsActive() && !Boolean.FALSE.equals(brand.getIsActive())
+                    && productRepository.existsByBrandIdAndIsActiveTrue(id)) {
+                throw new BusinessException("Không thể tắt thương hiệu vì vẫn còn sản phẩm đang hoạt động. Hãy tắt sản phẩm và biến thể trước.");
+            }
             brand.setIsActive(requestDTO.getIsActive());
         }
 

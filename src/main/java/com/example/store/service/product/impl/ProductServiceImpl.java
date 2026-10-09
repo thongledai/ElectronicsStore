@@ -271,6 +271,7 @@ public class ProductServiceImpl implements IProductService {
 				.description(requestDTO.getDescription().trim()).category(category).brand(brand)
 				.isActive(requestDTO.getIsActive() != null ? requestDTO.getIsActive() : true)
 				.isSelling(requestDTO.getIsSelling() != null ? requestDTO.getIsSelling() : true).rating(5.0).build();
+		validateProductState(product);
 
 		Product saved = productRepository.save(product);
 		log.info("Tạo mới sản phẩm thành công: id={}, name={}", saved.getId(), saved.getName());
@@ -311,6 +312,10 @@ public class ProductServiceImpl implements IProductService {
 		if (requestDTO.getIsSelling() != null) {
 			product.setSelling(requestDTO.getIsSelling());
 		}
+		if (Boolean.TRUE.equals(requestDTO.getIsSelling()) && !product.isActive()) {
+			throw new BusinessException("Không thể bật bán sản phẩm chưa hoạt động.");
+		}
+		validateProductState(product);
 
 		Product updated = productRepository.save(product);
 		log.info("Cập nhật sản phẩm thành công: id={}, name={}", updated.getId(), updated.getName());
@@ -323,13 +328,10 @@ public class ProductServiceImpl implements IProductService {
 		Product product = productRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm với ID: " + id));
 
-		product.setActive(false);
-		// Đặt isActive=false cho cả các variant của nó
-		List<ProductVariant> variants = productVariantRepository.findByProductId(id);
-		for (ProductVariant v : variants) {
-			v.setActive(false);
-			productVariantRepository.save(v);
+		if (productVariantRepository.existsByProductIdAndIsActiveTrue(id)) {
+			throw new BusinessException("Không thể ngừng hoạt động sản phẩm vì vẫn còn biến thể đang hoạt động. Hãy tắt từng biến thể trước.");
 		}
+		product.setActive(false);
 		productRepository.save(product);
 		log.info("Vô hiệu hóa sản phẩm và các biến thể của id={}", id);
 	}
@@ -351,12 +353,17 @@ public class ProductServiceImpl implements IProductService {
 		product.setActive(true);
 		productRepository.save(product);
 
-		List<ProductVariant> variants = productVariantRepository.findByProductId(id);
+	}
 
-		variants.forEach(v -> v.setActive(true));
-
-		productVariantRepository.saveAll(variants);
-
+	private void validateProductState(Product product) {
+		if (product.isActive() || product.isSelling()) {
+			if (Boolean.TRUE.equals(product.getCategory().getIsDeleted())) {
+				throw new BusinessException("Không thể kích hoạt/bán sản phẩm thuộc danh mục đã xóa.");
+			}
+			if (!Boolean.TRUE.equals(product.getBrand().getIsActive())) {
+				throw new BusinessException("Không thể kích hoạt/bán sản phẩm thuộc thương hiệu đang tắt.");
+			}
+		}
 	}
 
 	// Chỉ nạp biến thể của các sản phẩm đang hiển thị (thay cho findAll() toàn
