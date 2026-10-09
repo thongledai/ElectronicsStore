@@ -31,14 +31,14 @@ const STORE = {
    Change a page address here and every script follows. */
 const APP_URL = window.APP_URL || '/';
 const ROUTES = {
-  home:           APP_URL + 'customer/index',
-  products:       APP_URL + 'customer/products',
+  home: APP_URL + 'customer/index',
+  products: APP_URL + 'customer/products',
   productDetails: APP_URL + 'customer/product-details',
-  cart:           APP_URL + 'customer/cart',
-  wishlist:       APP_URL + 'customer/wishlist',
-  about:          APP_URL + 'pages/about',
-  contact:        APP_URL + 'pages/contact',
-  login:          APP_URL + 'auth/login'
+  cart: APP_URL + 'customer/cart',
+  wishlist: APP_URL + 'customer/wishlist',
+  about: APP_URL + 'pages/about',
+  contact: APP_URL + 'pages/contact',
+  login: APP_URL + 'auth/login'
 };
 
 /* Business rules used by the cart calculations */
@@ -53,9 +53,9 @@ const CONFIG = {
 /* Demo coupon codes — validated entirely on the frontend */
 const COUPONS = {
   TECHNOVA10: { type: 'percent', value: 10, label: '10% off your order' },
-  STUDENT15:  { type: 'percent', value: 15, label: '15% student discount' },
-  FLAT500:    { type: 'flat',    value: 500, label: '₹500 off', minOrder: 5000 },
-  FREESHIP:   { type: 'shipping', value: 0, label: 'Free shipping' }
+  STUDENT15: { type: 'percent', value: 15, label: '15% student discount' },
+  FLAT500: { type: 'flat', value: 500, label: '₹500 off', minOrder: 5000 },
+  FREESHIP: { type: 'shipping', value: 0, label: 'Free shipping' }
 };
 
 /* ==========================================================================
@@ -622,38 +622,50 @@ function initHeaderSearch() {
     if (!input || !panel) return;
 
     const closePanel = () => panel.classList.remove('show');
+    const vnd = v => Number(v || 0).toLocaleString('vi-VN') + ' ₫';
+    let timer = null;
+    let seq = 0;
 
+    // Gợi ý sản phẩm thật từ database (tối đa 6 kết quả)
     input.addEventListener('input', () => {
-      const query = input.value.trim().toLowerCase();
+      const query = input.value.trim();
+      clearTimeout(timer);
       if (query.length < 2) return closePanel();
 
-      const matches = PRODUCTS.filter(p =>
-        p.name.toLowerCase().includes(query) ||
-        p.brand.toLowerCase().includes(query) ||
-        getCategoryName(p.category).toLowerCase().includes(query) ||
-        p.tagline.toLowerCase().includes(query)
-      ).slice(0, 6);
+      timer = setTimeout(async () => {
+        const mySeq = ++seq;
+        try {
+          const res = await fetch(`/api/products?q=${encodeURIComponent(query)}&size=6`, {
+            headers: { 'Accept': 'application/json' }
+          }).then(r => r.json());
+          if (mySeq !== seq) return; // đã có truy vấn mới hơn
 
-      if (!matches.length) {
-        panel.innerHTML = `
-          <div class="suggestion-item text-muted">
-            <i class="fas fa-magnifying-glass"></i>
-            <span class="s-name">No products match "${escapeHtml(input.value.trim())}"</span>
-          </div>`;
-      } else {
-        panel.innerHTML = matches.map(p => `
-          <a class="suggestion-item" href="${ROUTES.productDetails}?id=${p.id}">
-            <img src="${p.images[0]}" alt="${escapeHtml(p.name)}" loading="lazy">
-            <span>
-              <span class="s-name d-block">${escapeHtml(p.name)}</span>
-              <span class="s-cat">${getCategoryName(p.category)} · ${formatPrice(p.price)}</span>
-            </span>
-          </a>`).join('');
-      }
-      panel.classList.add('show');
+          const items = (res && res.success && res.data && res.data.content) ? res.data.content : [];
+          if (!items.length) {
+            panel.innerHTML = `
+              <div class="suggestion-item text-muted">
+                <i class="fas fa-magnifying-glass"></i>
+                <span class="s-name">Không có sản phẩm phù hợp "${escapeHtml(query)}"</span>
+              </div>`;
+          } else {
+            panel.innerHTML = items.map(p => `
+              <a class="suggestion-item" href="${APP_URL}customer/products/${encodeURIComponent(p.slug)}">
+                <img src="${escapeHtml(p.thumbnailUrl || '/images/placeholder.webp')}" alt="${escapeHtml(p.name)}" loading="lazy"
+                     onerror="this.onerror=null;this.src='/images/placeholder.webp';">
+                <span>
+                  <span class="s-name d-block">${escapeHtml(p.name)}</span>
+                  <span class="s-cat">${escapeHtml(p.categoryName || '')} · ${vnd(p.effectivePrice != null ? p.effectivePrice : p.minPrice)}</span>
+                </span>
+              </a>`).join('');
+          }
+          panel.classList.add('show');
+        } catch (e) {
+          closePanel();
+        }
+      }, 300);
     });
 
-    // Submitting jumps to the products page with the query pre-applied
+    // Nhấn Enter / Tìm: chuyển tới trang sản phẩm với từ khóa
     if (form) {
       form.addEventListener('submit', e => {
         e.preventDefault();
@@ -669,19 +681,29 @@ function initHeaderSearch() {
   });
 }
 
-/** Fills the category dropdown in the navbar from CATEGORIES. */
+/** Điền menu danh mục trên navbar từ database (/api/categories). */
 function initCategoryMenu() {
-  document.querySelectorAll('.js-category-menu').forEach(menu => {
-    menu.innerHTML = CATEGORIES.map(c => `
-      <li>
-        <a class="dropdown-item" href="${ROUTES.products}?category=${c.id}">
-          <i class="fas ${c.icon}"></i>${c.name}
-          <span class="ms-auto badge-soft">${getProductsByCategory(c.id).length}</span>
-        </a>
-      </li>`).join('') + `
+  const menus = document.querySelectorAll('.js-category-menu');
+  if (!menus.length) return;
+
+  const viewAll = `
       <li><hr class="dropdown-divider"></li>
-      <li><a class="dropdown-item" href="${ROUTES.products}"><i class="fas fa-grip"></i>View All Products</a></li>`;
-  });
+      <li><a class="dropdown-item" href="${ROUTES.products}"><i class="fas fa-grip"></i>Xem tất cả sản phẩm</a></li>`;
+  menus.forEach(menu => { menu.innerHTML = viewAll; });
+
+  fetch('/api/categories', { headers: { 'Accept': 'application/json' } })
+    .then(r => r.json())
+    .then(res => {
+      const list = (res && res.success && Array.isArray(res.data)) ? res.data : [];
+      const html = list.map(c => `
+      <li>
+        <a class="dropdown-item" href="${ROUTES.products}?category=${encodeURIComponent(c.slug)}">
+          <i class="fas fa-tag"></i>${escapeHtml(c.name)}
+        </a>
+      </li>`).join('') + viewAll;
+      menus.forEach(menu => { menu.innerHTML = html; });
+    })
+    .catch(() => { /* giữ lại mục "Xem tất cả sản phẩm" */ });
 }
 
 /* ==========================================================================

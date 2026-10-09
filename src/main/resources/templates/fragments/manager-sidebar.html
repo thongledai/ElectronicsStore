@@ -7,23 +7,25 @@
         <a class="brand" th:href="@{/manager/index}"><i class="fa-solid fa-bolt me-2"></i>Tech<span>Nova</span></a>
         <button class="nav-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#roleNavLinks" aria-controls="roleNavLinks" aria-expanded="false" aria-label="Toggle menu"><i class="fa-solid fa-bars"></i></button>
     </div>
-    <div class="nav-caption">Manager</div>
+    <div class="nav-caption">Quản trị viên</div>
     <div class="nav-links collapse d-lg-flex" id="roleNavLinks">
-        <a th:href="@{/manager/index}" th:classappend="${active == 'index'} ? 'active'" th:attr="aria-current=${active == 'index'} ? 'page'"><i class="fa-solid fa-chart-pie"></i><span>Dashboard</span></a>
-        <a th:href="@{/manager/users}" th:classappend="${active == 'users'} ? 'active'" th:attr="aria-current=${active == 'users'} ? 'page'"><i class="fa-solid fa-users"></i><span>Users</span></a>
-        <a th:href="@{/manager/products}" th:classappend="${active == 'products'} ? 'active'" th:attr="aria-current=${active == 'products'} ? 'page'"><i class="fa-solid fa-box"></i><span>Products</span></a>
-        <a th:href="@{/manager/categories}" th:classappend="${active == 'categories'} ? 'active'" th:attr="aria-current=${active == 'categories'} ? 'page'"><i class="fa-solid fa-layer-group"></i><span>Categories</span></a>
-        <a th:href="@{/manager/promotions}" th:classappend="${active == 'promotions'} ? 'active'" th:attr="aria-current=${active == 'promotions'} ? 'page'"><i class="fa-solid fa-tags"></i><span>Promotions</span></a>
-        <a th:href="@{/manager/carriers}" th:classappend="${active == 'carriers'} ? 'active'" th:attr="aria-current=${active == 'carriers'} ? 'page'"><i class="fa-solid fa-truck-fast"></i><span>Carriers</span></a>
-        <a th:href="@{/manager/orders}" th:classappend="${active == 'orders'} ? 'active'" th:attr="aria-current=${active == 'orders'} ? 'page'"><i class="fa-solid fa-receipt"></i><span>Orders</span></a>
-        <a th:href="@{/manager/statistics}" th:classappend="${active == 'statistics'} ? 'active'" th:attr="aria-current=${active == 'statistics'} ? 'page'"><i class="fa-solid fa-chart-line"></i><span>Statistics</span></a>
-        <a th:href="@{/manager/reset-password}" th:classappend="${active == 'reset-password'} ? 'active'" th:attr="aria-current=${active == 'reset-password'} ? 'page'"><i class="fa-solid fa-key"></i><span>Change Password</span></a>
+        <a th:href="@{/manager/index}" th:classappend="${active == 'index'} ? 'active'" th:attr="aria-current=${active == 'index'} ? 'page'"><i class="fa-solid fa-chart-pie"></i><span>Tổng quan</span></a>
+        <a th:href="@{/manager/users}" th:classappend="${active == 'users'} ? 'active'" th:attr="aria-current=${active == 'users'} ? 'page'"><i class="fa-solid fa-users"></i><span>Người dùng</span></a>
+        <a th:href="@{/manager/products}" th:classappend="${active == 'products'} ? 'active'" th:attr="aria-current=${active == 'products'} ? 'page'"><i class="fa-solid fa-box"></i><span>Sản phẩm</span></a>
+        <a th:href="@{/manager/categories}" th:classappend="${active == 'categories'} ? 'active'" th:attr="aria-current=${active == 'categories'} ? 'page'"><i class="fa-solid fa-layer-group"></i><span>Danh mục</span></a>
+        <a th:href="@{/manager/brands}" th:classappend="${active == 'brands'} ? 'active'" th:attr="aria-current=${active == 'brands'} ? 'page'"><i class="fa-solid fa-copyright"></i><span>Thương hiệu</span></a>
+        <a th:href="@{/manager/styles}" th:classappend="${active == 'styles'} ? 'active'" th:attr="aria-current=${active == 'styles'} ? 'page'"><i class="fa-solid fa-palette"></i><span>Kiểu thuộc tính</span></a>
+        <a th:href="@{/manager/promotions}" th:classappend="${active == 'promotions'} ? 'active'" th:attr="aria-current=${active == 'promotions'} ? 'page'"><i class="fa-solid fa-tags"></i><span>Khuyến mãi</span></a>
+        <a th:href="@{/manager/carriers}" th:classappend="${active == 'carriers'} ? 'active'" th:attr="aria-current=${active == 'carriers'} ? 'page'"><i class="fa-solid fa-truck-fast"></i><span>Vận chuyển</span></a>
+        <a th:href="@{/manager/orders}" th:classappend="${active == 'orders'} ? 'active'" th:attr="aria-current=${active == 'orders'} ? 'page'"><i class="fa-solid fa-receipt"></i><span>Đơn hàng</span></a>
+        <a th:href="@{/manager/statistics}" th:classappend="${active == 'statistics'} ? 'active'" th:attr="aria-current=${active == 'statistics'} ? 'page'"><i class="fa-solid fa-chart-line"></i><span>Thống kê</span></a>
+        <a th:href="@{/manager/reset-password}" th:classappend="${active == 'reset-password'} ? 'active'" th:attr="aria-current=${active == 'reset-password'} ? 'page'"><i class="fa-solid fa-key"></i><span>Đổi mật khẩu</span></a>
     </div>
     <div class="nav-actions">
-        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle dark/light theme" title="Toggle dark/light theme"><i class="fa-solid fa-moon"></i></button>
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle dark/light theme" title="Chuyển chế độ sáng/tối"><i class="fa-solid fa-moon"></i></button>
         <!-- Spring Security logout (POST + CSRF token added automatically by th:action) -->
         <form th:action="@{/logout}" method="post" class="m-0 js-logout-form">
-            <button class="theme-toggle" type="submit" aria-label="Sign Out" title="Sign Out"><i class="fa-solid fa-right-from-bracket"></i></button>
+            <button class="theme-toggle" type="submit" aria-label="Sign Out" title="Đăng xuất"><i class="fa-solid fa-right-from-bracket"></i></button>
         </form>
         <div class="role-avatar">M</div>
     </div>
