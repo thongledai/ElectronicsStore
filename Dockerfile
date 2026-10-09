@@ -35,7 +35,8 @@ USER spring:spring
 # Expose port (default 8080, can be overridden via SERVER_PORT)
 EXPOSE 8080
 
-# Container-aware JVM memory options
-ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
+# Container-aware JVM memory options optimized for 512MB RAM limit
+ENV JAVA_OPTS="-Xms128m -Xmx240m -Xss256k -XX:MetaspaceSize=96m -XX:MaxMetaspaceSize=128m -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -XX:+ExitOnOutOfMemoryError"
 
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
+
