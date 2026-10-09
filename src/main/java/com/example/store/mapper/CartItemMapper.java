@@ -4,6 +4,7 @@ import com.example.store.dto.respone.CartItemDTO;
 import com.example.store.entity.CartItem;
 import com.example.store.entity.Product;
 import com.example.store.entity.ProductVariant;
+import com.example.store.entity.ProductVariantImage;
 import com.example.store.entity.StyleValue;
 
 import java.math.BigDecimal;
@@ -14,7 +15,13 @@ public class CartItemMapper {
     public CartItemDTO toCartItemDTO(CartItem cartItem) {
         ProductVariant productVariant = cartItem.getVariant();
         Product product = productVariant.getProduct();
-        String firstImageUrl = productVariant.getImage().getFirst();
+        String firstImageUrl = productVariant.getImages() == null
+                ? null
+                : productVariant.getImages().stream()
+                        .map(ProductVariantImage::getImageUrl)
+                        .filter(url -> url != null && !url.isBlank())
+                        .findFirst()
+                        .orElse(null);
 
         BigDecimal subtotal = productVariant.getPrice().multiply(BigDecimal.valueOf(cartItem.getCount()));
 
@@ -39,11 +46,18 @@ public class CartItemMapper {
         }
 
         Set<StyleValue> styleValues = productVariant.getStyleValues();
+        if (styleValues == null || styleValues.isEmpty()) {
+            return "";
+        }
         return styleValues.stream().map(StyleValue::getName)
                 .collect(Collectors.joining(", "));
     }
 
     private boolean isAvailable(CartItem cartItem) {
-        return cartItem.getVariant().getProduct().isActive() && cartItem.getVariant().getProduct().isSelling();
+        ProductVariant variant = cartItem.getVariant();
+        return variant != null
+                && variant.getProduct() != null
+                && variant.getProduct().isActive()
+                && variant.getProduct().isSelling();
     }
 }
