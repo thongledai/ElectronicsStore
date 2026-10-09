@@ -1,6 +1,5 @@
-package com.example.store.service;
+package com.example.store.service.auth.impl;
 
-import java.util.Collections;
 import java.util.List;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

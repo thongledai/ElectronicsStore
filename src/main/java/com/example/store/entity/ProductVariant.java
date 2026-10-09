@@ -3,7 +3,6 @@ package com.example.store.entity;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
-
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -29,12 +28,7 @@ public class ProductVariant {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(
-            nullable = false,
-            unique = true,
-            length = 100,
-            columnDefinition = "nvarchar(100)"
-    )
+    @Column(nullable = false, unique = true, length = 100, columnDefinition = "nvarchar(100)")
     private String sku;
 
     @Column(nullable = false, precision = 18, scale = 2)
@@ -53,11 +47,20 @@ public class ProductVariant {
 
     @Builder.Default
     @Column(nullable = false)
-    private boolean isActive = true;
+    private boolean isSelling = true;
+
+        @Builder.Default
+        @Column(nullable = false, columnDefinition = "boolean not null default true")
+        private boolean isActive = true;
 
     @Builder.Default
-    @Column(nullable = false)
-    private boolean isSelling = true;
+    @OneToMany(
+            mappedBy = "productVariant",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<ProductVariantImage> images = new ArrayList<>();
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
@@ -72,20 +75,11 @@ public class ProductVariant {
     private Product product;
 
     @Builder.Default
-    @OneToMany(
-            mappedBy = "productVariant",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true,
-            fetch = FetchType.LAZY
-    )
-    private List<ProductVariantImage> images = new ArrayList<>();
-
-    @Builder.Default
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "product_variant_style_values",
-            joinColumns = @JoinColumn(name = "variant_id"),
-            inverseJoinColumns = @JoinColumn(name = "style_value_id")
+            joinColumns = @JoinColumn(name = "variant_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "style_value_id", nullable = false)
     )
     private Set<StyleValue> styleValues = new HashSet<>();
 }

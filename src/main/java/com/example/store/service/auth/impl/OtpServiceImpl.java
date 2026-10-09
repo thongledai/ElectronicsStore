@@ -1,4 +1,4 @@
-package com.example.store.service.impl;
+package com.example.store.service.auth.impl;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
@@ -10,7 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.store.entity.OtpToken;
 import com.example.store.enums.OtpType;
 import com.example.store.repository.OtpTokenRepository;
-import com.example.store.service.IOtpService;
+import com.example.store.service.auth.IOtpService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

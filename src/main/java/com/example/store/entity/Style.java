@@ -43,8 +43,8 @@ public class Style {
     @Builder.Default
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "style_categories",
-            joinColumns = @JoinColumn(name = "style_id"),
-            inverseJoinColumns = @JoinColumn(name = "category_id"))
+            joinColumns = @JoinColumn(name = "style_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "category_id", nullable = false))
     private Set<Category> categories = new HashSet<>();
 
     @Builder.Default

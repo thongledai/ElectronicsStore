@@ -74,8 +74,8 @@ public class Order {
     @Builder.Default
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "order_promotions",
-            joinColumns = @JoinColumn(name = "order_id"),
-            inverseJoinColumns = @JoinColumn(name = "promotion_id"))
+            joinColumns = @JoinColumn(name = "order_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "promotion_id", nullable = false))
     private Set<Promotion> promotions = new HashSet<>();
 
     @Builder.Default
