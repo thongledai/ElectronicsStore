@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function notify(msg) {
         if (window.toast) window.toast(msg);
-        else if (window.showToast) window.showToast('Thông báo', msg, 'info');
+        else if (window.showToast) window.showToast(UiMessage.NOTICE, msg, 'info');
         else alert(msg);
     }
 
@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         modal.show();
                     }
                 } catch (e) {
-                    notify('Lỗi tải thông tin sản phẩm: ' + e.message);
+                    notify(UiMessage.PRODUCT_LOAD_ERROR(e.message));
                 }
             });
         });
@@ -201,13 +201,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         headers: authHeaders(false)
                     }).then(r => r.json());
                     if (res.success) {
-                        notify('Đã xóa vĩnh viễn sản phẩm');
+                        notify(UiMessage.PRODUCT_DELETED);
                         loadProducts(currentPage);
                     } else {
-                        notify('Lỗi: ' + res.message);
+                        notify(UiMessage.ERROR_PREFIX + res.message);
                     }
                 } catch (e) {
-                    notify('Lỗi: ' + e.message);
+                    notify(UiMessage.ERROR_PREFIX + e.message);
                 }
             });
         });
@@ -269,15 +269,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const isSelling = document.getElementById('productIsSelling').checked;
 
             if (!name) {
-                notify('Vui lòng nhập tên sản phẩm');
+                notify(UiMessage.PRODUCT_NAME_REQUIRED);
                 return;
             }
             if (!categoryId) {
-                notify('Vui lòng chọn danh mục');
+                notify(UiMessage.PRODUCT_CATEGORY_REQUIRED);
                 return;
             }
             if (!brandId) {
-                notify('Vui lòng chọn thương hiệu');
+                notify(UiMessage.PRODUCT_BRAND_REQUIRED);
                 return;
             }
 
@@ -307,10 +307,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (modal) modal.hide();
                     loadProducts(currentPage);
                 } else {
-                    notify('Lỗi: ' + res.message);
+                    notify(UiMessage.ERROR_PREFIX + res.message);
                 }
             } catch (err) {
-                notify('Lỗi: ' + err.message);
+                notify(UiMessage.ERROR_PREFIX + err.message);
             }
         });
     }
@@ -446,13 +446,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         headers: authHeaders(false)
                     }).then(r => r.json());
                     if (res.success) {
-                        notify('Đã xóa vĩnh viễn biến thể');
+                        notify(UiMessage.VARIANT_DELETED);
                         loadVariants(productId);
                     } else {
-                        notify('Lỗi: ' + res.message);
+                        notify(UiMessage.ERROR_PREFIX + res.message);
                     }
                 } catch (e) {
-                    notify('Lỗi: ' + e.message);
+                    notify(UiMessage.ERROR_PREFIX + e.message);
                 }
             });
         });
@@ -503,11 +503,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const qtyVal = parseInt(document.getElementById('variantQuantity').value, 10);
 
             if (isNaN(priceVal) || priceVal < 0) {
-                notify('Giá sản phẩm không hợp lệ');
+                notify(UiMessage.PRODUCT_PRICE_INVALID);
                 return;
             }
             if (promoVal !== null && promoVal >= priceVal) {
-                notify('Giá khuyến mãi phải nhỏ hơn giá gốc');
+                notify(UiMessage.PRODUCT_PROMOTION_INVALID);
                 return;
             }
 
@@ -539,10 +539,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     loadVariants(currentProductId);
                     loadProducts(currentPage); // update stock & min price
                 } else {
-                    notify('Lỗi: ' + res.message);
+                    notify(UiMessage.ERROR_PREFIX + res.message);
                 }
             } catch (err) {
-                notify('Lỗi: ' + err.message);
+                notify(UiMessage.ERROR_PREFIX + err.message);
             }
         });
     }
@@ -581,14 +581,14 @@ document.addEventListener('DOMContentLoaded', () => {
                             headers: authHeaders(false)
                         }).then(r => r.json());
                         if (delRes.success) {
-                            notify('Đã xóa ảnh');
+                            notify(UiMessage.IMAGE_DELETED);
                             loadVariantImages(productId, variantId);
                             loadVariants(productId);
                         } else {
-                            notify('Lỗi: ' + delRes.message);
+                            notify(UiMessage.ERROR_PREFIX + delRes.message);
                         }
                     } catch (e) {
-                        notify('Lỗi: ' + e.message);
+                        notify(UiMessage.ERROR_PREFIX + e.message);
                     }
                 });
             });
@@ -600,7 +600,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btnUploadVariantImages')?.addEventListener('click', async () => {
         const filesInput = document.getElementById('variantImageFiles');
         if (!filesInput.files || filesInput.files.length === 0) {
-            notify('Vui lòng chọn ít nhất một file ảnh');
+            notify(UiMessage.IMAGE_SELECT_REQUIRED);
             return;
         }
 
@@ -621,16 +621,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }).then(r => r.json());
 
             if (res.success) {
-                notify('Tải lên ảnh thành công');
+                notify(UiMessage.IMAGE_UPLOAD_SUCCESS);
                 filesInput.value = '';
                 loadVariantImages(currentProductId, activeVariantId);
                 loadVariants(currentProductId);
                 loadProducts(currentPage);
             } else {
-                notify('Lỗi: ' + res.message);
+                notify(UiMessage.ERROR_PREFIX + res.message);
             }
         } catch (e) {
-            notify('Lỗi: ' + e.message);
+            notify(UiMessage.ERROR_PREFIX + e.message);
         }
     });
 

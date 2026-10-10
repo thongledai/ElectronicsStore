@@ -38,55 +38,71 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class Order {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.UUID)
+	private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "user_id", nullable = false)
+	private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "delivery_id", nullable = false)
-    private Delivery delivery;
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "delivery_id", nullable = false)
+	private Delivery delivery;
 
-    @Column(nullable = false, length = 500, columnDefinition = "nvarchar(500)")
-    private String address;
+	@Column(nullable = false, length = 500, columnDefinition = "nvarchar(500)")
+	private String address;
 
-    @Column(nullable = false, length = 11)
-    private String phone;
+	@Column(nullable = false, length = 11)
+	private String phone;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "status_id", nullable = false)
-    private OrderStatus status;
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "status_id", nullable = false)
+	private OrderStatus status;
 
-    @Builder.Default
-    @Column(nullable = false)
-    private Boolean isPaidBefore = false;
+	@Builder.Default
+	@Column(nullable = false)
+	private Boolean isPaidBefore = false;
 
-    @Column(nullable = false, precision = 18, scale = 2)
-    private BigDecimal amountFromUser;
+	@Column(nullable = false, precision = 18, scale = 2)
+	private BigDecimal amountFromUser;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "payment_id", nullable = false)
-    private PaymentMethod payment;
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "payment_id", nullable = false)
+	private PaymentMethod payment;
 
-    @Builder.Default
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "order_promotions",
-            joinColumns = @JoinColumn(name = "order_id", nullable = false),
-            inverseJoinColumns = @JoinColumn(name = "promotion_id", nullable = false))
-    private Set<Promotion> promotions = new HashSet<>();
+	@Column(name = "ghn_order_code", length = 100)
+	private String ghnOrderCode;
 
-    @Builder.Default
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<OrderItem> items = new ArrayList<>();
+	@Column(name = "ghn_status", length = 100)
+	private String ghnStatus;
 
-    @CreationTimestamp
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+	@Column(name = "ghn_shipping_fee", precision = 18, scale = 2)
+	private BigDecimal ghnShippingFee;
 
-    @UpdateTimestamp
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
+	@Column(name = "expected_delivery_time")
+	private LocalDateTime expectedDeliveryTime;
+
+	@Column(name = "to_district_id")
+	private Integer toDistrictId;
+
+	@Column(name = "to_ward_code", length = 20)
+	private String toWardCode;
+
+	@Builder.Default
+	@ManyToMany(fetch = FetchType.LAZY)
+	@JoinTable(name = "order_promotions", joinColumns = @JoinColumn(name = "order_id", nullable = false), inverseJoinColumns = @JoinColumn(name = "promotion_id", nullable = false))
+	private Set<Promotion> promotions = new HashSet<>();
+
+	@Builder.Default
+	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<OrderItem> items = new ArrayList<>();
+
+	@CreationTimestamp
+	@Column(nullable = false, updatable = false)
+	private LocalDateTime createdAt;
+
+	@UpdateTimestamp
+	@Column(nullable = false)
+	private LocalDateTime updatedAt;
 }

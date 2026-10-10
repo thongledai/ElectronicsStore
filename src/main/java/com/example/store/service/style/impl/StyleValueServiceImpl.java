@@ -14,6 +14,7 @@ import com.example.store.dto.style.StyleValueRequestDTO;
 import com.example.store.dto.style.StyleValueResponseDTO;
 import com.example.store.entity.Style;
 import com.example.store.entity.StyleValue;
+import com.example.store.enums.BusinessMessage;
 import com.example.store.exception.BusinessException;
 import com.example.store.exception.DuplicateResourceException;
 import com.example.store.exception.ResourceNotFoundException;
@@ -71,7 +72,8 @@ public class StyleValueServiceImpl implements IStyleValueService {
 	@Transactional(readOnly = true)
 	public StyleValueResponseDTO getStyleValueById(UUID id) {
 		StyleValue styleValue = styleValueRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy giá trị thuộc tính với ID: " + id));
+				.orElseThrow(() -> new ResourceNotFoundException(String.format(
+						BusinessMessage.STYLE_VALUE_NOT_FOUND_ID.getMessage(), id)));
 		return styleValueMapper.toResponseDTO(styleValue);
 	}
 
@@ -82,7 +84,7 @@ public class StyleValueServiceImpl implements IStyleValueService {
 				"Không tìm thấy kiểu thuộc tính với ID: " + requestDTO.getStyleId()));
 
 		if (!Boolean.TRUE.equals(style.getIsActive())) {
-			throw new BusinessException("Không thể tạo giá trị cho kiểu thuộc tính đã bị xóa!");
+			throw new BusinessException(BusinessMessage.STYLE_INACTIVE_CREATE_VALUE.getMessage());
 		}
 
 		if (styleValueRepository.existsByNameAndStyleId(requestDTO.getName().trim(), style.getId())) {
@@ -102,12 +104,13 @@ public class StyleValueServiceImpl implements IStyleValueService {
 	@Transactional
 	public StyleValueResponseDTO updateStyleValue(UUID id, StyleValueRequestDTO requestDTO) {
 		StyleValue styleValue = styleValueRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy giá trị thuộc tính với ID: " + id));
+				.orElseThrow(() -> new ResourceNotFoundException(String.format(
+						BusinessMessage.STYLE_VALUE_NOT_FOUND_ID.getMessage(), id)));
 
 		Style style = styleRepository.findById(requestDTO.getStyleId()).orElseThrow(() -> new ResourceNotFoundException(
 				"Không tìm thấy kiểu thuộc tính với ID: " + requestDTO.getStyleId()));
 		if (!Boolean.TRUE.equals(style.getIsActive())) {
-			throw new BusinessException("Không thể gán giá trị vào kiểu thuộc tính đã bị xóa!");
+			throw new BusinessException(BusinessMessage.STYLE_INACTIVE_ASSIGN_VALUE.getMessage());
 		}
 
 		if (styleValueRepository.existsByNameAndStyleIdAndIdNot(requestDTO.getName().trim(), style.getId(), id)) {
@@ -117,18 +120,18 @@ public class StyleValueServiceImpl implements IStyleValueService {
 
 		if (!styleValue.getStyle().getId().equals(style.getId())
 				&& productVariantRepository.existsByStyleValuesId(id)) {
-			throw new BusinessException("Không thể chuyển giá trị sang kiểu khác khi biến thể đang tham chiếu giá trị này.");
+			throw new BusinessException(BusinessMessage.STYLE_VALUE_REFERENCED_UPDATE.getMessage());
 		}
 		styleValue.setName(requestDTO.getName().trim());
 		styleValue.setStyle(style);
 		if (requestDTO.getIsActive() != null) {
 			if (!requestDTO.getIsActive() && Boolean.TRUE.equals(styleValue.getIsActive())
 					&& productVariantRepository.existsByStyleValuesId(id)) {
-				throw new BusinessException("Không thể tắt giá trị thuộc tính vì đang được biến thể hoạt động sử dụng. Hãy tắt biến thể trước.");
+				throw new BusinessException(BusinessMessage.STYLE_VALUE_IN_USE_DEACTIVATE.getMessage());
 			}
 			if (requestDTO.getIsActive() && !Boolean.TRUE.equals(styleValue.getIsActive())
 					&& !Boolean.TRUE.equals(style.getIsActive())) {
-				throw new BusinessException("Không thể khôi phục giá trị khi kiểu thuộc tính đang tắt.");
+				throw new BusinessException(BusinessMessage.STYLE_INACTIVE_RESTORE_VALUE.getMessage());
 			}
 			styleValue.setIsActive(requestDTO.getIsActive());
 		}
@@ -142,7 +145,8 @@ public class StyleValueServiceImpl implements IStyleValueService {
 	@Transactional
 	public void deleteStyleValue(UUID id) {
 		StyleValue styleValue = styleValueRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy giá trị thuộc tính với ID: " + id));
+				.orElseThrow(() -> new ResourceNotFoundException(String.format(
+						BusinessMessage.STYLE_VALUE_NOT_FOUND_ID.getMessage(), id)));
 
 		if (productVariantRepository.existsByStyleValuesId(id)) {
 			throw new BusinessException(
@@ -157,10 +161,11 @@ public class StyleValueServiceImpl implements IStyleValueService {
 	@Transactional
 	public void restoreStyleValue(UUID id) {
 		StyleValue styleValue = styleValueRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy giá trị thuộc tính với ID: " + id));
+				.orElseThrow(() -> new ResourceNotFoundException(String.format(
+						BusinessMessage.STYLE_VALUE_NOT_FOUND_ID.getMessage(), id)));
 
 		if (!Boolean.TRUE.equals(styleValue.getStyle().getIsActive())) {
-			throw new BusinessException("Không thể khôi phục giá trị thuộc tính khi kiểu thuộc tính đang bị xóa!");
+			throw new BusinessException(BusinessMessage.STYLE_INACTIVE_RESTORE_STYLE_VALUE.getMessage());
 		}
 
 		styleValue.setIsActive(true);

@@ -186,7 +186,7 @@ function bindQuantity(maxQty) {
     if (isNaN(value) || value < 1) value = 1;
     if (value > maxQty) {
       value = maxQty;
-      showToast('Maximum quantity', `Only ${maxQty} units can be ordered at once.`, 'warning', 2400);
+      showToast(UiMessage.VARIANT_MAXIMUM_TITLE, UiMessage.VARIANT_MAXIMUM(maxQty), 'warning', 2400);
     }
     input.value = value;
     minus.disabled = value <= 1;
@@ -207,7 +207,7 @@ function bindBuyNow(product) {
   btn.addEventListener('click', () => {
     const qty = Number(document.getElementById('qtyInput').value) || 1;
     if (Cart.add(product.id, qty, true)) {
-      showToast('Taking you to checkout', `${product.name} × ${qty} added.`, 'success', 1500);
+      showToast(UiMessage.CHECKOUT_REDIRECT_TITLE, UiMessage.CHECKOUT_REDIRECT(product.name, qty), 'success', 1500);
       setTimeout(() => { location.href = ROUTES.cart; }, 700);
     }
   });
@@ -341,7 +341,7 @@ function renderReviews(product) {
   const writeBtn = document.getElementById('writeReviewBtn');
   if (writeBtn) {
     writeBtn.addEventListener('click', () => {
-      showToast('Sign in required', 'Log in with the demo account to post a review.', 'info');
+      showToast(UiMessage.SIGN_IN_REQUIRED_TITLE, UiMessage.REVIEW_SIGN_IN_REQUIRED, 'info');
       setTimeout(() => { location.href = ROUTES.login; }, 1200);
     });
   }

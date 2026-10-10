@@ -17,6 +17,7 @@
 <html lang="vi" th:fragment="layout(title, role, active, content)" th:with="URL=@{/}" th:attr="data-role=${role}">
 <head th:replace="~{fragments/header :: head(${title + ' | TechNova'}, 'TechNova Electronics — khu vực quản lý')}"></head>
 <body>
+<script th:src="@{/js/ui-messages.js}"></script>
 <div class="layout">
 
   <nav th:replace="~{|fragments/${role}-sidebar| :: sidebar(${active})}"></nav>

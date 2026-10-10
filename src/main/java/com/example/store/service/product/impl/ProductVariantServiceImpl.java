@@ -20,6 +20,7 @@ import com.example.store.dto.product.ProductVariantResponseDTO;
 import com.example.store.entity.Product;
 import com.example.store.entity.ProductVariant;
 import com.example.store.entity.StyleValue;
+import com.example.store.enums.BusinessMessage;
 import com.example.store.exception.BusinessException;
 import com.example.store.exception.ResourceNotFoundException;
 import com.example.store.mapper.ProductVariantMapper;
@@ -76,7 +77,8 @@ public class ProductVariantServiceImpl implements IProductVariantService {
 	@Transactional(readOnly = true)
 	public ProductVariantResponseDTO getVariantById(UUID id) {
 		ProductVariant variant = productVariantRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy biến thể với ID: " + id));
+				.orElseThrow(() -> new ResourceNotFoundException(String.format(
+						BusinessMessage.VARIANT_NOT_FOUND_ID.getMessage(), id)));
 		if (variant.getStyleValues() != null) {
 			variant.getStyleValues().forEach(sv -> {
 				if (sv.getStyle() != null) {
@@ -94,11 +96,12 @@ public class ProductVariantServiceImpl implements IProductVariantService {
 	@Transactional
 	public ProductVariantResponseDTO createVariant(UUID productId, ProductVariantRequestDTO requestDTO) {
 		Product product = productRepository.findById(productId)
-				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm với ID: " + productId));
+				.orElseThrow(() -> new ResourceNotFoundException(String.format(
+						BusinessMessage.PRODUCT_NOT_FOUND_ID.getMessage(), productId)));
 
 		if (!product.isActive() || !product.isSelling() || !Boolean.TRUE.equals(product.getCategory().getIsActive())
 				|| !Boolean.TRUE.equals(product.getBrand().getIsActive())) {
-			throw new BusinessException("Không thể tạo biến thể cho sản phẩm đã ngừng hoạt động!");
+			throw new BusinessException(BusinessMessage.VARIANT_PRODUCT_INACTIVE_CREATE.getMessage());
 		}
 
 		validatePrices(requestDTO);
@@ -108,7 +111,7 @@ public class ProductVariantServiceImpl implements IProductVariantService {
 		if (selling && (!product.isSelling()
 				|| !Boolean.TRUE.equals(product.getBrand().getIsActive())
 				|| !Boolean.TRUE.equals(product.getCategory().getIsActive()))) {
-			throw new BusinessException("Không thể tạo biến thể đang bán khi sản phẩm hoặc điều kiện phụ thuộc không hợp lệ.");
+			throw new BusinessException(BusinessMessage.VARIANT_DEPENDENCY_INVALID_CREATE_SELLING.getMessage());
 		}
 
 		ProductVariant variant = ProductVariant.builder().product(product).sku(generateUniqueSku(product, styleValues))
@@ -129,13 +132,15 @@ public class ProductVariantServiceImpl implements IProductVariantService {
 	public ProductVariantResponseDTO updateVariant(UUID productId, UUID variantId,
 			ProductVariantRequestDTO requestDTO) {
 		Product product = productRepository.findById(productId)
-				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm với ID: " + productId));
+				.orElseThrow(() -> new ResourceNotFoundException(String.format(
+						BusinessMessage.PRODUCT_NOT_FOUND_ID.getMessage(), productId)));
 
 		ProductVariant variant = productVariantRepository.findById(variantId)
-				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy biến thể với ID: " + variantId));
+				.orElseThrow(() -> new ResourceNotFoundException(String.format(
+						BusinessMessage.VARIANT_NOT_FOUND_ID.getMessage(), variantId)));
 
 		if (!variant.getProduct().getId().equals(productId)) {
-			throw new BusinessException("Biến thể không thuộc về sản phẩm này!");
+			throw new BusinessException(BusinessMessage.VARIANT_NOT_IN_PRODUCT.getMessage());
 		}
 
 		validatePrices(requestDTO);
@@ -149,7 +154,7 @@ public class ProductVariantServiceImpl implements IProductVariantService {
 		if (Boolean.TRUE.equals(requestDTO.getIsSelling()) && (!product.isSelling()
 				|| !Boolean.TRUE.equals(product.getBrand().getIsActive())
 				|| !Boolean.TRUE.equals(product.getCategory().getIsActive()))) {
-			throw new BusinessException("Không thể bật bán biến thể khi sản phẩm hoặc điều kiện phụ thuộc không hợp lệ.");
+			throw new BusinessException(BusinessMessage.VARIANT_DEPENDENCY_INVALID_UPDATE_SELLING.getMessage());
 		}
 		ProductVariant proposed = ProductVariant.builder().product(product).isSelling(selling).isActive(active).build();
 		validateVariantState(product, proposed, styleValues);
@@ -174,9 +179,10 @@ public class ProductVariantServiceImpl implements IProductVariantService {
 	@Transactional
 	public void deleteVariant(UUID productId, UUID variantId) {
 		ProductVariant variant = productVariantRepository.findById(variantId)
-				.orElseThrow(() -> new ResourceNotFoundException("ProductVariant not found: " + variantId));
+				.orElseThrow(() -> new ResourceNotFoundException(String.format(
+						BusinessMessage.VARIANT_NOT_FOUND_ID.getMessage(), variantId)));
 		if (!variant.getProduct().getId().equals(productId)) {
-			throw new BusinessException("Bi?n th? kh?ng thu?c Product n?y.");
+			throw new BusinessException(BusinessMessage.VARIANT_NOT_IN_PRODUCT.getMessage());
 		}
 		validateVariantCanBeDeleted(variantId);
 		productVariantImageRepository.deleteByProductVariantId(variantId);
@@ -189,12 +195,13 @@ public class ProductVariantServiceImpl implements IProductVariantService {
 	@Transactional
 	public void restoreVariant(UUID productId, UUID variantId) {
 		ProductVariant variant = productVariantRepository.findById(variantId)
-				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy biến thể với ID: " + variantId));
+				.orElseThrow(() -> new ResourceNotFoundException(String.format(
+						BusinessMessage.VARIANT_NOT_FOUND_ID.getMessage(), variantId)));
 		if (!variant.getProduct().getId().equals(productId)) {
-			throw new BusinessException("Biến thể không thuộc sản phẩm này.");
+			throw new BusinessException(BusinessMessage.VARIANT_NOT_IN_PRODUCT.getMessage());
 		}
 		if (!variant.getProduct().isActive()) {
-			throw new BusinessException("Không thể kích hoạt biến thể khi sản phẩm cha đang bị xóa mềm.");
+			throw new BusinessException(BusinessMessage.VARIANT_PARENT_INACTIVE_RESTORE.getMessage());
 		}
 		variant.setActive(true);
 		productVariantRepository.save(variant);
@@ -203,14 +210,14 @@ public class ProductVariantServiceImpl implements IProductVariantService {
 	private void validateVariantCanBeDeleted(UUID variantId) {
 		if (productVariantRepository.existsOrderItemReference(variantId)
 				|| productVariantRepository.existsCartItemReference(variantId)) {
-			throw new BusinessException("Không thể xóa mềm hoặc xóa vĩnh viễn biến thể đang được đơn hàng hoặc giỏ hàng tham chiếu!");
+			throw new BusinessException(BusinessMessage.VARIANT_REFERENCED_DELETE.getMessage());
 		}
 	}
 
 	private void validatePrices(ProductVariantRequestDTO dto) {
 		if (dto.getPromotionalPrice() != null) {
 			if (dto.getPrice() == null || dto.getPromotionalPrice().compareTo(dto.getPrice()) >= 0) {
-				throw new BusinessException("Giá khuyến mãi phải nhỏ hơn giá gốc của sản phẩm!");
+				throw new BusinessException(BusinessMessage.VARIANT_PROMOTIONAL_PRICE_INVALID.getMessage());
 			}
 		}
 	}
@@ -224,7 +231,7 @@ public class ProductVariantServiceImpl implements IProductVariantService {
 		List<StyleValue> styleValues = styleValueRepository.findAllById(styleValueIds);
 
 		if (styleValues.size() != styleValueIds.size()) {
-			throw new ResourceNotFoundException("Một số thuộc tính lựa chọn không tồn tại!");
+			throw new ResourceNotFoundException(BusinessMessage.VARIANT_STYLE_VALUES_NOT_FOUND.getMessage());
 		}
 
 		UUID productCategoryId = product.getCategory().getId();
@@ -233,24 +240,26 @@ public class ProductVariantServiceImpl implements IProductVariantService {
 
 		for (StyleValue sv : styleValues) {
 			if (!Boolean.TRUE.equals(sv.getIsActive())) {
-				throw new BusinessException("Giá trị thuộc tính '" + sv.getName() + "' đã bị xóa.");
+				throw new BusinessException(String.format(
+						BusinessMessage.STYLE_VALUE_INACTIVE.getMessage(), sv.getName()));
 			}
 
 			if (!Boolean.TRUE.equals(sv.getStyle().getIsActive())) {
-				throw new BusinessException("Kiểu thuộc tính '" + sv.getStyle().getName() + "' đã bị xóa!");
+				throw new BusinessException(String.format(
+						BusinessMessage.STYLE_INACTIVE.getMessage(), sv.getStyle().getName()));
 			}
 
 			boolean belongsToCategory = sv.getStyle().getCategories().stream()
 					.anyMatch(category -> category.getId().equals(productCategoryId));
 
 			if (!belongsToCategory) {
-				throw new BusinessException("Giá trị '" + sv.getName() + "' không thuộc danh mục '"
-						+ product.getCategory().getName() + "'!");
+				throw new BusinessException(String.format(BusinessMessage.STYLE_VALUE_NOT_IN_CATEGORY.getMessage(),
+						sv.getName(), product.getCategory().getName()));
 			}
 
 			if (!seenStyles.add(sv.getStyle().getId())) {
-				throw new BusinessException(
-						"Mỗi biến thể chỉ được chọn tối đa 1 giá trị cho kiểu '" + sv.getStyle().getName() + "'!");
+				throw new BusinessException(String.format(
+						BusinessMessage.VARIANT_STYLE_VALUE_LIMIT.getMessage(), sv.getStyle().getName()));
 			}
 		}
 
@@ -259,15 +268,16 @@ public class ProductVariantServiceImpl implements IProductVariantService {
 
 	private void validateVariantState(Product product, ProductVariant variant, Set<StyleValue> values) {
 		if (variant.isActive() && !product.isActive()) {
-			throw new BusinessException("Không thể bật biến thể khi sản phẩm cha đang tắt.");
+			throw new BusinessException(BusinessMessage.VARIANT_PARENT_INACTIVE.getMessage());
 		}
 		if (variant.isSelling() && (!product.isSelling() || !product.isActive())) {
-			throw new BusinessException("Không thể bật bán biến thể khi sản phẩm cha chưa hoạt động/bán.");
+			throw new BusinessException(BusinessMessage.VARIANT_PARENT_NOT_SELLING.getMessage());
 		}
 		if (variant.isSelling()) {
 			for (StyleValue value : values) {
 				if (!Boolean.TRUE.equals(value.getIsActive()) || !Boolean.TRUE.equals(value.getStyle().getIsActive())) {
-					throw new BusinessException("Biến thể tham chiếu giá trị/kiểu thuộc tính không hoạt động: " + value.getName());
+					throw new BusinessException(String.format(
+							BusinessMessage.VARIANT_HAS_INACTIVE_STYLE_VALUE.getMessage(), value.getName()));
 				}
 			}
 		}

@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function notify(msg) {
     if (window.toast) window.toast(msg);
-    else if (window.showToast) window.showToast('Thông báo', msg, 'info');
+    else if (window.showToast) window.showToast(UiMessage.NOTICE, msg, 'info');
     else alert(msg);
   }
 
@@ -140,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
             modal.show();
           }
         } catch (e) {
-          notify('Lỗi tải danh mục: ' + e.message);
+          notify(UiMessage.CATEGORY_LOAD_ERROR(e.message));
         }
       });
     });
@@ -156,14 +156,14 @@ document.addEventListener('DOMContentLoaded', () => {
             headers: authHeaders(false)
           }).then(r => r.json());
           if (res.success) {
-            notify('Đã xóa vĩnh viễn danh mục');
+            notify(UiMessage.CATEGORY_DELETED);
             loadCategories(currentPage);
             loadCategoryOptions();
           } else {
-            notify('Lỗi: ' + res.message);
+            notify(UiMessage.ERROR_PREFIX + res.message);
           }
         } catch (e) {
-          notify('Lỗi: ' + e.message);
+          notify(UiMessage.ERROR_PREFIX + e.message);
         }
       });
     });
@@ -208,10 +208,10 @@ document.addEventListener('DOMContentLoaded', () => {
           loadCategories(currentPage);
           loadCategoryOptions();
         } else {
-          notify('Lỗi: ' + res.message);
+            notify(UiMessage.ERROR_PREFIX + res.message);
         }
       } catch (err) {
-        notify('Lỗi: ' + err.message);
+        notify(UiMessage.ERROR_PREFIX + err.message);
       }
     });
   }

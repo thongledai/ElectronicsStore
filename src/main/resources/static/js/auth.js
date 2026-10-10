@@ -267,13 +267,13 @@ function bindServerErrors(form, errorData, defaultMsg) {
   // Display clear, logical Toast notification:
   if (fieldErrorCount >= 2) {
     // Multiple fields invalid -> Give comprehensive guidance
-    notify('Validation Error', 'Please check the highlighted fields.', 'danger');
+    notify(UiMessage.VALIDATION_ERROR_TITLE, UiMessage.VALIDATION_CHECK_FIELDS, 'danger');
   } else if (fieldErrorCount === 1) {
     // Single field invalid -> Report that specific field's error
-    notify('Validation Error', singleFieldErrorMessage, 'danger');
+    notify(UiMessage.VALIDATION_ERROR_TITLE, singleFieldErrorMessage, 'danger');
   } else {
     // Specific business error (e.g. "Current password is incorrect!", "Invalid email or password.")
-    notify('Notice', rawMsg, 'danger');
+    notify(UiMessage.NOTICE_TITLE, rawMsg, 'danger');
   }
 }
 
@@ -508,7 +508,7 @@ async function handleLogin(e) {
         });
       }
 
-      notify('Sign In Successful!', `Welcome back, ${data.data?.user?.fullName || ''}.`, 'success');
+      notify(UiMessage.SIGN_IN_SUCCESS_TITLE, UiMessage.WELCOME_BACK(data.data?.user?.fullName || ''), 'success');
       setTimeout(() => {
         location.href = data.data?.redirectUrl || '/customer/index';
       }, 900);
@@ -520,7 +520,7 @@ async function handleLogin(e) {
       bindServerErrors(form, data.data, data.message || 'Invalid email or password.');
     }
   } catch (err) {
-    notify('Connection Error', 'Cannot connect to server.', 'danger');
+    notify(UiMessage.CONNECTION_ERROR_TITLE, UiMessage.CONNECTION_ERROR, 'danger');
   } finally {
     btn.disabled = false;
     btn.innerHTML = originalHtml;
@@ -567,7 +567,7 @@ async function handleRegister(e) {
     const data = await res.json();
 
     if (res.ok && data.success) {
-      notify('Registration Successful', data.message || 'An OTP code has been sent to your email.', 'success', 3500);
+      notify(UiMessage.REGISTRATION_SUCCESS_TITLE, data.message || UiMessage.OTP_SENT, 'success', 3500);
       setTimeout(() => {
         location.href = '/verify-otp?email=' + encodeURIComponent(email) + '&type=REGISTER';
       }, 1200);
@@ -579,7 +579,7 @@ async function handleRegister(e) {
       bindServerErrors(form, data.data, data.message || 'Registration failed.');
     }
   } catch (err) {
-    notify('Connection Error', 'Cannot connect to server.', 'danger');
+    notify(UiMessage.CONNECTION_ERROR_TITLE, UiMessage.CONNECTION_ERROR, 'danger');
   } finally {
     btn.disabled = false;
     btn.innerHTML = originalHtml;
@@ -611,7 +611,7 @@ async function handleForgotPassword(e) {
     const data = await res.json();
 
     if (res.ok && data.success) {
-      notify('Success', data.message || 'An OTP code has been sent to your email!', 'success');
+      notify(UiMessage.SUCCESS_TITLE, data.message || UiMessage.OTP_SENT_ALT, 'success');
       setTimeout(() => {
         location.href = '/verify-otp?email=' + encodeURIComponent(email) + '&type=FORGOT_PASSWORD';
       }, 1200);
@@ -619,7 +619,7 @@ async function handleForgotPassword(e) {
       bindServerErrors(form, data.data, data.message || 'No account found with this email.');
     }
   } catch (err) {
-    notify('Connection Error', 'Cannot connect to server. Please try again.', 'danger');
+    notify(UiMessage.CONNECTION_ERROR_TITLE, UiMessage.CONNECTION_ERROR_RETRY, 'danger');
   } finally {
     btn.disabled = false;
     btn.innerHTML = originalHtml;
@@ -655,7 +655,7 @@ function startOtpCountdown(durationSeconds = 300) {
       if (resendBtn) {
         resendBtn.disabled = false;
       }
-      notify('OTP Expired', 'Your OTP code has expired. Please click "Resend Code" to receive a new one.', 'warning');
+      notify(UiMessage.OTP_EXPIRED_TITLE, UiMessage.OTP_EXPIRED, 'warning');
     }
     remaining--;
   }
@@ -671,7 +671,7 @@ async function handleResendOtp() {
   const resendBtn = document.getElementById('btnResendOtp');
 
   if (!email) {
-    notify('Error', 'No email address found to resend OTP code.', 'danger');
+    notify(UiMessage.ERROR_TITLE, UiMessage.RESEND_EMAIL_MISSING, 'danger');
     return;
   }
 
@@ -691,14 +691,14 @@ async function handleResendOtp() {
     const data = await res.json();
 
     if (res.ok && data.success) {
-      notify('Success', data.message || 'A new OTP code has been sent (valid for 5 minutes).', 'success');
+      notify(UiMessage.SUCCESS_TITLE, data.message || UiMessage.OTP_RESENT, 'success');
       startOtpCountdown(300);
     } else {
-      notify('Failed', data.message || 'Cannot resend OTP code.', 'danger');
+      notify(UiMessage.FAILED_TITLE, data.message || UiMessage.OTP_RESEND_FAILED, 'danger');
       if (resendBtn) resendBtn.disabled = false;
     }
   } catch (err) {
-    notify('Connection Error', 'Cannot connect to server to resend code.', 'danger');
+    notify(UiMessage.CONNECTION_ERROR_TITLE, UiMessage.CONNECTION_ERROR_RESEND, 'danger');
     if (resendBtn) resendBtn.disabled = false;
   } finally {
     if (resendBtn) resendBtn.innerHTML = originalText;
@@ -742,7 +742,7 @@ async function handleVerifyOtp(e) {
 
     if (res.ok && data.success) {
       if (otpTimerInterval) clearInterval(otpTimerInterval);
-      notify('Success', data.message || 'OTP verification successful!', 'success');
+      notify(UiMessage.SUCCESS_TITLE, data.message || UiMessage.OTP_VERIFIED, 'success');
       setTimeout(() => {
         location.href = '/login';
       }, 1400);
@@ -750,7 +750,7 @@ async function handleVerifyOtp(e) {
       bindServerErrors(form, data.data, data.message || 'Invalid or expired OTP code!');
     }
   } catch (err) {
-    notify('Connection Error', 'Cannot connect to server.', 'danger');
+    notify(UiMessage.CONNECTION_ERROR_TITLE, UiMessage.CONNECTION_ERROR, 'danger');
   } finally {
     btn.disabled = false;
     btn.innerHTML = originalHtml;
@@ -790,13 +790,13 @@ async function handleChangePassword(e) {
     const data = await res.json();
 
     if (res.ok && data.success) {
-      notify('Success', data.message || 'Password changed successfully!', 'success');
+      notify(UiMessage.SUCCESS_TITLE, data.message || UiMessage.PASSWORD_CHANGED, 'success');
       form.reset();
     } else {
       bindServerErrors(form, data.data, data.message || 'Failed to change password!');
     }
   } catch (err) {
-    notify('Connection Error', 'Cannot connect to server.', 'danger');
+    notify(UiMessage.CONNECTION_ERROR_TITLE, UiMessage.CONNECTION_ERROR, 'danger');
   } finally {
     if (btn) {
       btn.disabled = false;
@@ -1000,7 +1000,7 @@ document.addEventListener('DOMContentLoaded', () => {
       emailField.value = DEMO_USER.email;
       passField.value = DEMO_USER.password;
       clearAllErrors(document.getElementById('loginForm'));
-      notify('Demo credentials filled', 'Click Sign In to continue.', 'info', 2200);
+      notify(UiMessage.DEMO_CREDENTIALS_FILLED_TITLE, UiMessage.DEMO_CREDENTIALS_FILLED, 'info', 2200);
     }
   });
 

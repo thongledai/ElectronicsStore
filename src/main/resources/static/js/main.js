@@ -236,7 +236,7 @@ const Cart = {
     if (!product) return false;
 
     if (product.stock === 0) {
-      showToast('Out of stock', `${product.name} is currently unavailable.`, 'warning');
+      showToast(UiMessage.PRODUCT_OUT_OF_STOCK_TITLE, UiMessage.PRODUCT_OUT_OF_STOCK(product.name), 'warning');
       return false;
     }
 
@@ -246,7 +246,7 @@ const Cart = {
 
     if (existing) {
       if (existing.qty >= cap) {
-        showToast('Maximum reached', `You can order up to ${cap} units of this item.`, 'warning');
+        showToast(UiMessage.MAXIMUM_REACHED_TITLE, UiMessage.MAXIMUM_REACHED(cap), 'warning');
         return false;
       }
       existing.qty = Math.min(existing.qty + qty, cap);
@@ -256,7 +256,7 @@ const Cart = {
 
     this.save(items);
     if (!silent) {
-      showToast('Added to cart', `${product.name} — ${formatPrice(product.price)}`, 'success');
+      showToast(UiMessage.PRODUCT_ADDED_TITLE, UiMessage.PRODUCT_ADDED(product.name, formatPrice(product.price)), 'success');
     }
     return true;
   },
@@ -282,7 +282,7 @@ const Cart = {
     const product = getProductById(id);
     this.save(this.all().filter(i => i.id !== Number(id)));
     if (!silent && product) {
-      showToast('Removed from cart', `${product.name} was removed.`, 'info');
+      showToast(UiMessage.PRODUCT_REMOVED_TITLE, UiMessage.PRODUCT_REMOVED(product.name), 'info');
     }
   },
 
@@ -369,7 +369,7 @@ const Wishlist = {
     const product = getProductById(id);
     if (!product || this.has(id)) return false;
     this.save([...this.all(), product.id]);
-    showToast('Saved to wishlist', `${product.name} added to your favourites.`, 'success');
+    showToast(UiMessage.WISHLIST_SAVED_TITLE, UiMessage.WISHLIST_SAVED(product.name), 'success');
     return true;
   },
 
@@ -377,7 +377,7 @@ const Wishlist = {
     const product = getProductById(id);
     this.save(this.all().filter(i => i !== Number(id)));
     if (!silent && product) {
-      showToast('Removed from wishlist', `${product.name} was removed.`, 'info');
+      showToast(UiMessage.WISHLIST_REMOVED_TITLE, UiMessage.WISHLIST_REMOVED(product.name), 'info');
     }
   },
 
@@ -522,7 +522,7 @@ function initGlobalActions() {
       const product = getProductById(id);
 
       if (product && product.stock === 0) {
-        showToast('Back-in-stock alert set', `We'll notify you when ${product.name} returns.`, 'info');
+        showToast(UiMessage.BACK_IN_STOCK_TITLE, UiMessage.BACK_IN_STOCK(product.name), 'info');
         return;
       }
       // Optional quantity comes from a stepper on the details page
@@ -824,12 +824,12 @@ function initNewsletter() {
       const email = input.value.trim();
 
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
-        showToast('Invalid email', 'Please enter a valid email address.', 'danger');
+        showToast(UiMessage.EMAIL_INVALID_TITLE, UiMessage.EMAIL_INVALID, 'danger');
         input.focus();
         return;
       }
 
-      showToast('Subscribed!', 'Thanks — watch your inbox for exclusive deals.', 'success');
+      showToast(UiMessage.NEWSLETTER_SUCCESS_TITLE, UiMessage.NEWSLETTER_SUCCESS, 'success');
       form.reset();
     });
   });

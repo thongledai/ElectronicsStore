@@ -274,7 +274,7 @@ function homeInterceptCartActions() {
       const msg = btn.classList.contains('js-add-cart')
         ? 'Chức năng giỏ hàng đang được cập nhật!'
         : 'Chức năng danh sách yêu thích đang được cập nhật!';
-      if (window.showToast) window.showToast('Thông báo', msg, 'info');
+      if (window.showToast) window.showToast(UiMessage.NOTICE, msg, 'info');
       else if (window.toast) window.toast(msg);
       else alert(msg);
     }, true); // capture: chạy trước listener của main.js
