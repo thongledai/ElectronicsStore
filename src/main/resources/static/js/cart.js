@@ -168,7 +168,7 @@ function renderCouponState(coupon) {
     document.getElementById('removeCouponBtn').addEventListener('click', () => {
       storageSet(STORE.coupon, null);
       renderSummary();
-      showToast('Coupon removed', 'The discount has been taken off your order.', 'info');
+      showToast(UiMessage.COUPON_REMOVED_TITLE, UiMessage.COUPON_REMOVED, 'info');
     });
   } else {
     area.innerHTML = `
@@ -194,14 +194,14 @@ function bindCouponInput() {
     const code = input.value.trim().toUpperCase();
 
     if (!code) {
-      showToast('Enter a code', 'Type a coupon code before applying.', 'warning');
+      showToast(UiMessage.COUPON_CODE_REQUIRED_TITLE, UiMessage.COUPON_CODE_REQUIRED, 'warning');
       input.focus();
       return;
     }
 
     const coupon = COUPONS[code];
     if (!coupon) {
-      showToast('Invalid coupon', `"${code}" is not a valid code.`, 'danger');
+      showToast(UiMessage.COUPON_INVALID_TITLE, UiMessage.COUPON_INVALID(code), 'danger');
       input.classList.add('is-invalid');
       setTimeout(() => input.classList.remove('is-invalid'), 1800);
       return;
@@ -210,13 +210,13 @@ function bindCouponInput() {
     // Some coupons require a minimum order value
     const subtotal = Cart.totals().subtotal;
     if (coupon.minOrder && subtotal < coupon.minOrder) {
-      showToast('Minimum not met', `${code} requires an order of at least ${formatPrice(coupon.minOrder)}.`, 'warning', 4000);
+      showToast(UiMessage.COUPON_MINIMUM_TITLE, UiMessage.COUPON_MINIMUM(code, formatPrice(coupon.minOrder)), 'warning', 4000);
       return;
     }
 
     storageSet(STORE.coupon, code);
     renderSummary();
-    showToast('Coupon applied', `${code} — ${coupon.label}`, 'success');
+    showToast(UiMessage.COUPON_APPLIED_TITLE, UiMessage.COUPON_APPLIED(code, coupon.label), 'success');
   };
 
   btn.addEventListener('click', apply);
@@ -303,14 +303,14 @@ function bindCartEvents() {
     if (!Cart.count()) return;
     if (confirm('Remove all items from your cart?')) {
       Cart.clear();
-      showToast('Cart cleared', 'All items have been removed.', 'info');
+      showToast(UiMessage.CART_CLEARED_TITLE, UiMessage.CART_CLEARED, 'info');
     }
   });
 
   // --- Demo checkout ---
   document.getElementById('checkoutBtn').addEventListener('click', () => {
     if (!Cart.count()) {
-      showToast('Cart is empty', 'Add something before checking out.', 'warning');
+      showToast(UiMessage.CART_EMPTY_TITLE, UiMessage.CART_EMPTY, 'warning');
       return;
     }
 
@@ -324,7 +324,7 @@ function bindCartEvents() {
     // Empty the cart once the confirmation is dismissed
     document.getElementById('checkoutModal').addEventListener('hidden.bs.modal', () => {
       Cart.clear();
-      showToast('Order placed', `Reference ${ref}. Thanks for shopping with us!`, 'success', 5000);
+      showToast(UiMessage.ORDER_PLACED_TITLE, UiMessage.ORDER_PLACED(ref), 'success', 5000);
     }, { once: true });
   });
 }

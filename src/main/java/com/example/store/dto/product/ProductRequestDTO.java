@@ -17,18 +17,18 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ProductRequestDTO {
 
-    @NotBlank(message = "Tên sản phẩm không được để trống")
-    @Size(max = 100, message = "Tên sản phẩm không được vượt quá 100 ký tự")
+    @NotBlank(message = "PRODUCT_NAME_REQUIRED")
+    @Size(max = 100, message = "PRODUCT_NAME_MAX_LENGTH")
     private String name;
 
-    @NotBlank(message = "Mô tả sản phẩm không được để trống")
-    @Size(max = 1000, message = "Mô tả sản phẩm không được vượt quá 1000 ký tự")
+    @NotBlank(message = "PRODUCT_DESCRIPTION_REQUIRED")
+    @Size(max = 1000, message = "PRODUCT_DESCRIPTION_MAX_LENGTH")
     private String description;
 
-    @NotNull(message = "Danh mục sản phẩm không được để trống")
+    @NotNull(message = "PRODUCT_CATEGORY_REQUIRED")
     private UUID categoryId;
 
-    @NotNull(message = "Thương hiệu sản phẩm không được để trống")
+    @NotNull(message = "PRODUCT_BRAND_REQUIRED")
     private Long brandId;
 
     private Boolean isSelling;

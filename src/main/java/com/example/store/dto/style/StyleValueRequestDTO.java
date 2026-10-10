@@ -17,14 +17,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class StyleValueRequestDTO {
 
-    @NotBlank(message = "Tên giá trị thuộc tính không được để trống")
+    @NotBlank(message = "STYLE_VALUE_NAME_REQUIRED")
     @Size(
             max = 100,
-            message = "Tên giá trị thuộc tính không được vượt quá 100 ký tự"
+            message = "STYLE_VALUE_NAME_MAX_LENGTH"
     )
     private String name;
 
-    @NotNull(message = "Style không được để trống")
+    @NotNull(message = "STYLE_VALUE_STYLE_REQUIRED")
     private UUID styleId;
 
     private Boolean isActive;

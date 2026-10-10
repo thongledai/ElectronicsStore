@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import com.example.store.dto.common.ApiResponse;
 import com.example.store.enums.ApiMessage;
+import com.example.store.enums.ValidationMessage;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -57,7 +58,7 @@ public class GlobalExceptionHandler {
         Map<String, String> errors = new LinkedHashMap<>();
         for (ConstraintViolation<?> violation : ex.getConstraintViolations()) {
             String property = violation.getPropertyPath().toString();
-            errors.putIfAbsent(property, violation.getMessage());
+            errors.putIfAbsent(property, resolveValidationMessage(violation.getMessage()));
         }
         String message = errors.size() > 1
                 ? ApiMessage.INVALID_FIELDS.getMessage()
@@ -69,7 +70,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<?>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new LinkedHashMap<>();
         for (FieldError error : ex.getBindingResult().getFieldErrors()) {
-            errors.putIfAbsent(error.getField(), error.getDefaultMessage());
+            errors.putIfAbsent(error.getField(), resolveValidationMessage(error.getDefaultMessage()));
         }
         String message = errors.size() > 1
                 ? ApiMessage.INVALID_FIELDS.getMessage()
@@ -100,5 +101,13 @@ public class GlobalExceptionHandler {
         log.error("Lỗi hệ thống bất ngờ: ", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.error(ApiMessage.INTERNAL_ERROR));
+    }
+
+    private String resolveValidationMessage(String key) {
+        try {
+            return ValidationMessage.valueOf(key).getMessage();
+        } catch (IllegalArgumentException ex) {
+            return key;
+        }
     }
 }

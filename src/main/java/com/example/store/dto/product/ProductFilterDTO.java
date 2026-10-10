@@ -35,23 +35,23 @@ public class ProductFilterDTO {
 
     @DecimalMin(
             value = "0.0",
-            message = "Giá thấp nhất không được nhỏ hơn 0"
+            message = "MIN_PRICE_NON_NEGATIVE"
     )
     private BigDecimal minPrice;
 
     @DecimalMin(
             value = "0.0",
-            message = "Giá cao nhất không được nhỏ hơn 0"
+            message = "MAX_PRICE_NON_NEGATIVE"
     )
     private BigDecimal maxPrice;
 
     @DecimalMin(
             value = "0.0",
-            message = "Đánh giá thấp nhất không được nhỏ hơn 0"
+            message = "MIN_RATING_NON_NEGATIVE"
     )
     @DecimalMax(
             value = "5.0",
-            message = "Đánh giá thấp nhất không được lớn hơn 5"
+            message = "MIN_RATING_MAX_FIVE"
     )
     private Double minRating;
 
@@ -63,18 +63,18 @@ public class ProductFilterDTO {
 
     @Min(
             value = 0,
-            message = "Số trang không được nhỏ hơn 0"
+            message = "PAGE_NON_NEGATIVE"
     )
     @Builder.Default
     private Integer page = 0;
 
     @Min(
             value = 1,
-            message = "Kích thước trang phải lớn hơn 0"
+            message = "PAGE_SIZE_POSITIVE"
     )
     @Max(
             value = 50,
-            message = "Kích thước trang không được lớn hơn 50"
+            message = "PAGE_SIZE_MAX_FIFTY"
     )
     @Builder.Default
     private Integer size = 12;

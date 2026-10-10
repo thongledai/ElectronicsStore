@@ -14,14 +14,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class BrandRequestDTO {
 
-    @NotBlank(message = "Tên thương hiệu không được để trống")
-    @Size(max = 100, message = "Tên thương hiệu không được vượt quá 100 ký tự")
+    @NotBlank(message = "BRAND_NAME_REQUIRED")
+    @Size(max = 100, message = "BRAND_NAME_MAX_LENGTH")
     private String name;
 
-    @Size(max = 1000, message = "Đường dẫn logo không được vượt quá 1000 ký tự")
+    @Size(max = 1000, message = "BRAND_LOGO_URL_MAX_LENGTH")
     private String logoUrl;
 
-    @Size(max = 1000, message = "Mô tả không được vượt quá 1000 ký tự")
+    @Size(max = 1000, message = "DESCRIPTION_MAX_LENGTH")
     private String description;
 
     private Boolean isActive;

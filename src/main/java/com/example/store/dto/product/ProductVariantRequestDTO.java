@@ -24,15 +24,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ProductVariantRequestDTO {
 
-        @NotNull(message = "Giá sản phẩm không được để trống")
-        @DecimalMin(value = "0.0", message = "Giá sản phẩm không được nhỏ hơn 0")
+        @NotNull(message = "PRODUCT_PRICE_REQUIRED")
+        @DecimalMin(value = "0.0", message = "PRODUCT_PRICE_NON_NEGATIVE")
         private BigDecimal price;
 
-        @DecimalMin(value = "0.0", message = "Giá khuyến mãi không được nhỏ hơn 0")
+        @DecimalMin(value = "0.0", message = "PRODUCT_PROMOTIONAL_PRICE_NON_NEGATIVE")
         private BigDecimal promotionalPrice;
 
-        @NotNull(message = "Số lượng sản phẩm không được để trống")
-        @Min(value = 0, message = "Số lượng sản phẩm không được nhỏ hơn 0")
+        @NotNull(message = "PRODUCT_QUANTITY_REQUIRED")
+        @Min(value = 0, message = "PRODUCT_QUANTITY_NON_NEGATIVE")
         private Integer quantity;
 
         private Boolean isSelling;
@@ -41,7 +41,7 @@ public class ProductVariantRequestDTO {
 
         private Set<UUID> styleValueIds;
 
-        @AssertTrue(message = "Giá khuyến mãi phải nhỏ hơn giá sản phẩm")
+        @AssertTrue(message = "PRODUCT_PROMOTIONAL_PRICE_BELOW_PRICE")
         @JsonIgnore
         public boolean isPromotionalPriceValid() {
                 return promotionalPrice == null

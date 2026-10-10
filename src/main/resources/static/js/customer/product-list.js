@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (addCartBtn) {
       e.stopPropagation(); e.preventDefault();
       const msg = 'Chức năng giỏ hàng đang được cập nhật!';
-      if (window.showToast) window.showToast('Thông báo', msg, 'info'); else alert(msg);
+      if (window.showToast) window.showToast(UiMessage.NOTICE, msg, 'info'); else alert(msg);
       return;
     }
 
@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (wishBtn) {
       e.stopPropagation(); e.preventDefault();
       const msg = 'Chức năng danh sách yêu thích đang được cập nhật!';
-      if (window.showToast) window.showToast('Thông báo', msg, 'info'); else alert(msg);
+      if (window.showToast) window.showToast(UiMessage.NOTICE, msg, 'info'); else alert(msg);
     }
   }, true);
 });

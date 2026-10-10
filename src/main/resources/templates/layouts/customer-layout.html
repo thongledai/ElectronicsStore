@@ -20,6 +20,7 @@
 <html lang="vi" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:fragment="layout(title, description, content, extra, pageScript, minimal)" th:with="URL=@{/}">
 <head th:replace="~{fragments/header :: head(${title}, ${description})}"></head>
 <body>
+<script th:src="@{/js/ui-messages.js}"></script>
 
 <!-- Scroll progress indicator -->
 <div class="scroll-progress" aria-hidden="true"></div>
