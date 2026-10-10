@@ -149,6 +149,8 @@ function clearAuthSession() {
     localStorage.removeItem('technova_jwt');
     localStorage.removeItem('technova_role');
     localStorage.removeItem('technova_user');
+    localStorage.removeItem('technova_last_active');
+    localStorage.removeItem('technova_last_ping');
     if (typeof storageSet === 'function' && typeof STORE !== 'undefined') {
       storageSet(STORE.user, null);
     }
@@ -392,6 +394,8 @@ async function handleGoogleLoginPayload(payload) {
       if (data.data?.user?.role) {
         localStorage.setItem('technova_role', data.data.user.role);
       }
+      localStorage.setItem('technova_last_active', Date.now().toString());
+      localStorage.setItem('technova_last_ping', Date.now().toString());
 
       if (typeof storageSet === 'function' && typeof STORE !== 'undefined') {
         storageSet(STORE.user, {
@@ -497,6 +501,8 @@ async function handleLogin(e) {
       if (data.data?.user?.role) {
         localStorage.setItem('technova_role', data.data.user.role);
       }
+      localStorage.setItem('technova_last_active', Date.now().toString());
+      localStorage.setItem('technova_last_ping', Date.now().toString());
 
       if (typeof storageSet === 'function' && typeof STORE !== 'undefined') {
         storageSet(STORE.user, {

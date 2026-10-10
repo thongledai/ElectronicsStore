@@ -26,6 +26,14 @@ public class AuthenticationControllerAPI {
     private final IAuthenticationService authenticationService;
     private final GoogleAuthService googleAuthService;
 
+    /**
+     * Heartbeat ping để duy trì phiên làm việc ngầm khi người dùng đang mở web
+     */
+    @GetMapping("/ping")
+    public ResponseEntity<ApiResponse<String>> ping() {
+        return ResponseEntity.ok(ApiResponse.success("Session active", "pong"));
+    }
+
 
     /**
      * Đăng ký tài khoản mới (sinh OTP và gửi email xác thực)

@@ -117,7 +117,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
             Cookie jwtCookie = new Cookie("JWT_TOKEN", token);
             jwtCookie.setHttpOnly(true);
             jwtCookie.setPath("/");
-            jwtCookie.setMaxAge((int) (expiration / 1000));
+            jwtCookie.setMaxAge(120); // 2 phút (120s) sliding window
             response.addCookie(jwtCookie);
         }
 
@@ -186,7 +186,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
             Cookie jwtCookie = new Cookie("JWT_TOKEN", token);
             jwtCookie.setHttpOnly(true);
             jwtCookie.setPath("/");
-            jwtCookie.setMaxAge((int) (expiration / 1000));
+            jwtCookie.setMaxAge(120); // 2 phút (120s) sliding window
             response.addCookie(jwtCookie);
         }
 

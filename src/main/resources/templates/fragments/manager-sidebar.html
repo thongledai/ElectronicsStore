@@ -10,6 +10,7 @@
     <div class="nav-caption">Manager</div>
     <div class="nav-links collapse d-lg-flex" id="roleNavLinks">
         <a th:href="@{/manager/index}" th:classappend="${active == 'index'} ? 'active'" th:attr="aria-current=${active == 'index'} ? 'page'"><i class="fa-solid fa-chart-pie"></i><span>Dashboard</span></a>
+        <a th:href="@{/customer/index}" title="Go to Customer Storefront"><i class="fa-solid fa-store"></i><span>Storefront</span></a>
         <a th:href="@{/manager/users}" th:classappend="${active == 'users'} ? 'active'" th:attr="aria-current=${active == 'users'} ? 'page'"><i class="fa-solid fa-users"></i><span>Users</span></a>
         <a th:href="@{/manager/products}" th:classappend="${active == 'products'} ? 'active'" th:attr="aria-current=${active == 'products'} ? 'page'"><i class="fa-solid fa-box"></i><span>Products</span></a>
         <a th:href="@{/manager/categories}" th:classappend="${active == 'categories'} ? 'active'" th:attr="aria-current=${active == 'categories'} ? 'page'"><i class="fa-solid fa-layer-group"></i><span>Categories</span></a>

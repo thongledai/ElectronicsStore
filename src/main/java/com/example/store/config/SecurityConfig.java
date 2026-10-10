@@ -44,7 +44,7 @@ public class SecurityConfig {
                 // Public Authentication REST APIs
                 .requestMatchers(
                     "/auth/login", "/auth/register", "/auth/signup", "/auth/forgot-password", "/auth/resend-otp", "/auth/verify-otp",
-                    "/auth/google", "/auth/google/**"
+                    "/auth/google", "/auth/google/**", "/auth/ping"
                 ).permitAll()
 
 
