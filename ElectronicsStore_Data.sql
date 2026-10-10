@@ -87,16 +87,16 @@ INSERT INTO brands (id, name, slug, logo_url, description, is_active, created_at
 SET IDENTITY_INSERT brands OFF;
 
 -- ---------- categories (cha trước, con sau) ----------
-INSERT INTO categories (id, name, slug, parent_id, image, is_deleted, created_at, updated_at) VALUES ('8BCB53F5-A8A9-58EF-A06A-6F1DFD172897', N'Điện thoại', N'dien-thoai', NULL, NULL, 0, '2026-09-01T08:00:00', '2026-09-01T08:00:00');
-INSERT INTO categories (id, name, slug, parent_id, image, is_deleted, created_at, updated_at) VALUES ('9AA4CF84-AFB2-5DB5-ADB9-5A2BD31EABA6', N'Laptop', N'laptop', NULL, NULL, 0, '2026-09-01T08:00:00', '2026-09-01T08:00:00');
-INSERT INTO categories (id, name, slug, parent_id, image, is_deleted, created_at, updated_at) VALUES ('51B2F515-BC29-5B01-AE36-3599969404C7', N'Phụ kiện', N'phu-kien', NULL, NULL, 0, '2026-09-01T08:00:00', '2026-09-01T08:00:00');
-INSERT INTO categories (id, name, slug, parent_id, image, is_deleted, created_at, updated_at) VALUES ('3A29F5A0-7A82-5EC2-9885-CBBEF80ABA76', N'Tai nghe', N'tai-nghe', '51B2F515-BC29-5B01-AE36-3599969404C7', NULL, 0, '2026-09-01T08:00:00', '2026-09-01T08:00:00');
-INSERT INTO categories (id, name, slug, parent_id, image, is_deleted, created_at, updated_at) VALUES ('C3F609D8-2FF8-5C05-A2D1-2858CDAFC158', N'Chuột & bàn phím', N'chuot-ban-phim', '51B2F515-BC29-5B01-AE36-3599969404C7', NULL, 0, '2026-09-01T08:00:00', '2026-09-01T08:00:00');
+INSERT INTO categories (id, name, slug, parent_id, image, is_active, created_at, updated_at) VALUES ('8BCB53F5-A8A9-58EF-A06A-6F1DFD172897', N'Điện thoại', N'dien-thoai', NULL, NULL, 1, '2026-09-01T08:00:00', '2026-09-01T08:00:00');
+INSERT INTO categories (id, name, slug, parent_id, image, is_active, created_at, updated_at) VALUES ('9AA4CF84-AFB2-5DB5-ADB9-5A2BD31EABA6', N'Laptop', N'laptop', NULL, NULL, 1, '2026-09-01T08:00:00', '2026-09-01T08:00:00');
+INSERT INTO categories (id, name, slug, parent_id, image, is_active, created_at, updated_at) VALUES ('51B2F515-BC29-5B01-AE36-3599969404C7', N'Phụ kiện', N'phu-kien', NULL, NULL, 1, '2026-09-01T08:00:00', '2026-09-01T08:00:00');
+INSERT INTO categories (id, name, slug, parent_id, image, is_active, created_at, updated_at) VALUES ('3A29F5A0-7A82-5EC2-9885-CBBEF80ABA76', N'Tai nghe', N'tai-nghe', '51B2F515-BC29-5B01-AE36-3599969404C7', NULL, 1, '2026-09-01T08:00:00', '2026-09-01T08:00:00');
+INSERT INTO categories (id, name, slug, parent_id, image, is_active, created_at, updated_at) VALUES ('C3F609D8-2FF8-5C05-A2D1-2858CDAFC158', N'Chuột & bàn phím', N'chuot-ban-phim', '51B2F515-BC29-5B01-AE36-3599969404C7', NULL, 1, '2026-09-01T08:00:00', '2026-09-01T08:00:00');
 
 -- ---------- styles & style_categories ----------
-INSERT INTO styles (id, name, is_deleted, created_at, updated_at) VALUES ('DD6B949E-AB83-5BA3-8820-A2D6968996C1', N'Màu sắc', 0, '2026-09-01T08:00:00', '2026-09-01T08:00:00');
-INSERT INTO styles (id, name, is_deleted, created_at, updated_at) VALUES ('79636413-CA39-5009-A33A-C5D7F2ECA097', N'Dung lượng', 0, '2026-09-01T08:00:00', '2026-09-01T08:00:00');
-INSERT INTO styles (id, name, is_deleted, created_at, updated_at) VALUES ('FE0D7F95-E34A-548A-99E9-28D784177B81', N'RAM', 0, '2026-09-01T08:00:00', '2026-09-01T08:00:00');
+INSERT INTO styles (id, name, is_active, created_at, updated_at) VALUES ('DD6B949E-AB83-5BA3-8820-A2D6968996C1', N'Màu sắc', 1, '2026-09-01T08:00:00', '2026-09-01T08:00:00');
+INSERT INTO styles (id, name, is_active, created_at, updated_at) VALUES ('79636413-CA39-5009-A33A-C5D7F2ECA097', N'Dung lượng', 1, '2026-09-01T08:00:00', '2026-09-01T08:00:00');
+INSERT INTO styles (id, name, is_active, created_at, updated_at) VALUES ('FE0D7F95-E34A-548A-99E9-28D784177B81', N'RAM', 1, '2026-09-01T08:00:00', '2026-09-01T08:00:00');
 INSERT INTO style_categories (style_id, category_id) VALUES ('DD6B949E-AB83-5BA3-8820-A2D6968996C1', '8BCB53F5-A8A9-58EF-A06A-6F1DFD172897');
 INSERT INTO style_categories (style_id, category_id) VALUES ('DD6B949E-AB83-5BA3-8820-A2D6968996C1', '9AA4CF84-AFB2-5DB5-ADB9-5A2BD31EABA6');
 INSERT INTO style_categories (style_id, category_id) VALUES ('DD6B949E-AB83-5BA3-8820-A2D6968996C1', '3A29F5A0-7A82-5EC2-9885-CBBEF80ABA76');
