@@ -106,14 +106,14 @@ INSERT INTO style_categories (style_id, category_id) VALUES ('79636413-CA39-5009
 INSERT INTO style_categories (style_id, category_id) VALUES ('FE0D7F95-E34A-548A-99E9-28D784177B81', '9AA4CF84-AFB2-5DB5-ADB9-5A2BD31EABA6');
 
 -- ---------- style_values (name UNIQUE toàn bảng) ----------
-INSERT INTO style_values (id, name, style_id, is_deleted, created_at, updated_at) VALUES ('59A66403-2776-5ECA-95F6-70FB66DD7A20', N'Đen', 'DD6B949E-AB83-5BA3-8820-A2D6968996C1', 0, '2026-09-01T08:00:00', '2026-09-01T08:00:00');
-INSERT INTO style_values (id, name, style_id, is_deleted, created_at, updated_at) VALUES ('1E17D8E2-1208-5394-8326-72AF4FD4180E', N'Bạc', 'DD6B949E-AB83-5BA3-8820-A2D6968996C1', 0, '2026-09-01T08:00:00', '2026-09-01T08:00:00');
-INSERT INTO style_values (id, name, style_id, is_deleted, created_at, updated_at) VALUES ('ADF61633-05C3-58AF-8020-BD0CCD28E7C3', N'Xanh dương', 'DD6B949E-AB83-5BA3-8820-A2D6968996C1', 0, '2026-09-01T08:00:00', '2026-09-01T08:00:00');
-INSERT INTO style_values (id, name, style_id, is_deleted, created_at, updated_at) VALUES ('79375C32-EF78-50AA-B763-F6BF1DC4E7C5', N'128GB', '79636413-CA39-5009-A33A-C5D7F2ECA097', 0, '2026-09-01T08:00:00', '2026-09-01T08:00:00');
-INSERT INTO style_values (id, name, style_id, is_deleted, created_at, updated_at) VALUES ('A3F79B87-80F0-52D7-A2E3-83F2EFE45641', N'256GB', '79636413-CA39-5009-A33A-C5D7F2ECA097', 0, '2026-09-01T08:00:00', '2026-09-01T08:00:00');
-INSERT INTO style_values (id, name, style_id, is_deleted, created_at, updated_at) VALUES ('CCAEB9E7-03E5-5C1E-A512-ACC49C2059B1', N'512GB', '79636413-CA39-5009-A33A-C5D7F2ECA097', 0, '2026-09-01T08:00:00', '2026-09-01T08:00:00');
-INSERT INTO style_values (id, name, style_id, is_deleted, created_at, updated_at) VALUES ('8294ADCD-0270-561C-81AB-8BF4C38D6C72', N'8GB RAM', 'FE0D7F95-E34A-548A-99E9-28D784177B81', 0, '2026-09-01T08:00:00', '2026-09-01T08:00:00');
-INSERT INTO style_values (id, name, style_id, is_deleted, created_at, updated_at) VALUES ('780A90C3-7613-52F9-A6FF-4EBFCD019F0F', N'16GB RAM', 'FE0D7F95-E34A-548A-99E9-28D784177B81', 0, '2026-09-01T08:00:00', '2026-09-01T08:00:00');
+INSERT INTO style_values (id, name, style_id, is_active, created_at, updated_at) VALUES ('59A66403-2776-5ECA-95F6-70FB66DD7A20', N'Đen', 'DD6B949E-AB83-5BA3-8820-A2D6968996C1', 1, '2026-09-01T08:00:00', '2026-09-01T08:00:00');
+INSERT INTO style_values (id, name, style_id, is_active, created_at, updated_at) VALUES ('1E17D8E2-1208-5394-8326-72AF4FD4180E', N'Bạc', 'DD6B949E-AB83-5BA3-8820-A2D6968996C1', 1, '2026-09-01T08:00:00', '2026-09-01T08:00:00');
+INSERT INTO style_values (id, name, style_id, is_active, created_at, updated_at) VALUES ('ADF61633-05C3-58AF-8020-BD0CCD28E7C3', N'Xanh dương', 'DD6B949E-AB83-5BA3-8820-A2D6968996C1', 1, '2026-09-01T08:00:00', '2026-09-01T08:00:00');
+INSERT INTO style_values (id, name, style_id, is_active, created_at, updated_at) VALUES ('79375C32-EF78-50AA-B763-F6BF1DC4E7C5', N'128GB', '79636413-CA39-5009-A33A-C5D7F2ECA097', 1, '2026-09-01T08:00:00', '2026-09-01T08:00:00');
+INSERT INTO style_values (id, name, style_id, is_active, created_at, updated_at) VALUES ('A3F79B87-80F0-52D7-A2E3-83F2EFE45641', N'256GB', '79636413-CA39-5009-A33A-C5D7F2ECA097', 1, '2026-09-01T08:00:00', '2026-09-01T08:00:00');
+INSERT INTO style_values (id, name, style_id, is_active, created_at, updated_at) VALUES ('CCAEB9E7-03E5-5C1E-A512-ACC49C2059B1', N'512GB', '79636413-CA39-5009-A33A-C5D7F2ECA097', 1, '2026-09-01T08:00:00', '2026-09-01T08:00:00');
+INSERT INTO style_values (id, name, style_id, is_active, created_at, updated_at) VALUES ('8294ADCD-0270-561C-81AB-8BF4C38D6C72', N'8GB RAM', 'FE0D7F95-E34A-548A-99E9-28D784177B81', 1, '2026-09-01T08:00:00', '2026-09-01T08:00:00');
+INSERT INTO style_values (id, name, style_id, is_active, created_at, updated_at) VALUES ('780A90C3-7613-52F9-A6FF-4EBFCD019F0F', N'16GB RAM', 'FE0D7F95-E34A-548A-99E9-28D784177B81', 1, '2026-09-01T08:00:00', '2026-09-01T08:00:00');
 
 -- ---------- products ----------
 INSERT INTO products (id, name, slug, description, is_active, is_selling, rating, created_at, updated_at, category_id, brand_id) VALUES ('904E50E9-3DE2-5703-85CA-3CBF871B76B4', N'iPhone 15', N'iphone-15', N'iPhone 15 màn hình Dynamic Island, chip A16 Bionic, camera chính 48MP, cổng USB-C.', 1, 1, 5.0, '2026-09-01T08:00:00', '2026-09-01T08:00:00', '8BCB53F5-A8A9-58EF-A06A-6F1DFD172897', 1);
