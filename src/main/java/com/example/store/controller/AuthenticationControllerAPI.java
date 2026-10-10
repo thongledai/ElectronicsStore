@@ -14,6 +14,7 @@ import com.example.store.dto.auth.RegisterDTO;
 import com.example.store.dto.auth.ResetPasswordDTO;
 import com.example.store.dto.auth.VerifyOtpDTO;
 import com.example.store.dto.common.ApiResponse;
+import com.example.store.enums.ApiMessage;
 import com.example.store.service.auth.IAuthenticationService;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -52,7 +53,7 @@ public class AuthenticationControllerAPI {
             @Valid @RequestBody LoginDTO loginDTO,
             HttpServletResponse httpResponse) {
         AuthResponseDTO authResponse = authenticationService.login(loginDTO, httpResponse);
-        return ResponseEntity.ok(ApiResponse.success("Login successful!", authResponse));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.AUTH_LOGIN_SUCCESS, authResponse));
     }
 
     /**
@@ -90,7 +91,7 @@ public class AuthenticationControllerAPI {
             @Valid @RequestBody ResetPasswordDTO resetPasswordDTO,
             Principal principal) {
         if (principal == null) {
-            return ResponseEntity.status(401).body(ApiResponse.error("Please log in to change your password!"));
+            return ResponseEntity.status(401).body(ApiResponse.error(ApiMessage.AUTH_LOGIN_REQUIRED));
         }
         ApiResponse<?> response = authenticationService.resetPassword(principal.getName(), resetPasswordDTO);
         return ResponseEntity.ok(response);

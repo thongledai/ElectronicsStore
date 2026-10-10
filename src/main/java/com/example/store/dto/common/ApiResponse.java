@@ -1,5 +1,7 @@
 package com.example.store.dto.common;
 
+import com.example.store.enums.ApiMessage;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,8 +24,16 @@ public class ApiResponse<T> {
                 .build();
     }
 
+    public static <T> ApiResponse<T> success(ApiMessage message, T data) {
+        return success(message.getMessage(), data);
+    }
+
     public static <T> ApiResponse<T> success(String message) {
         return success(message, null);
+    }
+
+    public static <T> ApiResponse<T> success(ApiMessage message) {
+        return success(message.getMessage());
     }
 
     public static <T> ApiResponse<T> error(String message) {
@@ -31,5 +41,9 @@ public class ApiResponse<T> {
                 .success(false)
                 .message(message)
                 .build();
+    }
+
+    public static <T> ApiResponse<T> error(ApiMessage message) {
+        return error(message.getMessage());
     }
 }

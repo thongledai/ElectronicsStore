@@ -15,6 +15,7 @@ import com.example.store.dto.common.UserResponseDTO;
 import com.example.store.entity.Role;
 import com.example.store.entity.User;
 import com.example.store.enums.OtpType;
+import com.example.store.enums.ApiMessage;
 import com.example.store.mapper.UserMapper;
 import com.example.store.repository.RoleRepository;
 import com.example.store.repository.UserRepository;
@@ -75,7 +76,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         String otp = otpService.generateAndSaveOtp(user.getEmail(), OtpType.REGISTER);
         emailService.sendOtpEmail(user.getEmail(), otp, "Activate your TechNova Account", "account activation");
 
-        return ApiResponse.success("Registration successful! Please enter the OTP code sent to your email.", user.getEmail());
+        return ApiResponse.success(ApiMessage.AUTH_REGISTER_SUCCESS, user.getEmail());
     }
 
     @Override
@@ -129,7 +130,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         String otp = otpService.generateAndSaveOtp(user.getEmail(), OtpType.FORGOT_PASSWORD);
         emailService.sendOtpEmail(user.getEmail(), otp, "TechNova Password Recovery OTP", "password reset");
 
-        return ApiResponse.success("An OTP code has been sent to your email.", user.getEmail());
+        return ApiResponse.success(ApiMessage.AUTH_OTP_SENT, user.getEmail());
     }
 
     @Override
@@ -147,7 +148,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         String otp = otpService.generateAndSaveOtp(user.getEmail(), type);
         emailService.sendOtpEmail(user.getEmail(), otp, subject, purpose);
 
-        return ApiResponse.success("A new OTP code has been sent to your email (valid for 5 minutes).", user.getEmail());
+        return ApiResponse.success(ApiMessage.AUTH_OTP_RESENT, user.getEmail());
     }
 
     @Override
@@ -172,7 +173,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         if (type == OtpType.REGISTER) {
             user.setIsEmailActive(true);
             userRepository.save(user);
-            return ApiResponse.success("Account activated successfully! You can now sign in.");
+            return ApiResponse.success(ApiMessage.AUTH_ACCOUNT_ACTIVATED);
         } else {
             if (verifyOtpDTO.getNewPassword() == null || verifyOtpDTO.getNewPassword().isBlank()) {
                 throw new RuntimeException("Please enter a new password!");
@@ -186,7 +187,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
 
             user.setHashedPassword(passwordEncoder.encode(verifyOtpDTO.getNewPassword()));
             userRepository.save(user);
-            return ApiResponse.success("Password reset successfully! You can now sign in with your new password.");
+            return ApiResponse.success(ApiMessage.AUTH_PASSWORD_RESET);
         }
     }
 
@@ -215,7 +216,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         user.setHashedPassword(passwordEncoder.encode(resetPasswordDTO.getNewPassword()));
         userRepository.save(user);
 
-        return ApiResponse.success("Password changed successfully!");
+        return ApiResponse.success(ApiMessage.AUTH_PASSWORD_CHANGED);
     }
 
     @Override
