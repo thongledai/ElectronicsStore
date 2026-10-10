@@ -3,356 +3,386 @@
         'TechNova Electronics — Premium Gadgets, Honest Prices',
         'TechNova Electronics — shop laptops, smartphones, headphones, smartwatches and gaming accessories with fast delivery and genuine warranty.',
         ~{::main}, ~{}, 'home.js', false)}">
-<head><title>TechNova Electronics — Premium Gadgets, Honest Prices</title></head>
+
+<head>
+  <title>TechNova Electronics — Premium Gadgets, Honest Prices</title>
+</head>
+
 <body>
 
-<main>
+  <main>
 
-  <!-- ================================================================
+    <!-- ================================================================
        HERO BANNER
        ================================================================ -->
-  <section class="hero">
-    <div class="container">
-      <div class="row align-items-center g-5">
+    <section class="hero">
+      <div class="container">
+        <div class="row align-items-center g-5">
 
-        <div class="col-lg-6">
-          <span class="hero-pill">
-            <i class="fas fa-bolt"></i> Republic Sale live — up to 40% off
-          </span>
+          <div class="col-lg-6">
+            <span class="hero-pill">
+              <i class="fas fa-bolt"></i> Republic Sale live — up to 40% off
+            </span>
 
-          <h1>Premium tech,<br><span class="text-gradient">honest prices.</span></h1>
+            <h1>Premium tech,<br><span class="text-gradient">honest prices.</span></h1>
 
-          <p class="lead mb-4">
-            From creator laptops to flagship phones and tournament-grade gaming gear —
-            every product is genuine, warranty-backed and delivered in 48 hours.
-          </p>
+            <p class="lead mb-4">
+              From creator laptops to flagship phones and tournament-grade gaming gear —
+              every product is genuine, warranty-backed and delivered in 48 hours.
+            </p>
 
-          <div class="d-flex flex-wrap gap-3">
-            <a th:href="@{/customer/products}" class="btn btn-accent btn-lg">
-              <i class="fas fa-bag-shopping me-2"></i>Shop Now
-            </a>
-            <a href="#categories" class="btn btn-lg btn-outline-light rounded-pill px-4">
-              Browse Categories
-            </a>
+            <div class="d-flex flex-wrap gap-3">
+              <a th:href="@{/customer/products}" class="btn btn-accent btn-lg">
+                <i class="fas fa-bag-shopping me-2"></i>Shop Now
+              </a>
+              <a href="#categories" class="btn btn-lg btn-outline-light rounded-pill px-4">
+                Browse Categories
+              </a>
+            </div>
+
+            <div class="hero-stats">
+              <div class="hero-stat">
+                <div class="num">25+</div>
+                <div class="lbl">Curated products</div>
+              </div>
+              <div class="hero-stat">
+                <div class="num">50K+</div>
+                <div class="lbl">Happy customers</div>
+              </div>
+              <div class="hero-stat">
+                <div class="num">4.8<i class="fas fa-star ms-1" style="font-size:1rem;color:var(--star)"></i></div>
+                <div class="lbl">Average rating</div>
+              </div>
+            </div>
           </div>
 
-          <div class="hero-stats">
-            <div class="hero-stat">
-              <div class="num">25+</div>
-              <div class="lbl">Curated products</div>
-            </div>
-            <div class="hero-stat">
-              <div class="num">50K+</div>
-              <div class="lbl">Happy customers</div>
-            </div>
-            <div class="hero-stat">
-              <div class="num">4.8<i class="fas fa-star ms-1" style="font-size:1rem;color:var(--star)"></i></div>
-              <div class="lbl">Average rating</div>
+          <div class="col-lg-6">
+            <div class="hero-visual">
+              <img th:src="@{/images/hero-device.svg}" alt="Laptop, smartphone and smartwatch from TechNova" width="720"
+                height="560">
+
+              <div class="hero-chip chip-1">
+                <span class="chip-icon"><i class="fas fa-shield-halved"></i></span>
+                <span>2-Year<br>Warranty</span>
+              </div>
+              <div class="hero-chip chip-2">
+                <span class="chip-icon"><i class="fas fa-truck-fast"></i></span>
+                <span>48-Hour<br>Delivery</span>
+              </div>
             </div>
           </div>
+
         </div>
+      </div>
+    </section>
 
-        <div class="col-lg-6">
-          <div class="hero-visual">
-            <img th:src="@{/images/hero-device.svg}" alt="Laptop, smartphone and smartwatch from TechNova" width="720" height="560">
-
-            <div class="hero-chip chip-1">
-              <span class="chip-icon"><i class="fas fa-shield-halved"></i></span>
-              <span>2-Year<br>Warranty</span>
-            </div>
-            <div class="hero-chip chip-2">
-              <span class="chip-icon"><i class="fas fa-truck-fast"></i></span>
-              <span>48-Hour<br>Delivery</span>
-            </div>
-          </div>
-        </div>
-
+    <!-- Scrolling brand marquee -->
+    <div class="brand-strip" aria-hidden="true">
+      <div class="brand-strip-track">
+        <span class="brand-strip-item">TECHNOVA</span><span class="brand-strip-item">ZENITH</span>
+        <span class="brand-strip-item">PULSE</span><span class="brand-strip-item">SONICWAVE</span>
+        <span class="brand-strip-item">CHRONOFIT</span><span class="brand-strip-item">VORTEX</span>
+        <span class="brand-strip-item">RAPTOR</span><span class="brand-strip-item">ORBIT</span>
+        <span class="brand-strip-item">NEBULA</span><span class="brand-strip-item">BASSKING</span>
+        <!-- duplicated so the marquee loops seamlessly -->
+        <span class="brand-strip-item">TECHNOVA</span><span class="brand-strip-item">ZENITH</span>
+        <span class="brand-strip-item">PULSE</span><span class="brand-strip-item">SONICWAVE</span>
+        <span class="brand-strip-item">CHRONOFIT</span><span class="brand-strip-item">VORTEX</span>
+        <span class="brand-strip-item">RAPTOR</span><span class="brand-strip-item">ORBIT</span>
+        <span class="brand-strip-item">NEBULA</span><span class="brand-strip-item">BASSKING</span>
       </div>
     </div>
-  </section>
 
-  <!-- Scrolling brand marquee -->
-  <div class="brand-strip" aria-hidden="true">
-    <div class="brand-strip-track">
-      <span class="brand-strip-item">TECHNOVA</span><span class="brand-strip-item">ZENITH</span>
-      <span class="brand-strip-item">PULSE</span><span class="brand-strip-item">SONICWAVE</span>
-      <span class="brand-strip-item">CHRONOFIT</span><span class="brand-strip-item">VORTEX</span>
-      <span class="brand-strip-item">RAPTOR</span><span class="brand-strip-item">ORBIT</span>
-      <span class="brand-strip-item">NEBULA</span><span class="brand-strip-item">BASSKING</span>
-      <!-- duplicated so the marquee loops seamlessly -->
-      <span class="brand-strip-item">TECHNOVA</span><span class="brand-strip-item">ZENITH</span>
-      <span class="brand-strip-item">PULSE</span><span class="brand-strip-item">SONICWAVE</span>
-      <span class="brand-strip-item">CHRONOFIT</span><span class="brand-strip-item">VORTEX</span>
-      <span class="brand-strip-item">RAPTOR</span><span class="brand-strip-item">ORBIT</span>
-      <span class="brand-strip-item">NEBULA</span><span class="brand-strip-item">BASSKING</span>
-    </div>
-  </div>
-
-  <!-- ================================================================
+    <!-- ================================================================
        USP STRIP
        ================================================================ -->
-  <section class="section-tight">
-    <div class="container">
-      <div class="row g-3">
-        <div class="col-6 col-lg-3 reveal">
-          <div class="usp-card">
-            <div class="usp-icon"><i class="fas fa-truck-fast"></i></div>
-            <div><h5>Free Fast Delivery</h5><p>On every order above ₹5,000</p></div>
+    <section class="section-tight">
+      <div class="container">
+        <div class="row g-3">
+          <div class="col-6 col-lg-3 reveal">
+            <div class="usp-card">
+              <div class="usp-icon"><i class="fas fa-truck-fast"></i></div>
+              <div>
+                <h5>Free Fast Delivery</h5>
+                <p>On every order above ₹5,000</p>
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="col-6 col-lg-3 reveal" data-delay="1">
-          <div class="usp-card">
-            <div class="usp-icon"><i class="fas fa-rotate-left"></i></div>
-            <div><h5>7-Day Returns</h5><p>No-questions-asked refunds</p></div>
+          <div class="col-6 col-lg-3 reveal" data-delay="1">
+            <div class="usp-card">
+              <div class="usp-icon"><i class="fas fa-rotate-left"></i></div>
+              <div>
+                <h5>7-Day Returns</h5>
+                <p>No-questions-asked refunds</p>
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="col-6 col-lg-3 reveal" data-delay="2">
-          <div class="usp-card">
-            <div class="usp-icon"><i class="fas fa-shield-halved"></i></div>
-            <div><h5>Genuine Warranty</h5><p>Brand-authorised service</p></div>
+          <div class="col-6 col-lg-3 reveal" data-delay="2">
+            <div class="usp-card">
+              <div class="usp-icon"><i class="fas fa-shield-halved"></i></div>
+              <div>
+                <h5>Genuine Warranty</h5>
+                <p>Brand-authorised service</p>
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="col-6 col-lg-3 reveal" data-delay="3">
-          <div class="usp-card">
-            <div class="usp-icon"><i class="fas fa-headset"></i></div>
-            <div><h5>24×7 Support</h5><p>Real humans, real answers</p></div>
+          <div class="col-6 col-lg-3 reveal" data-delay="3">
+            <div class="usp-card">
+              <div class="usp-icon"><i class="fas fa-headset"></i></div>
+              <div>
+                <h5>24×7 Support</h5>
+                <p>Real humans, real answers</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ================================================================
+    <!-- ================================================================
        CATEGORIES
        ================================================================ -->
-  <section class="section pt-0" id="categories">
-    <div class="container">
-      <div class="section-head text-center">
-        <span class="section-eyebrow"><i class="fas fa-layer-group"></i>Shop by category</span>
-        <h2 class="section-title">Find exactly what you need</h2>
-        <p class="section-subtitle">Five carefully curated categories, stocked only with gear our team would buy themselves.</p>
+    <section class="section pt-0" id="categories">
+      <div class="container">
+        <div class="section-head text-center">
+          <span class="section-eyebrow"><i class="fas fa-layer-group"></i>Shop by category</span>
+          <h2 class="section-title">Find exactly what you need</h2>
+          <p class="section-subtitle">Five carefully curated categories, stocked only with gear our team would buy
+            themselves.</p>
+        </div>
+
+        <!-- Tiles injected by js/home.js -->
+        <div class="row g-3 g-md-4" id="categoryGrid"></div>
       </div>
+    </section>
 
-      <!-- Tiles injected by js/home.js -->
-      <div class="row g-3 g-md-4" id="categoryGrid"></div>
-    </div>
-  </section>
-
-  <!-- ================================================================
+    <!-- ================================================================
        FEATURED PRODUCTS (filterable tabs)
        ================================================================ -->
-  <section class="section pt-0">
-    <div class="container">
-      <div class="section-head text-center">
-        <span class="section-eyebrow"><i class="fas fa-star"></i>Handpicked</span>
-        <h2 class="section-title">Featured Products</h2>
-        <p class="section-subtitle mb-4">Our editors' current favourites across every category.</p>
+    <section class="section pt-0">
+      <div class="container">
+        <div class="section-head text-center">
+          <span class="section-eyebrow"><i class="fas fa-star"></i>Handpicked</span>
+          <h2 class="section-title">Featured Products</h2>
+          <p class="section-subtitle mb-4">Our editors' current favourites across every category.</p>
 
-        <div class="pill-tabs" id="featuredTabs">
-          <button class="pill-tab active" data-filter="all" type="button">All</button>
-          <!-- category pills appended by js/home.js -->
+          <div class="pill-tabs" id="featuredTabs">
+            <button class="pill-tab active" data-filter="all" type="button">All</button>
+            <!-- category pills appended by js/home.js -->
+          </div>
+        </div>
+
+        <div class="row g-3 g-md-4" id="featuredGrid"></div>
+
+        <div class="text-center mt-4">
+          <a th:href="@{/customer/products}" class="btn btn-outline-brand btn-lg">
+            Xem tất cả sản phẩm <i class="fas fa-arrow-right ms-2"></i>
+          </a>
         </div>
       </div>
+    </section>
 
-      <div class="row g-3 g-md-4" id="featuredGrid"></div>
-
-      <div class="text-center mt-4">
-        <a th:href="@{/customer/products}" class="btn btn-outline-brand btn-lg">
-          View All 25 Products <i class="fas fa-arrow-right ms-2"></i>
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- ================================================================
+    <!-- ================================================================
        DEAL OF THE DAY
        ================================================================ -->
-  <section class="section pt-0">
-    <div class="container">
-      <div class="deal-band reveal">
-        <div class="row align-items-center g-4">
+    <section class="section pt-0">
+      <div class="container">
+        <div class="deal-band reveal">
+          <div class="row align-items-center g-4">
 
-          <div class="col-lg-4 text-center">
-            <img id="dealImage" src="" alt="" style="max-height:230px" width="600" height="600">
-          </div>
-
-          <div class="col-lg-5">
-            <span class="section-eyebrow"><i class="fas fa-fire"></i>Deal of the day</span>
-            <h3 class="h4 text-white mb-2" id="dealName">—</h3>
-            <p class="mb-3" style="color:rgba(255,255,255,.75)" id="dealTagline"></p>
-            <div class="d-flex align-items-baseline gap-3 mb-3">
-              <span class="h3 mb-0 text-white" id="dealPrice"></span>
-              <span class="price-old text-white-50" id="dealOldPrice"></span>
-              <span class="badge bg-warning text-dark" id="dealOff"></span>
+            <div class="col-lg-4 text-center">
+              <img id="dealImage" src="" alt="" style="max-height:230px" width="600" height="600">
             </div>
-            <a href="#" class="btn btn-accent" id="dealLink">
-              <i class="fas fa-bolt me-2"></i>Grab This Deal
-            </a>
-          </div>
 
-          <div class="col-lg-3">
-            <p class="small mb-2" style="color:rgba(255,255,255,.7)">Offer ends in</p>
-            <div class="countdown" id="countdown">
-              <div class="countdown-box"><span class="cd-num" data-cd="h">00</span><span class="cd-lbl">Hours</span></div>
-              <div class="countdown-box"><span class="cd-num" data-cd="m">00</span><span class="cd-lbl">Mins</span></div>
-              <div class="countdown-box"><span class="cd-num" data-cd="s">00</span><span class="cd-lbl">Secs</span></div>
+            <div class="col-lg-5">
+              <span class="section-eyebrow"><i class="fas fa-fire"></i>Deal of the day</span>
+              <h3 class="h4 text-white mb-2" id="dealName">—</h3>
+              <p class="mb-3" style="color:rgba(255,255,255,.75)" id="dealTagline"></p>
+              <div class="d-flex align-items-baseline gap-3 mb-3">
+                <span class="h3 mb-0 text-white" id="dealPrice"></span>
+                <span class="price-old text-white-50" id="dealOldPrice"></span>
+                <span class="badge bg-warning text-dark" id="dealOff"></span>
+              </div>
+              <a href="#" class="btn btn-accent" id="dealLink">
+                <i class="fas fa-bolt me-2"></i>Grab This Deal
+              </a>
             </div>
-          </div>
 
+            <div class="col-lg-3">
+              <p class="small mb-2" style="color:rgba(255,255,255,.7)">Offer ends in</p>
+              <div class="countdown" id="countdown">
+                <div class="countdown-box"><span class="cd-num" data-cd="h">00</span><span class="cd-lbl">Hours</span>
+                </div>
+                <div class="countdown-box"><span class="cd-num" data-cd="m">00</span><span class="cd-lbl">Mins</span>
+                </div>
+                <div class="countdown-box"><span class="cd-num" data-cd="s">00</span><span class="cd-lbl">Secs</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ================================================================
+    <!-- ================================================================
        BEST SELLERS
        ================================================================ -->
-  <section class="section pt-0">
-    <div class="container">
-      <div class="section-head d-flex justify-content-between align-items-end flex-wrap gap-3">
-        <div>
-          <span class="section-eyebrow"><i class="fas fa-trophy"></i>Most loved</span>
-          <h2 class="section-title mb-0">Best Sellers</h2>
+    <section class="section pt-0">
+      <div class="container">
+        <div class="section-head d-flex justify-content-between align-items-end flex-wrap gap-3">
+          <div>
+            <span class="section-eyebrow"><i class="fas fa-trophy"></i>Most loved</span>
+            <h2 class="section-title mb-0">Best Sellers</h2>
+          </div>
+          <a th:href="@{/customer/products(sort='popular')}" class="btn btn-ghost">
+            See all <i class="fas fa-arrow-right ms-1"></i>
+          </a>
         </div>
-        <a th:href="@{/customer/products(sort='popular')}" class="btn btn-ghost">
-          See all <i class="fas fa-arrow-right ms-1"></i>
-        </a>
+
+        <div class="row g-3 g-md-4" id="bestSellerGrid"></div>
       </div>
+    </section>
 
-      <div class="row g-3 g-md-4" id="bestSellerGrid"></div>
-    </div>
-  </section>
-
-  <!-- ================================================================
+    <!-- ================================================================
        PROMO BANNERS
        ================================================================ -->
-  <section class="section pt-0">
-    <div class="container">
-      <div class="row g-4">
-        <div class="col-lg-4 reveal">
-          <a th:href="@{/customer/products(category='headphones')}" class="promo-card d-block">
-            <img th:src="@{/images/promo-audio.svg}" alt="">
-            <div class="promo-body">
-              <h3>Audio that disappears</h3>
-              <p>Flagship ANC headphones from ₹2,999</p>
-              <span class="btn btn-accent btn-sm">Shop Audio</span>
-            </div>
-          </a>
-        </div>
-        <div class="col-lg-4 reveal" data-delay="1">
-          <a th:href="@{/customer/products(category='gaming')}" class="promo-card d-block">
-            <img th:src="@{/images/promo-gaming.svg}" alt="">
-            <div class="promo-body">
-              <h3>Level up your setup</h3>
-              <p>Mechanical keys, 8K polling mice & more</p>
-              <span class="btn btn-accent btn-sm">Shop Gaming</span>
-            </div>
-          </a>
-        </div>
-        <div class="col-lg-4 reveal" data-delay="2">
-          <a th:href="@{/customer/products(category='smartphones')}" class="promo-card d-block">
-            <img th:src="@{/images/promo-mobile.svg}" alt="">
-            <div class="promo-body">
-              <h3>5G for everyone</h3>
-              <p>Flagship cameras from ₹18,999</p>
-              <span class="btn btn-accent btn-sm">Shop Phones</span>
-            </div>
-          </a>
+    <section class="section pt-0">
+      <div class="container">
+        <div class="row g-4">
+          <div class="col-lg-4 reveal">
+            <a th:href="@{/customer/products(category='headphones')}" class="promo-card d-block">
+              <img th:src="@{/images/promo-audio.svg}" alt="">
+              <div class="promo-body">
+                <h3>Audio that disappears</h3>
+                <p>Flagship ANC headphones from ₹2,999</p>
+                <span class="btn btn-accent btn-sm">Shop Audio</span>
+              </div>
+            </a>
+          </div>
+          <div class="col-lg-4 reveal" data-delay="1">
+            <a th:href="@{/customer/products(category='gaming')}" class="promo-card d-block">
+              <img th:src="@{/images/promo-gaming.svg}" alt="">
+              <div class="promo-body">
+                <h3>Level up your setup</h3>
+                <p>Mechanical keys, 8K polling mice & more</p>
+                <span class="btn btn-accent btn-sm">Shop Gaming</span>
+              </div>
+            </a>
+          </div>
+          <div class="col-lg-4 reveal" data-delay="2">
+            <a th:href="@{/customer/products(category='smartphones')}" class="promo-card d-block">
+              <img th:src="@{/images/promo-mobile.svg}" alt="">
+              <div class="promo-body">
+                <h3>5G for everyone</h3>
+                <p>Flagship cameras from ₹18,999</p>
+                <span class="btn btn-accent btn-sm">Shop Phones</span>
+              </div>
+            </a>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ================================================================
+    <!-- ================================================================
        TESTIMONIALS
        ================================================================ -->
-  <section class="section pt-0">
-    <div class="container">
-      <div class="section-head text-center">
-        <span class="section-eyebrow"><i class="fas fa-comment-dots"></i>Customer stories</span>
-        <h2 class="section-title">Trusted by 50,000+ shoppers</h2>
+    <section class="section pt-0">
+      <div class="container">
+        <div class="section-head text-center">
+          <span class="section-eyebrow"><i class="fas fa-comment-dots"></i>Customer stories</span>
+          <h2 class="section-title">Trusted by 50,000+ shoppers</h2>
+        </div>
+
+        <div class="row g-4">
+          <div class="col-md-4 reveal">
+            <div class="testimonial-card">
+              <span class="quote-mark"><i class="fas fa-quote-right"></i></span>
+              <div class="stars mb-2">
+                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                  class="fas fa-star"></i><i class="fas fa-star"></i>
+              </div>
+              <p>"Ordered the NovaBook Pro on a Tuesday evening and it arrived Thursday morning, sealed and with a
+                proper invoice. The price beat every other store I checked."</p>
+              <div class="testimonial-author">
+                <div class="avatar-initials">AM</div>
+                <div>
+                  <div class="fw-semibold small">Arjun Mehta</div>
+                  <div class="small text-muted">Video Editor, Pune</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-4 reveal" data-delay="1">
+            <div class="testimonial-card">
+              <span class="quote-mark"><i class="fas fa-quote-right"></i></span>
+              <div class="stars mb-2">
+                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                  class="fas fa-star"></i><i class="fas fa-star"></i>
+              </div>
+              <p>"Support actually answered on the first ring when my headphone case had a fault. Replacement shipped
+                the same day, no arguments. That is why I keep coming back."</p>
+              <div class="testimonial-author">
+                <div class="avatar-initials">RS</div>
+                <div>
+                  <div class="fw-semibold small">Riya Sen</div>
+                  <div class="small text-muted">Student, Patiala</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-4 reveal" data-delay="2">
+            <div class="testimonial-card">
+              <span class="quote-mark"><i class="fas fa-quote-right"></i></span>
+              <div class="stars mb-2">
+                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                  class="fas fa-star"></i><i class="fas fa-star-half-stroke"></i>
+              </div>
+              <p>"I have bought a keyboard, a mouse and a monitor arm here over two years. Everything genuine,
+                everything warrantied. The student discount is a nice touch too."</p>
+              <div class="testimonial-author">
+                <div class="avatar-initials">SN</div>
+                <div>
+                  <div class="fw-semibold small">Shaurya Nanda</div>
+                  <div class="small text-muted">Software Engineer, Bengaluru</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
+    </section>
 
-      <div class="row g-4">
-        <div class="col-md-4 reveal">
-          <div class="testimonial-card">
-            <span class="quote-mark"><i class="fas fa-quote-right"></i></span>
-            <div class="stars mb-2">
-              <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-            </div>
-            <p>"Ordered the NovaBook Pro on a Tuesday evening and it arrived Thursday morning, sealed and with a proper invoice. The price beat every other store I checked."</p>
-            <div class="testimonial-author">
-              <div class="avatar-initials">AM</div>
-              <div>
-                <div class="fw-semibold small">Arjun Mehta</div>
-                <div class="small text-muted">Video Editor, Pune</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-4 reveal" data-delay="1">
-          <div class="testimonial-card">
-            <span class="quote-mark"><i class="fas fa-quote-right"></i></span>
-            <div class="stars mb-2">
-              <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-            </div>
-            <p>"Support actually answered on the first ring when my headphone case had a fault. Replacement shipped the same day, no arguments. That is why I keep coming back."</p>
-            <div class="testimonial-author">
-              <div class="avatar-initials">RS</div>
-              <div>
-                <div class="fw-semibold small">Riya Sen</div>
-                <div class="small text-muted">Student, Patiala</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-4 reveal" data-delay="2">
-          <div class="testimonial-card">
-            <span class="quote-mark"><i class="fas fa-quote-right"></i></span>
-            <div class="stars mb-2">
-              <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-stroke"></i>
-            </div>
-            <p>"I have bought a keyboard, a mouse and a monitor arm here over two years. Everything genuine, everything warrantied. The student discount is a nice touch too."</p>
-            <div class="testimonial-author">
-              <div class="avatar-initials">SN</div>
-              <div>
-                <div class="fw-semibold small">Shaurya Nanda</div>
-                <div class="small text-muted">Software Engineer, Bengaluru</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ================================================================
+    <!-- ================================================================
        NEWSLETTER
        ================================================================ -->
-  <section class="section pt-0">
-    <div class="container">
-      <div class="newsletter text-center reveal">
-        <span class="section-eyebrow"><i class="fas fa-envelope-open-text"></i>Stay in the loop</span>
-        <h2 class="section-title text-white">Get ₹500 off your first order</h2>
-        <p class="mb-4">Join 20,000+ subscribers for launch alerts, price-drop notifications and members-only sale access.</p>
+    <section class="section pt-0">
+      <div class="container">
+        <div class="newsletter text-center reveal">
+          <span class="section-eyebrow"><i class="fas fa-envelope-open-text"></i>Stay in the loop</span>
+          <h2 class="section-title text-white">Get ₹500 off your first order</h2>
+          <p class="mb-4">Join 20,000+ subscribers for launch alerts, price-drop notifications and members-only sale
+            access.</p>
 
-        <form class="newsletter-form js-newsletter" novalidate>
-          <div class="input-group">
-            <input type="email" class="form-control" placeholder="Enter your email address" aria-label="Email address" required>
-            <button class="btn btn-accent px-4" type="submit">Subscribe</button>
-          </div>
-          <p class="small mt-3 mb-0" style="color:rgba(255,255,255,.6)">
-            <i class="fas fa-lock me-1"></i>We never share your email. Unsubscribe anytime.
-          </p>
-        </form>
+          <form class="newsletter-form js-newsletter" novalidate>
+            <div class="input-group">
+              <input type="email" class="form-control" placeholder="Enter your email address" aria-label="Email address"
+                required>
+              <button class="btn btn-accent px-4" type="submit">Subscribe</button>
+            </div>
+            <p class="small mt-3 mb-0" style="color:rgba(255,255,255,.6)">
+              <i class="fas fa-lock me-1"></i>We never share your email. Unsubscribe anytime.
+            </p>
+          </form>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-</main>
+  </main>
 
 
 </body>
+
 </html>

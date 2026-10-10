@@ -172,7 +172,7 @@ function handleSubmit(e) {
     submitBtn.disabled = false;
     submitBtn.innerHTML = originalHtml;
 
-    showToast('Message sent', `Thanks ${name.split(' ')[0]} — we'll be in touch shortly.`, 'success', 4500);
+    showToast(UiMessage.MESSAGE_SENT_TITLE, UiMessage.MESSAGE_SENT(name.split(' ')[0]), 'success', 4500);
   }, 900);
 }
 
@@ -220,7 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Reset button clears the painted validation states too
   document.getElementById('cfReset').addEventListener('click', () => {
     setTimeout(clearValidation, 0);   // run after the native reset
-    showToast('Form cleared', 'All fields have been reset.', 'info', 2000);
+    showToast(UiMessage.FORM_CLEARED_TITLE, UiMessage.FORM_CLEARED, 'info', 2000);
   });
 
   // "Send another message" returns to a blank form

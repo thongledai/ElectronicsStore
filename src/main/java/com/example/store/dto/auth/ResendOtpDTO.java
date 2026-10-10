@@ -14,8 +14,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ResendOtpDTO {
 
-    @NotBlank(message = "Email is required")
-    @Email(message = "Invalid email format")
+    @NotBlank(message = "EMAIL_REQUIRED")
+    @Email(message = "EMAIL_INVALID")
     private String email;
 
     private OtpType type;

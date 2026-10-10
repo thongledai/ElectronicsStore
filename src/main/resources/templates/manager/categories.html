@@ -1,27 +1,122 @@
 <!DOCTYPE html>
-<html lang="vi" th:replace="~{layouts/dashboard-layout :: layout('Danh mục', 'manager', 'categories', ~{::section.content})}">
-<head><title>Danh mục | TechNova</title></head>
+<html lang="vi"
+  th:replace="~{layouts/dashboard-layout :: layout('Danh mục', 'manager', 'categories', ~{::section.content})}">
+
+<head>
+  <title>Danh mục | TechNova</title>
+</head>
+
 <body>
-<section class="content"><div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4"><div><h1 class="title">Danh mục</h1>
-<div class="subtitle">Quản lý và theo dõi danh mục trong hệ thống.</div>
-</div>
-<button class="btn btn-primary btn-sm" data-demo-action="Thêm mới"><i class="fa-solid fa-plus me-1"></i>Thêm mới</button></div>
-<div class="panel mb-3"><div class="row g-2 align-items-center"><div class="col-md-6"><input class="form-control" placeholder="Tìm kiếm..." data-search-table="#dataTable"></div>
-<div class="col-md-6 text-md-end"><span class="muted">Dữ liệu minh họa · 3 bản ghi</span></div>
-</div>
-</div>
-<div class="panel"><h2 class="paneltitle mb-3">Danh mục</h2>
-<div class="table-responsive"><table class="table" id="dataTable"><thead><tr><th>Mã danh mục</th><th>Tên danh mục</th><th>Số sản phẩm</th><th>Mô tả</th><th>Trạng thái</th><th>Thao tác</th></tr>
-</thead>
-<tbody><tr><td>C001</td><td>Laptop</td><td>86</td><td>Máy tính xách tay</td><td><span class="status green">Hoạt động</span></td><td><button class="action" data-demo-action="Xem chi tiết"><i class="fa-regular fa-eye"></i></button> <button class="action" data-demo-action="Chỉnh sửa"><i class="fa-solid fa-pen"></i></button></td></tr>
-<tr><td>C002</td><td>Màn hình</td><td>42</td><td>Màn hình máy tính</td><td><span class="status green">Hoạt động</span></td><td><button class="action" data-demo-action="Xem chi tiết"><i class="fa-regular fa-eye"></i></button> <button class="action" data-demo-action="Chỉnh sửa"><i class="fa-solid fa-pen"></i></button></td></tr>
-<tr><td>C003</td><td>Phụ kiện</td><td>173</td><td>Phụ kiện điện tử</td><td><span class="status green">Hoạt động</span></td><td><button class="action" data-demo-action="Xem chi tiết"><i class="fa-regular fa-eye"></i></button> <button class="action" data-demo-action="Chỉnh sửa"><i class="fa-solid fa-pen"></i></button></td></tr>
-</tbody>
-</table>
-</div>
-<div class="d-flex justify-content-between"><span class="muted">Trang 1/1</span><div class="btn-group btn-group-sm"><button class="btn btn-outline-secondary">Trước</button><button class="btn btn-primary">1</button><button class="btn btn-outline-secondary">Sau</button></div>
-</div>
-</div>
-</section>
+  <section class="content">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+      <div>
+        <h1 class="title">Danh mục</h1>
+        <div class="subtitle">Quản lý các danh mục sản phẩm, phân cấp cha-con và hình ảnh đại diện.</div>
+      </div>
+      <button class="btn btn-primary btn-sm" id="btnOpenCreateCategoryModal"><i class="fa-solid fa-plus me-1"></i>Thêm
+        mới</button>
+    </div>
+
+    <!-- Search & Filter Panel -->
+    <div class="panel mb-3">
+      <div class="row g-2 align-items-center">
+        <div class="col-md-6">
+          <div class="input-group input-group-sm">
+            <input class="form-control" id="searchInput" placeholder="Tìm kiếm tên danh mục...">
+            <button class="btn btn-outline-secondary" type="button" id="btnSearch"><i
+                class="fa-solid fa-magnifying-glass"></i></button>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <select class="form-select form-select-sm" id="statusFilter">
+            <option value="">-- Tất cả trạng thái --</option>
+            <option value="active">Đang hoạt động</option>
+            <option value="deleted">Đã xóa mềm</option>
+          </select>
+        </div>
+        <div class="col-md-3 text-md-end">
+          <span class="muted" id="totalRecordsText">0 bản ghi</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Data Table -->
+    <div class="panel">
+      <h2 class="paneltitle mb-3">Danh sách danh mục</h2>
+      <div class="table-responsive">
+        <table class="table" id="dataTable">
+          <thead>
+            <tr>
+              <th>Hình ảnh</th>
+              <th>Tên danh mục</th>
+              <th>Danh mục cha</th>
+              <th>Trạng thái</th>
+              <th class="text-end">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="categoryTableBody">
+            <tr>
+              <td colspan="5" class="text-center py-4 text-muted">Đang tải dữ liệu...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="d-flex justify-content-between align-items-center mt-3">
+        <span class="muted" id="pageInfoText">Trang 1/1</span>
+        <div class="btn-group btn-group-sm" id="paginationControls">
+          <button class="btn btn-outline-secondary" id="btnPrevPage">Trước</button>
+          <button class="btn btn-primary" id="btnCurrentPage">1</button>
+          <button class="btn btn-outline-secondary" id="btnNextPage">Sau</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Thêm / Sửa Danh mục -->
+    <div class="modal fade" id="categoryFormModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="categoryModalTitle">Thêm mới danh mục</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+          </div>
+          <form id="categoryForm">
+            <input type="hidden" id="categoryId">
+            <div class="modal-body">
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Tên danh mục <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="categoryName" required placeholder="Ví dụ: Laptop Gaming">
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Danh mục cha</label>
+                <select class="form-select" id="categoryParent">
+                  <option value="">-- Không có (Danh mục gốc) --</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Hình ảnh đại diện</label>
+                <input type="file" class="form-control" id="categoryImageFile" accept="image/jpeg,image/png,image/webp">
+                <div id="currentCategoryImgPreview" class="mt-2" style="display:none;">
+                  <img id="categoryPreviewImg" src="" alt="" style="max-height:80px; max-width:120px;"
+                    class="border rounded p-1">
+                </div>
+              </div>
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="categoryIsActive" checked>
+                <label class="form-check-label fw-semibold" for="categoryIsActive">Hoạt động</label>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+              <button type="submit" class="btn btn-primary btn-sm" id="btnSaveCategory">Lưu thông tin</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <!-- Script nạp cho quản lý danh mục -->
+      <script th:src="@{/js/manager/categories.js}"></script>
+  </section>
 </body>
+
 </html>

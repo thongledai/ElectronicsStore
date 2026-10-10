@@ -14,12 +14,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class VerifyOtpDTO {
-    @NotBlank(message = "Email is required")
-    @Email(message = "Invalid email format")
+    @NotBlank(message = "EMAIL_REQUIRED")
+    @Email(message = "EMAIL_INVALID")
     private String email;
 
-    @NotBlank(message = "OTP code is required")
-    @Size(min = 6, max = 6, message = "OTP code must be 6 digits")
+    @NotBlank(message = "OTP_REQUIRED")
+    @Size(min = 6, max = 6, message = "OTP_SIX_DIGITS")
     private String otp;
 
     private OtpType type;

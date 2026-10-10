@@ -71,11 +71,11 @@ public class Promotion {
 
     @Builder.Default
     @Column(nullable = false)
-    private Boolean isActive = true;
+    private Boolean isEnabled = true;
 
     @Builder.Default
-    @Column(nullable = false)
-    private Boolean isDeleted = false;
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive = true;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

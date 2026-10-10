@@ -286,7 +286,7 @@ function clearAllFilters() {
 
   updatePageTitle();
   render();
-  showToast('Filters cleared', 'Showing all products again.', 'info', 2000);
+  showToast(UiMessage.FILTERS_CLEARED_TITLE, UiMessage.FILTERS_CLEARED, 'info', 2000);
 }
 
 /** Removes a single filter identified by a chip's type/value. */
