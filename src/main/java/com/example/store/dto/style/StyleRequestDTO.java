@@ -17,10 +17,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class StyleRequestDTO {
 
-    @NotBlank(message = "Tên kiểu thuộc tính không được để trống")
+    @NotBlank(message = "STYLE_NAME_REQUIRED")
     @Size(
             max = 100,
-            message = "Tên kiểu thuộc tính không được vượt quá 100 ký tự"
+            message = "STYLE_NAME_MAX_LENGTH"
     )
     private String name;
 

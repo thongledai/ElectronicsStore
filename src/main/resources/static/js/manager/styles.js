@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function notify(msg) {
     if (window.toast) window.toast(msg);
-    else if (window.showToast) window.showToast('Thông báo', msg, 'info');
+    else if (window.showToast) window.showToast(UiMessage.NOTICE, msg, 'info');
     else alert(msg);
   }
 
@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
             modal.show();
           }
         } catch (e) {
-          notify('Lỗi tải kiểu thuộc tính: ' + e.message);
+          notify(UiMessage.STYLE_LOAD_ERROR(e.message));
         }
       });
     });
@@ -164,13 +164,13 @@ document.addEventListener('DOMContentLoaded', () => {
             headers: authHeaders(false)
           }).then(r => r.json());
           if (res.success) {
-            notify('Đã xóa vĩnh viễn kiểu thuộc tính');
+            notify(UiMessage.STYLE_DELETED);
             loadStyles(currentPage);
           } else {
-            notify('Lỗi: ' + res.message);
+            notify(UiMessage.ERROR_PREFIX + res.message);
           }
         } catch (e) {
-          notify('Lỗi: ' + e.message);
+          notify(UiMessage.ERROR_PREFIX + e.message);
         }
       });
     });
@@ -219,10 +219,10 @@ document.addEventListener('DOMContentLoaded', () => {
           bootstrap.Modal.getInstance(document.getElementById('styleFormModal'))?.hide();
           loadStyles(currentPage);
         } else {
-          notify('Lỗi: ' + res.message);
+          notify(UiMessage.ERROR_PREFIX + res.message);
         }
       } catch (err) {
-        notify('Lỗi: ' + err.message);
+        notify(UiMessage.ERROR_PREFIX + err.message);
       }
     });
   }
@@ -290,11 +290,11 @@ document.addEventListener('DOMContentLoaded', () => {
               loadStyleValues(styleId);
             } else {
               input.checked = !isActive;
-              notify('Lỗi: ' + updateRes.message);
+              notify(UiMessage.ERROR_PREFIX + updateRes.message);
             }
           } catch (e) {
             input.checked = !isActive;
-            notify('Lỗi: ' + e.message);
+            notify(UiMessage.ERROR_PREFIX + e.message);
           }
         });
       });
@@ -329,7 +329,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const value = res.data.content.find(item => item.id === id);
           const name = row.querySelector('.js-sv-name-input').value.trim();
           if (!name) {
-            notify('Vui lòng nhập tên giá trị');
+            notify(UiMessage.STYLE_VALUE_NAME_REQUIRED);
             return;
           }
 
@@ -340,13 +340,13 @@ document.addEventListener('DOMContentLoaded', () => {
               body: JSON.stringify({ name, styleId, isActive: value.isActive })
             }).then(r => r.json());
             if (updateRes.success) {
-              notify('Cập nhật tên giá trị thành công');
+              notify(UiMessage.STYLE_VALUE_UPDATED);
               loadStyleValues(styleId);
             } else {
-              notify('Lỗi: ' + updateRes.message);
+              notify(UiMessage.ERROR_PREFIX + updateRes.message);
             }
           } catch (e) {
-            notify('Lỗi: ' + e.message);
+            notify(UiMessage.ERROR_PREFIX + e.message);
           }
         });
       });
@@ -366,13 +366,13 @@ document.addEventListener('DOMContentLoaded', () => {
               headers: authHeaders(false)
             }).then(r => r.json());
             if (delRes.success) {
-              notify('Đã xóa vĩnh viễn giá trị');
+              notify(UiMessage.STYLE_VALUE_DELETED);
               loadStyleValues(styleId);
             } else {
-              notify('Lỗi: ' + delRes.message);
+              notify(UiMessage.ERROR_PREFIX + delRes.message);
             }
           } catch (e) {
-            notify('Lỗi: ' + e.message);
+            notify(UiMessage.ERROR_PREFIX + e.message);
           }
         });
       });
@@ -387,7 +387,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById('newStyleValueName');
     const name = input.value.trim();
     if (!name) {
-      notify('Vui lòng nhập tên giá trị');
+      notify(UiMessage.STYLE_VALUE_NAME_REQUIRED);
       return;
     }
 
@@ -402,14 +402,14 @@ document.addEventListener('DOMContentLoaded', () => {
       }).then(r => r.json());
 
       if (res.success) {
-        notify('Thêm giá trị thành công');
+        notify(UiMessage.STYLE_VALUE_CREATED);
         input.value = '';
         loadStyleValues(activeStyleId);
       } else {
-        notify('Lỗi: ' + res.message);
+        notify(UiMessage.ERROR_PREFIX + res.message);
       }
     } catch (e) {
-      notify('Lỗi: ' + e.message);
+      notify(UiMessage.ERROR_PREFIX + e.message);
     }
   });
 

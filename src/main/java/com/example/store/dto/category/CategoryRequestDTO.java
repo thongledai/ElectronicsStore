@@ -16,13 +16,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CategoryRequestDTO {
 
-    @NotBlank(message = "Tên danh mục không được để trống")
-    @Size(max = 100, message = "Tên danh mục không được vượt quá 100 ký tự")
+    @NotBlank(message = "CATEGORY_NAME_REQUIRED")
+    @Size(max = 100, message = "CATEGORY_NAME_MAX_LENGTH")
     private String name;
 
     private UUID parentId;
 
-    @Size(max = 1000, message = "Đường dẫn hình ảnh không được vượt quá 1000 ký tự")
+    @Size(max = 1000, message = "CATEGORY_IMAGE_URL_MAX_LENGTH")
     private String image;
 
     private Boolean isActive;

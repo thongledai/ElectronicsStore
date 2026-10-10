@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.store.common.service.ICloudinaryService;
 import com.example.store.common.util.SlugUtils;
+import com.example.store.enums.CloudinaryMessage;
 import com.example.store.entity.Product;
 import com.example.store.entity.ProductVariant;
 import com.example.store.entity.ProductVariantImage;
@@ -39,22 +40,25 @@ public class ProductVariantImageServiceImpl implements IProductVariantImageServi
     @Transactional
     public List<String> uploadVariantImages(UUID productId, UUID variantId, List<MultipartFile> files) {
         if (files == null || files.isEmpty()) {
-            throw new BusinessException("Danh sách file tải lên không được rỗng!");
+            throw new BusinessException(CloudinaryMessage.IMAGE_FILE_LIST_EMPTY.getMessage());
         }
 
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm với ID: " + productId));
+            .orElseThrow(() -> new ResourceNotFoundException(String.format(
+                CloudinaryMessage.PRODUCT_NOT_FOUND.getMessage(), productId)));
 
         ProductVariant variant = productVariantRepository.findById(variantId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy biến thể với ID: " + variantId));
+            .orElseThrow(() -> new ResourceNotFoundException(String.format(
+                CloudinaryMessage.VARIANT_NOT_FOUND.getMessage(), variantId)));
 
         if (!variant.getProduct().getId().equals(productId)) {
-            throw new BusinessException("Biến thể không thuộc về sản phẩm này!");
+            throw new BusinessException(CloudinaryMessage.VARIANT_NOT_IN_PRODUCT.getMessage());
         }
 
         long currentCount = productVariantImageRepository.countByProductVariantId(variantId);
         if (currentCount + files.size() > MAX_IMAGES_PER_VARIANT) {
-            throw new BusinessException("Mỗi biến thể chỉ được có tối đa " + MAX_IMAGES_PER_VARIANT + " hình ảnh (hiện có " + currentCount + " ảnh)!");
+            throw new BusinessException(String.format(CloudinaryMessage.IMAGE_LIMIT_EXCEEDED.getMessage(),
+                    MAX_IMAGES_PER_VARIANT, currentCount));
         }
 
         String folderSlug = SlugUtils.limitSlug(product.getSlug(), 40);
@@ -83,18 +87,20 @@ public class ProductVariantImageServiceImpl implements IProductVariantImageServi
     @Transactional
     public void deleteVariantImage(UUID productId, UUID variantId, String imageUrl) {
         if (imageUrl == null || imageUrl.trim().isEmpty()) {
-            throw new BusinessException("URL hình ảnh không được để trống!");
+            throw new BusinessException(CloudinaryMessage.IMAGE_URL_EMPTY.getMessage());
         }
 
         ProductVariant variant = productVariantRepository.findById(variantId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy biến thể với ID: " + variantId));
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(
+                        CloudinaryMessage.VARIANT_NOT_FOUND.getMessage(), variantId)));
 
         if (!variant.getProduct().getId().equals(productId)) {
-            throw new BusinessException("Biến thể không thuộc về sản phẩm này!");
+            throw new BusinessException(CloudinaryMessage.VARIANT_NOT_IN_PRODUCT.getMessage());
         }
 
         ProductVariantImage image = productVariantImageRepository.findByProductVariantIdAndImageUrl(variantId, imageUrl.trim())
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy ảnh của biến thể với URL này!"));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        CloudinaryMessage.VARIANT_IMAGE_NOT_FOUND.getMessage()));
 
         productVariantImageRepository.delete(image);
         // Xóa ảnh trên Cloudinary

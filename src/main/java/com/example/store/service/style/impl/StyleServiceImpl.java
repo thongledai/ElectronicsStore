@@ -17,6 +17,7 @@ import com.example.store.dto.style.StyleResponseDTO;
 import com.example.store.entity.Category;
 import com.example.store.entity.Style;
 import com.example.store.entity.StyleValue;
+import com.example.store.enums.BusinessMessage;
 import com.example.store.exception.BusinessException;
 import com.example.store.exception.DuplicateResourceException;
 import com.example.store.exception.ResourceNotFoundException;
@@ -75,7 +76,8 @@ public class StyleServiceImpl implements IStyleService {
 	@Transactional(readOnly = true)
 	public StyleResponseDTO getStyleById(UUID id) {
 		Style style = styleRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy kiểu thuộc tính với ID: " + id));
+				.orElseThrow(() -> new ResourceNotFoundException(String.format(
+						BusinessMessage.STYLE_NOT_FOUND_ID.getMessage(), id)));
 		return styleMapper.toResponseDTO(style);
 	}
 
@@ -118,7 +120,8 @@ public class StyleServiceImpl implements IStyleService {
 	@Transactional
 	public StyleResponseDTO updateStyle(UUID id, StyleRequestDTO requestDTO) {
 		Style style = styleRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy kiểu thuộc tính với ID: " + id));
+				.orElseThrow(() -> new ResourceNotFoundException(String.format(
+						BusinessMessage.STYLE_NOT_FOUND_ID.getMessage(), id)));
 
 		validateStyleNameUniqueness(requestDTO.getName(), requestDTO.getCategoryIds(), id);
 
@@ -146,13 +149,14 @@ public class StyleServiceImpl implements IStyleService {
 	@Transactional
 	public void deleteStyle(UUID id) {
 		Style style = styleRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy kiểu thuộc tính với ID: " + id));
+				.orElseThrow(() -> new ResourceNotFoundException(String.format(
+						BusinessMessage.STYLE_NOT_FOUND_ID.getMessage(), id)));
 
 		List<StyleValue> values = styleValueRepository.findByStyleId(id);
 		for (StyleValue value : values) {
 			if (productVariantRepository.existsByStyleValuesId(value.getId())) {
-				throw new BusinessException("Không thể xóa vĩnh viễn kiểu thuộc tính vì giá trị '"
-						+ value.getName() + "' vẫn được biến thể sản phẩm tham chiếu!");
+				throw new BusinessException(String.format(
+						BusinessMessage.STYLE_VALUE_REFERENCED_DELETE.getMessage(), value.getName()));
 			}
 		}
 
@@ -165,7 +169,8 @@ public class StyleServiceImpl implements IStyleService {
 	@Transactional
 	public void restoreStyle(UUID id) {
 		Style style = styleRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy kiểu thuộc tính với ID: " + id));
+				.orElseThrow(() -> new ResourceNotFoundException(String.format(
+						BusinessMessage.STYLE_NOT_FOUND_ID.getMessage(), id)));
 
 		style.setIsActive(true);
 		styleRepository.save(style);
@@ -174,10 +179,10 @@ public class StyleServiceImpl implements IStyleService {
 
 	private void validateCategories(Set<UUID> requestedIds, Set<Category> found) {
 		if (found.size() != requestedIds.size()) {
-			throw new ResourceNotFoundException("Một hoặc nhiều danh mục không tồn tại.");
+			throw new ResourceNotFoundException(BusinessMessage.STYLE_CATEGORIES_NOT_FOUND.getMessage());
 		}
 		if (found.stream().anyMatch(c -> !Boolean.TRUE.equals(c.getIsActive()))) {
-			throw new BusinessException("Không thể gán kiểu thuộc tính vào danh mục đã xóa.");
+			throw new BusinessException(BusinessMessage.STYLE_CATEGORY_INACTIVE.getMessage());
 		}
 	}
 
@@ -185,14 +190,14 @@ public class StyleServiceImpl implements IStyleService {
 		List<StyleValue> values = styleValueRepository.findByStyleId(styleId);
 		for (StyleValue value : values) {
 			if (productVariantRepository.existsByStyleValuesId(value.getId())) {
-				throw new BusinessException("Không thể tắt kiểu thuộc tính vì giá trị '" + value.getName()
-						+ "' vẫn được biến thể hoạt động sử dụng.");
+				throw new BusinessException(String.format(
+						BusinessMessage.STYLE_VALUE_REFERENCED_DEACTIVATE.getMessage(), value.getName()));
 			}
 		}
 		long activeValues = values.stream().filter(value -> Boolean.TRUE.equals(value.getIsActive())).count();
 		if (activeValues > 0) {
-			throw new BusinessException("Không thể tắt kiểu thuộc tính vì vẫn còn " + activeValues
-					+ " giá trị đang hoạt động. Hãy tắt từng giá trị trước.");
+			throw new BusinessException(String.format(
+					BusinessMessage.STYLE_HAS_ACTIVE_VALUES.getMessage(), activeValues));
 		}
 	}
 }

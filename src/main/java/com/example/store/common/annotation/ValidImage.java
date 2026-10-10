@@ -14,7 +14,7 @@ import jakarta.validation.Payload;
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidImage {
-    String message() default "File tải lên phải là hình ảnh (JPG, PNG, WEBP) và có dung lượng tối đa 10MB";
+    String message() default "IMAGE_INVALID";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
     boolean required() default false;

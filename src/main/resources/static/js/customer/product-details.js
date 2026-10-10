@@ -372,11 +372,11 @@ document.addEventListener('DOMContentLoaded', function () {
             event.stopPropagation();
 
             if (window.showToast) {
-                window.showToast('Thông báo', 'Chức năng giỏ hàng đang được cập nhật!', 'info');
+                window.showToast(UiMessage.NOTICE, UiMessage.CART_FEATURE_UPDATING, 'info');
             } else if (window.toast) {
-                window.toast('Chức năng giỏ hàng đang được cập nhật!');
+                window.toast(UiMessage.CART_FEATURE_UPDATING);
             } else {
-                alert('Chức năng giỏ hàng đang được cập nhật!');
+                alert(UiMessage.CART_FEATURE_UPDATING);
             }
             return;
         }
@@ -388,11 +388,11 @@ document.addEventListener('DOMContentLoaded', function () {
             event.stopPropagation();
 
             if (window.showToast) {
-                window.showToast('Thông báo', 'Chức năng danh sách yêu thích đang được cập nhật!', 'info');
+                window.showToast(UiMessage.NOTICE, UiMessage.WISHLIST_FEATURE_UPDATING, 'info');
             } else if (window.toast) {
-                window.toast('Chức năng danh sách yêu thích đang được cập nhật!');
+                window.toast(UiMessage.WISHLIST_FEATURE_UPDATING);
             } else {
-                alert('Chức năng danh sách yêu thích đang được cập nhật!');
+                alert(UiMessage.WISHLIST_FEATURE_UPDATING);
             }
         }
 

@@ -20,6 +20,7 @@ import com.example.store.dto.category.CategoryResponseDTO;
 import com.example.store.dto.common.PageResponse;
 import com.example.store.dto.style.StyleValueOptionDTO;
 import com.example.store.entity.Category;
+import com.example.store.enums.BusinessMessage;
 import com.example.store.exception.BusinessException;
 import com.example.store.exception.DuplicateResourceException;
 import com.example.store.exception.ResourceNotFoundException;
@@ -75,7 +76,8 @@ public class CategoryServiceImpl implements ICategoryService {
 	@Transactional(readOnly = true)
 	public CategoryResponseDTO getCategoryById(UUID id) {
 		Category category = categoryRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục với ID: " + id));
+			.orElseThrow(() -> new ResourceNotFoundException(String.format(
+				BusinessMessage.CATEGORY_NOT_FOUND_ID.getMessage(), id)));
 		return categoryMapper.toResponseDTO(category);
 	}
 
@@ -83,7 +85,8 @@ public class CategoryServiceImpl implements ICategoryService {
 	@Transactional(readOnly = true)
 	public CategoryResponseDTO getCategoryBySlug(String slug) {
 		Category category = categoryRepository.findBySlug(slug)
-				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục với slug: " + slug));
+			.orElseThrow(() -> new ResourceNotFoundException(String.format(
+				BusinessMessage.CATEGORY_NOT_FOUND_SLUG.getMessage(), slug)));
 		return categoryMapper.toResponseDTO(category);
 	}
 
@@ -93,16 +96,17 @@ public class CategoryServiceImpl implements ICategoryService {
 		String slug = generateAndValidateSlug(requestDTO.getName(), null);
 
 		if (categoryRepository.existsByName(requestDTO.getName())) {
-			throw new DuplicateResourceException("Tên danh mục đã tồn tại: " + requestDTO.getName());
+			    throw new DuplicateResourceException(String.format(
+				    BusinessMessage.CATEGORY_NAME_EXISTS.getMessage(), requestDTO.getName()));
 		}
 
 		Category parent = null;
 		if (requestDTO.getParentId() != null) {
 			parent = categoryRepository.findById(requestDTO.getParentId())
-					.orElseThrow(() -> new ResourceNotFoundException(
-							"Không tìm thấy danh mục cha với ID: " + requestDTO.getParentId()));
+				    .orElseThrow(() -> new ResourceNotFoundException(String.format(
+					    BusinessMessage.CATEGORY_PARENT_NOT_FOUND.getMessage(), requestDTO.getParentId())));
 			if (!Boolean.TRUE.equals(parent.getIsActive())) {
-				throw new BusinessException("Không thể chọn danh mục cha đã bị xóa!");
+				throw new BusinessException(BusinessMessage.CATEGORY_PARENT_INACTIVE.getMessage());
 			}
 		}
 
@@ -126,10 +130,12 @@ public class CategoryServiceImpl implements ICategoryService {
 	@Transactional
 	public CategoryResponseDTO updateCategory(UUID id, CategoryRequestDTO requestDTO, MultipartFile imageFile) {
 		Category category = categoryRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục với ID: " + id));
+			.orElseThrow(() -> new ResourceNotFoundException(String.format(
+				BusinessMessage.CATEGORY_NOT_FOUND_ID.getMessage(), id)));
 
 		if (categoryRepository.existsByNameAndIdNot(requestDTO.getName(), id)) {
-			throw new DuplicateResourceException("Tên danh mục đã tồn tại: " + requestDTO.getName());
+			    throw new DuplicateResourceException(String.format(
+				    BusinessMessage.CATEGORY_NAME_EXISTS.getMessage(), requestDTO.getName()));
 		}
 
 		// Chỉ tạo lại slug khi đổi tên, tránh làm hỏng đường dẫn cũ
@@ -140,17 +146,17 @@ public class CategoryServiceImpl implements ICategoryService {
 		Category parent = null;
 		if (requestDTO.getParentId() != null) {
 			if (requestDTO.getParentId().equals(id)) {
-				throw new BusinessException("Danh mục không thể là cha của chính nó!");
+				throw new BusinessException(BusinessMessage.CATEGORY_PARENT_SELF.getMessage());
 			}
 			// Chống vòng lặp cha-con
 			if (isDescendant(requestDTO.getParentId(), id)) {
-				throw new BusinessException("Không thể chọn danh mục con làm danh mục cha (gây vòng lặp)!");
+				throw new BusinessException(BusinessMessage.CATEGORY_PARENT_DESCENDANT.getMessage());
 			}
 			parent = categoryRepository.findById(requestDTO.getParentId())
-					.orElseThrow(() -> new ResourceNotFoundException(
-							"Không tìm thấy danh mục cha với ID: " + requestDTO.getParentId()));
+				    .orElseThrow(() -> new ResourceNotFoundException(String.format(
+					    BusinessMessage.CATEGORY_PARENT_NOT_FOUND.getMessage(), requestDTO.getParentId())));
 			if (!Boolean.TRUE.equals(parent.getIsActive())) {
-				throw new BusinessException("Không thể chọn danh mục cha đã bị xóa!");
+				throw new BusinessException(BusinessMessage.CATEGORY_PARENT_INACTIVE.getMessage());
 			}
 		}
 
@@ -173,7 +179,7 @@ public class CategoryServiceImpl implements ICategoryService {
 			}
 			if (requestDTO.getIsActive() && !Boolean.TRUE.equals(category.getIsActive())
 					&& parent != null && !Boolean.TRUE.equals(parent.getIsActive())) {
-				throw new BusinessException("Không thể khôi phục danh mục khi danh mục cha đang bị xóa.");
+				throw new BusinessException(BusinessMessage.CATEGORY_RESTORE_PARENT_INACTIVE.getMessage());
 			}
 			category.setIsActive(requestDTO.getIsActive());
 		}
@@ -187,16 +193,17 @@ public class CategoryServiceImpl implements ICategoryService {
 	@Transactional
 	public void deleteCategory(UUID id) {
 		Category category = categoryRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục với ID: " + id));
+			.orElseThrow(() -> new ResourceNotFoundException(String.format(
+				BusinessMessage.CATEGORY_NOT_FOUND_ID.getMessage(), id)));
 
 		if (productRepository.existsByCategoryId(id)) {
-			throw new BusinessException("Không thể xóa vĩnh viễn danh mục vì vẫn còn sản phẩm tham chiếu!");
+			throw new BusinessException(BusinessMessage.CATEGORY_HAS_PRODUCTS_DELETE.getMessage());
 		}
 		if (categoryRepository.existsByParentId(id)) {
-			throw new BusinessException("Không thể xóa vĩnh viễn danh mục vì vẫn còn danh mục con!");
+			throw new BusinessException(BusinessMessage.CATEGORY_HAS_CHILDREN_DELETE.getMessage());
 		}
 		if (styleRepository.existsByCategoriesId(id)) {
-			throw new BusinessException("Hãy gỡ danh mục khỏi các kiểu thuộc tính trước khi xóa vĩnh viễn!");
+			throw new BusinessException(BusinessMessage.CATEGORY_HAS_STYLES_DELETE.getMessage());
 		}
 
 		categoryRepository.delete(category);
@@ -207,11 +214,12 @@ public class CategoryServiceImpl implements ICategoryService {
 	@Transactional
 	public void restoreCategory(UUID id) {
 		Category category = categoryRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục với ID: " + id));
+			.orElseThrow(() -> new ResourceNotFoundException(String.format(
+				BusinessMessage.CATEGORY_NOT_FOUND_ID.getMessage(), id)));
 
 		// Khôi phục: chỉ khi category cha chưa bị xóa
 		if (category.getParent() != null && !Boolean.TRUE.equals(category.getParent().getIsActive())) {
-			throw new BusinessException("Không thể khôi phục danh mục vì danh mục cha đang bị xóa!");
+			throw new BusinessException(BusinessMessage.CATEGORY_PARENT_RESTORE_INACTIVE.getMessage());
 		}
 
 		category.setIsActive(true);
@@ -221,10 +229,10 @@ public class CategoryServiceImpl implements ICategoryService {
 
 	private void validateCanDeleteCategory(UUID id) {
 		if (productRepository.existsByCategoryId(id)) {
-			throw new BusinessException("Không thể xóa mềm danh mục vì vẫn còn sản phẩm tham chiếu!");
+			throw new BusinessException(BusinessMessage.CATEGORY_HAS_PRODUCTS_DEACTIVATE.getMessage());
 		}
 		if (categoryRepository.existsByParentIdAndIsActiveTrue(id)) {
-			throw new BusinessException("Không thể xóa danh mục vì vẫn còn danh mục con đang hoạt động!");
+			throw new BusinessException(BusinessMessage.CATEGORY_HAS_ACTIVE_CHILDREN.getMessage());
 		}
 	}
 

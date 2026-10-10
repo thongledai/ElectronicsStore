@@ -14,24 +14,24 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class RegisterDTO {
-    @NotBlank(message = "Full name is required")
+    @NotBlank(message = "FULL_NAME_REQUIRED")
     private String fullName;
 
-    @NotBlank(message = "Email is required")
-    @Email(message = "Invalid email format")
+    @NotBlank(message = "EMAIL_REQUIRED")
+    @Email(message = "EMAIL_INVALID")
     private String email;
 
-    @NotBlank(message = "Phone number is required")
-    @Pattern(regexp = "^(0|\\+84)[35789][0-9]{8}$", message = "Invalid Vietnamese phone number (10 digits starting with 03, 05, 07, 08, 09)")
+    @NotBlank(message = "PHONE_REQUIRED")
+    @Pattern(regexp = "^(0|\\+84)[35789][0-9]{8}$", message = "PHONE_INVALID")
     private String phone;
 
     private String mobileNumber;
 
-    @NotBlank(message = "Password is required")
-    @Size(min = 6, message = "Password must be at least 6 characters")
+    @NotBlank(message = "PASSWORD_REQUIRED")
+    @Size(min = 6, message = "PASSWORD_MIN_LENGTH")
     private String password;
 
-    @NotBlank(message = "Confirm password is required")
+    @NotBlank(message = "CONFIRM_PASSWORD_REQUIRED")
     private String confirmPassword;
 
     public String getResolvedPhone() {

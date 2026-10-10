@@ -11,6 +11,7 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.example.store.common.service.ICloudinaryService;
 import com.example.store.common.util.SlugUtils;
+import com.example.store.enums.CloudinaryMessage;
 import com.example.store.exception.BusinessException;
 
 import lombok.RequiredArgsConstructor;
@@ -44,7 +45,7 @@ public class CloudinaryServiceImpl implements ICloudinaryService {
             return (String) uploadResult.get("secure_url");
         } catch (IOException e) {
             log.error("Lỗi khi tải ảnh lên Cloudinary: ", e);
-            throw new BusinessException("Tải ảnh lên máy chủ thất bại: " + e.getMessage());
+            throw new BusinessException(CloudinaryMessage.UPLOAD_FAILED.getMessage());
         }
     }
 

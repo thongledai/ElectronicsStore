@@ -195,9 +195,9 @@ function bindWishlistEvents() {
       const message = skipped
         ? `${moved} moved to cart · ${skipped} skipped (out of stock or at max quantity).`
         : `${moved} item${moved === 1 ? '' : 's'} moved to your cart.`;
-      showToast('Moved to cart', message, 'success', 4000);
+      showToast(UiMessage.WISHLIST_MOVED_TITLE, message, 'success', 4000);
     } else {
-      showToast('Nothing moved', 'These items are unavailable right now.', 'warning');
+      showToast(UiMessage.WISHLIST_UNAVAILABLE_TITLE, UiMessage.WISHLIST_UNAVAILABLE, 'warning');
     }
   });
 
@@ -206,7 +206,7 @@ function bindWishlistEvents() {
     if (!Wishlist.count()) return;
     if (confirm('Remove all items from your wishlist?')) {
       Wishlist.save([]);
-      showToast('Wishlist cleared', 'All saved items have been removed.', 'info');
+      showToast(UiMessage.WISHLIST_CLEARED_TITLE, UiMessage.WISHLIST_CLEARED, 'info');
     }
   });
 }
