@@ -71,7 +71,7 @@ public class JwtServiceImpl implements IJwtService {
     }
 
     @Override
-    public String extractUsername(String token) {
+    public String extractEmail(String token) {
         try {
             SignedJWT signedJWT = SignedJWT.parse(token);
             return signedJWT.getJWTClaimsSet().getSubject();
@@ -96,4 +96,25 @@ public class JwtServiceImpl implements IJwtService {
     public long getExpirationTime() {
         return jwtExpiration;
     }
+    @Override
+    public String extractUserId(String token) {
+		try {
+			SignedJWT signedJWT = SignedJWT.parse(token);
+			return signedJWT.getJWTClaimsSet().getStringClaim("userId");
+		} catch (Exception e) {
+			log.error("Failed to extract userId from token", e);
+			return null;
+		}
+	}
+    @Override
+    public String extractFullName(String token) {
+		try {
+			SignedJWT signedJWT = SignedJWT.parse(token);
+			return signedJWT.getJWTClaimsSet().getStringClaim("fullName");
+		} catch (Exception e) {
+			log.error("Failed to extract fullName from token", e);
+			return null;
+		}
+	}
+    
 }
