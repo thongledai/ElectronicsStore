@@ -850,9 +850,52 @@ function initAccountLabel() {
     el.style.display = isLoggedIn ? 'block' : 'none';
   });
 
+  // Hiển thị nút "Management" trên Navbar Customer nếu là Manager
+  const userRole = (localStorage.getItem('technova_role') || (user && user.role) || '').toUpperCase();
+  const isManager = isLoggedIn && (userRole === 'MANAGER' || userRole === 'ROLE_MANAGER');
+  document.querySelectorAll('.js-nav-manager').forEach(el => {
+    el.style.display = isManager ? 'block' : 'none';
+  });
+
+  const updatePasswordLinks = (hasPass) => {
+    document.querySelectorAll('.js-password-link').forEach(el => {
+      if (isLoggedIn && hasPass === false) {
+        el.setAttribute('href', '/customer/set-password');
+        const textEl = el.querySelector('.js-password-link-text');
+        if (textEl) textEl.textContent = 'Set Password';
+      } else {
+        el.setAttribute('href', '/customer/reset-password');
+        const textEl = el.querySelector('.js-password-link-text');
+        if (textEl) textEl.textContent = 'Change Password';
+      }
+    });
+  };
+
+  updatePasswordLinks(user?.hasPassword);
+
+  if (isLoggedIn && (typeof user?.hasPassword === 'undefined' || window.__CHECKED_PASS_STATUS__ !== true)) {
+    window.__CHECKED_PASS_STATUS__ = true;
+    fetch('/auth/has-password')
+      .then(r => r.ok ? r.json() : null)
+      .then(res => {
+        if (res && res.success && typeof res.data === 'boolean') {
+          if (user && user.hasPassword !== res.data) {
+            user.hasPassword = res.data;
+            storageSet(STORE.user, user);
+          }
+          updatePasswordLinks(res.data);
+        }
+      })
+      .catch(() => {});
+  }
+
+
   if (new URLSearchParams(location.search).get('logout') === 'true') {
     localStorage.removeItem('technova_jwt');
     localStorage.removeItem('technova_role');
+    localStorage.removeItem('technova_user');
+    localStorage.removeItem('technova_last_active');
+    localStorage.removeItem('technova_last_ping');
     storageSet(STORE.user, null);
     document.cookie = 'JWT_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     document.cookie = 'JSESSIONID=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
@@ -862,6 +905,9 @@ function initAccountLabel() {
     form.addEventListener('submit', () => {
       localStorage.removeItem('technova_jwt');
       localStorage.removeItem('technova_role');
+      localStorage.removeItem('technova_user');
+      localStorage.removeItem('technova_last_active');
+      localStorage.removeItem('technova_last_ping');
       storageSet(STORE.user, null);
       document.cookie = 'JWT_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
       document.cookie = 'JSESSIONID=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
@@ -879,6 +925,109 @@ function initTooltips() {
   if (typeof bootstrap === 'undefined') return;
   document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
 }
+
+/**
+ * Session Manager:
+ * - Tắt web quá 2 phút: xóa sạch session/token/cookie, chuyển về /login nếu là trang bảo vệ.
+ * - Tắt web dưới 2 phút: duy trì phiên làm việc nguyên vẹn.
+ * - Đang mở web: Heartbeat ngầm mỗi 35s duy trì phiên mà không làm giật/chớp web.
+ * - Hỗ trợ đồng bộ nhiều tab mở cùng lúc (Multi-tab throttle).
+ */
+function initSessionManager() {
+  const TIMEOUT_MS = 2 * 60 * 1000; // 2 phút
+  const token = localStorage.getItem('technova_jwt');
+  const user = (typeof storageGet === 'function' && typeof STORE !== 'undefined') ? storageGet(STORE.user, null) : null;
+  const hasSession = !!(token || (user && user.email));
+
+  const clearAllSessionData = () => {
+    try {
+      localStorage.removeItem('technova_jwt');
+      localStorage.removeItem('technova_role');
+      localStorage.removeItem('technova_user');
+      localStorage.removeItem('technova_last_active');
+      localStorage.removeItem('technova_last_ping');
+      if (typeof storageSet === 'function' && typeof STORE !== 'undefined') {
+        storageSet(STORE.user, null);
+      }
+      document.cookie = 'JWT_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      document.cookie = 'JSESSIONID=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    } catch (e) {}
+  };
+
+  if (hasSession) {
+    const lastActiveStr = localStorage.getItem('technova_last_active');
+    const lastActive = lastActiveStr ? parseInt(lastActiveStr, 10) : 0;
+    const now = Date.now();
+
+    if (lastActive > 0 && (now - lastActive) > TIMEOUT_MS) {
+      clearAllSessionData();
+      if (window.location.pathname.startsWith('/manager') ||
+          window.location.pathname.startsWith('/employee') ||
+          window.location.pathname.startsWith('/shipper')) {
+        window.location.replace('/login?error=session_expired');
+        return;
+      }
+    } else {
+      localStorage.setItem('technova_last_active', now.toString());
+    }
+  }
+
+  let lastTouch = Date.now();
+  const touchActive = () => {
+    const now = Date.now();
+    if (now - lastTouch > 5000) {
+      lastTouch = now;
+      if (localStorage.getItem('technova_jwt')) {
+        localStorage.setItem('technova_last_active', now.toString());
+      }
+    }
+  };
+  ['mousedown', 'keydown', 'scroll', 'touchstart'].forEach(evt => {
+    window.addEventListener(evt, touchActive, { passive: true });
+  });
+
+  const onPageUnload = () => {
+    if (localStorage.getItem('technova_jwt')) {
+      localStorage.setItem('technova_last_active', Date.now().toString());
+    }
+  };
+  window.addEventListener('beforeunload', onPageUnload);
+  window.addEventListener('pagehide', onPageUnload);
+
+  setInterval(() => {
+    const currentToken = localStorage.getItem('technova_jwt');
+    if (!currentToken) return;
+
+    const now = Date.now();
+    const lastPing = parseInt(localStorage.getItem('technova_last_ping') || '0', 10);
+    if (now - lastPing < 25000) {
+      localStorage.setItem('technova_last_active', now.toString());
+      return;
+    }
+
+    localStorage.setItem('technova_last_ping', now.toString());
+    localStorage.setItem('technova_last_active', now.toString());
+
+    fetch('/auth/ping', {
+      method: 'GET',
+      headers: { 'Authorization': 'Bearer ' + currentToken }
+    }).then(res => {
+      if (res.status === 401 || res.status === 403) {
+        clearAllSessionData();
+        if (window.location.pathname.startsWith('/manager') ||
+            window.location.pathname.startsWith('/employee') ||
+            window.location.pathname.startsWith('/shipper')) {
+          window.location.replace('/login?error=session_expired');
+        } else if (typeof initAccountLabel === 'function') {
+          initAccountLabel();
+        }
+      }
+    }).catch(() => {});
+  }, 35000);
+}
+
+// Chạy kiểm tra timeout ngay khi file nạp vào
+initSessionManager();
 
 /* ==========================================================================
    15. BOOTSTRAP THE PAGE

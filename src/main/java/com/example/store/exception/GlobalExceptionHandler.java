@@ -41,6 +41,15 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error("You do not have permission to perform this action!"));
     }
 
+    @ExceptionHandler(AccountNotActivatedException.class)
+    public ResponseEntity<ApiResponse<?>> handleAccountNotActivated(AccountNotActivatedException ex) {
+        log.info("Account not activated for email: {}", ex.getEmail());
+        java.util.Map<String, Object> data = new java.util.HashMap<>();
+        data.put("email", ex.getEmail());
+        data.put("pendingActivation", true);
+        return ResponseEntity.badRequest().body(ApiResponse.error("ACCOUNT_NOT_ACTIVATED", data));
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ApiResponse<?>> handleRuntimeException(RuntimeException ex) {
         log.warn("Runtime exception: {}", ex.getMessage());

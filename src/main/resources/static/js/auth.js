@@ -149,6 +149,8 @@ function clearAuthSession() {
     localStorage.removeItem('technova_jwt');
     localStorage.removeItem('technova_role');
     localStorage.removeItem('technova_user');
+    localStorage.removeItem('technova_last_active');
+    localStorage.removeItem('technova_last_ping');
     if (typeof storageSet === 'function' && typeof STORE !== 'undefined') {
       storageSet(STORE.user, null);
     }
@@ -298,6 +300,174 @@ function scorePassword(password) {
   return { score, ...levels[score] };
 }
 
+let pendingActivationEmail = '';
+
+function openActivationModal(email) {
+  pendingActivationEmail = email;
+  const emailEl = document.getElementById('activationModalEmail');
+  if (emailEl) emailEl.textContent = email;
+
+  const modalEl = document.getElementById('activationModal');
+  if (modalEl && window.bootstrap?.Modal) {
+    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    modal.show();
+  }
+}
+
+async function handleModalVerifyNow() {
+  if (!pendingActivationEmail) return;
+
+  const btn = document.getElementById('btnModalVerifyNow');
+  const originalHtml = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Sending OTP…';
+  }
+
+  try {
+    const res = await fetch('/auth/resend-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: pendingActivationEmail, type: 'REGISTER' })
+    });
+
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      notify('OTP Sent', 'A verification code has been sent to your email.', 'success');
+      setTimeout(() => {
+        location.href = '/verify-otp?email=' + encodeURIComponent(pendingActivationEmail) + '&type=REGISTER';
+      }, 700);
+    } else {
+      notify('Failed', data.message || 'Cannot send verification code.', 'danger');
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+      }
+    }
+  } catch (err) {
+    notify('Connection Error', 'Cannot connect to server.', 'danger');
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
+    }
+  }
+}
+
+/* ==========================================================================
+   2.0 GOOGLE SIGN-IN (/auth/google) - Preserves 100% Original Button UI
+   ========================================================================== */
+async function fetchGoogleClientId() {
+  if (window.__GOOGLE_CLIENT_ID__) return window.__GOOGLE_CLIENT_ID__;
+  try {
+    const res = await fetch('/auth/google/client-id');
+    if (res.ok) {
+      const data = await res.json();
+      const clientId = data?.data?.trim();
+      if (clientId && clientId !== 'your_google_client_id_here') {
+        window.__GOOGLE_CLIENT_ID__ = clientId;
+        return clientId;
+      }
+    }
+  } catch (err) {
+    console.warn('Could not load Google Client ID from backend:', err);
+  }
+  return null;
+}
+
+async function handleGoogleLoginPayload(payload) {
+  notify('Verifying with Google...', 'Please wait a moment while we authenticate your account.', 'info', 2500);
+
+  try {
+    const res = await fetch('/auth/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      if (data.data?.token) {
+        localStorage.setItem('technova_jwt', data.data.token);
+      }
+      if (data.data?.user?.role) {
+        localStorage.setItem('technova_role', data.data.user.role);
+      }
+      localStorage.setItem('technova_last_active', Date.now().toString());
+      localStorage.setItem('technova_last_ping', Date.now().toString());
+
+      if (typeof storageSet === 'function' && typeof STORE !== 'undefined') {
+        storageSet(STORE.user, {
+          name: data.data?.user?.fullName || 'User',
+          email: data.data?.user?.email || '',
+          role: data.data?.user?.role,
+          hasPassword: data.data?.user?.hasPassword ?? false,
+          loggedInAt: new Date().toISOString()
+        });
+
+      }
+
+      notify('Sign In Successful!', `Welcome back, ${data.data?.user?.fullName || 'User'}!`, 'success');
+      setTimeout(() => {
+        location.href = data.data?.redirectUrl || '/customer/index';
+      }, 900);
+    } else {
+      notify('Google Sign-In Failed', data.message || 'Cannot complete authentication with Google.', 'danger');
+    }
+  } catch (err) {
+    notify('Connection Error', 'Cannot connect to server. Please check your network connection.', 'danger');
+  }
+}
+
+async function initGoogleAuth() {
+  const btnGoogle = document.getElementById('btnGoogleLogin');
+  if (!btnGoogle) return;
+
+  // Pre-fetch Google Client ID in background
+  fetchGoogleClientId();
+
+  // Attach click listener to the original UI button
+  btnGoogle.addEventListener('click', async (e) => {
+    e.preventDefault();
+
+    const clientId = window.__GOOGLE_CLIENT_ID__ || await fetchGoogleClientId();
+    if (!clientId || clientId === 'your_google_client_id_here') {
+      notify('Google Sign-In Notice', 'Google Client ID is not configured yet. Please set GOOGLE_CLIENT_ID in your environment (.env).', 'warning', 5000);
+      return;
+    }
+
+    if (typeof window.google === 'undefined' || !window.google.accounts || !window.google.accounts.oauth2) {
+      notify('Initializing Google SDK', 'Google authentication service is initializing. Please try again in a moment.', 'warning', 4000);
+      return;
+    }
+
+    // Initialize Google OAuth2 Token Client to open official Google popup
+    if (!window.__GOOGLE_TOKEN_CLIENT__) {
+      window.__GOOGLE_TOKEN_CLIENT__ = window.google.accounts.oauth2.initTokenClient({
+        client_id: clientId,
+        scope: 'email profile openid',
+        callback: async (tokenResponse) => {
+          if (tokenResponse.error) {
+            console.error('Google OAuth error:', tokenResponse);
+            notify('Google Sign-In Cancelled', 'Google sign-in was cancelled or closed.', 'warning');
+            return;
+          }
+          if (tokenResponse.access_token) {
+            await handleGoogleLoginPayload({ accessToken: tokenResponse.access_token });
+          }
+        }
+      });
+    }
+
+    // Trigger official Google account chooser popup
+    window.__GOOGLE_TOKEN_CLIENT__.requestAccessToken();
+  });
+}
+
+
+
+
 /* ==========================================================================
    2. FORM: SIGN IN (/auth/login)
    ========================================================================== */
@@ -331,12 +501,15 @@ async function handleLogin(e) {
       if (data.data?.user?.role) {
         localStorage.setItem('technova_role', data.data.user.role);
       }
+      localStorage.setItem('technova_last_active', Date.now().toString());
+      localStorage.setItem('technova_last_ping', Date.now().toString());
 
       if (typeof storageSet === 'function' && typeof STORE !== 'undefined') {
         storageSet(STORE.user, {
           name: data.data?.user?.fullName || 'User',
           email: data.data?.user?.email || email,
           role: data.data?.user?.role,
+          hasPassword: data.data?.user?.hasPassword ?? true,
           loggedInAt: new Date().toISOString()
         });
       }
@@ -346,12 +519,11 @@ async function handleLogin(e) {
         location.href = data.data?.redirectUrl || '/customer/index';
       }, 900);
     } else {
-      bindServerErrors(form, data.data, data.message || 'Invalid email or password.');
-      if (data.message && data.message.toLowerCase().includes('activate')) {
-        setTimeout(() => {
-          location.href = '/verify-otp?email=' + encodeURIComponent(email) + '&type=REGISTER';
-        }, 1500);
+      if (data.message === 'ACCOUNT_NOT_ACTIVATED' || data.data?.pendingActivation) {
+        openActivationModal(data.data?.email || email);
+        return;
       }
+      bindServerErrors(form, data.data, data.message || 'Invalid email or password.');
     }
   } catch (err) {
     notify('Connection Error', 'Cannot connect to server.', 'danger');
@@ -406,6 +578,10 @@ async function handleRegister(e) {
         location.href = '/verify-otp?email=' + encodeURIComponent(email) + '&type=REGISTER';
       }, 1200);
     } else {
+      if (data.message === 'ACCOUNT_NOT_ACTIVATED' || data.data?.pendingActivation) {
+        openActivationModal(data.data?.email || email);
+        return;
+      }
       bindServerErrors(form, data.data, data.message || 'Registration failed.');
     }
   } catch (err) {
@@ -588,21 +764,23 @@ async function handleVerifyOtp(e) {
 }
 
 /* ==========================================================================
-   6. FORM: RESET PASSWORD (/auth/reset-password - Khi đã đăng nhập)
+   6. FORMS: CHANGE PASSWORD & SET PASSWORD (/customer/change-password & /customer/set-password)
    ========================================================================== */
-async function handleResetPassword(e) {
+async function handleChangePassword(e) {
   e.preventDefault();
-  const form = document.getElementById('resetPassForm');
+  const form = e.target;
   clearAllErrors(form);
 
-  const oldPassword = document.getElementById('oldPassword')?.value || '';
-  const newPassword = document.getElementById('newPassword')?.value || '';
-  const confirmNewPassword = document.getElementById('confirmNewPassword')?.value || '';
-  const btn = document.getElementById('btnSubmitReset');
-  const originalHtml = btn.innerHTML;
+  const oldPassword = form.querySelector('#oldPassword')?.value || '';
+  const newPassword = form.querySelector('#newPassword')?.value || '';
+  const confirmNewPassword = form.querySelector('#confirmNewPassword')?.value || '';
+  const btn = form.querySelector('button[type="submit"]');
+  const originalHtml = btn ? btn.innerHTML : '';
 
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Updating…';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving changes…';
+  }
 
   try {
     const token = getAuthToken();
@@ -621,13 +799,78 @@ async function handleResetPassword(e) {
       notify('Success', data.message || 'Password changed successfully!', 'success');
       form.reset();
     } else {
-      bindServerErrors(form, data.data, data.message || 'Error updating password!');
+      bindServerErrors(form, data.data, data.message || 'Failed to change password!');
     }
   } catch (err) {
     notify('Connection Error', 'Cannot connect to server.', 'danger');
   } finally {
-    btn.disabled = false;
-    btn.innerHTML = originalHtml;
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
+    }
+  }
+}
+
+async function handleSetPassword(e) {
+  e.preventDefault();
+  const form = e.target;
+  clearAllErrors(form);
+
+  const newPassword = form.querySelector('#newPassword')?.value || '';
+  const confirmNewPassword = form.querySelector('#confirmNewPassword')?.value || '';
+  const btn = form.querySelector('button[type="submit"]');
+  const originalHtml = btn ? btn.innerHTML : '';
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Setting password…';
+  }
+
+  try {
+    const token = getAuthToken();
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+
+    const res = await fetch('/auth/set-password', {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({ newPassword, confirmNewPassword })
+    });
+
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      notify('Success', data.message || 'Password set successfully! Redirecting...', 'success');
+      form.reset();
+
+      // Update cached user state
+      if (typeof storageGet === 'function' && typeof storageSet === 'function' && typeof STORE !== 'undefined') {
+        const user = storageGet(STORE.user, null);
+        if (user) {
+          user.hasPassword = true;
+          storageSet(STORE.user, user);
+        }
+      }
+
+      // Update navbar links immediately
+      if (typeof initAccountLabel === 'function') {
+        initAccountLabel();
+      }
+
+      // Smoothly redirect to customer-index URL
+      setTimeout(() => {
+        location.href = '/customer/index';
+      }, 1000);
+    } else {
+      bindServerErrors(form, data.data, data.message || 'Failed to set password!');
+    }
+  } catch (err) {
+    notify('Connection Error', 'Cannot connect to server.', 'danger');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
+    }
   }
 }
 
@@ -698,10 +941,12 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('registerForm')?.addEventListener('submit', handleRegister);
   document.getElementById('forgotForm')?.addEventListener('submit', handleForgotPassword);
   document.getElementById('otpForm')?.addEventListener('submit', handleVerifyOtp);
-  document.getElementById('resetPassForm')?.addEventListener('submit', handleResetPassword);
+  document.getElementById('resetPassForm')?.addEventListener('submit', handleChangePassword);
+  document.getElementById('setPassForm')?.addEventListener('submit', handleSetPassword);
 
-  // --- Resend OTP Button ---
+  // --- Resend OTP Button & Modal Verify Now ---
   document.getElementById('btnResendOtp')?.addEventListener('click', handleResendOtp);
+  document.getElementById('btnModalVerifyNow')?.addEventListener('click', handleModalVerifyNow);
 
   // --- Toggle Show / Hide Password ---
   document.querySelectorAll('.toggle-pass').forEach(btn => {
@@ -799,4 +1044,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Start 5-minute (300 seconds) countdown timer
     startOtpCountdown(300);
   }
+
+  // --- Initialize Google Sign-In ---
+  initGoogleAuth();
 });
+
+

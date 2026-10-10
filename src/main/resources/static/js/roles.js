@@ -84,12 +84,95 @@
           localStorage.removeItem('technova_jwt');
           localStorage.removeItem('technova_role');
           localStorage.removeItem('technova_user');
+          localStorage.removeItem('technova_last_active');
+          localStorage.removeItem('technova_last_ping');
           document.cookie = 'JWT_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
           document.cookie = 'JSESSIONID=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
         } catch (e) { /* storage error */ }
       });
     });
   }
+
+  /* ---------- Session Inactivity & Heartbeat Manager ---------- */
+  function initSessionManager() {
+    const TIMEOUT_MS = 2 * 60 * 1000; // 2 phút
+    const token = localStorage.getItem('technova_jwt');
+
+    const clearAllSessionData = () => {
+      try {
+        localStorage.removeItem('technova_jwt');
+        localStorage.removeItem('technova_role');
+        localStorage.removeItem('technova_user');
+        localStorage.removeItem('technova_last_active');
+        localStorage.removeItem('technova_last_ping');
+        document.cookie = 'JWT_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        document.cookie = 'JSESSIONID=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      } catch (e) {}
+    };
+
+    if (token) {
+      const lastActiveStr = localStorage.getItem('technova_last_active');
+      const lastActive = lastActiveStr ? parseInt(lastActiveStr, 10) : 0;
+      const now = Date.now();
+
+      if (lastActive > 0 && (now - lastActive) > TIMEOUT_MS) {
+        clearAllSessionData();
+        window.location.replace('/login?error=session_expired');
+        return;
+      } else {
+        localStorage.setItem('technova_last_active', now.toString());
+      }
+    }
+
+    let lastTouch = Date.now();
+    const touchActive = () => {
+      const now = Date.now();
+      if (now - lastTouch > 5000) {
+        lastTouch = now;
+        if (localStorage.getItem('technova_jwt')) {
+          localStorage.setItem('technova_last_active', now.toString());
+        }
+      }
+    };
+    ['mousedown', 'keydown', 'scroll', 'touchstart'].forEach(evt => {
+      window.addEventListener(evt, touchActive, { passive: true });
+    });
+
+    const onPageUnload = () => {
+      if (localStorage.getItem('technova_jwt')) {
+        localStorage.setItem('technova_last_active', Date.now().toString());
+      }
+    };
+    window.addEventListener('beforeunload', onPageUnload);
+    window.addEventListener('pagehide', onPageUnload);
+
+    setInterval(() => {
+      const currentToken = localStorage.getItem('technova_jwt');
+      if (!currentToken) return;
+
+      const now = Date.now();
+      const lastPing = parseInt(localStorage.getItem('technova_last_ping') || '0', 10);
+      if (now - lastPing < 25000) {
+        localStorage.setItem('technova_last_active', now.toString());
+        return;
+      }
+
+      localStorage.setItem('technova_last_ping', now.toString());
+      localStorage.setItem('technova_last_active', now.toString());
+
+      fetch('/auth/ping', {
+        method: 'GET',
+        headers: { 'Authorization': 'Bearer ' + currentToken }
+      }).then(res => {
+        if (res.status === 401 || res.status === 403) {
+          clearAllSessionData();
+          window.location.replace('/login?error=session_expired');
+        }
+      }).catch(() => {});
+    }, 35000);
+  }
+
+  initSessionManager();
 
   document.addEventListener('DOMContentLoaded', () => {
     initTheme();

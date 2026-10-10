@@ -43,17 +43,20 @@ public class SecurityConfig {
 
                 // Public Authentication REST APIs
                 .requestMatchers(
-                    "/auth/login", "/auth/register", "/auth/signup", "/auth/forgot-password", "/auth/resend-otp", "/auth/verify-otp"
+                    "/auth/login", "/auth/register", "/auth/signup", "/auth/forgot-password", "/auth/resend-otp", "/auth/verify-otp",
+                    "/auth/google", "/auth/google/**", "/auth/ping"
                 ).permitAll()
 
-                // Reset Password API (must be authenticated)
-                .requestMatchers("/auth/reset-password").authenticated()
+
+                // Reset & Set Password & Status APIs (must be authenticated)
+                .requestMatchers("/auth/reset-password", "/auth/set-password", "/auth/has-password").authenticated()
+
 
                 // Role-based reset password pages
                 .requestMatchers("/manager/reset-password").hasAnyAuthority("MANAGER", "ROLE_MANAGER")
                 .requestMatchers("/employee/reset-password").hasAnyAuthority("EMPLOYEE", "ROLE_EMPLOYEE")
                 .requestMatchers("/shipper/reset-password").hasAnyAuthority("SHIPPER", "ROLE_SHIPPER")
-                .requestMatchers("/customer/reset-password").hasAnyAuthority("CUSTOMER", "ROLE_CUSTOMER")
+                .requestMatchers("/customer/reset-password", "/customer/set-password").hasAnyAuthority("CUSTOMER", "ROLE_CUSTOMER")
 
                 // Role-based dashboards
                 .requestMatchers("/manager/**").hasAnyAuthority("MANAGER", "ROLE_MANAGER")
