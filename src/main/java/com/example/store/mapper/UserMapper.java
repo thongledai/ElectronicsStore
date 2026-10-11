@@ -27,5 +27,7 @@ public interface UserMapper {
     User toUser(RegisterDTO dto);
 
     @Mapping(target = "role", source = "role.name")
+    @Mapping(target = "hasPassword", expression = "java(user.getHashedPassword() != null && !user.getHashedPassword().isBlank())")
     UserResponseDTO toUserResponseDTO(User user);
 }
+

@@ -38,7 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = resolveToken(request);
 
         if (token != null && jwtService.validateToken(token)) {
-            String userEmail = jwtService.extractUsername(token);
+            String userEmail = jwtService.extractEmail(token);
 
             if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 try {
@@ -54,9 +54,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     log.error("Cannot set user authentication: {}", e.getMessage());
                 }
             }
+
+            // Sliding window 120 giây (2 phút) cho Cookie JWT_TOKEN khi còn đang truy cập web
+            String uri = request.getRequestURI();
+            if (!isStaticResource(uri)) {
+                Cookie jwtCookie = new Cookie("JWT_TOKEN", token);
+                jwtCookie.setHttpOnly(true);
+                jwtCookie.setPath("/");
+                jwtCookie.setMaxAge(120); // 2 phút
+                response.addCookie(jwtCookie);
+            }
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private boolean isStaticResource(String uri) {
+        if (uri == null) return false;
+        return uri.endsWith(".css") || uri.endsWith(".js") || uri.endsWith(".png") ||
+               uri.endsWith(".jpg") || uri.endsWith(".jpeg") || uri.endsWith(".svg") ||
+               uri.endsWith(".ico") || uri.endsWith(".woff") || uri.endsWith(".woff2") ||
+               uri.endsWith(".ttf") || uri.startsWith("/webjars/");
     }
 
     private String resolveToken(HttpServletRequest request) {

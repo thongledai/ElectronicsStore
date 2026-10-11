@@ -76,8 +76,7 @@ public class CategoryServiceImpl implements ICategoryService {
 	@Transactional(readOnly = true)
 	public CategoryResponseDTO getCategoryById(UUID id) {
 		Category category = categoryRepository.findById(id)
-			.orElseThrow(() -> new ResourceNotFoundException(String.format(
-				BusinessMessage.CATEGORY_NOT_FOUND_ID.getMessage(), id)));
+			.orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.CATEGORY_NOT_FOUND_ID, id));
 		return categoryMapper.toResponseDTO(category);
 	}
 
@@ -85,8 +84,7 @@ public class CategoryServiceImpl implements ICategoryService {
 	@Transactional(readOnly = true)
 	public CategoryResponseDTO getCategoryBySlug(String slug) {
 		Category category = categoryRepository.findBySlug(slug)
-			.orElseThrow(() -> new ResourceNotFoundException(String.format(
-				BusinessMessage.CATEGORY_NOT_FOUND_SLUG.getMessage(), slug)));
+			.orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.CATEGORY_NOT_FOUND_SLUG, slug));
 		return categoryMapper.toResponseDTO(category);
 	}
 
@@ -96,17 +94,15 @@ public class CategoryServiceImpl implements ICategoryService {
 		String slug = generateAndValidateSlug(requestDTO.getName(), null);
 
 		if (categoryRepository.existsByName(requestDTO.getName())) {
-			    throw new DuplicateResourceException(String.format(
-				    BusinessMessage.CATEGORY_NAME_EXISTS.getMessage(), requestDTO.getName()));
+			    throw new DuplicateResourceException(BusinessMessage.CATEGORY_NAME_EXISTS, requestDTO.getName());
 		}
 
 		Category parent = null;
 		if (requestDTO.getParentId() != null) {
 			parent = categoryRepository.findById(requestDTO.getParentId())
-				    .orElseThrow(() -> new ResourceNotFoundException(String.format(
-					    BusinessMessage.CATEGORY_PARENT_NOT_FOUND.getMessage(), requestDTO.getParentId())));
+				    .orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.CATEGORY_PARENT_NOT_FOUND, requestDTO.getParentId()));
 			if (!Boolean.TRUE.equals(parent.getIsActive())) {
-				throw new BusinessException(BusinessMessage.CATEGORY_PARENT_INACTIVE.getMessage());
+				throw new BusinessException(BusinessMessage.CATEGORY_PARENT_INACTIVE);
 			}
 		}
 
@@ -130,12 +126,10 @@ public class CategoryServiceImpl implements ICategoryService {
 	@Transactional
 	public CategoryResponseDTO updateCategory(UUID id, CategoryRequestDTO requestDTO, MultipartFile imageFile) {
 		Category category = categoryRepository.findById(id)
-			.orElseThrow(() -> new ResourceNotFoundException(String.format(
-				BusinessMessage.CATEGORY_NOT_FOUND_ID.getMessage(), id)));
+			.orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.CATEGORY_NOT_FOUND_ID, id));
 
 		if (categoryRepository.existsByNameAndIdNot(requestDTO.getName(), id)) {
-			    throw new DuplicateResourceException(String.format(
-				    BusinessMessage.CATEGORY_NAME_EXISTS.getMessage(), requestDTO.getName()));
+			    throw new DuplicateResourceException(BusinessMessage.CATEGORY_NAME_EXISTS, requestDTO.getName());
 		}
 
 		// Chỉ tạo lại slug khi đổi tên, tránh làm hỏng đường dẫn cũ
@@ -146,17 +140,16 @@ public class CategoryServiceImpl implements ICategoryService {
 		Category parent = null;
 		if (requestDTO.getParentId() != null) {
 			if (requestDTO.getParentId().equals(id)) {
-				throw new BusinessException(BusinessMessage.CATEGORY_PARENT_SELF.getMessage());
+				throw new BusinessException(BusinessMessage.CATEGORY_PARENT_SELF);
 			}
 			// Chống vòng lặp cha-con
 			if (isDescendant(requestDTO.getParentId(), id)) {
-				throw new BusinessException(BusinessMessage.CATEGORY_PARENT_DESCENDANT.getMessage());
+				throw new BusinessException(BusinessMessage.CATEGORY_PARENT_DESCENDANT);
 			}
 			parent = categoryRepository.findById(requestDTO.getParentId())
-				    .orElseThrow(() -> new ResourceNotFoundException(String.format(
-					    BusinessMessage.CATEGORY_PARENT_NOT_FOUND.getMessage(), requestDTO.getParentId())));
+				    .orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.CATEGORY_PARENT_NOT_FOUND, requestDTO.getParentId()));
 			if (!Boolean.TRUE.equals(parent.getIsActive())) {
-				throw new BusinessException(BusinessMessage.CATEGORY_PARENT_INACTIVE.getMessage());
+				throw new BusinessException(BusinessMessage.CATEGORY_PARENT_INACTIVE);
 			}
 		}
 
@@ -179,7 +172,7 @@ public class CategoryServiceImpl implements ICategoryService {
 			}
 			if (requestDTO.getIsActive() && !Boolean.TRUE.equals(category.getIsActive())
 					&& parent != null && !Boolean.TRUE.equals(parent.getIsActive())) {
-				throw new BusinessException(BusinessMessage.CATEGORY_RESTORE_PARENT_INACTIVE.getMessage());
+				throw new BusinessException(BusinessMessage.CATEGORY_RESTORE_PARENT_INACTIVE);
 			}
 			category.setIsActive(requestDTO.getIsActive());
 		}
@@ -193,17 +186,16 @@ public class CategoryServiceImpl implements ICategoryService {
 	@Transactional
 	public void deleteCategory(UUID id) {
 		Category category = categoryRepository.findById(id)
-			.orElseThrow(() -> new ResourceNotFoundException(String.format(
-				BusinessMessage.CATEGORY_NOT_FOUND_ID.getMessage(), id)));
+			.orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.CATEGORY_NOT_FOUND_ID, id));
 
 		if (productRepository.existsByCategoryId(id)) {
-			throw new BusinessException(BusinessMessage.CATEGORY_HAS_PRODUCTS_DELETE.getMessage());
+			throw new BusinessException(BusinessMessage.CATEGORY_HAS_PRODUCTS_DELETE);
 		}
 		if (categoryRepository.existsByParentId(id)) {
-			throw new BusinessException(BusinessMessage.CATEGORY_HAS_CHILDREN_DELETE.getMessage());
+			throw new BusinessException(BusinessMessage.CATEGORY_HAS_CHILDREN_DELETE);
 		}
 		if (styleRepository.existsByCategoriesId(id)) {
-			throw new BusinessException(BusinessMessage.CATEGORY_HAS_STYLES_DELETE.getMessage());
+			throw new BusinessException(BusinessMessage.CATEGORY_HAS_STYLES_DELETE);
 		}
 
 		categoryRepository.delete(category);
@@ -214,12 +206,11 @@ public class CategoryServiceImpl implements ICategoryService {
 	@Transactional
 	public void restoreCategory(UUID id) {
 		Category category = categoryRepository.findById(id)
-			.orElseThrow(() -> new ResourceNotFoundException(String.format(
-				BusinessMessage.CATEGORY_NOT_FOUND_ID.getMessage(), id)));
+			.orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.CATEGORY_NOT_FOUND_ID, id));
 
 		// Khôi phục: chỉ khi category cha chưa bị xóa
 		if (category.getParent() != null && !Boolean.TRUE.equals(category.getParent().getIsActive())) {
-			throw new BusinessException(BusinessMessage.CATEGORY_PARENT_RESTORE_INACTIVE.getMessage());
+			throw new BusinessException(BusinessMessage.CATEGORY_PARENT_RESTORE_INACTIVE);
 		}
 
 		category.setIsActive(true);
@@ -229,10 +220,10 @@ public class CategoryServiceImpl implements ICategoryService {
 
 	private void validateCanDeleteCategory(UUID id) {
 		if (productRepository.existsByCategoryId(id)) {
-			throw new BusinessException(BusinessMessage.CATEGORY_HAS_PRODUCTS_DEACTIVATE.getMessage());
+			throw new BusinessException(BusinessMessage.CATEGORY_HAS_PRODUCTS_DEACTIVATE);
 		}
 		if (categoryRepository.existsByParentIdAndIsActiveTrue(id)) {
-			throw new BusinessException(BusinessMessage.CATEGORY_HAS_ACTIVE_CHILDREN.getMessage());
+			throw new BusinessException(BusinessMessage.CATEGORY_HAS_ACTIVE_CHILDREN);
 		}
 	}
 

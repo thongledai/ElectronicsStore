@@ -57,7 +57,7 @@ public class User {
     @Column(nullable = false)
     private Boolean isPhoneActive = false;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String hashedPassword;
 
     // Cần load role ngay khi đăng nhập (Spring Security) nên dùng EAGER

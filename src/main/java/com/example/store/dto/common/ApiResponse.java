@@ -43,7 +43,18 @@ public class ApiResponse<T> {
                 .build();
     }
 
-    public static <T> ApiResponse<T> error(ApiMessage message) {
-        return error(message.getMessage());
+
+    public static <T> ApiResponse<T> error(String message, T data) {
+        return ApiResponse.<T>builder()
+                .success(false)
+                .message(message)
+                .data(data)
+                .build();
     }
-}
+        public static <T > ApiResponse < T > error(ApiMessage message) {
+            return error(message.getMessage());
+        }
+            public static <T > ApiResponse < T > error(ApiMessage message, T data) {
+            return error(message.getMessage(), data);
+        }
+    }

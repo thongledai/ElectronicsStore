@@ -76,8 +76,7 @@ public class StyleServiceImpl implements IStyleService {
 	@Transactional(readOnly = true)
 	public StyleResponseDTO getStyleById(UUID id) {
 		Style style = styleRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException(String.format(
-						BusinessMessage.STYLE_NOT_FOUND_ID.getMessage(), id)));
+				.orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.STYLE_NOT_FOUND_ID, id));
 		return styleMapper.toResponseDTO(style);
 	}
 
@@ -86,13 +85,11 @@ public class StyleServiceImpl implements IStyleService {
 		UUID excludeIdSafe = excludeId != null ? excludeId : NO_ID;
 		if (categoryIds != null && !categoryIds.isEmpty()) {
 			if (styleRepository.existsByNameAndCategoryIds(trimmedName, categoryIds, excludeIdSafe)) {
-				throw new DuplicateResourceException(
-						"Tên kiểu thuộc tính '" + trimmedName + "' đã tồn tại trong danh mục được chọn!");
+				throw new DuplicateResourceException(BusinessMessage.STYLE_NAME_EXISTS_IN_CATEGORY, trimmedName);
 			}
 		} else {
 			if (styleRepository.existsByNameAndCategoriesIsEmpty(trimmedName, excludeIdSafe)) {
-				throw new DuplicateResourceException(
-						"Tên kiểu thuộc tính '" + trimmedName + "' chưa gán danh mục đã tồn tại!");
+				throw new DuplicateResourceException(BusinessMessage.STYLE_NAME_EXISTS_WITHOUT_CATEGORY, trimmedName);
 			}
 		}
 	}
@@ -120,8 +117,7 @@ public class StyleServiceImpl implements IStyleService {
 	@Transactional
 	public StyleResponseDTO updateStyle(UUID id, StyleRequestDTO requestDTO) {
 		Style style = styleRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException(String.format(
-						BusinessMessage.STYLE_NOT_FOUND_ID.getMessage(), id)));
+				.orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.STYLE_NOT_FOUND_ID, id));
 
 		validateStyleNameUniqueness(requestDTO.getName(), requestDTO.getCategoryIds(), id);
 
@@ -149,14 +145,12 @@ public class StyleServiceImpl implements IStyleService {
 	@Transactional
 	public void deleteStyle(UUID id) {
 		Style style = styleRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException(String.format(
-						BusinessMessage.STYLE_NOT_FOUND_ID.getMessage(), id)));
+				.orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.STYLE_NOT_FOUND_ID, id));
 
 		List<StyleValue> values = styleValueRepository.findByStyleId(id);
 		for (StyleValue value : values) {
 			if (productVariantRepository.existsByStyleValuesId(value.getId())) {
-				throw new BusinessException(String.format(
-						BusinessMessage.STYLE_VALUE_REFERENCED_DELETE.getMessage(), value.getName()));
+				throw new BusinessException(BusinessMessage.STYLE_VALUE_REFERENCED_DELETE, value.getName());
 			}
 		}
 
@@ -169,8 +163,7 @@ public class StyleServiceImpl implements IStyleService {
 	@Transactional
 	public void restoreStyle(UUID id) {
 		Style style = styleRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException(String.format(
-						BusinessMessage.STYLE_NOT_FOUND_ID.getMessage(), id)));
+				.orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.STYLE_NOT_FOUND_ID, id));
 
 		style.setIsActive(true);
 		styleRepository.save(style);
@@ -179,10 +172,10 @@ public class StyleServiceImpl implements IStyleService {
 
 	private void validateCategories(Set<UUID> requestedIds, Set<Category> found) {
 		if (found.size() != requestedIds.size()) {
-			throw new ResourceNotFoundException(BusinessMessage.STYLE_CATEGORIES_NOT_FOUND.getMessage());
+			throw new ResourceNotFoundException(BusinessMessage.STYLE_CATEGORIES_NOT_FOUND);
 		}
 		if (found.stream().anyMatch(c -> !Boolean.TRUE.equals(c.getIsActive()))) {
-			throw new BusinessException(BusinessMessage.STYLE_CATEGORY_INACTIVE.getMessage());
+			throw new BusinessException(BusinessMessage.STYLE_CATEGORY_INACTIVE);
 		}
 	}
 
@@ -190,14 +183,12 @@ public class StyleServiceImpl implements IStyleService {
 		List<StyleValue> values = styleValueRepository.findByStyleId(styleId);
 		for (StyleValue value : values) {
 			if (productVariantRepository.existsByStyleValuesId(value.getId())) {
-				throw new BusinessException(String.format(
-						BusinessMessage.STYLE_VALUE_REFERENCED_DEACTIVATE.getMessage(), value.getName()));
+				throw new BusinessException(BusinessMessage.STYLE_VALUE_REFERENCED_DEACTIVATE, value.getName());
 			}
 		}
 		long activeValues = values.stream().filter(value -> Boolean.TRUE.equals(value.getIsActive())).count();
 		if (activeValues > 0) {
-			throw new BusinessException(String.format(
-					BusinessMessage.STYLE_HAS_ACTIVE_VALUES.getMessage(), activeValues));
+			throw new BusinessException(BusinessMessage.STYLE_HAS_ACTIVE_VALUES, activeValues);
 		}
 	}
 }

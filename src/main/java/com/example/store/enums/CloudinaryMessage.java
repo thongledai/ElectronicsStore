@@ -19,4 +19,8 @@ public enum CloudinaryMessage {
     public String getMessage() {
         return message;
     }
+
+    public String format(Object... args) {
+        return (args != null && args.length > 0) ? String.format(this.message, args) : this.message;
+    }
 }

@@ -77,8 +77,7 @@ public class ProductVariantServiceImpl implements IProductVariantService {
 	@Transactional(readOnly = true)
 	public ProductVariantResponseDTO getVariantById(UUID id) {
 		ProductVariant variant = productVariantRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException(String.format(
-						BusinessMessage.VARIANT_NOT_FOUND_ID.getMessage(), id)));
+				.orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.VARIANT_NOT_FOUND_ID, id));
 		if (variant.getStyleValues() != null) {
 			variant.getStyleValues().forEach(sv -> {
 				if (sv.getStyle() != null) {
@@ -96,12 +95,11 @@ public class ProductVariantServiceImpl implements IProductVariantService {
 	@Transactional
 	public ProductVariantResponseDTO createVariant(UUID productId, ProductVariantRequestDTO requestDTO) {
 		Product product = productRepository.findById(productId)
-				.orElseThrow(() -> new ResourceNotFoundException(String.format(
-						BusinessMessage.PRODUCT_NOT_FOUND_ID.getMessage(), productId)));
+				.orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.PRODUCT_NOT_FOUND_ID, productId));
 
 		if (!product.isActive() || !product.isSelling() || !Boolean.TRUE.equals(product.getCategory().getIsActive())
 				|| !Boolean.TRUE.equals(product.getBrand().getIsActive())) {
-			throw new BusinessException(BusinessMessage.VARIANT_PRODUCT_INACTIVE_CREATE.getMessage());
+			throw new BusinessException(BusinessMessage.VARIANT_PRODUCT_INACTIVE_CREATE);
 		}
 
 		validatePrices(requestDTO);
@@ -111,7 +109,7 @@ public class ProductVariantServiceImpl implements IProductVariantService {
 		if (selling && (!product.isSelling()
 				|| !Boolean.TRUE.equals(product.getBrand().getIsActive())
 				|| !Boolean.TRUE.equals(product.getCategory().getIsActive()))) {
-			throw new BusinessException(BusinessMessage.VARIANT_DEPENDENCY_INVALID_CREATE_SELLING.getMessage());
+			throw new BusinessException(BusinessMessage.VARIANT_DEPENDENCY_INVALID_CREATE_SELLING);
 		}
 
 		ProductVariant variant = ProductVariant.builder().product(product).sku(generateUniqueSku(product, styleValues))
@@ -132,15 +130,13 @@ public class ProductVariantServiceImpl implements IProductVariantService {
 	public ProductVariantResponseDTO updateVariant(UUID productId, UUID variantId,
 			ProductVariantRequestDTO requestDTO) {
 		Product product = productRepository.findById(productId)
-				.orElseThrow(() -> new ResourceNotFoundException(String.format(
-						BusinessMessage.PRODUCT_NOT_FOUND_ID.getMessage(), productId)));
+				.orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.PRODUCT_NOT_FOUND_ID, productId));
 
 		ProductVariant variant = productVariantRepository.findById(variantId)
-				.orElseThrow(() -> new ResourceNotFoundException(String.format(
-						BusinessMessage.VARIANT_NOT_FOUND_ID.getMessage(), variantId)));
+				.orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.VARIANT_NOT_FOUND_ID, variantId));
 
 		if (!variant.getProduct().getId().equals(productId)) {
-			throw new BusinessException(BusinessMessage.VARIANT_NOT_IN_PRODUCT.getMessage());
+			throw new BusinessException(BusinessMessage.VARIANT_NOT_IN_PRODUCT);
 		}
 
 		validatePrices(requestDTO);
@@ -154,7 +150,7 @@ public class ProductVariantServiceImpl implements IProductVariantService {
 		if (Boolean.TRUE.equals(requestDTO.getIsSelling()) && (!product.isSelling()
 				|| !Boolean.TRUE.equals(product.getBrand().getIsActive())
 				|| !Boolean.TRUE.equals(product.getCategory().getIsActive()))) {
-			throw new BusinessException(BusinessMessage.VARIANT_DEPENDENCY_INVALID_UPDATE_SELLING.getMessage());
+			throw new BusinessException(BusinessMessage.VARIANT_DEPENDENCY_INVALID_UPDATE_SELLING);
 		}
 		ProductVariant proposed = ProductVariant.builder().product(product).isSelling(selling).isActive(active).build();
 		validateVariantState(product, proposed, styleValues);
@@ -179,10 +175,9 @@ public class ProductVariantServiceImpl implements IProductVariantService {
 	@Transactional
 	public void deleteVariant(UUID productId, UUID variantId) {
 		ProductVariant variant = productVariantRepository.findById(variantId)
-				.orElseThrow(() -> new ResourceNotFoundException(String.format(
-						BusinessMessage.VARIANT_NOT_FOUND_ID.getMessage(), variantId)));
+				.orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.VARIANT_NOT_FOUND_ID, variantId));
 		if (!variant.getProduct().getId().equals(productId)) {
-			throw new BusinessException(BusinessMessage.VARIANT_NOT_IN_PRODUCT.getMessage());
+			throw new BusinessException(BusinessMessage.VARIANT_NOT_IN_PRODUCT);
 		}
 		validateVariantCanBeDeleted(variantId);
 		productVariantImageRepository.deleteByProductVariantId(variantId);
@@ -195,13 +190,12 @@ public class ProductVariantServiceImpl implements IProductVariantService {
 	@Transactional
 	public void restoreVariant(UUID productId, UUID variantId) {
 		ProductVariant variant = productVariantRepository.findById(variantId)
-				.orElseThrow(() -> new ResourceNotFoundException(String.format(
-						BusinessMessage.VARIANT_NOT_FOUND_ID.getMessage(), variantId)));
+				.orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.VARIANT_NOT_FOUND_ID, variantId));
 		if (!variant.getProduct().getId().equals(productId)) {
-			throw new BusinessException(BusinessMessage.VARIANT_NOT_IN_PRODUCT.getMessage());
+			throw new BusinessException(BusinessMessage.VARIANT_NOT_IN_PRODUCT);
 		}
 		if (!variant.getProduct().isActive()) {
-			throw new BusinessException(BusinessMessage.VARIANT_PARENT_INACTIVE_RESTORE.getMessage());
+			throw new BusinessException(BusinessMessage.VARIANT_PARENT_INACTIVE_RESTORE);
 		}
 		variant.setActive(true);
 		productVariantRepository.save(variant);
@@ -210,14 +204,14 @@ public class ProductVariantServiceImpl implements IProductVariantService {
 	private void validateVariantCanBeDeleted(UUID variantId) {
 		if (productVariantRepository.existsOrderItemReference(variantId)
 				|| productVariantRepository.existsCartItemReference(variantId)) {
-			throw new BusinessException(BusinessMessage.VARIANT_REFERENCED_DELETE.getMessage());
+			throw new BusinessException(BusinessMessage.VARIANT_REFERENCED_DELETE);
 		}
 	}
 
 	private void validatePrices(ProductVariantRequestDTO dto) {
 		if (dto.getPromotionalPrice() != null) {
 			if (dto.getPrice() == null || dto.getPromotionalPrice().compareTo(dto.getPrice()) >= 0) {
-				throw new BusinessException(BusinessMessage.VARIANT_PROMOTIONAL_PRICE_INVALID.getMessage());
+				throw new BusinessException(BusinessMessage.VARIANT_PROMOTIONAL_PRICE_INVALID);
 			}
 		}
 	}
@@ -231,7 +225,7 @@ public class ProductVariantServiceImpl implements IProductVariantService {
 		List<StyleValue> styleValues = styleValueRepository.findAllById(styleValueIds);
 
 		if (styleValues.size() != styleValueIds.size()) {
-			throw new ResourceNotFoundException(BusinessMessage.VARIANT_STYLE_VALUES_NOT_FOUND.getMessage());
+			throw new ResourceNotFoundException(BusinessMessage.VARIANT_STYLE_VALUES_NOT_FOUND);
 		}
 
 		UUID productCategoryId = product.getCategory().getId();
@@ -240,26 +234,23 @@ public class ProductVariantServiceImpl implements IProductVariantService {
 
 		for (StyleValue sv : styleValues) {
 			if (!Boolean.TRUE.equals(sv.getIsActive())) {
-				throw new BusinessException(String.format(
-						BusinessMessage.STYLE_VALUE_INACTIVE.getMessage(), sv.getName()));
+				throw new BusinessException(BusinessMessage.STYLE_VALUE_INACTIVE, sv.getName());
 			}
 
 			if (!Boolean.TRUE.equals(sv.getStyle().getIsActive())) {
-				throw new BusinessException(String.format(
-						BusinessMessage.STYLE_INACTIVE.getMessage(), sv.getStyle().getName()));
+				throw new BusinessException(BusinessMessage.STYLE_INACTIVE, sv.getStyle().getName());
 			}
 
 			boolean belongsToCategory = sv.getStyle().getCategories().stream()
 					.anyMatch(category -> category.getId().equals(productCategoryId));
 
 			if (!belongsToCategory) {
-				throw new BusinessException(String.format(BusinessMessage.STYLE_VALUE_NOT_IN_CATEGORY.getMessage(),
-						sv.getName(), product.getCategory().getName()));
+				throw new BusinessException(BusinessMessage.STYLE_VALUE_NOT_IN_CATEGORY,
+						sv.getName(), product.getCategory().getName());
 			}
 
 			if (!seenStyles.add(sv.getStyle().getId())) {
-				throw new BusinessException(String.format(
-						BusinessMessage.VARIANT_STYLE_VALUE_LIMIT.getMessage(), sv.getStyle().getName()));
+				throw new BusinessException(BusinessMessage.VARIANT_STYLE_VALUE_LIMIT, sv.getStyle().getName());
 			}
 		}
 
@@ -268,16 +259,15 @@ public class ProductVariantServiceImpl implements IProductVariantService {
 
 	private void validateVariantState(Product product, ProductVariant variant, Set<StyleValue> values) {
 		if (variant.isActive() && !product.isActive()) {
-			throw new BusinessException(BusinessMessage.VARIANT_PARENT_INACTIVE.getMessage());
+			throw new BusinessException(BusinessMessage.VARIANT_PARENT_INACTIVE);
 		}
 		if (variant.isSelling() && (!product.isSelling() || !product.isActive())) {
-			throw new BusinessException(BusinessMessage.VARIANT_PARENT_NOT_SELLING.getMessage());
+			throw new BusinessException(BusinessMessage.VARIANT_PARENT_NOT_SELLING);
 		}
 		if (variant.isSelling()) {
 			for (StyleValue value : values) {
 				if (!Boolean.TRUE.equals(value.getIsActive()) || !Boolean.TRUE.equals(value.getStyle().getIsActive())) {
-					throw new BusinessException(String.format(
-							BusinessMessage.VARIANT_HAS_INACTIVE_STYLE_VALUE.getMessage(), value.getName()));
+					throw new BusinessException(BusinessMessage.VARIANT_HAS_INACTIVE_STYLE_VALUE, value.getName());
 				}
 			}
 		}

@@ -15,6 +15,7 @@ public class ResetPasswordDTO {
     @NotBlank(message = "CURRENT_PASSWORD_REQUIRED")
     private String oldPassword;
 
+
     @NotBlank(message = "NEW_PASSWORD_REQUIRED")
     @Size(min = 6, message = "PASSWORD_MIN_LENGTH")
     private String newPassword;
