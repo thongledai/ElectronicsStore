@@ -35,11 +35,11 @@ public class Product {
 
     @Builder.Default
     @Column(nullable = false)
-    private boolean isActive = true;
+    private boolean isSelling = true;
 
     @Builder.Default
-    @Column(nullable = false)
-    private boolean isSelling = true;
+    @Column(nullable = false, columnDefinition = "boolean not null default true")
+    private boolean isActive = true;
 
     @Builder.Default
     @Column(nullable = false)
@@ -65,8 +65,7 @@ public class Product {
     @OneToMany(
             mappedBy = "product",
             fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
+            cascade = { CascadeType.PERSIST, CascadeType.MERGE }
     )
     private Set<ProductVariant> variants = new HashSet<>();
 }

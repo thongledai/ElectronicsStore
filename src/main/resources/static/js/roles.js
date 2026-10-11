@@ -71,7 +71,7 @@
     });
     document.querySelectorAll('[data-demo-status]').forEach(sel => {
       sel.addEventListener('change', () => {
-        toast('Selected "' + sel.options[sel.selectedIndex].text + '" (demo — not saved to database).');
+        toast(UiMessage.SELECTED_DEMO(sel.options[sel.selectedIndex].text));
       });
     });
   }

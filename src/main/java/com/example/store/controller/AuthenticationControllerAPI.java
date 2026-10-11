@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.store.dto.common.ApiResponse;
 import com.example.store.service.auth.GoogleAuthService;
+import com.example.store.enums.ApiMessage;
 import com.example.store.service.auth.IAuthenticationService;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -60,7 +61,7 @@ public class AuthenticationControllerAPI {
             @Valid @RequestBody LoginDTO loginDTO,
             HttpServletResponse httpResponse) {
         AuthResponseDTO authResponse = authenticationService.login(loginDTO, httpResponse);
-        return ResponseEntity.ok(ApiResponse.success("Login successful!", authResponse));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.AUTH_LOGIN_SUCCESS, authResponse));
     }
 
     /**
@@ -118,7 +119,7 @@ public class AuthenticationControllerAPI {
             @Valid @RequestBody ResetPasswordDTO resetPasswordDTO,
             Principal principal) {
         if (principal == null) {
-            return ResponseEntity.status(401).body(ApiResponse.error("Please log in to change your password!"));
+            return ResponseEntity.status(401).body(ApiResponse.error(ApiMessage.AUTH_LOGIN_REQUIRED));
         }
         ApiResponse<?> response = authenticationService.resetPassword(principal.getName(), resetPasswordDTO);
         return ResponseEntity.ok(response);
@@ -132,7 +133,7 @@ public class AuthenticationControllerAPI {
             @Valid @RequestBody SetPasswordDTO setPasswordDTO,
             Principal principal) {
         if (principal == null) {
-            return ResponseEntity.status(401).body(ApiResponse.error("Please log in to set your password!"));
+            return ResponseEntity.status(401).body(ApiResponse.error(ApiMessage.AUTH_SET_PASSWORD_LOGIN_REQUIRED));
         }
         ApiResponse<?> response = authenticationService.setPassword(principal.getName(), setPasswordDTO);
         return ResponseEntity.ok(response);
@@ -144,11 +145,9 @@ public class AuthenticationControllerAPI {
     @GetMapping("/has-password")
     public ResponseEntity<ApiResponse<Boolean>> hasPassword(Principal principal) {
         if (principal == null) {
-            return ResponseEntity.status(401).body(ApiResponse.error("Unauthorized"));
+            return ResponseEntity.status(401).body(ApiResponse.error(ApiMessage.AUTH_UNAUTHORIZED));
         }
         boolean hasPassword = authenticationService.hasPassword(principal.getName());
-        return ResponseEntity.ok(ApiResponse.success("Has password status", hasPassword));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.AUTH_HAS_PASSWORD_STATUS, hasPassword));
     }
 }
-
-

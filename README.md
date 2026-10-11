@@ -138,6 +138,10 @@ Dự án được xây dựng phục vụ mục đích minh họa trong môi tr�
 
 Giao diện hiện là frontend tĩnh (chưa có controller/service/database): dữ liệu trong bảng là dữ liệu mẫu, các nút "Thêm mới", "Xem chi tiết", chọn trạng thái chỉ hiện thông báo minh họa (xem `js/roles.js`).
 
+## Môi trường Java
+
+Ứng dụng Spring Boot yêu cầu Java 25 LTS. Dùng Maven Wrapper để biên dịch và chạy kiểm thử: `mvnw.cmd clean test` trên Windows hoặc `./mvnw clean test` trên macOS/Linux. Docker build và runtime cũng sử dụng Java 25.
+
 ## Cấu trúc thư mục
 
 ```text

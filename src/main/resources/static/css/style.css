@@ -649,7 +649,7 @@ code { color: var(--orange); background: var(--orange-light); padding: .08em .38
   object-fit: contain;
   transition: transform .5s cubic-bezier(.4, 0, .2, 1);
 }
-.product-card:hover .card-media img { transform: scale(1.08) rotate(-1.5deg); }
+.product-card:hover .card-media img { transform: scale(1.08); }
 
 /* Quick-action rail that slides in on hover */
 .card-actions {

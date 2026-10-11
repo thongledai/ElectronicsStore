@@ -49,7 +49,7 @@ public class Category {
 
     @Builder.Default
     @Column(nullable = false)
-    private Boolean isDeleted = false;
+    private Boolean isActive = true;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

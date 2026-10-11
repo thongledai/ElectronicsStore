@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 import com.example.store.dto.auth.GoogleUserInfo;
+import com.example.store.enums.BusinessMessage;
+import com.example.store.exception.BusinessException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,7 +32,7 @@ public class GoogleAuthService {
 
     public GoogleUserInfo verifyToken(String idToken, String accessToken) {
         if ((idToken == null || idToken.isBlank()) && (accessToken == null || accessToken.isBlank())) {
-            throw new RuntimeException("Google token cannot be empty!");
+            throw new BusinessException(BusinessMessage.AUTH_GOOGLE_TOKEN_EMPTY);
         }
 
         try {
@@ -56,7 +58,7 @@ public class GoogleAuthService {
                 if (!configuredClientId.isEmpty() && !configuredClientId.equalsIgnoreCase("your_google_client_id_here")) {
                     if (!configuredClientId.equals(aud)) {
                         log.error("Google token audience mismatch: expected [{}], received [{}]", configuredClientId, aud);
-                        throw new RuntimeException("Google token client ID does not match server configuration!");
+                        throw new BusinessException(BusinessMessage.AUTH_GOOGLE_CLIENT_ID_MISMATCH);
                     }
                 }
             }
@@ -64,13 +66,13 @@ public class GoogleAuthService {
             if (payload == null || payload.containsKey("error")) {
                 String error = payload != null ? String.valueOf(payload.get("error_description")) : "Unknown error";
                 log.error("Google token verification failed with error: {}", error);
-                throw new RuntimeException("Invalid Google token: " + error);
+                throw new BusinessException(BusinessMessage.AUTH_GOOGLE_TOKEN_INVALID, error);
             }
 
             String email = (String) payload.get("email");
             String emailVerified = String.valueOf(payload.get("email_verified"));
             if (email == null || !"true".equalsIgnoreCase(emailVerified)) {
-                throw new RuntimeException("Google account email is not verified!");
+                throw new BusinessException(BusinessMessage.AUTH_GOOGLE_EMAIL_NOT_VERIFIED);
             }
 
             String name = (String) payload.get("name");
@@ -84,9 +86,11 @@ public class GoogleAuthService {
                     .picture(picture)
                     .build();
 
+        } catch (BusinessException be) {
+            throw be;
         } catch (Exception e) {
             log.error("Error verifying Google token: {}", e.getMessage());
-            throw new RuntimeException("Google authentication failed: " + e.getMessage());
+            throw new BusinessException(BusinessMessage.AUTH_GOOGLE_FAILED, e.getMessage());
         }
     }
 }
