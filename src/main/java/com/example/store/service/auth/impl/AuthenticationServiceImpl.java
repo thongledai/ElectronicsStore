@@ -74,7 +74,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
             }
         }
 
-        String phone = registerDTO.getResolvedPhone();
+        String phone = registerDTO.getPhone();
         if (phone != null && !phone.isBlank() && userRepository.existsByPhone(phone.trim())) {
             throw new BusinessException(BusinessMessage.AUTH_PHONE_ALREADY_EXISTS);
         }

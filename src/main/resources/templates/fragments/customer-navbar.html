@@ -65,7 +65,6 @@
                   <i class="fas fa-key me-2 text-warning"></i><span class="js-password-link-text">Change Password</span>
                 </a>
               </li>
-
               <li class="js-auth-user" style="display: none;">
                 <hr class="dropdown-divider my-1">
               </li>
@@ -96,7 +95,9 @@
           <li class="nav-item"><a class="nav-link" th:href="@{/customer/products}">Products</a></li>
           <li class="nav-item"><a class="nav-link" th:href="@{/pages/about}">About</a></li>
           <li class="nav-item"><a class="nav-link" th:href="@{/pages/contact}">Contact</a></li>
-          <li class="nav-item"><a class="nav-link" th:href="@{/manager/index}">Management</a></li>
+            <li class="nav-item js-nav-manager" style="display: none;">
+                <a class="nav-link" th:href="@{/manager/index}">Management</a>
+            </li>
           
         </ul>
 

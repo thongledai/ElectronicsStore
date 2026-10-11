@@ -872,9 +872,20 @@ function initAccountLabel() {
     el.style.display = isLoggedIn ? 'block' : 'none';
   });
 
-  // Hiển thị nút "Management" trên Navbar Customer nếu là Manager
-  const userRole = (localStorage.getItem('technova_role') || (user && user.role) || '').toUpperCase();
-  const isManager = isLoggedIn && (userRole === 'MANAGER' || userRole === 'ROLE_MANAGER');
+  // Hiển thị nút "Management" trên Navbar Customer chỉ khi đăng nhập với tư cách quản trị viên (Manager/Admin)
+  let userRole = (localStorage.getItem('technova_role') || (user && user.role) || '').toUpperCase();
+  if (!userRole && token) {
+    try {
+      const parts = token.split('.');
+      if (parts.length === 3) {
+        const payload = JSON.parse(atob(parts[1]));
+        if (payload && payload.role) {
+          userRole = String(payload.role).toUpperCase();
+        }
+      }
+    } catch (_) {}
+  }
+  const isManager = isLoggedIn && (userRole === 'MANAGER' || userRole === 'ROLE_MANAGER' || userRole === 'ADMIN' || userRole === 'ROLE_ADMIN');
   document.querySelectorAll('.js-nav-manager').forEach(el => {
     el.style.display = isManager ? 'block' : 'none';
   });
