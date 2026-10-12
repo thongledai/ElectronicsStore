@@ -16,7 +16,14 @@ public class CartItemMapper {
     public CartItemDTO toCartItemDTO(CartItem cartItem) {
         ProductVariant productVariant = cartItem.getVariant();
         Product product = productVariant.getProduct();
-        String firstImageUrl = productVariant.getImages().getFirst().getImageUrl();
+        String firstImageUrl = productVariant.getImages() == null
+                ? null
+                : productVariant.getImages().stream()
+                        .filter(image -> image != null)
+                        .map(image -> image.getImageUrl())
+                        .filter(url -> url != null && !url.isBlank())
+                        .findFirst()
+                        .orElse(null);
         BigDecimal subtotal = productVariant.getPrice().multiply(BigDecimal.valueOf(cartItem.getCount()));
 
         return new CartItemDTO(cartItem.getId(),
@@ -27,8 +34,7 @@ public class CartItemMapper {
                 productVariant.getPrice(),
                 cartItem.getCount(),
                 subtotal,
-                getStyleValues(productVariant)
-                );
+                getStyleValues(productVariant));
     }
 
     private String getStyleValues(ProductVariant variant) {
