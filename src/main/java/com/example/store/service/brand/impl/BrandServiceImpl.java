@@ -73,8 +73,7 @@ public class BrandServiceImpl implements IBrandService {
     @Transactional(readOnly = true)
     public BrandResponseDTO getBrandById(Long id) {
         Brand brand = brandRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException(String.format(
-                BusinessMessage.BRAND_NOT_FOUND_ID.getMessage(), id)));
+            .orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.BRAND_NOT_FOUND_ID, id));
         return brandMapper.toResponseDTO(brand);
     }
 
@@ -82,8 +81,7 @@ public class BrandServiceImpl implements IBrandService {
     @Transactional(readOnly = true)
     public BrandResponseDTO getBrandBySlug(String slug) {
         Brand brand = brandRepository.findBySlug(slug)
-            .orElseThrow(() -> new ResourceNotFoundException(String.format(
-                BusinessMessage.BRAND_NOT_FOUND_SLUG.getMessage(), slug)));
+            .orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.BRAND_NOT_FOUND_SLUG, slug));
         return brandMapper.toResponseDTO(brand);
     }
 
@@ -93,8 +91,7 @@ public class BrandServiceImpl implements IBrandService {
         String slug = generateAndValidateSlug(requestDTO.getName(), null);
 
         if (brandRepository.existsByName(requestDTO.getName())) {
-                throw new DuplicateResourceException(String.format(
-                    BusinessMessage.BRAND_NAME_EXISTS.getMessage(), requestDTO.getName()));
+                throw new DuplicateResourceException(BusinessMessage.BRAND_NAME_EXISTS, requestDTO.getName());
         }
 
         String logoUrl = null;
@@ -121,12 +118,10 @@ public class BrandServiceImpl implements IBrandService {
     @Transactional
     public BrandResponseDTO updateBrand(Long id, BrandRequestDTO requestDTO, MultipartFile logoFile) {
         Brand brand = brandRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException(String.format(
-                BusinessMessage.BRAND_NOT_FOUND_ID.getMessage(), id)));
+            .orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.BRAND_NOT_FOUND_ID, id));
 
         if (brandRepository.existsByNameAndIdNot(requestDTO.getName(), id)) {
-                throw new DuplicateResourceException(String.format(
-                    BusinessMessage.BRAND_NAME_EXISTS.getMessage(), requestDTO.getName()));
+                throw new DuplicateResourceException(BusinessMessage.BRAND_NAME_EXISTS, requestDTO.getName());
         }
 
         // Chỉ tạo lại slug khi đổi tên, tránh làm hỏng đường dẫn cũ
@@ -151,7 +146,7 @@ public class BrandServiceImpl implements IBrandService {
         if (requestDTO.getIsActive() != null) {
             if (!requestDTO.getIsActive() && !Boolean.FALSE.equals(brand.getIsActive())
                     && productRepository.existsByBrandId(id)) {
-                throw new BusinessException(BusinessMessage.BRAND_HAS_PRODUCTS_DEACTIVATE.getMessage());
+                throw new BusinessException(BusinessMessage.BRAND_HAS_PRODUCTS_DEACTIVATE);
             }
             brand.setIsActive(requestDTO.getIsActive());
         }
@@ -165,11 +160,10 @@ public class BrandServiceImpl implements IBrandService {
     @Transactional
     public void deleteBrand(Long id) {
         Brand brand = brandRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException(String.format(
-                BusinessMessage.BRAND_NOT_FOUND_ID.getMessage(), id)));
+            .orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.BRAND_NOT_FOUND_ID, id));
 
         if (productRepository.existsByBrandId(id)) {
-            throw new BusinessException(BusinessMessage.BRAND_HAS_PRODUCTS_DELETE.getMessage());
+            throw new BusinessException(BusinessMessage.BRAND_HAS_PRODUCTS_DELETE);
         }
 
         brandRepository.delete(brand);
@@ -180,8 +174,7 @@ public class BrandServiceImpl implements IBrandService {
     @Transactional
     public void restoreBrand(Long id) {
         Brand brand = brandRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException(String.format(
-                BusinessMessage.BRAND_NOT_FOUND_ID.getMessage(), id)));
+            .orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.BRAND_NOT_FOUND_ID, id));
 
         brand.setIsActive(true);
         brandRepository.save(brand);

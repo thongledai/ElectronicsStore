@@ -72,8 +72,7 @@ public class StyleValueServiceImpl implements IStyleValueService {
 	@Transactional(readOnly = true)
 	public StyleValueResponseDTO getStyleValueById(UUID id) {
 		StyleValue styleValue = styleValueRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException(String.format(
-						BusinessMessage.STYLE_VALUE_NOT_FOUND_ID.getMessage(), id)));
+				.orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.STYLE_VALUE_NOT_FOUND_ID, id));
 		return styleValueMapper.toResponseDTO(styleValue);
 	}
 
@@ -81,15 +80,14 @@ public class StyleValueServiceImpl implements IStyleValueService {
 	@Transactional
 	public StyleValueResponseDTO createStyleValue(StyleValueRequestDTO requestDTO) {
 		Style style = styleRepository.findById(requestDTO.getStyleId()).orElseThrow(() -> new ResourceNotFoundException(
-				"Không tìm thấy kiểu thuộc tính với ID: " + requestDTO.getStyleId()));
+				BusinessMessage.STYLE_NOT_FOUND_ID, requestDTO.getStyleId()));
 
 		if (!Boolean.TRUE.equals(style.getIsActive())) {
-			throw new BusinessException(BusinessMessage.STYLE_INACTIVE_CREATE_VALUE.getMessage());
+			throw new BusinessException(BusinessMessage.STYLE_INACTIVE_CREATE_VALUE);
 		}
 
 		if (styleValueRepository.existsByNameAndStyleId(requestDTO.getName().trim(), style.getId())) {
-			throw new DuplicateResourceException(
-					"Giá trị thuộc tính '" + requestDTO.getName() + "' đã tồn tại trong kiểu này!");
+			throw new DuplicateResourceException(BusinessMessage.STYLE_VALUE_NAME_EXISTS, requestDTO.getName());
 		}
 
 		StyleValue styleValue = StyleValue.builder().name(requestDTO.getName().trim()).style(style)
@@ -104,34 +102,32 @@ public class StyleValueServiceImpl implements IStyleValueService {
 	@Transactional
 	public StyleValueResponseDTO updateStyleValue(UUID id, StyleValueRequestDTO requestDTO) {
 		StyleValue styleValue = styleValueRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException(String.format(
-						BusinessMessage.STYLE_VALUE_NOT_FOUND_ID.getMessage(), id)));
+				.orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.STYLE_VALUE_NOT_FOUND_ID, id));
 
 		Style style = styleRepository.findById(requestDTO.getStyleId()).orElseThrow(() -> new ResourceNotFoundException(
-				"Không tìm thấy kiểu thuộc tính với ID: " + requestDTO.getStyleId()));
+				BusinessMessage.STYLE_NOT_FOUND_ID, requestDTO.getStyleId()));
 		if (!Boolean.TRUE.equals(style.getIsActive())) {
-			throw new BusinessException(BusinessMessage.STYLE_INACTIVE_ASSIGN_VALUE.getMessage());
+			throw new BusinessException(BusinessMessage.STYLE_INACTIVE_ASSIGN_VALUE);
 		}
 
 		if (styleValueRepository.existsByNameAndStyleIdAndIdNot(requestDTO.getName().trim(), style.getId(), id)) {
-			throw new DuplicateResourceException(
-					"Giá trị thuộc tính '" + requestDTO.getName() + "' đã tồn tại trong kiểu này!");
+			throw new DuplicateResourceException(BusinessMessage.STYLE_VALUE_NAME_EXISTS, requestDTO.getName());
 		}
 
 		if (!styleValue.getStyle().getId().equals(style.getId())
 				&& productVariantRepository.existsByStyleValuesId(id)) {
-			throw new BusinessException(BusinessMessage.STYLE_VALUE_REFERENCED_UPDATE.getMessage());
+			throw new BusinessException(BusinessMessage.STYLE_VALUE_REFERENCED_UPDATE);
 		}
 		styleValue.setName(requestDTO.getName().trim());
 		styleValue.setStyle(style);
 		if (requestDTO.getIsActive() != null) {
 			if (!requestDTO.getIsActive() && Boolean.TRUE.equals(styleValue.getIsActive())
 					&& productVariantRepository.existsByStyleValuesId(id)) {
-				throw new BusinessException(BusinessMessage.STYLE_VALUE_IN_USE_DEACTIVATE.getMessage());
+				throw new BusinessException(BusinessMessage.STYLE_VALUE_IN_USE_DEACTIVATE);
 			}
 			if (requestDTO.getIsActive() && !Boolean.TRUE.equals(styleValue.getIsActive())
 					&& !Boolean.TRUE.equals(style.getIsActive())) {
-				throw new BusinessException(BusinessMessage.STYLE_INACTIVE_RESTORE_VALUE.getMessage());
+				throw new BusinessException(BusinessMessage.STYLE_INACTIVE_RESTORE_VALUE);
 			}
 			styleValue.setIsActive(requestDTO.getIsActive());
 		}
@@ -145,12 +141,10 @@ public class StyleValueServiceImpl implements IStyleValueService {
 	@Transactional
 	public void deleteStyleValue(UUID id) {
 		StyleValue styleValue = styleValueRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException(String.format(
-						BusinessMessage.STYLE_VALUE_NOT_FOUND_ID.getMessage(), id)));
+				.orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.STYLE_VALUE_NOT_FOUND_ID, id));
 
 		if (productVariantRepository.existsByStyleValuesId(id)) {
-			throw new BusinessException(
-					"Không thể xóa vĩnh viễn giá trị thuộc tính vì vẫn còn biến thể sản phẩm tham chiếu!");
+			throw new BusinessException(BusinessMessage.STYLE_VALUE_REFERENCED_DELETE_DIRECT);
 		}
 
 		styleValueRepository.delete(styleValue);
@@ -161,11 +155,10 @@ public class StyleValueServiceImpl implements IStyleValueService {
 	@Transactional
 	public void restoreStyleValue(UUID id) {
 		StyleValue styleValue = styleValueRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException(String.format(
-						BusinessMessage.STYLE_VALUE_NOT_FOUND_ID.getMessage(), id)));
+				.orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.STYLE_VALUE_NOT_FOUND_ID, id));
 
 		if (!Boolean.TRUE.equals(styleValue.getStyle().getIsActive())) {
-			throw new BusinessException(BusinessMessage.STYLE_INACTIVE_RESTORE_STYLE_VALUE.getMessage());
+			throw new BusinessException(BusinessMessage.STYLE_INACTIVE_RESTORE_STYLE_VALUE);
 		}
 
 		styleValue.setIsActive(true);

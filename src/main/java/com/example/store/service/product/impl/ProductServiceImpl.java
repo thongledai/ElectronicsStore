@@ -142,8 +142,7 @@ public class ProductServiceImpl implements IProductService {
 	@Transactional(readOnly = true)
 	public ProductDetailResponseDTO getPublicProductDetailBySlug(String slug) {
 		Product product = productRepository.findPublicBySlug(slug).orElseThrow(
-				() -> new ResourceNotFoundException(String.format(
-						BusinessMessage.PRODUCT_NOT_FOUND_SLUG.getMessage(), slug)));
+				() -> new ResourceNotFoundException(BusinessMessage.PRODUCT_NOT_FOUND_SLUG, slug));
 
 		List<ProductVariant> variants = productVariantRepository.findAllWithImagesByProductId(product.getId());
 		List<ProductVariant> styleVariants = productVariantRepository
@@ -164,7 +163,7 @@ public class ProductServiceImpl implements IProductService {
 				.sorted(Comparator.comparing(ProductVariantResponseDTO::getPrice)).toList();
 
 		if (variantDTOs.isEmpty()) {
-			throw new ResourceNotFoundException(BusinessMessage.PRODUCT_NO_ACTIVE_VARIANTS.getMessage());
+			throw new ResourceNotFoundException(BusinessMessage.PRODUCT_NO_ACTIVE_VARIANTS);
 		}
 
 		return ProductDetailResponseDTO.builder().id(product.getId()).name(product.getName()).slug(product.getSlug())
@@ -219,8 +218,7 @@ public class ProductServiceImpl implements IProductService {
 	@Transactional(readOnly = true)
 	public ProductResponseDTO getProductById(UUID id) {
 		Product product = productRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException(String.format(
-						BusinessMessage.PRODUCT_NOT_FOUND_ID.getMessage(), id)));
+				.orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.PRODUCT_NOT_FOUND_ID, id));
 		List<ProductVariant> variants = productVariantRepository.findByProductId(id);
 		return enrichProductResponseDTO(product, variants);
 	}
@@ -229,8 +227,7 @@ public class ProductServiceImpl implements IProductService {
 	@Transactional(readOnly = true)
 	public ProductDetailResponseDTO getProductDetailById(UUID id) {
 		Product product = productRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException(String.format(
-						BusinessMessage.PRODUCT_NOT_FOUND_ID.getMessage(), id)));
+				.orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.PRODUCT_NOT_FOUND_ID, id));
 
 		List<ProductVariant> variants = productVariantRepository.findAllWithImagesByProductId(id);
 		List<ProductVariant> styleVariants = productVariantRepository.findAllWithStyleValuesByProductId(id);
@@ -260,17 +257,15 @@ public class ProductServiceImpl implements IProductService {
 		String slug = generateAndValidateSlug(requestDTO.getName(), null);
 
 		Category category = categoryRepository.findById(requestDTO.getCategoryId()).orElseThrow(
-				() -> new ResourceNotFoundException(String.format(
-						BusinessMessage.CATEGORY_NOT_FOUND_ID.getMessage(), requestDTO.getCategoryId())));
+				() -> new ResourceNotFoundException(BusinessMessage.CATEGORY_NOT_FOUND_ID, requestDTO.getCategoryId()));
 		if (!Boolean.TRUE.equals(category.getIsActive())) {
-			throw new BusinessException(BusinessMessage.PRODUCT_CATEGORY_INACTIVE.getMessage());
+			throw new BusinessException(BusinessMessage.PRODUCT_CATEGORY_INACTIVE);
 		}
 
 		Brand brand = brandRepository.findById(requestDTO.getBrandId()).orElseThrow(
-				() -> new ResourceNotFoundException(String.format(
-						BusinessMessage.BRAND_NOT_FOUND_ID.getMessage(), requestDTO.getBrandId())));
+				() -> new ResourceNotFoundException(BusinessMessage.BRAND_NOT_FOUND_ID, requestDTO.getBrandId()));
 		if (Boolean.FALSE.equals(brand.getIsActive())) {
-			throw new BusinessException(BusinessMessage.PRODUCT_BRAND_INACTIVE.getMessage());
+			throw new BusinessException(BusinessMessage.PRODUCT_BRAND_INACTIVE);
 		}
 
 		Product product = Product.builder().name(requestDTO.getName().trim()).slug(slug)
@@ -288,8 +283,7 @@ public class ProductServiceImpl implements IProductService {
 	@Transactional
 	public ProductDetailResponseDTO updateProduct(UUID id, ProductRequestDTO requestDTO) {
 		Product product = productRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException(String.format(
-						BusinessMessage.PRODUCT_NOT_FOUND_ID.getMessage(), id)));
+				.orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.PRODUCT_NOT_FOUND_ID, id));
 
 		// Chỉ tạo lại slug khi đổi tên, tránh làm hỏng đường dẫn cũ
 		String slug = (requestDTO.getName().trim().equals(product.getName()) && product.getSlug() != null
@@ -297,17 +291,15 @@ public class ProductServiceImpl implements IProductService {
 						: generateAndValidateSlug(requestDTO.getName(), id);
 
 		Category category = categoryRepository.findById(requestDTO.getCategoryId()).orElseThrow(
-				() -> new ResourceNotFoundException(String.format(
-						BusinessMessage.CATEGORY_NOT_FOUND_ID.getMessage(), requestDTO.getCategoryId())));
+				() -> new ResourceNotFoundException(BusinessMessage.CATEGORY_NOT_FOUND_ID, requestDTO.getCategoryId()));
 		if (!Boolean.TRUE.equals(category.getIsActive())) {
-			throw new BusinessException(BusinessMessage.PRODUCT_CATEGORY_INACTIVE.getMessage());
+			throw new BusinessException(BusinessMessage.PRODUCT_CATEGORY_INACTIVE);
 		}
 
 		Brand brand = brandRepository.findById(requestDTO.getBrandId()).orElseThrow(
-				() -> new ResourceNotFoundException(String.format(
-						BusinessMessage.BRAND_NOT_FOUND_ID.getMessage(), requestDTO.getBrandId())));
+				() -> new ResourceNotFoundException(BusinessMessage.BRAND_NOT_FOUND_ID, requestDTO.getBrandId()));
 		if (Boolean.FALSE.equals(brand.getIsActive())) {
-			throw new BusinessException(BusinessMessage.PRODUCT_BRAND_INACTIVE.getMessage());
+			throw new BusinessException(BusinessMessage.PRODUCT_BRAND_INACTIVE);
 		}
 
 		product.setName(requestDTO.getName().trim());
@@ -318,7 +310,7 @@ public class ProductServiceImpl implements IProductService {
 		if (requestDTO.getIsSelling() != null) {
 			if (!requestDTO.getIsSelling() && product.isSelling()
 					&& productVariantRepository.existsByProductIdAndIsSellingTrue(id)) {
-				throw new BusinessException(BusinessMessage.PRODUCT_VARIANTS_MUST_STOP_SELLING.getMessage());
+				throw new BusinessException(BusinessMessage.PRODUCT_VARIANTS_MUST_STOP_SELLING);
 			}
 			product.setSelling(requestDTO.getIsSelling());
 		}
@@ -339,8 +331,7 @@ public class ProductServiceImpl implements IProductService {
 	@Transactional
 	public void deleteProduct(UUID id) {
 		Product product = productRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException(String.format(
-						BusinessMessage.PRODUCT_NOT_FOUND_ID.getMessage(), id)));
+				.orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.PRODUCT_NOT_FOUND_ID, id));
 		validateProductCanBeDeleted(id);
 		productRepository.delete(product);
 		log.info("Xóa vĩnh viễn sản phẩm id={}", id);
@@ -350,8 +341,7 @@ public class ProductServiceImpl implements IProductService {
 	@Transactional
 	public void restoreProduct(UUID id) {
 		Product product = productRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException(String.format(
-						BusinessMessage.PRODUCT_NOT_FOUND_ID.getMessage(), id)));
+				.orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.PRODUCT_NOT_FOUND_ID, id));
 		product.setActive(true);
 		productRepository.save(product);
 	}
@@ -360,17 +350,17 @@ public class ProductServiceImpl implements IProductService {
 		if (productVariantRepository.existsByProductId(id)
 				|| productRepository.existsReviewReference(id)
 				|| productRepository.existsFollowReference(id)) {
-			throw new BusinessException(BusinessMessage.PRODUCT_HAS_REFERENCES_DELETE.getMessage());
+			throw new BusinessException(BusinessMessage.PRODUCT_HAS_REFERENCES_DELETE);
 		}
 	}
 
 	private void validateProductState(Product product) {
 		if (product.isSelling()) {
 			if (!Boolean.TRUE.equals(product.getCategory().getIsActive())) {
-				throw new BusinessException(BusinessMessage.PRODUCT_CATEGORY_INACTIVE_ACTIVATE.getMessage());
+				throw new BusinessException(BusinessMessage.PRODUCT_CATEGORY_INACTIVE_ACTIVATE);
 			}
 			if (!Boolean.TRUE.equals(product.getBrand().getIsActive())) {
-				throw new BusinessException(BusinessMessage.PRODUCT_BRAND_INACTIVE_ACTIVATE.getMessage());
+				throw new BusinessException(BusinessMessage.PRODUCT_BRAND_INACTIVE_ACTIVATE);
 			}
 		}
 	}

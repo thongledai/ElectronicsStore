@@ -40,25 +40,22 @@ public class ProductVariantImageServiceImpl implements IProductVariantImageServi
     @Transactional
     public List<String> uploadVariantImages(UUID productId, UUID variantId, List<MultipartFile> files) {
         if (files == null || files.isEmpty()) {
-            throw new BusinessException(CloudinaryMessage.IMAGE_FILE_LIST_EMPTY.getMessage());
+            throw new BusinessException(CloudinaryMessage.IMAGE_FILE_LIST_EMPTY);
         }
 
         Product product = productRepository.findById(productId)
-            .orElseThrow(() -> new ResourceNotFoundException(String.format(
-                CloudinaryMessage.PRODUCT_NOT_FOUND.getMessage(), productId)));
+            .orElseThrow(() -> new ResourceNotFoundException(CloudinaryMessage.PRODUCT_NOT_FOUND, productId));
 
         ProductVariant variant = productVariantRepository.findById(variantId)
-            .orElseThrow(() -> new ResourceNotFoundException(String.format(
-                CloudinaryMessage.VARIANT_NOT_FOUND.getMessage(), variantId)));
+            .orElseThrow(() -> new ResourceNotFoundException(CloudinaryMessage.VARIANT_NOT_FOUND, variantId));
 
         if (!variant.getProduct().getId().equals(productId)) {
-            throw new BusinessException(CloudinaryMessage.VARIANT_NOT_IN_PRODUCT.getMessage());
+            throw new BusinessException(CloudinaryMessage.VARIANT_NOT_IN_PRODUCT);
         }
 
         long currentCount = productVariantImageRepository.countByProductVariantId(variantId);
         if (currentCount + files.size() > MAX_IMAGES_PER_VARIANT) {
-            throw new BusinessException(String.format(CloudinaryMessage.IMAGE_LIMIT_EXCEEDED.getMessage(),
-                    MAX_IMAGES_PER_VARIANT, currentCount));
+            throw new BusinessException(CloudinaryMessage.IMAGE_LIMIT_EXCEEDED, MAX_IMAGES_PER_VARIANT, currentCount);
         }
 
         String folderSlug = SlugUtils.limitSlug(product.getSlug(), 40);
@@ -87,20 +84,18 @@ public class ProductVariantImageServiceImpl implements IProductVariantImageServi
     @Transactional
     public void deleteVariantImage(UUID productId, UUID variantId, String imageUrl) {
         if (imageUrl == null || imageUrl.trim().isEmpty()) {
-            throw new BusinessException(CloudinaryMessage.IMAGE_URL_EMPTY.getMessage());
+            throw new BusinessException(CloudinaryMessage.IMAGE_URL_EMPTY);
         }
 
         ProductVariant variant = productVariantRepository.findById(variantId)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(
-                        CloudinaryMessage.VARIANT_NOT_FOUND.getMessage(), variantId)));
+                .orElseThrow(() -> new ResourceNotFoundException(CloudinaryMessage.VARIANT_NOT_FOUND, variantId));
 
         if (!variant.getProduct().getId().equals(productId)) {
-            throw new BusinessException(CloudinaryMessage.VARIANT_NOT_IN_PRODUCT.getMessage());
+            throw new BusinessException(CloudinaryMessage.VARIANT_NOT_IN_PRODUCT);
         }
 
         ProductVariantImage image = productVariantImageRepository.findByProductVariantIdAndImageUrl(variantId, imageUrl.trim())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        CloudinaryMessage.VARIANT_IMAGE_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new ResourceNotFoundException(CloudinaryMessage.VARIANT_IMAGE_NOT_FOUND));
 
         productVariantImageRepository.delete(image);
         // Xóa ảnh trên Cloudinary

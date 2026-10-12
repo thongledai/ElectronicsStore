@@ -15,6 +15,7 @@ import com.example.store.dto.common.UserResponseDTO;
 import com.example.store.entity.Role;
 import com.example.store.entity.User;
 import com.example.store.enums.OtpType;
+import com.example.store.enums.ApiMessage;
 import com.example.store.mapper.UserMapper;
 import com.example.store.repository.RoleRepository;
 import com.example.store.repository.UserRepository;
@@ -29,7 +30,10 @@ import java.util.UUID;
 import com.example.store.dto.auth.GoogleLoginDTO;
 import com.example.store.dto.auth.GoogleUserInfo;
 import com.example.store.service.auth.GoogleAuthService;
+import com.example.store.enums.BusinessMessage;
 import com.example.store.exception.AccountNotActivatedException;
+import com.example.store.exception.BusinessException;
+import com.example.store.exception.ResourceNotFoundException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -54,7 +58,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     @Transactional
     public ApiResponse<?> register(RegisterDTO registerDTO) {
         if (!registerDTO.getPassword().equals(registerDTO.getConfirmPassword())) {
-            throw new RuntimeException("Passwords do not match!");
+            throw new BusinessException(BusinessMessage.AUTH_PASSWORDS_DO_NOT_MATCH);
         }
 
         String normalizedEmail = registerDTO.getEmail().toLowerCase().trim();
@@ -62,7 +66,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         if (existingUserOpt.isPresent()) {
             User existingUser = existingUserOpt.get();
             if (Boolean.TRUE.equals(existingUser.getIsEmailActive())) {
-                throw new RuntimeException("This email is already in use! Please sign in.");
+                throw new BusinessException(BusinessMessage.AUTH_EMAIL_ALREADY_EXISTS);
             } else {
                 // DO NOT overwrite existing user data or credentials!
                 // Signal client to show confirmation modal to verify account
@@ -72,7 +76,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
 
         String phone = registerDTO.getResolvedPhone();
         if (phone != null && !phone.isBlank() && userRepository.existsByPhone(phone.trim())) {
-            throw new RuntimeException("This phone number is already in use!");
+            throw new BusinessException(BusinessMessage.AUTH_PHONE_ALREADY_EXISTS);
         }
 
         User user = userMapper.toUser(registerDTO);
@@ -92,17 +96,17 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         String otp = otpService.generateAndSaveOtp(user.getEmail(), OtpType.REGISTER);
         emailService.sendOtpEmail(user.getEmail(), otp, "Activate your TechNova Account", "account activation");
 
-        return ApiResponse.success("Registration successful! Please enter the OTP code sent to your email.", user.getEmail());
+        return ApiResponse.success(ApiMessage.AUTH_REGISTER_SUCCESS, user.getEmail());
     }
 
     @Override
     public AuthResponseDTO login(LoginDTO loginDTO, HttpServletResponse response) {
         String email = loginDTO.getEmail().toLowerCase().trim();
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Invalid email or password!"));
+                .orElseThrow(() -> new BusinessException(BusinessMessage.AUTH_INVALID_CREDENTIALS));
 
         if (!passwordEncoder.matches(loginDTO.getPassword(), user.getHashedPassword())) {
-            throw new RuntimeException("Invalid email or password!");
+            throw new BusinessException(BusinessMessage.AUTH_INVALID_CREDENTIALS);
         }
 
         if (Boolean.FALSE.equals(user.getIsEmailActive())) {
@@ -209,12 +213,12 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     public ApiResponse<?> forgotPassword(ForgotPasswordDTO forgotPasswordDTO) {
         String email = forgotPasswordDTO.getEmail().toLowerCase().trim();
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("No account found with this email address!"));
+                .orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.AUTH_NO_ACCOUNT_FOUND_EMAIL));
 
         String otp = otpService.generateAndSaveOtp(user.getEmail(), OtpType.FORGOT_PASSWORD);
         emailService.sendOtpEmail(user.getEmail(), otp, "TechNova Password Recovery OTP", "password reset");
 
-        return ApiResponse.success("An OTP code has been sent to your email.", user.getEmail());
+        return ApiResponse.success(ApiMessage.AUTH_OTP_SENT, user.getEmail());
     }
 
     @Override
@@ -224,7 +228,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         OtpType type = resendOtpDTO.getType() != null ? resendOtpDTO.getType() : OtpType.REGISTER;
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("No account found with this email address!"));
+                .orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.AUTH_NO_ACCOUNT_FOUND_EMAIL));
 
         String subject = type == OtpType.FORGOT_PASSWORD ? "TechNova Password Recovery OTP" : "Activate your TechNova Account";
         String purpose = type == OtpType.FORGOT_PASSWORD ? "password reset" : "account activation";
@@ -232,7 +236,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         String otp = otpService.generateAndSaveOtp(user.getEmail(), type);
         emailService.sendOtpEmail(user.getEmail(), otp, subject, purpose);
 
-        return ApiResponse.success("A new OTP code has been sent to your email (valid for 5 minutes).", user.getEmail());
+        return ApiResponse.success(ApiMessage.AUTH_OTP_RESENT, user.getEmail());
     }
 
     @Override
@@ -248,30 +252,30 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
 
         boolean isValid = otpService.verifyOtp(email, verifyOtpDTO.getOtp(), type);
         if (!isValid) {
-            throw new RuntimeException("Invalid or expired OTP code!");
+            throw new BusinessException(BusinessMessage.AUTH_INVALID_OR_EXPIRED_OTP);
         }
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User account not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.USER_ACCOUNT_NOT_FOUND));
 
         if (type == OtpType.REGISTER) {
             user.setIsEmailActive(true);
             userRepository.save(user);
-            return ApiResponse.success("Account activated successfully! You can now sign in.");
+            return ApiResponse.success(ApiMessage.AUTH_ACCOUNT_ACTIVATED);
         } else {
             if (verifyOtpDTO.getNewPassword() == null || verifyOtpDTO.getNewPassword().isBlank()) {
-                throw new RuntimeException("Please enter a new password!");
+                throw new BusinessException(BusinessMessage.AUTH_NEW_PASSWORD_REQUIRED);
             }
             if (!verifyOtpDTO.getNewPassword().equals(verifyOtpDTO.getConfirmPassword())) {
-                throw new RuntimeException("Confirm password does not match!");
+                throw new BusinessException(BusinessMessage.AUTH_CONFIRM_PASSWORD_DOES_NOT_MATCH);
             }
             if (verifyOtpDTO.getNewPassword().length() < 6) {
-                throw new RuntimeException("New password must be at least 6 characters!");
+                throw new BusinessException(BusinessMessage.AUTH_NEW_PASSWORD_MIN_LENGTH);
             }
 
             user.setHashedPassword(passwordEncoder.encode(verifyOtpDTO.getNewPassword()));
             userRepository.save(user);
-            return ApiResponse.success("Password reset successfully! You can now sign in with your new password.");
+            return ApiResponse.success(ApiMessage.AUTH_PASSWORD_RESET);
         }
     }
 
@@ -279,56 +283,57 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     @Transactional
     public ApiResponse<?> resetPassword(String currentUserEmail, ResetPasswordDTO resetPasswordDTO) {
         if (currentUserEmail == null || currentUserEmail.isBlank()) {
-            throw new RuntimeException("User is not authenticated!");
+            throw new BusinessException(BusinessMessage.AUTH_USER_NOT_AUTHENTICATED);
         }
 
         User user = userRepository.findByEmail(currentUserEmail.toLowerCase().trim())
-                .orElseThrow(() -> new RuntimeException("User account not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.USER_ACCOUNT_NOT_FOUND));
 
         if (user.getHashedPassword() == null || user.getHashedPassword().isBlank()) {
-            throw new RuntimeException("This account has not set a password yet. Please use Set Password instead!");
+            throw new BusinessException(BusinessMessage.AUTH_ACCOUNT_NO_PASSWORD_YET);
         }
 
         if (!passwordEncoder.matches(resetPasswordDTO.getOldPassword(), user.getHashedPassword())) {
-            throw new RuntimeException("Current password is incorrect!");
+            throw new BusinessException(BusinessMessage.AUTH_CURRENT_PASSWORD_INCORRECT);
         }
 
         if (!resetPasswordDTO.getNewPassword().equals(resetPasswordDTO.getConfirmNewPassword())) {
-            throw new RuntimeException("Confirm new password does not match!");
+            throw new BusinessException(BusinessMessage.AUTH_CONFIRM_NEW_PASSWORD_DOES_NOT_MATCH);
         }
 
         if (passwordEncoder.matches(resetPasswordDTO.getNewPassword(), user.getHashedPassword())) {
-            throw new RuntimeException("New password cannot be the same as your current password!");
+            throw new BusinessException(BusinessMessage.AUTH_NEW_PASSWORD_SAME_AS_CURRENT);
         }
 
         user.setHashedPassword(passwordEncoder.encode(resetPasswordDTO.getNewPassword()));
         userRepository.save(user);
 
-        return ApiResponse.success("Password updated successfully!");
+
+        return ApiResponse.success(ApiMessage.AUTH_PASSWORD_CHANGED);
     }
 
     @Override
     @Transactional
     public ApiResponse<?> setPassword(String currentUserEmail, com.example.store.dto.auth.SetPasswordDTO setPasswordDTO) {
         if (currentUserEmail == null || currentUserEmail.isBlank()) {
-            throw new RuntimeException("User is not authenticated!");
+            throw new BusinessException(BusinessMessage.AUTH_USER_NOT_AUTHENTICATED);
         }
 
         User user = userRepository.findByEmail(currentUserEmail.toLowerCase().trim())
-                .orElseThrow(() -> new RuntimeException("User account not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.USER_ACCOUNT_NOT_FOUND));
 
         if (user.getHashedPassword() != null && !user.getHashedPassword().isBlank()) {
-            throw new RuntimeException("This account already has a password. Please use Change Password instead!");
+            throw new BusinessException(BusinessMessage.AUTH_ACCOUNT_ALREADY_HAS_PASSWORD);
         }
 
         if (!setPasswordDTO.getNewPassword().equals(setPasswordDTO.getConfirmNewPassword())) {
-            throw new RuntimeException("Confirm new password does not match!");
+            throw new BusinessException(BusinessMessage.AUTH_CONFIRM_NEW_PASSWORD_DOES_NOT_MATCH);
         }
 
         user.setHashedPassword(passwordEncoder.encode(setPasswordDTO.getNewPassword()));
         userRepository.save(user);
 
-        return ApiResponse.success("Password set successfully! You can now sign in using your email and password.");
+        return ApiResponse.success(ApiMessage.AUTH_PASSWORD_SET_SUCCESS);
     }
 
     @Override

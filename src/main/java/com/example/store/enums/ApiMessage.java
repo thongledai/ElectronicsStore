@@ -18,7 +18,6 @@ public enum ApiMessage {
     PRODUCT_IMAGE_LIST_SUCCESS("Product images retrieved successfully."),
     PRODUCT_IMAGE_UPLOAD_SUCCESS("Product images uploaded successfully."),
     PRODUCT_IMAGE_DELETE_SUCCESS("Product image deleted successfully."),
-
     CATEGORY_LIST_SUCCESS("Categories retrieved successfully."),
     CATEGORY_OPTIONS_SUCCESS("Category options retrieved successfully."),
     CATEGORY_DETAIL_SUCCESS("Category details retrieved successfully."),
@@ -26,7 +25,6 @@ public enum ApiMessage {
     CATEGORY_UPDATE_SUCCESS("Category updated successfully."),
     CATEGORY_DELETE_SUCCESS("Category deleted successfully."),
     CATEGORY_RESTORE_SUCCESS("Category restored successfully."),
-
     BRAND_LIST_SUCCESS("Brands retrieved successfully."),
     BRAND_OPTIONS_SUCCESS("Brand options retrieved successfully."),
     BRAND_DETAIL_SUCCESS("Brand details retrieved successfully."),
@@ -34,7 +32,6 @@ public enum ApiMessage {
     BRAND_UPDATE_SUCCESS("Brand updated successfully."),
     BRAND_DELETE_SUCCESS("Brand deleted successfully."),
     BRAND_RESTORE_SUCCESS("Brand restored successfully."),
-
     STYLE_LIST_SUCCESS("Styles retrieved successfully."),
     STYLE_OPTIONS_SUCCESS("Style options retrieved successfully."),
     STYLE_BY_CATEGORY_SUCCESS("Styles for the category retrieved successfully."),
@@ -50,15 +47,18 @@ public enum ApiMessage {
     STYLE_VALUE_UPDATE_SUCCESS("Style value updated successfully."),
     STYLE_VALUE_DELETE_SUCCESS("Style value deleted successfully."),
     STYLE_VALUE_RESTORE_SUCCESS("Style value restored successfully."),
-
     AUTH_LOGIN_SUCCESS("Login successful."),
+    AUTH_LOGIN_REQUIRED("Please log in to change your password."),
     AUTH_REGISTER_SUCCESS("Registration successful. Enter the verification code sent to your email."),
     AUTH_OTP_SENT("A verification code has been sent to your email."),
     AUTH_OTP_RESENT("A new verification code has been sent to your email. It is valid for 5 minutes."),
     AUTH_ACCOUNT_ACTIVATED("Account activated successfully. You can now sign in."),
     AUTH_PASSWORD_RESET("Password reset successfully. You can now sign in with your new password."),
     AUTH_PASSWORD_CHANGED("Password changed successfully."),
-
+    AUTH_PASSWORD_SET_SUCCESS("Password set successfully! You can now sign in using your email and password."),
+    AUTH_SET_PASSWORD_LOGIN_REQUIRED("Please log in to set your password!"),
+    AUTH_UNAUTHORIZED("Unauthorized"),
+    AUTH_HAS_PASSWORD_STATUS("Has password status"),
     FILE_TOO_LARGE("The uploaded file exceeds the allowed size limit (10 MB per file)."),
     INVALID_DATA("The submitted data is invalid. Please check your input."),
     INVALID_FIELDS("Please check the submitted fields."),

@@ -7,6 +7,7 @@ public enum BusinessMessage {
     BRAND_HAS_PRODUCTS_DEACTIVATE("Không thể xóa mềm thương hiệu vì vẫn còn sản phẩm tham chiếu!"),
     BRAND_HAS_PRODUCTS_DELETE("Không thể xóa vĩnh viễn thương hiệu vì vẫn còn sản phẩm tham chiếu!"),
     USER_NOT_FOUND_EMAIL("User not found with email: %s"),
+    USER_ACCOUNT_NOT_FOUND("User account not found!"),
 
     CATEGORY_NOT_FOUND_ID("Không tìm thấy danh mục với ID: %s"),
     CATEGORY_NOT_FOUND_SLUG("Không tìm thấy danh mục với slug: %s"),
@@ -62,12 +63,36 @@ public enum BusinessMessage {
     STYLE_HAS_ACTIVE_VALUES("Không thể tắt kiểu thuộc tính vì vẫn còn %d giá trị đang hoạt động. Hãy tắt từng giá trị trước."),
 
     STYLE_VALUE_NOT_FOUND_ID("Không tìm thấy giá trị thuộc tính với ID: %s"),
+    STYLE_VALUE_NAME_EXISTS("Giá trị thuộc tính '%s' đã tồn tại trong kiểu này!"),
     STYLE_INACTIVE_CREATE_VALUE("Không thể tạo giá trị cho kiểu thuộc tính đã bị xóa!"),
     STYLE_INACTIVE_ASSIGN_VALUE("Không thể gán giá trị vào kiểu thuộc tính đã bị xóa!"),
     STYLE_VALUE_REFERENCED_UPDATE("Không thể chuyển giá trị sang kiểu khác khi biến thể đang tham chiếu giá trị này."),
+    STYLE_VALUE_REFERENCED_DELETE_DIRECT("Không thể xóa vĩnh viễn giá trị thuộc tính vì vẫn còn biến thể sản phẩm tham chiếu!"),
     STYLE_VALUE_IN_USE_DEACTIVATE("Không thể tắt giá trị thuộc tính vì đang được biến thể hoạt động sử dụng. Hãy tắt biến thể trước."),
     STYLE_INACTIVE_RESTORE_VALUE("Không thể khôi phục giá trị khi kiểu thuộc tính đang tắt."),
-    STYLE_INACTIVE_RESTORE_STYLE_VALUE("Không thể khôi phục giá trị thuộc tính khi kiểu thuộc tính đang bị xóa!");
+    STYLE_INACTIVE_RESTORE_STYLE_VALUE("Không thể khôi phục giá trị thuộc tính khi kiểu thuộc tính đang bị xóa!"),
+
+    // Authentication & Security (English messages preserved)
+    AUTH_PASSWORDS_DO_NOT_MATCH("Passwords do not match!"),
+    AUTH_EMAIL_ALREADY_EXISTS("This email is already in use! Please sign in."),
+    AUTH_PHONE_ALREADY_EXISTS("This phone number is already in use!"),
+    AUTH_INVALID_CREDENTIALS("Invalid email or password!"),
+    AUTH_INVALID_OR_EXPIRED_OTP("Invalid or expired OTP code!"),
+    AUTH_NEW_PASSWORD_REQUIRED("Please enter a new password!"),
+    AUTH_CONFIRM_PASSWORD_DOES_NOT_MATCH("Confirm password does not match!"),
+    AUTH_NEW_PASSWORD_MIN_LENGTH("New password must be at least 6 characters!"),
+    AUTH_USER_NOT_AUTHENTICATED("User is not authenticated!"),
+    AUTH_ACCOUNT_NO_PASSWORD_YET("This account has not set a password yet. Please use Set Password instead!"),
+    AUTH_CURRENT_PASSWORD_INCORRECT("Current password is incorrect!"),
+    AUTH_CONFIRM_NEW_PASSWORD_DOES_NOT_MATCH("Confirm new password does not match!"),
+    AUTH_NEW_PASSWORD_SAME_AS_CURRENT("New password cannot be the same as your current password!"),
+    AUTH_ACCOUNT_ALREADY_HAS_PASSWORD("This account already has a password. Please use Change Password instead!"),
+    AUTH_GOOGLE_TOKEN_EMPTY("Google token cannot be empty!"),
+    AUTH_GOOGLE_CLIENT_ID_MISMATCH("Google token client ID does not match server configuration!"),
+    AUTH_GOOGLE_TOKEN_INVALID("Invalid Google token: %s"),
+    AUTH_GOOGLE_EMAIL_NOT_VERIFIED("Google account email is not verified!"),
+    AUTH_GOOGLE_FAILED("Google authentication failed: %s"),
+    AUTH_NO_ACCOUNT_FOUND_EMAIL("No account found with this email address!");
 
     private final String message;
 
@@ -77,5 +102,9 @@ public enum BusinessMessage {
 
     public String getMessage() {
         return message;
+    }
+
+    public String format(Object... args) {
+        return (args != null && args.length > 0) ? String.format(this.message, args) : this.message;
     }
 }
