@@ -1,4 +1,4 @@
-package com.example.store.enums;
+package com.example.store.enums.error;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

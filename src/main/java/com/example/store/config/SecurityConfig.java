@@ -51,6 +51,8 @@ public class SecurityConfig {
                 // Reset & Set Password & Status APIs (must be authenticated)
                 .requestMatchers("/auth/reset-password", "/auth/set-password", "/auth/has-password").authenticated()
 
+                // Cart APIs (chỉ khách hàng)
+                .requestMatchers("/cart/**").hasAnyAuthority("CUSTOMER", "ROLE_CUSTOMER")
 
                 // Role-based reset password pages
                 .requestMatchers("/manager/reset-password").hasAnyAuthority("MANAGER", "ROLE_MANAGER")

@@ -6,8 +6,8 @@ import com.example.store.entity.Cart;
 
 import java.util.List;
 
-public class CartMapper {
-    public CartDTO toDTO(Cart cart) {
-        List<CartItemDTO> items = cart.getItems().stream().map(this::toItemDTO).toList();
-    }
-}
+//public class CartMapper {
+//    public CartDTO toDTO(Cart cart) {
+//        List<CartItemDTO> items = cart.getItems().stream().map(this::toItemDTO).toList();
+//    }
+//}

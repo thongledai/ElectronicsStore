@@ -3,5 +3,6 @@ package com.example.store.dto.request;
 import jakarta.validation.constraints.Min;
 
 public record UpdateCartItemRequest(
-        @Min(1) int count
+        @Min(value = 1, message = "Số lượng phải từ 1 trở lên")
+        int count
 ) {}

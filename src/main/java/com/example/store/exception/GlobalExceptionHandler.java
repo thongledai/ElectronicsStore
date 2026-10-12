@@ -25,6 +25,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(AppException.class)
+    public ResponseEntity<ApiResponse<?>> handleAppException(AppException appException) {
+        return ResponseEntity.badRequest()
+                .body(ApiResponse.error(appException.getMessage()));
+    }
+
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiResponse<?>> handleResourceNotFound(ResourceNotFoundException ex) {
         log.warn("Không tìm thấy tài nguyên: {}", ex.getMessage());
@@ -88,15 +94,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<?>> handleAccessDenied(AccessDeniedException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(ApiResponse.error(ApiMessage.ACCESS_DENIED));
-    }
-
-    @ExceptionHandler(AccountNotActivatedException.class)
-    public ResponseEntity<ApiResponse<?>> handleAccountNotActivated(AccountNotActivatedException ex) {
-        log.info("Account not activated for email: {}", ex.getEmail());
-        java.util.Map<String, Object> data = new java.util.HashMap<>();
-        data.put("email", ex.getEmail());
-        data.put("pendingActivation", true);
-        return ResponseEntity.badRequest().body(ApiResponse.error("ACCOUNT_NOT_ACTIVATED", data));
     }
 
     @ExceptionHandler(RuntimeException.class)

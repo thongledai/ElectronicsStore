@@ -2,9 +2,15 @@ package com.example.store.dto.request;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import org.hibernate.validator.constraints.UUID;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+import java.util.UUID;
 
+@Builder
 public record AddToCartRequest(
-    @NotNull UUID productVariantId,
-    @Min(1) int count
+    @NotNull(message = "Vui lòng chọn phân loại hàng")
+    UUID productVariantId,
+
+    @Min(value = 1, message = "Số lượng phải từ 1 trở lên")
+    int count
 ) {}

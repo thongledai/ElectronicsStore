@@ -1,4 +1,4 @@
-package com.example.store.enums;
+package com.example.store.enums.error;
 
 public interface ErrorCode {
     int getCode();
