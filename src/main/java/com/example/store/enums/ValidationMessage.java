@@ -5,6 +5,8 @@ public enum ValidationMessage {
     EMAIL_INVALID("Invalid email format"),
     PASSWORD_REQUIRED("Password is required"),
     FULL_NAME_REQUIRED("Full name is required"),
+    FULL_NAME_MAX_LENGTH("Full name must not exceed 200 characters"),
+    ROLE_REQUIRED("Role is required"),
     PHONE_REQUIRED("Phone number is required"),
     PHONE_INVALID("Invalid Vietnamese phone number (10 digits starting with 03, 05, 07, 08, 09)"),
     PASSWORD_MIN_LENGTH("Password must be at least 6 characters"),
@@ -49,6 +51,7 @@ public enum ValidationMessage {
     STYLE_VALUE_NAME_REQUIRED("Tên giá trị thuộc tính không được để trống"),
     STYLE_VALUE_NAME_MAX_LENGTH("Tên giá trị thuộc tính không được vượt quá 100 ký tự"),
     STYLE_VALUE_STYLE_REQUIRED("Style không được để trống"),
+    ADDRESS_MAX_LENGTH("Địa chỉ không được vượt quá 1200 ký tự"),
     IMAGE_INVALID("File tải lên phải là hình ảnh (JPG, PNG, WEBP) và có dung lượng tối đa 10MB");
 
     private final String message;

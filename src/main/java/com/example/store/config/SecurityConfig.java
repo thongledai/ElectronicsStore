@@ -62,7 +62,9 @@ public class SecurityConfig {
                 .requestMatchers("/manager/**").hasAnyAuthority("MANAGER", "ROLE_MANAGER")
                 .requestMatchers("/employee/**").hasAnyAuthority("EMPLOYEE", "ROLE_EMPLOYEE")
                 .requestMatchers("/shipper/**").hasAnyAuthority("SHIPPER", "ROLE_SHIPPER")
-                .requestMatchers("/customer/cart", "/customer/wishlist").hasAnyAuthority("CUSTOMER", "ROLE_CUSTOMER")
+                // Customer pages & APIs (must be authenticated)
+                .requestMatchers("/customer/cart", "/customer/wishlist", "/customer/profile").authenticated()
+                .requestMatchers("/api/customer/profile").authenticated()
 
                 // Any other request
                 .anyRequest().permitAll()

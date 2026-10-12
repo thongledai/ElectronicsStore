@@ -11,7 +11,7 @@ import com.example.store.dto.auth.RegisterDTO;
 import com.example.store.dto.auth.ResetPasswordDTO;
 import com.example.store.dto.auth.VerifyOtpDTO;
 import com.example.store.dto.common.ApiResponse;
-import com.example.store.dto.common.UserResponseDTO;
+import com.example.store.dto.user.UserResponseDTO;
 import com.example.store.entity.Role;
 import com.example.store.entity.User;
 import com.example.store.enums.OtpType;
@@ -68,8 +68,6 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
             if (Boolean.TRUE.equals(existingUser.getIsEmailActive())) {
                 throw new BusinessException(BusinessMessage.AUTH_EMAIL_ALREADY_EXISTS);
             } else {
-                // DO NOT overwrite existing user data or credentials!
-                // Signal client to show confirmation modal to verify account
                 throw new AccountNotActivatedException(normalizedEmail);
             }
         }

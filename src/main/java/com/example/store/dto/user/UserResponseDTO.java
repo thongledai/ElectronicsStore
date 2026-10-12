@@ -1,4 +1,4 @@
-package com.example.store.dto.common;
+package com.example.store.dto.user;
 
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class UserResponseDTO {
     private UUID id;
+    private String userCode;
     private String fullName;
     private String email;
     private String phone;
@@ -19,6 +20,10 @@ public class UserResponseDTO {
     private String avatar;
     private Boolean isEmailActive;
     private Boolean hasPassword;
+    private Integer point;
+    private java.math.BigDecimal eWallet;
+    private String addresses;
+    private java.time.LocalDateTime createdAt;
 }
 
 
