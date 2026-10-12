@@ -1,7 +1,6 @@
 package com.example.store.dto.respone;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.UUID;
 
 public record CartItemDTO(
@@ -11,9 +10,7 @@ public record CartItemDTO(
         String productName,
         String productImageUrl,
         BigDecimal unitPrice,           // giá hiện tại của sản phẩm
-        int count,
+        int quantity,
         BigDecimal subtotal,           // unitPrice × count
-        String styleValues,
-        boolean available,              // còn bán và đủ tồn kho
-        Integer availableStock        // tồn kho tối đa, dùng giới hạn ô nhập số lượng
+        String styleValues
 ) {}
