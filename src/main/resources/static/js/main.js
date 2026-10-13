@@ -956,6 +956,12 @@ function initAccountLabel() {
     el.style.display = isManager ? 'block' : 'none';
   });
 
+  // Chỉ role CUSTOMER mới có quyền xem Profile; Manager và các role khác khi chuyển sang trang người dùng bị ẩn/xóa ngay mục Profile
+  const isCustomer = isLoggedIn && (userRole === 'CUSTOMER' || userRole === 'ROLE_CUSTOMER');
+  document.querySelectorAll('.js-profile-item').forEach(el => {
+    el.style.display = isCustomer ? 'block' : 'none';
+  });
+
   const updatePasswordLinks = (hasPass) => {
     document.querySelectorAll('.js-password-link').forEach(el => {
       if (isLoggedIn && hasPass === false) {

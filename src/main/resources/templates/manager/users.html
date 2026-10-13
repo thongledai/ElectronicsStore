@@ -139,25 +139,22 @@
         </div>
         <div class="modal-body">
           <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
-            <div class="position-relative" style="width: 54px; height: 54px;">
-              <img id="detailAvatarImg" class="rounded-circle border object-fit-cover shadow-sm" style="width: 54px; height: 54px; display: none;" alt="Avatar">
-              <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fs-4 fw-bold" style="width: 54px; height: 54px;" id="detailAvatar">
-                U
-              </div>
+            <div class="rounded-circle overflow-hidden border shadow-sm flex-shrink-0" style="width: 58px; height: 58px;">
+              <img id="detailAvatarImg" class="w-100 h-100 object-fit-cover" alt="Avatar" src="https://ui-avatars.com/api/?name=User&background=0d6efd&color=fff">
             </div>
-            <div>
-              <h5 class="mb-0 fw-bold" id="detailFullName">---</h5>
+            <div class="min-w-0">
+              <h5 class="mb-0 fw-bold text-truncate" id="detailFullName">---</h5>
               <span class="text-muted" id="detailUserCode">---</span>
             </div>
           </div>
           <div class="row g-3">
-            <div class="col-6">
+            <div class="col-12 col-sm-6">
               <label class="text-muted small">Email</label>
-              <div class="fw-semibold" id="detailEmail">---</div>
+              <div class="fw-semibold text-break" id="detailEmail" style="word-break: break-all; overflow-wrap: anywhere;">---</div>
             </div>
-            <div class="col-6">
+            <div class="col-12 col-sm-6">
               <label class="text-muted small">Số điện thoại</label>
-              <div class="fw-semibold" id="detailPhone">---</div>
+              <div class="fw-semibold text-break" id="detailPhone">---</div>
             </div>
             <div class="col-6">
               <label class="text-muted small">Vai trò</label>

@@ -172,6 +172,77 @@
     }, 35000);
   }
 
+  /* ---------- User Avatar & Identity in Dashboard Topbar ---------- */
+  function initUserAvatar() {
+    let user = null;
+    try {
+      user = JSON.parse(localStorage.getItem('technova_user') || 'null');
+    } catch (_) {}
+
+    const token = localStorage.getItem('technova_jwt');
+    let role = (localStorage.getItem('technova_role') || (user && user.role) || document.documentElement.getAttribute('data-role') || 'Manager').toUpperCase();
+
+    const fullName = user && (user.name || user.fullName) ? (user.name || user.fullName) : role;
+    const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=0d6efd&color=fff`;
+    const avatarUrl = user && user.avatar ? user.avatar : defaultAvatar;
+
+    document.querySelectorAll('.js-topbar-username').forEach(el => {
+      el.textContent = fullName;
+    });
+    document.querySelectorAll('.js-topbar-name').forEach(el => {
+      el.textContent = 'Xin chào, ' + fullName;
+    });
+    document.querySelectorAll('.js-topbar-role').forEach(el => {
+      el.textContent = role.replace('ROLE_', '');
+    });
+
+    document.querySelectorAll('.js-topbar-avatar').forEach(img => {
+      img.onerror = () => {
+        img.onerror = null;
+        img.src = defaultAvatar;
+      };
+      img.src = avatarUrl;
+    });
+
+    document.querySelectorAll('.role-avatar').forEach(el => {
+      if (user && user.avatar) {
+        el.innerHTML = `<img src="${user.avatar}" class="w-100 h-100 rounded-circle object-fit-cover" alt="avatar" onerror="this.onerror=null; this.parentElement.textContent='${role.charAt(0)}';">`;
+      } else {
+        el.textContent = role.charAt(0);
+      }
+    });
+
+    // Background fetch if user data is missing in cache
+    if (token && (!user || !user.avatar || !user.name)) {
+      fetch('/api/customer/profile', {
+        headers: { 'Accept': 'application/json', 'Authorization': 'Bearer ' + token }
+      }).then(r => r.ok ? r.json() : null)
+        .then(res => {
+          if (res && res.success && res.data) {
+            const u = res.data;
+            const updated = {
+              ...(user || {}),
+              name: u.fullName || user?.name || role,
+              email: u.email || user?.email || '',
+              role: u.role || user?.role || role,
+              avatar: u.avatar || null
+            };
+            try { localStorage.setItem('technova_user', JSON.stringify(updated)); } catch (_) {}
+            initUserAvatar();
+          }
+        }).catch(() => {});
+    }
+  }
+
+  window.updateDashboardUserAvatar = function(avatarUrl, newName) {
+    let user = {};
+    try { user = JSON.parse(localStorage.getItem('technova_user') || '{}'); } catch (_) {}
+    if (avatarUrl !== undefined) user.avatar = avatarUrl;
+    if (newName) user.name = newName;
+    try { localStorage.setItem('technova_user', JSON.stringify(user)); } catch (_) {}
+    initUserAvatar();
+  };
+
   initSessionManager();
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -179,6 +250,7 @@
     initTableSearch();
     initDemoActions();
     initLogoutHandler();
+    initUserAvatar();
   });
 
   window.toast = toast;
