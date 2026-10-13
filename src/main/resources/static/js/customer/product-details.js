@@ -171,6 +171,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var value = parseInt(qtyInput.value, 10) || 1;
             if (value > 1) value--;
             qtyInput.value = value;
+            updateQuantityButtons();
         });
     }
 
@@ -180,6 +181,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var max   = parseInt(qtyInput.max,   10) || 10;
             if (value < max) value++;
             qtyInput.value = value;
+            updateQuantityButtons();
         });
     }
 
@@ -190,7 +192,16 @@ document.addEventListener('DOMContentLoaded', function () {
             if (value < 1)   value = 1;
             if (value > max) value = max;
             qtyInput.value = value;
+            updateQuantityButtons();
         });
+    }
+
+    function updateQuantityButtons() {
+        if (!qtyInput) return;
+        var value = parseInt(qtyInput.value, 10) || 1;
+        var max = parseInt(qtyInput.max, 10) || 10;
+        if (btnQtyMinus) btnQtyMinus.disabled = value <= 1;
+        if (btnQtyPlus) btnQtyPlus.disabled = value >= max;
     }
 
 
@@ -211,6 +222,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (currentPrice) {
             currentPrice.textContent = formatVnd(effectivePrice);
         }
+        if (btnAddToCart) btnAddToCart.dataset.variantId = variant.id || '';
 
         /* ---- Giá cũ + badge giảm giá ---- */
         if (
@@ -219,7 +231,7 @@ document.addEventListener('DOMContentLoaded', function () {
         ) {
             if (currentOldPrice) {
                 currentOldPrice.textContent = formatVnd(variant.price);
-                currentOldPrice.hidden = false;
+                currentOldPrice.classList.remove('price-hidden');
             }
 
             if (currentDiscountBadge) {
@@ -229,12 +241,12 @@ document.addEventListener('DOMContentLoaded', function () {
                     ) / Number(variant.price)
                 );
                 currentDiscountBadge.textContent = '-' + discount + '%';
-                currentDiscountBadge.hidden = false;
+                currentDiscountBadge.classList.remove('price-hidden');
             }
 
         } else {
-            if (currentOldPrice)       currentOldPrice.hidden = true;
-            if (currentDiscountBadge)  currentDiscountBadge.hidden = true;
+            if (currentOldPrice)       currentOldPrice.classList.add('price-hidden');
+            if (currentDiscountBadge)  currentDiscountBadge.classList.add('price-hidden');
         }
 
         /* ---- Tình trạng kho ---- */
@@ -249,6 +261,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 if (qtyInput) {
                     qtyInput.max = Math.min(Number(variant.quantity), 10);
+                    var requestedQuantity = parseInt(qtyInput.value, 10) || 1;
+                    qtyInput.value = Math.min(requestedQuantity, Number(qtyInput.max));
                 }
 
             } else {
@@ -256,8 +270,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     '<strong class="text-danger">Tạm hết hàng</strong>';
 
                 if (btnAddToCart) btnAddToCart.disabled = true;
+                if (qtyInput) {
+                    qtyInput.max = 1;
+                    qtyInput.value = 1;
+                }
             }
         }
+        updateQuantityButtons();
 
         /* ---- SKU ---- */
         if (currentSku) {
@@ -276,39 +295,135 @@ document.addEventListener('DOMContentLoaded', function () {
        ========================================================= */
 
     function setupVariantSwitcher(variants) {
+        var controls = document.getElementById('variantConfigControls');
+        if (!controls || !Array.isArray(variants) || variants.length === 0) return;
 
-        var variantButtons = document.querySelectorAll('.js-variant-choice');
-
-        variantButtons.forEach(function (button) {
-            button.addEventListener('click', function () {
-
-                var variantId = button.getAttribute('data-variant-id');
-
-                var variant = variants.find(function (item) {
-                    return String(item.id) === String(variantId);
-                });
-
-                if (!variant) return;
-
-                /* Cập nhật trạng thái active */
-                variantButtons.forEach(function (item) {
-                    item.classList.remove('active');
-                });
-                button.classList.add('active');
-
-                /* Cập nhật trang */
-                applyVariant(variant);
+        var groupsByKey = new Map();
+        variants.forEach(function (variant) {
+            (variant.styleValues || []).forEach(function (styleValue) {
+                var key = String(styleValue.styleId || styleValue.styleName || '');
+                if (!key) return;
+                if (!groupsByKey.has(key)) {
+                    groupsByKey.set(key, { key: key, name: styleValue.styleName || 'Cấu hình', values: new Map() });
+                }
+                var valueKey = String(styleValue.id || styleValue.name || '');
+                if (valueKey) groupsByKey.get(key).values.set(valueKey, styleValue.name || valueKey);
             });
         });
+
+        var groups = Array.from(groupsByKey.values());
+        function stylePriority(name) {
+            var value = String(name || '').toLowerCase();
+            if (/color|colour|màu/.test(value)) return 0;
+            if (/storage|dung lượng|bộ nhớ|ram/.test(value)) return 1;
+            if (/size|kích thước|màn hình/.test(value)) return 2;
+            return 3;
+        }
+        groups.sort(function (a, b) {
+            return stylePriority(a.name) - stylePriority(b.name) || a.name.localeCompare(b.name);
+        });
+        var availableVariants = variants.filter(function (variant) { return Number(variant.quantity) > 0; });
+        var selectedVariant = availableVariants[0] || variants[0];
+        var selectedValues = new Map();
+
+        function valueFor(variant, styleKey) {
+            var value = (variant.styleValues || []).find(function (styleValue) {
+                return String(styleValue.styleId || styleValue.styleName || '') === styleKey;
+            });
+            return value ? String(value.id || value.name || '') : '';
+        }
+
+        groups.forEach(function (group) {
+            selectedValues.set(group.key, valueFor(selectedVariant, group.key));
+        });
+
+        function matches(variant, exceptStyle, candidateValue) {
+            return groups.every(function (group) {
+                var expected = group.key === exceptStyle ? candidateValue : selectedValues.get(group.key);
+                return expected && valueFor(variant, group.key) === expected;
+            });
+        }
+
+        function matchesThrough(variant, groupIndex, candidateValue) {
+            return groups.slice(0, groupIndex).every(function (group) {
+                return valueFor(variant, group.key) === selectedValues.get(group.key);
+            }) && valueFor(variant, groups[groupIndex].key) === candidateValue;
+        }
+
+        function render() {
+            controls.replaceChildren();
+            if (groups.length === 0) {
+                var simpleGroup = document.createElement('div');
+                simpleGroup.className = 'variant-config-group';
+                var simpleLabel = document.createElement('span');
+                simpleLabel.className = 'variant-config-label';
+                simpleLabel.textContent = 'Phiên bản';
+                simpleGroup.appendChild(simpleLabel);
+                variants.forEach(function (variant, index) {
+                    var option = document.createElement('button');
+                    option.type = 'button';
+                    option.className = 'variant-option' + (variant.id === selectedVariant.id ? ' active' : '');
+                    option.disabled = Number(variant.quantity) <= 0;
+                    option.textContent = 'Cấu hình ' + (index + 1);
+                    option.addEventListener('click', function () {
+                        selectedVariant = variant;
+                        render();
+                        applyVariant(variant);
+                    });
+                    simpleGroup.appendChild(option);
+                });
+                controls.appendChild(simpleGroup);
+                applyVariant(selectedVariant);
+                return;
+            }
+
+            groups.forEach(function (group) {
+                var groupElement = document.createElement('div');
+                groupElement.className = 'variant-config-group';
+                var label = document.createElement('span');
+                label.className = 'variant-config-label';
+                label.textContent = group.name;
+                groupElement.appendChild(label);
+
+                group.values.forEach(function (valueName, valueKey) {
+                    var option = document.createElement('button');
+                    option.type = 'button';
+                    option.className = 'variant-option' + (selectedValues.get(group.key) === valueKey ? ' active' : '');
+                    option.textContent = valueName;
+                    option.setAttribute('aria-pressed', String(selectedValues.get(group.key) === valueKey));
+                    option.disabled = !variants.some(function (variant) {
+                        return Number(variant.quantity) > 0 && matchesThrough(variant, groups.indexOf(group), valueKey);
+                    });
+                    option.addEventListener('click', function () {
+                        if (option.disabled) return;
+                        var nextVariant = variants.find(function (variant) {
+                            return Number(variant.quantity) > 0 && matches(variant, group.key, valueKey);
+                        }) || variants.find(function (variant) {
+                            return Number(variant.quantity) > 0 && matchesThrough(variant, groups.indexOf(group), valueKey);
+                        });
+                        if (!nextVariant) return;
+                        selectedVariant = nextVariant;
+                        groups.forEach(function (item) {
+                            selectedValues.set(item.key, valueFor(nextVariant, item.key));
+                        });
+                        render();
+                        applyVariant(selectedVariant);
+                    });
+                    groupElement.appendChild(option);
+                });
+                controls.appendChild(groupElement);
+            });
+
+            applyVariant(selectedVariant);
+        }
+
+        render();
     }
-
-
     /* =========================================================
        LOAD VARIANTS FROM API
        Dùng slug trong URL để gọi /api/products/{slug}.
        Nếu API thành công → setupVariantSwitcher với dữ liệu đầy đủ.
-       Nếu API lỗi → variant buttons vẫn hiển thị đúng (do Thymeleaf
-       đã render sẵn), chỉ thiếu khả năng đổi gallery khi click.
+       Nếu API lỗi, thông báo trạng thái thay vì cho chọn nhầm phiên bản.
        ========================================================= */
 
     var pathParts = window.location.pathname
@@ -341,20 +456,9 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .catch(function (error) {
             console.warn('Không thể tải dữ liệu biến thể:', error);
-
-            /*
-             * Fallback: gắn click handler mà không có gallery update.
-             * Ít nhất nút variant vẫn toggle active state.
-             */
-            var variantButtons = document.querySelectorAll('.js-variant-choice');
-            variantButtons.forEach(function (button) {
-                button.addEventListener('click', function () {
-                    variantButtons.forEach(function (item) {
-                        item.classList.remove('active');
-                    });
-                    button.classList.add('active');
-                });
-            });
+            var controls = document.getElementById('variantConfigControls');
+            if (controls) controls.innerHTML = '<span class="text-danger small">Không tải được cấu hình. Vui lòng tải lại trang.</span>';
+            if (btnAddToCart) btnAddToCart.disabled = true;
         });
     }
 

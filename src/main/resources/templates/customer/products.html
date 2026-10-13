@@ -24,7 +24,7 @@
 
   <section class="section">
     <div class="container">
-      <div class="row g-4">
+      <div class="row g-3 products-layout">
 
         <!-- ==========================================================
              FILTER SIDEBAR
@@ -32,25 +32,76 @@
         <aside class="col-lg-3">
           <button class="btn btn-ghost w-100 d-lg-none mb-3" type="button"
                   data-bs-toggle="collapse" data-bs-target="#filterPanel" aria-expanded="false">
-            <i class="fas fa-layer-group me-2"></i>Danh mục
+            <i class="fas fa-filter me-2"></i>Bộ lọc sản phẩm
           </button>
 
           <div class="collapse d-lg-block" id="filterPanel">
-            <div class="filter-panel">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <h2 class="h6 mb-0"><i class="fas fa-filter me-2 text-primary"></i>Danh mục</h2>
-                <a href="#" class="btn btn-sm btn-link p-0 text-decoration-none text-danger js-clear-category">
-                  Bỏ chọn
-                </a>
-              </div>
-
-              <!-- Category list populated by JS -->
-              <div class="filter-group">
-                <div id="categoryList" class="d-flex flex-column gap-2">
-                  <div class="text-center text-muted py-3"><i class="fas fa-spinner fa-spin me-2"></i>Đang tải...</div>
+            <form id="productFilterForm" th:action="@{/customer/products}" method="get">
+              <div class="products-search mb-3">
+                <label class="form-label" for="filterSearch">Tìm kiếm sản phẩm</label>
+                <div class="input-group">
+                  <input id="filterSearch" class="form-control" name="q" type="search" maxlength="200"
+                         placeholder="Tên, mã, thương hiệu..." autocomplete="off">
+                  <button class="btn btn-brand" type="submit" aria-label="Tìm kiếm"><i class="fas fa-magnifying-glass"></i></button>
                 </div>
               </div>
-            </div>
+              <div class="filter-panel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h2 class="h6 mb-0"><i class="fas fa-filter me-2 text-primary"></i>Lọc sản phẩm</h2>
+                  <a href="#" class="btn btn-sm btn-link p-0 text-decoration-none text-danger js-clear-filters">Xóa lọc</a>
+                </div>
+
+                <div class="filter-group mb-3">
+                  <label class="form-label" for="filterCategory">Danh mục</label>
+                  <select id="filterCategory" class="form-select" name="category">
+                    <option value="">Tất cả danh mục</option>
+                    <option th:each="cat : ${categories}" th:value="${cat.slug}" th:text="${cat.name}"></option>
+                  </select>
+                </div>
+                <div class="filter-group mb-3">
+                  <label class="form-label" for="filterBrand">Thương hiệu</label>
+                  <select id="filterBrand" class="form-select" name="brand">
+                    <option value="">Tất cả thương hiệu</option>
+                    <option th:each="brand : ${brands}" th:value="${brand.slug}" th:text="${brand.name}"></option>
+                  </select>
+                </div>
+                <div class="filter-group mb-3">
+                  <label class="form-label">Khoảng giá (₫)</label>
+                  <div class="d-flex gap-2">
+                    <input id="minPrice" class="form-control" name="minPrice" type="number" min="0" step="1"
+                           inputmode="numeric" placeholder="Từ giá">
+                    <input id="maxPrice" class="form-control" name="maxPrice" type="number" min="0" step="1"
+                           inputmode="numeric" placeholder="Đến giá">
+                  </div>
+                </div>
+                <div class="filter-group mb-3">
+                  <label class="form-label" for="filterStockStatus">Tồn kho</label>
+                  <select id="filterStockStatus" class="form-select" name="stockStatus">
+                    <option value="">Tất cả sản phẩm</option>
+                    <option value="in-stock">Còn hàng</option>
+                    <option value="out-of-stock">Hết hàng</option>
+                  </select>
+                </div>
+                <div class="filter-group mb-3">
+                  <label class="form-label" for="minRating">Đánh giá tối thiểu</label>
+                  <select id="minRating" class="form-select" name="minRating">
+                    <option value="">Tất cả đánh giá</option>
+                    <option value="4">Từ 4 sao</option>
+                    <option value="3">Từ 3 sao</option>
+                    <option value="2">Từ 2 sao</option>
+                    <option value="1">Từ 1 sao</option>
+                  </select>
+                </div>
+                <div class="form-check mb-3">
+                  <input id="onSale" class="form-check-input" type="checkbox" name="onSale" value="true">
+                  <label class="form-check-label" for="onSale">Đang giảm giá</label>
+                </div>
+                <button class="btn btn-brand w-100" type="submit">
+                  <i class="fas fa-magnifying-glass me-2"></i>Áp dụng bộ lọc
+                </button>
+                <div id="filterMessage" class="small text-danger mt-3" role="alert" aria-live="polite"></div>
+              </div>
+            </form>
           </div>
         </aside>
 
@@ -59,10 +110,20 @@
              ========================================================== -->
         <div class="col-lg-9">
           <!-- Toolbar -->
-          <div class="toolbar mb-4">
-            <p class="result-count mb-0" id="resultCount">
-              Đang tải sản phẩm...
-            </p>
+          <div class="toolbar mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <p class="result-count mb-0" id="resultCount" aria-live="polite">Đang tải sản phẩm...</p>
+            <div class="d-flex align-items-center gap-2">
+              <label for="sortOrder" class="form-label mb-0 text-nowrap">Sắp xếp:</label>
+              <select id="sortOrder" class="form-select form-select-sm" aria-label="Sắp xếp sản phẩm">
+                <option value="">Mới nhất</option>
+                <option value="oldest">Cũ hơn</option>
+                <option value="price-asc">Giá tăng dần</option>
+                <option value="price-desc">Giá giảm dần</option>
+                <option value="rating">Đánh giá cao</option>
+                <option value="popular">Bán chạy</option>
+                <option value="discount">Giảm giá nhiều</option>
+              </select>
+            </div>
           </div>
 
           <!-- Products grid populated by JS -->
@@ -71,6 +132,9 @@
               <i class="fas fa-spinner fa-spin fa-2x text-muted"></i>
             </div>
           </div>
+          <nav class="mt-4" aria-label="Phân trang sản phẩm">
+            <ul class="pagination justify-content-center" id="productPagination"></ul>
+          </nav>
         </div>
 
       </div>

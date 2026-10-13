@@ -5,7 +5,9 @@ import java.util.List;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -28,12 +30,18 @@ public class ProductListViewController {
     private final ICategoryService categoryService;
     private final IBrandService brandService;
 
+    @InitBinder("productFilterDTO")
+    public void configureProductFilterBinder(WebDataBinder binder) {
+        // Page and size are controlled here, so malformed values cannot break page rendering.
+        binder.setDisallowedFields("page", "size");
+    }
+
     @GetMapping("/customer/products")
     public String productListPage(
-            @ModelAttribute ProductFilterDTO filterDTO,
-            @RequestParam(name = "page", defaultValue = "1") int page,
+            @ModelAttribute("productFilterDTO") ProductFilterDTO filterDTO,
+            @RequestParam(name = "page", defaultValue = "1") String pageValue,
             Model model) {
-        // Chuyển đổi page từ 1-indexed sang 0-indexed cho service
+        int page = parsePage(pageValue);
         int zeroIndexedPage = Math.max(0, page - 1);
         filterDTO.setPage(zeroIndexedPage);
         filterDTO.setSize(12);
@@ -51,5 +59,14 @@ public class ProductListViewController {
         model.addAttribute("currentPage", page);
 
         return "customer/products";
+    }
+
+    private int parsePage(String value) {
+        try {
+            int requestedPage = Integer.parseInt(value);
+            return Math.max(1, requestedPage);
+        } catch (NumberFormatException ex) {
+            return 1;
+        }
     }
 }

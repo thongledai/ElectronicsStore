@@ -27,7 +27,7 @@ public class ProductDetailViewController {
                 product.getId(),
                 product.getCategory() != null ? product.getCategory().getId() : null,
                 product.getBrand() != null ? product.getBrand().getId() : null,
-                4
+                5
         );
 
         model.addAttribute("product", product);
