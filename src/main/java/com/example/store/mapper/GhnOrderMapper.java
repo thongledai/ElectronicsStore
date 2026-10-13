@@ -49,33 +49,56 @@ public class GhnOrderMapper {
     public int getDefaultWidthCm() { return width; }
     public int getDefaultHeightCm() { return height; }
 
-    public GhnCreateOrderRequest toCreateOrderRequest(Order order) {
-        long value = toVnd(order.getAmountFromUser());
-        return GhnCreateOrderRequest.builder()
-                .paymentTypeId(paymentTypeId)
-                .requiredNote(requiredNote)
-                .clientOrderCode(order.getId().toString())
-                .toName(order.getUser().getFullName().trim())
-                .toPhone(normalizePhone(order.getPhone()))
-                .toAddress(order.getAddress().trim())
-                .toWardName(order.getToWardName().trim())
-                .toDistrictName(newAddressModel ? null : trim(order.getToDistrictName()))
-                .toProvinceName(order.getToProvinceName().trim())
-                .isNewToAddress(newAddressModel)
-                .serviceTypeId(SERVICE_TYPE_STANDARD)
-                .weight(calculateTotalWeightGram(order))
-                .length(length).width(width).height(height)
-                .codAmount(Boolean.TRUE.equals(order.getIsPaidBefore()) ? 0L : value)
-                .orderValue(value)
-                .insuranceValue(Math.min(value, MAX_INSURANCE_VALUE))
-                .items(order.getItems().stream().map(item -> GhnCreateOrderRequest.Item.builder()
-                        .name(item.getVariant().getProduct().getName())
-                        .code(item.getVariant().getSku())
-                        .quantity(item.getCount())
-                        .weight(itemWeight).length(length).width(width).height(height)
-                        .build()).toList())
-                .build();
-    }
+    
+public GhnCreateOrderRequest toCreateOrderRequest(Order order) {
+    return toCreateOrderRequest(
+            order,
+            order.getAddress(),
+            order.getToWardName(),
+            order.getToProvinceName());
+}
+
+public GhnCreateOrderRequest toCreateOrderRequest(
+        Order order,
+        String toAddress,
+        String toWardName,
+        String toProvinceName) {
+
+    long value = toVnd(order.getAmountFromUser());
+
+    return GhnCreateOrderRequest.builder()
+            .paymentTypeId(paymentTypeId)
+            .requiredNote(requiredNote)
+            .clientOrderCode(order.getId().toString())
+            .toName(order.getUser().getFullName().trim())
+            .toPhone(normalizePhone(order.getPhone()))
+            .toAddress(toAddress == null ? null : toAddress.trim())
+            .toWardName(toWardName == null ? null : toWardName.trim())
+            .toDistrictName(newAddressModel ? null : trim(order.getToDistrictName()))
+            .toProvinceName(toProvinceName == null ? null : toProvinceName.trim())
+            .isNewToAddress(newAddressModel)
+            .serviceTypeId(SERVICE_TYPE_STANDARD)
+            .weight(calculateTotalWeightGram(order))
+            .length(length)
+            .width(width)
+            .height(height)
+            .codAmount(Boolean.TRUE.equals(order.getIsPaidBefore()) ? 0L : value)
+            .orderValue(value)
+            .insuranceValue(Math.min(value, MAX_INSURANCE_VALUE))
+            .items(order.getItems().stream()
+                    .map(item -> GhnCreateOrderRequest.Item.builder()
+                            .name(item.getVariant().getProduct().getName())
+                            .code(item.getVariant().getSku())
+                            .quantity(item.getCount())
+                            .weight(itemWeight)
+                            .length(length)
+                            .width(width)
+                            .height(height)
+                            .build())
+                    .toList())
+            .build();
+}
+
 
     public long calculateCodAmount(Order order) {
         return Boolean.TRUE.equals(order.getIsPaidBefore()) ? 0L : toVnd(order.getAmountFromUser());

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+import com.example.store.dto.ghn.GhnCreateOrderPreviewDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -61,6 +62,94 @@ public class GhnDeliveryServiceImpl implements IGhnDeliveryService {
         if (StringUtils.hasText(order.getGhnOrderCode())) throw new BusinessException("Đơn đã có vận đơn GHN; không thể đổi địa chỉ.");
         validateAndApplyAddress(order, input);
     }
+    
+        @Override
+        @Transactional(readOnly = true)
+        public GhnCreateOrderPreviewDTO previewShipment(
+                UUID orderId,
+                GhnShipmentCreateRequestDTO input) {
+
+            Order order = orderRepository.findDetailedById(orderId)
+                    .orElseThrow(() ->
+                            new ResourceNotFoundException("Không tìm thấy đơn hàng."));
+
+            ensureConfirmed(order);
+
+            if (StringUtils.hasText(order.getGhnOrderCode())) {
+                throw new BusinessException(
+                        "Đơn hàng đã có vận đơn GHN, không cần tạo Preview.");
+            }
+
+            if (!orderMapper.isNewAddressModel()) {
+                throw new BusinessException(
+                        "GHN_NEW_ADDRESS_MODEL phải là true để dùng danh mục địa chỉ 2 cấp.");
+            }
+
+            if (input == null
+                    || input.getProvinceId() == null
+                    || input.getWardId() == null) {
+                throw new BusinessException(
+                        "Hãy chọn tỉnh/thành và phường/xã từ danh mục GHN.");
+            }
+
+            String detail = input.getAddressDetail() == null
+                    ? ""
+                    : input.getAddressDetail().trim();
+
+            if (!StringUtils.hasText(detail)) {
+                throw new BusinessException(
+                        "Nhập số nhà và tên đường trong địa chỉ chi tiết.");
+            }
+
+            if (detail.length() > 500) {
+                throw new BusinessException(
+                        "Địa chỉ chi tiết tối đa 500 ký tự.");
+            }
+
+            GhnAddressOptionDTO province = addressService.getProvinces()
+                    .stream()
+                    .filter(item -> item.getId() != null
+                            && item.getId().equals(input.getProvinceId()))
+                    .findFirst()
+                    .orElseThrow(() -> new BusinessException(
+                            "Tỉnh/thành không còn trong danh mục GHN; hãy tải lại trang."));
+
+            GhnAddressOptionDTO ward = addressService.getWards(province.getId())
+                    .stream()
+                    .filter(item -> item.getId() != null
+                            && item.getId().equals(input.getWardId()))
+                    .findFirst()
+                    .orElseThrow(() -> new BusinessException(
+                            "Phường/xã không thuộc tỉnh/thành đã chọn; hãy chọn lại."));
+
+            String toAddress = detail + ", "
+                    + ward.getName() + ", "
+                    + provinceAddressLabel(province);
+
+            validatePreviewReady(order, toAddress, ward.getName(), province.getName());
+
+            GhnCreateOrderRequest base = orderMapper.toCreateOrderRequest(
+                    order,
+                    toAddress,
+                    ward.getName(),
+                    province.getName());
+
+            GhnCreateOrderRequest payload = applyOverrides(base, order, input);
+
+            return GhnCreateOrderPreviewDTO.builder()
+                    .sourceAddress(order.getAddress())
+                    .provinceId(province.getId())
+                    .wardId(ward.getId())
+                    .provinceName(province.getName())
+                    .wardName(ward.getName())
+                    .addressSource(
+                            "GHN staging v3 master-data API; freshly fetched for this request")
+                    .validated(true)
+                    .districtFieldOmitted(payload.getToDistrictName() == null)
+                    .payload(payload)
+                    .build();
+        }
+
 
     @Override
     @Transactional
@@ -160,6 +249,60 @@ public class GhnDeliveryServiceImpl implements IGhnDeliveryService {
                 .weight(weight).length(length).width(width).height(height).codAmount(base.getCodAmount())
                 .orderValue(base.getOrderValue()).insuranceValue(base.getInsuranceValue()).items(base.getItems()).build();
     }
+
+    
+    private void validatePreviewReady(
+            Order order,
+            String toAddress,
+            String wardName,
+            String provinceName) {
+
+        List<String> invalid = new ArrayList<>();
+
+        if (order.getUser() == null
+                || !StringUtils.hasText(order.getUser().getFullName())) {
+            invalid.add("tên người nhận");
+        }
+
+        if (GhnOrderMapper.normalizePhone(order.getPhone()) == null) {
+            invalid.add("số điện thoại 10 số");
+        }
+
+        if (!StringUtils.hasText(toAddress)) {
+            invalid.add("địa chỉ");
+        }
+
+        if (!StringUtils.hasText(wardName)) {
+            invalid.add("phường/xã");
+        }
+
+        if (!StringUtils.hasText(provinceName)) {
+            invalid.add("tỉnh/thành");
+        }
+
+        if (order.getItems() == null || order.getItems().isEmpty()) {
+            invalid.add("sản phẩm trong đơn");
+        }
+
+        if (!invalid.isEmpty()) {
+            throw new BusinessException(
+                    "Thiếu dữ liệu tạo vận đơn: "
+                            + String.join(", ", invalid) + ".");
+        }
+
+        int totalWeight = orderMapper.calculateTotalWeightGram(order);
+
+        if (totalWeight <= 0
+                || totalWeight > GhnOrderMapper.MAX_WEIGHT_GRAM_SERVICE_2) {
+            throw new BusinessException(
+                    "Tổng khối lượng phải từ 1 đến 19.999 gram cho dịch vụ GHN đang cấu hình.");
+        }
+
+        if (orderMapper.calculateCodAmount(order) > GhnOrderMapper.MAX_COD_AMOUNT) {
+            throw new BusinessException("Tiền thu hộ vượt giới hạn GHN.");
+        }
+    }
+
 
     private void ensureConfirmed(Order order) {
         if (currentStatus(order) != OrderStatusName.CONFIRMED) throw new BusinessException("Chỉ thao tác vận đơn khi đơn đã được xác nhận.");

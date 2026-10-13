@@ -18,6 +18,7 @@ import com.example.store.dto.ghn.GhnShipmentCreateRequestDTO;
 import com.example.store.dto.ghn.GhnShipmentResponseDTO;
 import com.example.store.service.delivery.IGhnAddressService;
 import com.example.store.service.delivery.IGhnDeliveryService;
+import com.example.store.dto.ghn.GhnCreateOrderPreviewDTO;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -52,6 +53,20 @@ public class OrderShipmentEmployeeControllerAPI {
         deliveryService.saveAddressSelection(orderId, request);
         return ResponseEntity.ok(ApiResponse.success("Đã lưu địa chỉ GHN cho đơn hàng."));
     }
+
+    
+    @PostMapping("/{orderId}/ghn-shipment/preview")
+    public ResponseEntity<ApiResponse<GhnCreateOrderPreviewDTO>> previewShipment(
+            @PathVariable UUID orderId,
+            @Valid @RequestBody GhnShipmentCreateRequestDTO request) {
+
+        GhnCreateOrderPreviewDTO result =
+                deliveryService.previewShipment(orderId, request);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("Preview payload GHN thành công.", result));
+    }
+
 
     @PostMapping("/{orderId}/ghn-shipment")
     public ResponseEntity<ApiResponse<GhnShipmentResponseDTO>> createShipment(@PathVariable UUID orderId,
