@@ -101,49 +101,58 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
                 AND (:q IS NULL OR :q = '' OR
                     LOWER(p.name) LIKE LOWER(CONCAT('%', :q, '%')) OR
                     LOWER(p.slug) LIKE LOWER(CONCAT('%', :q, '%')) OR
-                    LOWER(p.description) LIKE LOWER(CONCAT('%', :q, '%'))
+                    LOWER(p.description) LIKE LOWER(CONCAT('%', :q, '%')) OR
+                    LOWER(c.name) LIKE LOWER(CONCAT('%', :q, '%')) OR
+                    LOWER(b.name) LIKE LOWER(CONCAT('%', :q, '%')) OR
+                    EXISTS (
+                        SELECT 1 FROM ProductVariant sv
+                        WHERE sv.product = p AND sv.isSelling = true AND sv.isActive = true
+                            AND LOWER(sv.sku) LIKE LOWER(CONCAT('%', :q, '%'))
+                    )
                 )
                 AND (:filterByCategory = false OR c.id IN :categoryIds)
                 AND (:filterByBrand = false OR b.id IN :brandIds)
                 AND (:minRating IS NULL OR p.rating >= :minRating)
                 AND (
-                    :minPrice IS NULL
+                    (:minPrice IS NULL AND :maxPrice IS NULL)
                     OR EXISTS (
                         SELECT 1
                         FROM ProductVariant v
                         WHERE v.product = p
                             AND v.isSelling = true
                             AND v.isActive = true
-                            AND (
+                            AND (:minPrice IS NULL OR (
                                 CASE
                                     WHEN v.promotionalPrice IS NOT NULL AND v.promotionalPrice > 0
                                         THEN v.promotionalPrice
                                     ELSE v.price
                                 END
-                            ) >= :minPrice
-                    )
-                )
-                AND (
-                    :maxPrice IS NULL
-                    OR EXISTS (
-                        SELECT 1
-                        FROM ProductVariant v
-                        WHERE v.product = p
-                            AND v.isSelling = true
-                            AND v.isActive = true
-                            AND (
+                            ) >= :minPrice)
+                            AND (:maxPrice IS NULL OR (
                                 CASE
                                     WHEN v.promotionalPrice IS NOT NULL AND v.promotionalPrice > 0
                                         THEN v.promotionalPrice
                                     ELSE v.price
                                 END
-                            ) <= :maxPrice
+                            ) <= :maxPrice)
                     )
                 )
                 AND (
                     :inStock IS NULL
                     OR :inStock = false
                     OR EXISTS (
+                        SELECT 1
+                        FROM ProductVariant v
+                        WHERE v.product = p
+                            AND v.isSelling = true
+                            AND v.isActive = true
+                            AND v.quantity > 0
+                    )
+                )
+                AND (
+                    :outOfStock IS NULL
+                    OR :outOfStock = false
+                    OR NOT EXISTS (
                         SELECT 1
                         FROM ProductVariant v
                         WHERE v.product = p
@@ -176,6 +185,7 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
             @Param("maxPrice") BigDecimal maxPrice,
             @Param("minRating") Double minRating,
             @Param("inStock") Boolean inStock,
+            @Param("outOfStock") Boolean outOfStock,
             @Param("onSale") Boolean onSale,
             Pageable pageable);
 
@@ -213,7 +223,11 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
                             AND v.isSelling = true
                             AND v.isActive = true
                     )
-                ORDER BY CASE WHEN c.id = :categoryId THEN 0 ELSE 1 END, p.createdAt DESC
+                ORDER BY CASE
+                    WHEN c.id = :categoryId AND b.id = :brandId THEN 0
+                    WHEN c.id = :categoryId THEN 1
+                    ELSE 2
+                END, p.createdAt DESC, p.id ASC
             """)
     List<Product> findRelatedProducts(
             @Param("excludeId") UUID excludeId,

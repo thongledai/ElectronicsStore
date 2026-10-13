@@ -57,6 +57,8 @@ public class ProductFilterDTO {
 
     private Boolean inStock;
 
+    private Boolean outOfStock;
+
     private Boolean onSale;
 
     private String sort;
