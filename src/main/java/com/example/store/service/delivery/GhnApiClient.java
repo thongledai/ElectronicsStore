@@ -22,7 +22,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class GhnApiClient {
     private static final String CREATE_PATH = "/shiip/public-api/v2/shipping-order/create";
-    private static final ParameterizedTypeReference<GhnApiResponse<GhnCreateOrderData>> TYPE = new ParameterizedTypeReference<>() {};
+    private static final ParameterizedTypeReference<GhnApiResponse<GhnCreateOrderData>> TYPE =
+            new ParameterizedTypeReference<>() {};
+
     private final RestClient restClient;
     private final String token;
     private final String shopId;
@@ -39,50 +41,73 @@ public class GhnApiClient {
         if (!StringUtils.hasText(token) || !StringUtils.hasText(shopId)) {
             throw new BusinessException("Chưa cấu hình GHN_TOKEN hoặc GHN_SHOP_ID.");
         }
-        if (request == null) throw new BusinessException("Dữ liệu tạo đơn GHN không được để trống.");
+        if (request == null) {
+            throw new BusinessException("Dữ liệu tạo đơn GHN không được để trống.");
+        }
+        if (!Boolean.TRUE.equals(request.getIsNewToAddress())) {
+            throw new BusinessException("Tạo vận đơn phải dùng mô hình địa chỉ mới của GHN.");
+        }
+        if (StringUtils.hasText(request.getToDistrictName())) {
+            throw new BusinessException("Mô hình địa chỉ mới không được gửi to_district_name.");
+        }
+        if (!StringUtils.hasText(request.getToWardName())
+                || !StringUtils.hasText(request.getToProvinceName())
+                || !StringUtils.hasText(request.getToAddress())) {
+            throw new BusinessException("Thiếu địa chỉ, tên phường/xã hoặc tên tỉnh/thành GHN.");
+        }
 
-        log.info("Creating GHN shipment: ward='{}', district='{}', province='{}', newAddressModel={}",
-                request.getToWardName(), request.getToDistrictName(), request.getToProvinceName(), request.getIsNewToAddress());
         final GhnApiResponse<GhnCreateOrderData> response;
+        final int[] httpStatus = {0};
         try {
             response = restClient.post().uri(CREATE_PATH).body(request).exchange((req, res) -> {
+                httpStatus[0] = res.getStatusCode().value();
                 try {
                     return res.bodyTo(TYPE);
                 } catch (RestClientException ex) {
-                    throw new BusinessException("GHN trả về phản hồi không đọc được (HTTP " + res.getStatusCode().value() + ").");
+                    log.warn("GHN create response unreadable: httpStatus={}", httpStatus[0]);
+                    return null;
                 }
             });
         } catch (ResourceAccessException ex) {
-            log.error("GHN connection failed: {}", ex.getMessage());
-            throw new BusinessException("Không kết nối được GHN hoặc GHN phản hồi quá chậm.");
-        } catch (BusinessException ex) {
-            throw ex;
+            // Có thể GHN đã nhận request nhưng client timeout. Không đổi client_order_code khi đối soát/retry.
+            log.warn("GHN create connection/timeout error: {}", safeMessage(ex.getMessage()));
+            throw new BusinessException(
+                    "Không nhận được phản hồi xác định từ GHN. Không đổi mã tham chiếu đơn; hãy kiểm tra vận đơn trước khi thử lại.");
         } catch (RestClientException ex) {
-            log.error("GHN request failed: {}", ex.getMessage());
-            throw new BusinessException("Có lỗi khi gửi yêu cầu tới GHN.");
+            log.warn("GHN create HTTP client error: {}", safeMessage(ex.getMessage()));
+            throw new BusinessException("Không thể đọc phản hồi tạo vận đơn từ GHN. Kiểm tra log backend.");
         }
 
         if (response == null || response.getCode() == null || response.getCode() != 200
                 || response.getData() == null || !StringUtils.hasText(response.getData().getOrderCode())) {
-            String code = response == null ? "" : String.valueOf(response.getCodeMessage());
-            String message = response == null ? "GHN không trả dữ liệu" : response.getMessage();
-            log.warn("GHN rejected shipment: code={}, code_message={}, message={}",
-                    response == null ? null : response.getCode(), code, message);
-            throw new BusinessException(translateError(code, message));
+            String code = response == null ? "" : safeMessage(response.getCodeMessage());
+            String message = response == null ? "Không đọc được body phản hồi GHN" : safeMessage(response.getMessage());
+            log.warn("GHN rejected create order: httpStatus={}, code={}, codeMessage={}, message={}",
+                    httpStatus[0], safeMessage(response == null ? null : String.valueOf(response.getCode())),
+                    code, message);
+            throw new BusinessException(translateError(code, message, httpStatus[0]));
         }
         return response.getData();
     }
 
-    private String translateError(String code, String message) {
+    private String translateError(String code, String message, int httpStatus) {
         String normalized = (code + " " + message).toLowerCase(Locale.ROOT)
                 .replace('_', ' ').replace('-', ' ').replaceAll("\\s+", " ");
-        if (normalized.contains("address conflict")) {
-            return "GHN từ chối địa chỉ nhận (TO_ADDRESS_CONFLICT). Hãy chọn lại phường/xã và tỉnh/thành từ danh mục GHN, đồng thời kiểm tra địa chỉ chi tiết.";
+        if (normalized.contains("to address conflict") || normalized.contains("address conflict")) {
+            return "GHN từ chối địa chỉ (TO_ADDRESS_CONFLICT). Đã ghi lại mã lỗi/message để chẩn đoán; hãy kiểm tra tên tỉnh/phường nguyên văn từ danh mục GHN và payload Preview, không tự đổi địa chỉ giao hàng.";
         }
-        if (code != null && code.equalsIgnoreCase("PHONE_INVALID")) return "Số điện thoại người nhận hoặc cửa hàng không hợp lệ theo GHN.";
-        if (code != null && code.equalsIgnoreCase("ROUTE_NOT_FOUND_SERVICE")) return "GHN chưa hỗ trợ tuyến giao hàng này.";
-        if (code != null && code.equalsIgnoreCase("SERVICE_NOT_FOUND_CONFIG_FEE")) return "GHN chưa cấu hình phí cho tuyến giao hàng này.";
+        if (normalized.contains("phone invalid")) {
+            return "Số điện thoại người nhận hoặc cửa hàng không hợp lệ theo GHN.";
+        }
+        if (normalized.contains("route not found") || normalized.contains("service fee error")) {
+            return "GHN không tìm được tuyến/dịch vụ cho địa chỉ và cấu hình hiện tại.";
+        }
         String detail = StringUtils.hasText(message) ? message : (StringUtils.hasText(code) ? code : "không rõ nguyên nhân");
-        return "GHN từ chối tạo vận đơn: " + detail.substring(0, Math.min(detail.length(), 300));
+        return "GHN từ chối tạo vận đơn (HTTP " + httpStatus + "): " + detail.substring(0, Math.min(detail.length(), 250));
+    }
+
+    private String safeMessage(String value) {
+        if (value == null) return "";
+        return value.replaceAll("[\\r\\n\\t]", " ").substring(0, Math.min(value.length(), 250));
     }
 }

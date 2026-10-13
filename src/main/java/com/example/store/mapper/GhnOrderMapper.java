@@ -17,7 +17,6 @@ public class GhnOrderMapper {
     public static final long MAX_INSURANCE_VALUE = 5_000_000L;
 
     private final int paymentTypeId;
-    private final String requiredNote;
     private final boolean newAddressModel;
     private final int itemWeight;
     private final int length;
@@ -26,14 +25,12 @@ public class GhnOrderMapper {
 
     public GhnOrderMapper(
             @Value("${ghn.payment-type-id:1}") int paymentTypeId,
-            @Value("${ghn.required-note:CHOXEMHANGKHONGTHU}") String requiredNote,
             @Value("${ghn.new-address-model:true}") boolean newAddressModel,
             @Value("${ghn.default-item-weight-gram:500}") int itemWeight,
             @Value("${ghn.default-length-cm:30}") int length,
             @Value("${ghn.default-width-cm:20}") int width,
             @Value("${ghn.default-height-cm:10}") int height) {
         this.paymentTypeId = paymentTypeId;
-        this.requiredNote = requiredNote;
         this.newAddressModel = newAddressModel;
         this.itemWeight = itemWeight;
         this.length = length;
@@ -43,7 +40,6 @@ public class GhnOrderMapper {
 
     public boolean isNewAddressModel() { return newAddressModel; }
     public int getPaymentTypeId() { return paymentTypeId; }
-    public String getRequiredNote() { return requiredNote; }
     public int getDefaultItemWeightGram() { return itemWeight; }
     public int getDefaultLengthCm() { return length; }
     public int getDefaultWidthCm() { return width; }
@@ -68,7 +64,7 @@ public GhnCreateOrderRequest toCreateOrderRequest(
 
     return GhnCreateOrderRequest.builder()
             .paymentTypeId(paymentTypeId)
-            .requiredNote(requiredNote)
+            .requiredNote("CHOXEMHANGKHONGTHU")
             .clientOrderCode(order.getId().toString())
             .toName(order.getUser().getFullName().trim())
             .toPhone(normalizePhone(order.getPhone()))

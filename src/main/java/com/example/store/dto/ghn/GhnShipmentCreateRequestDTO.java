@@ -12,7 +12,6 @@ public class GhnShipmentCreateRequestDTO {
     @Min(1) @Max(200) private Integer width;
     @Min(1) @Max(200) private Integer height;
     @Min(1) @Max(2) private Integer paymentTypeId;
-    private String requiredNote;
     @Min(1) private Integer provinceId;
     @Min(1) private Integer wardId;
     @Size(max = 500) private String addressDetail;

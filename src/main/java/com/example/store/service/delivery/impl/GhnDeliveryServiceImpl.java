@@ -124,7 +124,7 @@ public class GhnDeliveryServiceImpl implements IGhnDeliveryService {
 
             String toAddress = detail + ", "
                     + ward.getName() + ", "
-                    + provinceAddressLabel(province);
+                    + province.getName();
 
             validatePreviewReady(order, toAddress, ward.getName(), province.getName());
 
@@ -189,26 +189,23 @@ public class GhnDeliveryServiceImpl implements IGhnDeliveryService {
         if (detail.length() > 500) throw new BusinessException("Địa chỉ chi tiết tối đa 500 ký tự.");
 
         GhnAddressOptionDTO province = addressService.getProvinces().stream()
-                .filter(item -> item.getId().equals(input.getProvinceId())).findFirst()
-                .orElseThrow(() -> new BusinessException("Tỉnh/thành không còn trong danh mục GHN; hãy tải lại trang."));
+        .filter(item -> item.getId() != null && item.getId().equals(input.getProvinceId()))
+        .findFirst()
+        .orElseThrow(() -> new BusinessException(
+                "Tỉnh/thành không còn trong danh mục GHN; hãy tải lại trang."));
         GhnAddressOptionDTO ward = addressService.getWards(province.getId()).stream()
-                .filter(item -> item.getId().equals(input.getWardId())).findFirst()
-                .orElseThrow(() -> new BusinessException("Phường/xã không thuộc tỉnh/thành đã chọn; hãy chọn lại."));
+        .filter(item -> item.getId() != null && item.getId().equals(input.getWardId()))
+        .findFirst()
+        .orElseThrow(() -> new BusinessException(
+                "Phường/xã không thuộc tỉnh/thành đã chọn; hãy chọn lại."));
 
         order.setToProvinceName(province.getName());
         order.setToWardName(ward.getName());
         order.setToDistrictName(null);
-        order.setAddress(detail + ", " + ward.getName() + ", " + provinceAddressLabel(province));
+        order.setAddress(detail + ", " + ward.getName() + ", " + province.getName());
         orderRepository.save(order);
     }
 
-    private String provinceAddressLabel(GhnAddressOptionDTO province) {
-        boolean city = province.getExtensionNames() != null && province.getExtensionNames().stream()
-                .filter(StringUtils::hasText).map(this::normalize)
-                .anyMatch(alias -> alias.startsWith("tp ") || alias.startsWith("thanh pho "));
-        return city && !province.getName().regionMatches(true, 0, "TP.", 0, 3)
-                ? "TP. " + province.getName() : province.getName();
-    }
 
     private String normalize(String value) {
         return Normalizer.normalize(value, Normalizer.Form.NFD).replaceAll("\\p{M}+", "")
@@ -236,13 +233,11 @@ public class GhnDeliveryServiceImpl implements IGhnDeliveryService {
         int width = input.getWidth() == null ? base.getWidth() : input.getWidth();
         int height = input.getHeight() == null ? base.getHeight() : input.getHeight();
         int payment = input.getPaymentTypeId() == null ? base.getPaymentTypeId() : input.getPaymentTypeId();
-        String note = StringUtils.hasText(input.getRequiredNote()) ? input.getRequiredNote().trim().toUpperCase(Locale.ROOT) : base.getRequiredNote();
         if (weight <= 0 || weight > 19_999 || length <= 0 || width <= 0 || height <= 0 || length > 200 || width > 200 || height > 200) {
             throw new BusinessException("Thông số kiện hàng không hợp lệ theo dịch vụ GHN.");
         }
         if (payment != 1 && payment != 2) throw new BusinessException("payment_type_id phải là 1 hoặc 2.");
-        if (!List.of("CHOTHUHANG", "CHOXEMHANGKHONGTHU", "KHONGCHOXEMHANG").contains(note)) throw new BusinessException("required_note không được GHN hỗ trợ.");
-        return GhnCreateOrderRequest.builder().paymentTypeId(payment).requiredNote(note)
+        return GhnCreateOrderRequest.builder().paymentTypeId(payment).requiredNote("CHOXEMHANGKHONGTHU")
                 .clientOrderCode(base.getClientOrderCode()).toName(base.getToName()).toPhone(base.getToPhone())
                 .toAddress(base.getToAddress()).toWardName(base.getToWardName()).toDistrictName(null)
                 .toProvinceName(base.getToProvinceName()).isNewToAddress(true).serviceTypeId(base.getServiceTypeId())

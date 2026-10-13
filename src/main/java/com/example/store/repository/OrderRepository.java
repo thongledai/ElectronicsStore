@@ -30,4 +30,6 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     @EntityGraph(attributePaths = {"user", "status", "delivery", "payment"})
     @Query("select o from Order o where o.id = :id")
     Optional<Order> findByIdForUpdate(@Param("id") UUID id);
+
+    Optional<Order> findByGhnOrderCode(String ghnOrderCode);
 }

@@ -45,7 +45,6 @@ public class EmployeeOrderViewController {
         model.addAttribute("order", order);
         model.addAttribute("newAddressModel", orderMapper.isNewAddressModel());
         model.addAttribute("defaultPaymentTypeId", orderMapper.getPaymentTypeId());
-        model.addAttribute("defaultRequiredNote", orderMapper.getRequiredNote());
         model.addAttribute("defaultWeight", Math.max(1, orderMapper.calculateTotalWeightGram(order)));
         model.addAttribute("defaultLength", orderMapper.getDefaultLengthCm());
         model.addAttribute("defaultWidth", orderMapper.getDefaultWidthCm());
