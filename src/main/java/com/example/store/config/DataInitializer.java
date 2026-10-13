@@ -32,7 +32,7 @@ public class DataInitializer {
             if (managerRole != null && !userRepository.existsByEmail("manager@technova.com")) {
                 userRepository.save(User.builder()
                         .fullName("Manager TechNova")
-                        .email("manager@technova.com")
+                        .email("Manager@123")
                         .phone("0987654321")
                         .isEmailActive(true)
                         .isPhoneActive(true)

@@ -1,6 +1,8 @@
 package com.example.store.service.auth.impl;
 
 import java.util.List;
+
+import com.example.store.security.CustomUserDetails;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -30,13 +32,11 @@ public class CustomUserDetailsService implements UserDetailsService {
                 new SimpleGrantedAuthority(roleWithPrefix)
         );
 
-        return new org.springframework.security.core.userdetails.User(
+        return new CustomUserDetails(
+                user.getId(),
                 user.getEmail(),
                 user.getHashedPassword(),
-                Boolean.TRUE.equals(user.getIsEmailActive()), // enabled
-                true, // accountNonExpired
-                true, // credentialsNonExpired
-                true, // accountNonLocked
+                Boolean.TRUE.equals(user.getIsEmailActive()),
                 authorities
         );
     }
