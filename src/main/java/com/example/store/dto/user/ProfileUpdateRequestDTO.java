@@ -1,4 +1,4 @@
-package com.example.store.dto.customer;
+package com.example.store.dto.user;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CustomerProfileUpdateRequestDTO {
+public class ProfileUpdateRequestDTO {
 
     @NotBlank(message = "FULL_NAME_REQUIRED")
     @Size(max = 200, message = "FULL_NAME_MAX_LENGTH")

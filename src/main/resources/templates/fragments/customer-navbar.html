@@ -62,7 +62,7 @@
                 <h6 class="dropdown-header js-account-greeting">My Account</h6>
               </li>
               <li class="js-auth-user js-profile-item" style="display: none;">
-                <a class="dropdown-item py-2" th:href="@{/customer/profile}">
+                <a class="dropdown-item py-2" th:href="@{/profile}">
                   <i class="fas fa-user-gear me-2 text-primary"></i>Profile
                 </a>
               </li>
@@ -157,7 +157,7 @@
           <li class="nav-item"><a class="nav-link" th:href="@{/pages/about}">About</a></li>
           <li class="nav-item"><a class="nav-link" th:href="@{/pages/contact}">Contact</a></li>
           <li class="nav-item js-nav-manager" style="display: none;">
-            <a class="nav-link text-warning fw-semibold" th:href="@{/manager/index}"><i class="fas fa-gauge-high me-1"></i>Management</a>
+            <a class="nav-link" th:href="@{/manager/index}">Management</a>
           </li>
         </ul>
       </div>

@@ -119,7 +119,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
             Cookie jwtCookie = new Cookie("JWT_TOKEN", token);
             jwtCookie.setHttpOnly(true);
             jwtCookie.setPath("/");
-            jwtCookie.setMaxAge(120); // 2 phút (120s) sliding window
+            jwtCookie.setMaxAge(45 * 60); // 45 phút (2700s) sliding window
             response.addCookie(jwtCookie);
         }
 
@@ -188,7 +188,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
             Cookie jwtCookie = new Cookie("JWT_TOKEN", token);
             jwtCookie.setHttpOnly(true);
             jwtCookie.setPath("/");
-            jwtCookie.setMaxAge(120); // 2 phút (120s) sliding window
+            jwtCookie.setMaxAge(45 * 60); // 45 phút (2700s) sliding window
             response.addCookie(jwtCookie);
         }
 

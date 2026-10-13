@@ -95,7 +95,7 @@
 
   /* ---------- Session Inactivity & Heartbeat Manager ---------- */
   function initSessionManager() {
-    const TIMEOUT_MS = 2 * 60 * 1000; // 2 phút
+    const TIMEOUT_MS = 45 * 60 * 1000; // 45 phút
     const token = localStorage.getItem('technova_jwt');
 
     const clearAllSessionData = () => {
@@ -152,7 +152,7 @@
 
       const now = Date.now();
       const lastPing = parseInt(localStorage.getItem('technova_last_ping') || '0', 10);
-      if (now - lastPing < 25000) {
+      if (now - lastPing < 50000) {
         localStorage.setItem('technova_last_active', now.toString());
         return;
       }
@@ -169,7 +169,7 @@
           window.location.replace('/login?error=session_expired');
         }
       }).catch(() => {});
-    }, 35000);
+    }, 60000);
   }
 
   /* ---------- User Avatar & Identity in Dashboard Topbar ---------- */
@@ -214,7 +214,7 @@
 
     // Background fetch if user data is missing in cache
     if (token && (!user || !user.avatar || !user.name)) {
-      fetch('/api/customer/profile', {
+      fetch('/api/profile', {
         headers: { 'Accept': 'application/json', 'Authorization': 'Bearer ' + token }
       }).then(r => r.ok ? r.json() : null)
         .then(res => {

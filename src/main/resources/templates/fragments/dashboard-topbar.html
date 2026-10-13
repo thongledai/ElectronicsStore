@@ -22,6 +22,11 @@
         <h6 class="dropdown-header js-topbar-name">Tài khoản</h6>
       </li>
       <li>
+        <a class="dropdown-item py-2" th:href="@{/profile}">
+          <i class="fas fa-user-gear me-2 text-primary"></i>Hồ sơ cá nhân
+        </a>
+      </li>
+      <li>
         <a class="dropdown-item py-2" th:href="@{|/${role}/reset-password|}">
           <i class="fas fa-key me-2 text-warning"></i>Đổi mật khẩu
         </a>
