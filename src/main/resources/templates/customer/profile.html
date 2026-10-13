@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="vi" th:replace="~{layouts/customer-layout :: layout(
+        'Hồ sơ cá nhân — TechNova Electronics',
+        'Quản lý và cập nhật thông tin cá nhân tài khoản của bạn.',
+        ~{::main}, ~{}, 'common/profile.js', false)}">
+<head><title>Hồ sơ cá nhân — TechNova Electronics</title></head>
+<body>
+
+<main class="py-4 py-md-5 bg-body-tertiary">
+  <div class="container">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a th:href="@{/customer/index}" class="text-decoration-none">Trang chủ</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Hồ sơ cá nhân</li>
+      </ol>
+    </nav>
+
+    <div class="row g-4">
+      <!-- Cột trái: Tóm tắt thông tin & Avatar -->
+      <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 text-center p-4 h-100 bg-surface">
+          <!-- Avatar container with camera button -->
+          <div class="position-relative d-inline-block mx-auto mb-3" style="width: 110px; height: 110px;">
+            <img id="avatarPreview" src="https://ui-avatars.com/api/?name=User&background=0d6efd&color=fff"
+                 class="rounded-circle border border-3 border-white shadow object-fit-cover w-100 h-100"
+                 alt="Avatar" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=User&background=0d6efd&color=fff';">
+            <label for="profileAvatarFile"
+                   class="btn btn-sm btn-primary position-absolute bottom-0 end-0 rounded-circle p-0 d-flex align-items-center justify-content-center shadow"
+                   style="width: 34px; height: 34px; cursor: pointer;" title="Đổi ảnh đại diện">
+              <i class="fa-solid fa-camera fa-sm text-white"></i>
+            </label>
+            <input type="file" id="profileAvatarFile" class="d-none" accept="image/png, image/jpeg, image/webp">
+          </div>
+          <div class="small text-muted mb-2">Định dạng JPG, PNG, WEBP (tối đa 10MB)</div>
+          <div class="invalid-feedback d-block text-danger mb-2" id="avatarError" style="display:none;"></div>
+
+          <h5 class="fw-bold mb-1" id="summaryFullName">---</h5>
+          <p class="text-muted small mb-2" id="summaryEmail">---</p>
+          <div class="mb-3">
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 rounded-pill" id="summaryRole">
+              CUSTOMER
+            </span>
+          </div>
+
+          <hr class="my-3 opacity-10">
+
+          <!-- Thống kê tài khoản -->
+          <div class="row g-2 text-center">
+            <div class="col-6">
+              <div class="p-2 rounded-3 bg-light">
+                <span class="text-muted small d-block">Điểm tích lũy</span>
+                <span class="fw-bold fs-5 text-primary" id="summaryPoint">0</span>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="p-2 rounded-3 bg-light">
+                <span class="text-muted small d-block">Số dư ví</span>
+                <span class="fw-bold fs-5 text-success" id="summaryEWallet">0 ₫</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Liên kết nhanh -->
+          <div class="list-group list-group-flush text-start mt-4 pt-2 border-top">
+            <a th:href="@{/customer/reset-password}" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between px-2 py-3 border-0 rounded-3 mb-1">
+              <span><i class="fas fa-key me-2 text-warning"></i>Đổi mật khẩu</span>
+              <i class="fas fa-chevron-right fa-xs text-muted"></i>
+            </a>
+            <a th:href="@{/customer/cart}" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between px-2 py-3 border-0 rounded-3 mb-1">
+              <span><i class="fas fa-shopping-cart me-2 text-primary"></i>Giỏ hàng của tôi</span>
+              <i class="fas fa-chevron-right fa-xs text-muted"></i>
+            </a>
+            <a th:href="@{/customer/wishlist}" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between px-2 py-3 border-0 rounded-3">
+              <span><i class="far fa-heart me-2 text-danger"></i>Danh sách yêu thích</span>
+              <i class="fas fa-chevron-right fa-xs text-muted"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cột phải: Form cập nhật thông tin -->
+      <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-surface">
+          <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom">
+            <div>
+              <h4 class="fw-bold mb-1">Thông tin cá nhân</h4>
+              <p class="text-muted small mb-0">Quản lý hồ sơ để bảo vệ tài khoản và nhận ưu đãi từ TechNova.</p>
+            </div>
+            <span class="badge bg-light text-secondary border px-3 py-2" id="summaryUserCode">
+              Mã: ---
+            </span>
+          </div>
+
+          <form id="profileForm" novalidate>
+            <!-- Họ và tên -->
+            <div class="mb-3">
+              <label class="form-label fw-semibold" for="profileFullName">
+                Họ và tên <span class="text-danger">*</span>
+              </label>
+              <div class="input-group">
+                <span class="input-group-text bg-light text-muted"><i class="fas fa-user"></i></span>
+                <input type="text" class="form-control" id="profileFullName" placeholder="Nhập họ và tên đầy đủ" required>
+              </div>
+              <div class="invalid-feedback" id="errFullName"></div>
+            </div>
+
+            <!-- Email (Read-only) -->
+            <div class="mb-3">
+              <label class="form-label fw-semibold" for="profileEmail">Email đăng nhập</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light text-muted"><i class="fas fa-envelope"></i></span>
+                <input type="email" class="form-control bg-light" id="profileEmail" disabled readonly>
+              </div>
+              <small class="text-muted">Email định danh tài khoản không thể tự chỉnh sửa.</small>
+            </div>
+
+            <!-- Số điện thoại -->
+            <div class="mb-3">
+              <label class="form-label fw-semibold" for="profilePhone">Số điện thoại</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light text-muted"><i class="fas fa-phone"></i></span>
+                <input type="tel" class="form-control" id="profilePhone" placeholder="Ví dụ: 0912345678">
+              </div>
+              <div class="invalid-feedback" id="errPhone"></div>
+            </div>
+
+            <!-- Địa chỉ giao hàng -->
+            <div class="mb-4">
+              <label class="form-label fw-semibold" for="profileAddresses">Địa chỉ giao hàng</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light text-muted"><i class="fas fa-location-dot"></i></span>
+                <textarea class="form-control" id="profileAddresses" rows="3" placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố..."></textarea>
+              </div>
+              <div class="invalid-feedback" id="errAddresses"></div>
+              <small class="text-muted">Địa chỉ mặc định dùng để giao hàng khi đặt đơn.</small>
+            </div>
+
+            <!-- Nút Lưu -->
+            <div class="d-flex justify-content-end gap-2 pt-2">
+              <button type="submit" class="btn btn-primary px-4 py-2 fw-semibold" id="btnSaveProfile">
+                <i class="fas fa-floppy-disk me-2"></i>Lưu thay đổi
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+</body>
+</html>

@@ -402,6 +402,7 @@ async function handleGoogleLoginPayload(payload) {
           name: data.data?.user?.fullName || 'User',
           email: data.data?.user?.email || '',
           role: data.data?.user?.role,
+          avatar: data.data?.user?.avatar || null,
           hasPassword: data.data?.user?.hasPassword ?? false,
           loggedInAt: new Date().toISOString()
         });
@@ -509,6 +510,7 @@ async function handleLogin(e) {
           name: data.data?.user?.fullName || 'User',
           email: data.data?.user?.email || email,
           role: data.data?.user?.role,
+          avatar: data.data?.user?.avatar || null,
           hasPassword: data.data?.user?.hasPassword ?? true,
           loggedInAt: new Date().toISOString()
         });

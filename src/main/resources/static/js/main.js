@@ -872,11 +872,94 @@ function initAccountLabel() {
     el.style.display = isLoggedIn ? 'block' : 'none';
   });
 
-  // Hiển thị nút "Management" trên Navbar Customer nếu là Manager
-  const userRole = (localStorage.getItem('technova_role') || (user && user.role) || '').toUpperCase();
-  const isManager = isLoggedIn && (userRole === 'MANAGER' || userRole === 'ROLE_MANAGER');
+  // Render circular avatar on navbar when logged in
+  const avatarImgs = document.querySelectorAll('.js-user-avatar');
+  const userIcons = document.querySelectorAll('.js-user-icon');
+
+  const applyAvatar = (avatarUrl) => {
+    if (isLoggedIn && avatarUrl) {
+      avatarImgs.forEach(img => {
+        img.src = avatarUrl;
+        img.style.display = 'block';
+      });
+      userIcons.forEach(icon => {
+        icon.style.display = 'none';
+      });
+    } else {
+      avatarImgs.forEach(img => {
+        img.style.display = 'none';
+      });
+      userIcons.forEach(icon => {
+        icon.style.display = 'inline-block';
+      });
+    }
+  };
+
+  applyAvatar(user?.avatar);
+
+  window.updateHeaderUserAvatar = function(avatarUrl, fullName) {
+    const currentUser = (typeof storageGet === 'function' ? storageGet(STORE.user, {}) : {}) || {};
+    if (avatarUrl !== undefined) currentUser.avatar = avatarUrl;
+    if (fullName) currentUser.name = fullName;
+    if (typeof storageSet === 'function') storageSet(STORE.user, currentUser);
+    applyAvatar(avatarUrl);
+    if (fullName) {
+      document.querySelectorAll('.js-account-greeting').forEach(el => {
+        el.textContent = 'Hello, ' + fullName.split(' ')[0];
+      });
+    }
+  };
+
+  // If logged in and avatar is missing in cache, fetch profile in background
+  if (isLoggedIn && (!user || typeof user.avatar === 'undefined')) {
+    const authHdr = {};
+    if (token) authHdr['Authorization'] = `Bearer ${token}`;
+    fetch('/api/customer/profile', { headers: { 'Accept': 'application/json', ...authHdr } })
+      .then(r => r.ok ? r.json() : null)
+      .then(res => {
+        if (res && res.success && res.data) {
+          const u = res.data;
+          const updatedUser = {
+            ...(user || {}),
+            name: u.fullName || user?.name || 'User',
+            email: u.email || user?.email || '',
+            role: u.role || user?.role,
+            avatar: u.avatar || null
+          };
+          if (typeof storageSet === 'function') storageSet(STORE.user, updatedUser);
+          applyAvatar(u.avatar);
+          if (u.fullName) {
+            document.querySelectorAll('.js-account-greeting').forEach(el => {
+              el.textContent = 'Hello, ' + u.fullName.split(' ')[0];
+            });
+          }
+        }
+      })
+      .catch(() => {});
+  }
+
+  // Hiển thị nút "Management" trên Navbar Customer chỉ khi đăng nhập với tư cách quản trị viên (Manager/Admin)
+  let userRole = (localStorage.getItem('technova_role') || (user && user.role) || '').toUpperCase();
+  if (!userRole && token) {
+    try {
+      const parts = token.split('.');
+      if (parts.length === 3) {
+        const payload = JSON.parse(atob(parts[1]));
+        if (payload && payload.role) {
+          userRole = String(payload.role).toUpperCase();
+        }
+      }
+    } catch (_) {}
+  }
+  const isManager = isLoggedIn && (userRole === 'MANAGER' || userRole === 'ROLE_MANAGER' || userRole === 'ADMIN' || userRole === 'ROLE_ADMIN');
   document.querySelectorAll('.js-nav-manager').forEach(el => {
     el.style.display = isManager ? 'block' : 'none';
+  });
+
+  // Chỉ role CUSTOMER mới có quyền xem Profile; Manager và các role khác khi chuyển sang trang người dùng bị ẩn/xóa ngay mục Profile
+  const isCustomer = isLoggedIn && (userRole === 'CUSTOMER' || userRole === 'ROLE_CUSTOMER');
+  document.querySelectorAll('.js-profile-item').forEach(el => {
+    el.style.display = isCustomer ? 'block' : 'none';
   });
 
   const updatePasswordLinks = (hasPass) => {

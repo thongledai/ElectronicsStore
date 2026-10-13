@@ -61,6 +61,11 @@ public class ViewController {
         return "customer/wishlist";
     }
 
+    @GetMapping("/customer/profile")
+    public String customerProfile() {
+        return "customer/profile";
+    }
+
 
     // Các trang thông tin: /pages/{page}
     @GetMapping("/pages/{page}")
