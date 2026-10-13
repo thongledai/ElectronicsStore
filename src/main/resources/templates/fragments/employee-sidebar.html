@@ -10,6 +10,7 @@
     <div class="nav-caption">Employee</div>
     <div class="nav-links collapse d-lg-flex" id="roleNavLinks">
         <a th:href="@{/employee/index}" th:classappend="${active == 'index'} ? 'active'" th:attr="aria-current=${active == 'index'} ? 'page'"><i class="fa-solid fa-chart-pie"></i><span>Dashboard</span></a>
+        <a th:href="@{/employee/orders}" th:classappend="${active == 'orders'} ? 'active'" th:attr="aria-current=${active == 'orders'} ? 'page'"><i class="fa-solid fa-receipt"></i><span>Đơn hàng</span></a>
         <a th:href="@{/employee/orders-new}" th:classappend="${active == 'orders-new'} ? 'active'" th:attr="aria-current=${active == 'orders-new'} ? 'page'"><i class="fa-solid fa-bell"></i><span>New Orders</span></a>
         <a th:href="@{/employee/orders-confirmed}" th:classappend="${active == 'orders-confirmed'} ? 'active'" th:attr="aria-current=${active == 'orders-confirmed'} ? 'page'"><i class="fa-solid fa-clipboard-check"></i><span>Confirmed</span></a>
         <a th:href="@{/employee/orders-picked}" th:classappend="${active == 'orders-picked'} ? 'active'" th:attr="aria-current=${active == 'orders-picked'} ? 'page'"><i class="fa-solid fa-box-open"></i><span>Picked Up</span></a>

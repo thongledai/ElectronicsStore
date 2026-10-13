@@ -53,6 +53,15 @@ public class Order {
     @Column(nullable = false, length = 500, columnDefinition = "nvarchar(500)")
     private String address;
 
+    @Column(length = 150, columnDefinition = "nvarchar(150)")
+    private String toProvinceName;
+
+    @Column(length = 150, columnDefinition = "nvarchar(150)")
+    private String toDistrictName;
+
+    @Column(length = 150, columnDefinition = "nvarchar(150)")
+    private String toWardName;
+
     @Column(nullable = false, length = 11)
     private String phone;
 
@@ -66,6 +75,17 @@ public class Order {
 
     @Column(nullable = false, precision = 18, scale = 2)
     private BigDecimal amountFromUser;
+
+    @Column(length = 50, unique = true)
+    private String ghnOrderCode;
+
+    @Column(length = 50)
+    private String ghnStatus;
+
+    @Column(precision = 18, scale = 2)
+    private BigDecimal ghnShippingFee;
+
+    private LocalDateTime expectedDeliveryTime;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "payment_id", nullable = false)

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="vi" th:replace="~{layouts/dashboard-layout :: layout('Quản lý đơn hàng', 'employee', 'orders', ~{::section.content})}">
+<head><title>Quản lý đơn hàng | TechNova</title></head>
+<body>
+<section class="content order-management">
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div><h1 class="title">Quản lý đơn hàng</h1><div class="subtitle">Xác nhận đơn và tạo vận đơn GHN staging.</div></div>
+  </div>
+  <div id="orderNotice" class="alert d-none" role="status"></div>
+  <form class="panel mb-3 d-flex flex-wrap gap-2" method="get" th:action="@{/employee/orders}">
+    <input class="form-control flex-grow-1" name="keyword" th:value="${keyword}" placeholder="Tên khách, số điện thoại hoặc mã GHN">
+    <select class="form-select" name="status" style="max-width:220px">
+      <option value="">Tất cả trạng thái</option>
+      <option value="NOT_PROCESSED" th:selected="${statusFilter == 'NOT_PROCESSED'}">Chưa xử lý</option>
+      <option value="CONFIRMED" th:selected="${statusFilter == 'CONFIRMED'}">Đã xác nhận</option>
+      <option value="SHIPPING" th:selected="${statusFilter == 'SHIPPING'}">Đang giao</option>
+      <option value="DELIVERED" th:selected="${statusFilter == 'DELIVERED'}">Đã giao</option>
+    </select>
+    <button class="btn btn-primary" type="submit">Tìm kiếm</button>
+  </form>
+  <div class="panel table-responsive">
+    <table class="table align-middle mb-0">
+      <thead><tr><th>Mã đơn</th><th>Khách hàng</th><th>Ngày đặt</th><th>Tổng tiền</th><th>Trạng thái</th><th>Mã vận đơn GHN</th><th></th></tr></thead>
+      <tbody>
+        <tr th:each="order : ${orders.content}">
+          <td class="text-break" th:text="${order.id}">order-id</td>
+          <td><span th:text="${order.user.fullName}">Khách hàng</span><small class="d-block text-muted" th:text="${order.phone}"></small></td>
+          <td th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2026</td>
+          <td th:text="|${#numbers.formatDecimal(order.amountFromUser, 0, 'COMMA', 0, 'POINT')} ₫|">0 ₫</td>
+          <td th:text="${order.status.name}">CONFIRMED</td>
+          <td th:text="${order.ghnOrderCode != null ? order.ghnOrderCode : '—'}">—</td>
+          <td><a class="btn btn-sm btn-outline-primary" th:href="@{/employee/orders/{id}(id=${order.id})}">Chi tiết</a></td>
+        </tr>
+        <tr th:if="${orders.empty}"><td colspan="7" class="text-center text-muted py-4">Không có đơn hàng phù hợp.</td></tr>
+      </tbody>
+    </table>
+    <div class="d-flex justify-content-between align-items-center mt-3" th:if="${orders.totalPages > 1}">
+      <a class="btn btn-sm btn-outline-secondary" th:if="${orders.hasPrevious()}" th:href="@{/employee/orders(page=${orders.number - 1},keyword=${keyword},status=${statusFilter})}">Trang trước</a><span th:text="|Trang ${orders.number + 1}/${orders.totalPages}|">Trang</span>
+      <a class="btn btn-sm btn-outline-secondary" th:if="${orders.hasNext()}" th:href="@{/employee/orders(page=${orders.number + 1},keyword=${keyword},status=${statusFilter})}">Trang sau</a>
+    </div>
+  </div>
+</section>
+</body>
+</html>

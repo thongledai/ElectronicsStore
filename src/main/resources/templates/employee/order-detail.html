@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="vi" th:replace="~{layouts/dashboard-layout :: layout('Chi tiết đơn hàng', 'employee', 'orders', ~{::section.content})}">
+<head><title>Chi tiết đơn hàng | TechNova</title></head>
+<body>
+<section class="content order-management">
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div><a th:href="@{/employee/orders}" class="small">← Danh sách đơn</a><h1 class="title mt-2">Chi tiết đơn hàng</h1><div class="subtitle text-break" th:text="${order.id}">order-id</div></div>
+    <span class="badge text-bg-secondary fs-6" th:text="${order.status.name}">CONFIRMED</span>
+  </div>
+  <div id="orderNotice" class="alert d-none" role="status"></div>
+  <div class="row g-3 mb-4">
+    <div class="col-lg-6"><div class="panel h-100"><h2 class="h5">Người nhận</h2><div th:text="${order.user.fullName}">Tên</div><div th:text="${order.phone}">Điện thoại</div><div th:text="${order.address}">Địa chỉ</div><div class="small text-muted mt-2" th:text="|Phường/xã: ${order.toWardName ?: 'Chưa chọn'} · Quận/huyện: ${order.toDistrictName ?: 'Không dùng mô hình mới'} · Tỉnh/thành: ${order.toProvinceName ?: 'Chưa chọn'}|">Thông tin địa chỉ</div></div></div>
+    <div class="col-lg-6"><div class="panel h-100"><h2 class="h5">Vận chuyển GHN</h2><div>Mã vận đơn: <strong th:text="${order.ghnOrderCode ?: 'Chưa tạo'}">Chưa tạo</strong></div><div th:if="${order.ghnStatus != null}" th:text="|Trạng thái GHN: ${order.ghnStatus}|">Trạng thái</div><div th:if="${order.ghnShippingFee != null}" th:text="|Phí GHN: ${order.ghnShippingFee} ₫|">Phí</div><div th:if="${order.expectedDeliveryTime != null}" th:text="|Dự kiến giao: ${#temporals.format(order.expectedDeliveryTime, 'dd/MM/yyyy HH:mm')}|">Ngày</div></div></div>
+  </div>
+  <div class="panel mb-4"><h2 class="h5">Sản phẩm</h2><div class="table-responsive"><table class="table"><thead><tr><th>Sản phẩm</th><th>SKU</th><th>Số lượng</th></tr></thead><tbody><tr th:each="item : ${order.items}"><td th:text="${item.variant.product.name}">Sản phẩm</td><td th:text="${item.variant.sku}">SKU</td><td th:text="${item.count}">1</td></tr></tbody></table></div><div class="text-end fw-semibold" th:text="|Tổng thanh toán: ${#numbers.formatDecimal(order.amountFromUser, 0, 'COMMA', 0, 'POINT')} ₫|">Tổng</div></div>
+
+  <div class="panel mb-4" th:if="${order.status.name.equalsIgnoreCase('NOT_PROCESSED')}">
+    <h2 class="h5">Xác nhận đơn</h2><p class="text-muted">Xác nhận đơn trước khi tạo vận đơn GHN.</p>
+    <button class="btn btn-primary" id="confirmOrderButton" th:attr="data-url=@{/api/employee/orders/{id}/confirm(id=${order.id})}">Xác nhận đơn hàng</button>
+  </div>
+
+  <form class="panel" id="shipmentForm" th:if="${order.status.name.equalsIgnoreCase('CONFIRMED') and order.ghnOrderCode == null}"
+        th:attr="data-url=@{/api/employee/orders/{id}/ghn-shipment(id=${order.id})},data-url-address=@{/api/employee/orders/{id}/ghn-address(id=${order.id})}">
+    <h2 class="h5">Tạo vận đơn GHN staging</h2>
+    <p class="text-muted">Chọn địa chỉ theo danh mục GHN. Mô hình mới gồm phường/xã và tỉnh/thành, không có quận/huyện.</p>
+    <div id="ghnAddressPicker" th:attr="data-url-provinces=@{/api/employee/orders/ghn-address/provinces},data-url-wards-prefix=@{/api/employee/orders/ghn-address/provinces/},data-current-address=${order.address},data-current-province=${order.toProvinceName},data-current-ward=${order.toWardName}">
+      <div class="row g-3">
+        <div class="col-md-6"><label class="form-label" for="ghnProvince">Tỉnh/thành</label><select class="form-select" id="ghnProvince" name="provinceId" required><option value="">Đang tải…</option></select></div>
+        <div class="col-md-6"><label class="form-label" for="ghnWard">Phường/xã</label><select class="form-select" id="ghnWard" name="wardId" required disabled><option value="">Chọn tỉnh trước</option></select></div>
+        <div class="col-12"><label class="form-label" for="ghnAddressDetail">Địa chỉ chi tiết (số nhà, đường)</label><input class="form-control" id="ghnAddressDetail" name="addressDetail" maxlength="500" required th:attr="data-address=${order.address}" placeholder="Ví dụ: 45 Lê Lợi"></div>
+      </div><div id="ghnAddressMessage" class="alert alert-info mt-3 mb-0" role="status">Đang tải danh mục GHN…</div>
+    </div>
+    <hr><div class="row g-3">
+      <div class="col-md-4"><label class="form-label" for="weight">Khối lượng (g)</label><input class="form-control" id="weight" name="weight" type="number" min="1" max="19999" required th:value="${defaultWeight}"></div>
+      <div class="col-md-2"><label class="form-label" for="length">Dài (cm)</label><input class="form-control" id="length" name="length" type="number" min="1" max="200" required th:value="${defaultLength}"></div>
+      <div class="col-md-2"><label class="form-label" for="width">Rộng (cm)</label><input class="form-control" id="width" name="width" type="number" min="1" max="200" required th:value="${defaultWidth}"></div>
+      <div class="col-md-2"><label class="form-label" for="height">Cao (cm)</label><input class="form-control" id="height" name="height" type="number" min="1" max="200" required th:value="${defaultHeight}"></div>
+      <div class="col-md-6"><label class="form-label" for="paymentTypeId">Bên trả phí</label><select class="form-select" id="paymentTypeId" name="paymentTypeId"><option value="1" th:selected="${defaultPaymentTypeId == 1}">Người gửi</option><option value="2" th:selected="${defaultPaymentTypeId == 2}">Người nhận</option></select></div>
+      <div class="col-md-6"><label class="form-label" for="requiredNote">Quy định xem hàng</label><select class="form-select" id="requiredNote" name="requiredNote"><option value="CHOXEMHANGKHONGTHU" th:selected="${defaultRequiredNote == 'CHOXEMHANGKHONGTHU'}">Cho xem, không thử</option><option value="CHOTHUHANG" th:selected="${defaultRequiredNote == 'CHOTHUHANG'}">Cho thử hàng</option><option value="KHONGCHOXEMHANG" th:selected="${defaultRequiredNote == 'KHONGCHOXEMHANG'}">Không cho xem</option></select></div>
+    </div><button class="btn btn-primary mt-4" id="createShipmentButton" type="submit">Tạo vận đơn</button>
+  </form>
+  <div class="panel" th:if="${order.ghnOrderCode != null}"><a th:href="@{/employee/orders}">Quay lại danh sách</a></div>
+  <script th:src="@{/js/employee-orders.js}" defer></script>
+</section>
+</body>
+</html>
