@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
 th:replace="~{layouts/customer-layout :: layout(
         ${product.name + ' — TechNova Electronics'},
@@ -47,10 +47,10 @@ th:replace="~{layouts/customer-layout :: layout(
 					<div class="row g-4 g-lg-5">
 
 						<!-- ===================== Image Gallery Column ===================== -->
-						<div class="col-lg-6">
+						<div class="col-lg-5">
 
 							<!-- Ảnh lớn -->
-							<div class="gallery-main" id="galleryMain" title="Xem ảnh sản phẩm">
+							<div class="gallery-main" id="galleryMain">
 								<img id="mainImage"
 									th:src="${firstVariant.imageUrls != null and !firstVariant.imageUrls.isEmpty() ? firstVariant.imageUrls[0] : '/images/placeholder.webp'}"
 									th:alt="${product.name}"
@@ -92,7 +92,7 @@ th:replace="~{layouts/customer-layout :: layout(
 						<!-- ================== END Image Gallery Column ================== -->
 
 						<!-- ===================== Product Details Column ===================== -->
-						<div class="col-lg-6">
+						<div class="col-lg-7">
 							<div class="pd-info">
 
 								<!-- Brand / Category badges -->
@@ -124,7 +124,16 @@ th:replace="~{layouts/customer-layout :: layout(
 									<span class="text-muted">· Đánh giá từ chuyên gia TechNova</span>
 								</div>
 
-								<!-- ============================================================
+
+
+								<!-- Variant Selection Options -->
+								<div class="mb-3" id="variantSelectorGroup">
+									<label class="fw-semibold mb-2 d-block">Cấu hình</label>
+									<div id="variantConfigControls" class="variant-config-controls" aria-live="polite">
+										<span class="text-muted small">Đang tải cấu hình...</span>
+									</div>
+								</div>
+<!-- ============================================================
 								     Pricing Box
 								     th:with tính giá 1 lần, tránh lồng biểu thức phức tạp.
 								     ============================================================ -->
@@ -135,29 +144,25 @@ th:replace="~{layouts/customer-layout :: layout(
 										hasDiscount=${firstVariant.promotionalPrice != null and firstVariant.price != null and firstVariant.promotionalPrice < firstVariant.price},
 										discountPct=${(firstVariant.promotionalPrice != null and firstVariant.price != null and firstVariant.promotionalPrice < firstVariant.price) ? T(java.lang.Math).round(((firstVariant.price.doubleValue() - firstVariant.promotionalPrice.doubleValue()) * 100.0) / firstVariant.price.doubleValue()) : 0}">
 
-									<div class="d-flex align-items-baseline gap-3">
-
-										<!-- Giá hiệu lực (khuyến mãi hoặc gốc) -->
-										<span class="h2 fw-bold text-danger mb-0" id="currentPrice"
-											th:text="${#numbers.formatDecimal(effectivePrice, 0, 'POINT', 0, 'POINT') + ' ₫'}">
-											24.990.000 ₫
-										</span>
+									<div class="pd-price-stack">
 
 										<!-- Giá gốc (gạch ngang) -->
-										<span class="text-muted text-decoration-line-through h5 mb-0"
+										<span class="text-muted text-decoration-line-through mb-0 pd-original-price"
 											id="currentOldPrice"
-											th:if="${hasDiscount}"
-											th:text="${#numbers.formatDecimal(firstVariant.price, 0, 'POINT', 0, 'POINT') + ' ₫'}">
+											th:classappend="${!hasDiscount ? ' price-hidden' : ''}"
+											th:text="${#numbers.formatDecimal(firstVariant.price != null ? firstVariant.price : 0, 0, 'POINT', 0, 'POINT') + ' ₫'}">
 											29.990.000 ₫
 										</span>
 
-										<!-- Badge % giảm -->
-										<span class="badge bg-danger"
-											id="currentDiscountBadge"
-											th:if="${hasDiscount}"
-											th:text="${'-' + discountPct + '%'}">
-											-10%
-										</span>
+										<div class="pd-current-price-row">
+											<span class="h2 fw-bold text-danger mb-0 pd-current-price" id="currentPrice"
+												th:text="${#numbers.formatDecimal(effectivePrice, 0, 'POINT', 0, 'POINT') + ' ₫'}">
+												24.990.000 ₫
+											</span>
+											<span class="badge bg-danger" id="currentDiscountBadge"
+												th:classappend="${!hasDiscount ? ' price-hidden' : ''}"
+												th:text="${'-' + discountPct + '%'}">-10%</span>
+										</div>
 
 									</div>
 
@@ -175,81 +180,18 @@ th:replace="~{layouts/customer-layout :: layout(
 								</div>
 								<!-- END Pricing Box -->
 
-								<!-- Variant Selection Options -->
-								<div class="mb-4" id="variantSelectorGroup">
-									<label class="fw-semibold mb-2 d-block">Phiên bản / Cấu hình:</label>
-									<div class="d-flex flex-wrap gap-2" id="variantButtons">
-										<button th:each="v, iterStat : ${product.variants}"
-											type="button"
-											class="btn btn-outline-secondary js-variant-choice"
-											th:classappend="${iterStat.index == 0} ? ' active'"
-											th:attr="data-variant-id=${v.id}"
-											th:disabled="${v.quantity <= 0}">
-											<span th:if="${v.styleValues != null and !v.styleValues.isEmpty()}">
-												<th:block th:each="sv, svStat : ${v.styleValues}">
-													<th:block th:text="${sv.name}"></th:block><th:block th:if="${!svStat.last}"> - </th:block>
-												</th:block>
-											</span>
-											<span th:if="${v.styleValues == null or v.styleValues.isEmpty()}"
-												th:text="${'Phiên bản ' + (iterStat.index + 1)}">Phiên bản 1</span>
-											<span th:if="${v.quantity <= 0}" class="badge bg-secondary ms-1">Hết hàng</span>
-										</button>
-									</div>
-								</div>
-
-								<!-- Bảng cấu hình sản phẩm -->
-								<div class="mb-4">
-									<h5 class="fw-bold mb-3">
-										<i class="fas fa-sliders me-2 text-primary"></i> Cấu hình sản phẩm
-									</h5>
-									<div class="table-responsive">
-										<table class="table table-bordered align-middle mb-0">
-											<thead class="table-light">
-												<tr>
-													<th style="width: 30%;">Cấu hình</th>
-													<th>Giá trị</th>
-													<th style="width: 25%;">Giá</th>
-												</tr>
-											</thead>
-											<tbody>
-												<th:block th:each="v, iterStat : ${product.variants}"
-												          th:with="vEffectivePrice=${v.promotionalPrice != null and v.promotionalPrice > 0 ? v.promotionalPrice : (v.price != null ? v.price : 0)}">
-													<tr>
-														<td><strong>Phiên bản [[${iterStat.index + 1}]]</strong></td>
-														<td>
-															<div class="d-flex flex-wrap gap-2">
-																<span th:each="sv : ${v.styleValues}"
-																	class="badge bg-light text-dark border">
-																	<strong th:text="${sv.styleName}">RAM</strong>:
-																	<span th:text="${sv.name}">8GB</span>
-																</span>
-																<span th:if="${v.styleValues == null or v.styleValues.isEmpty()}"
-																	class="text-muted">Cấu hình mặc định</span>
-															</div>
-														</td>
-														<td>
-															<strong class="text-danger"
-																th:text="${#numbers.formatDecimal(vEffectivePrice, 0, 'POINT', 0, 'POINT') + ' ₫'}">
-																20.000.000 ₫
-															</strong>
-														</td>
-													</tr>
-												</th:block>
-											</tbody>
-										</table>
-									</div>
-								</div>
-
-								<!-- Số lượng & Nút hành động -->
-								<div class="d-flex align-items-center gap-3 mb-4">
-									<div class="input-group" style="width: 130px;">
-										<button class="btn btn-outline-secondary" type="button" id="btnQtyMinus">-</button>
-										<input type="number" class="form-control text-center" id="qtyInput" value="1" min="1" max="10">
-										<button class="btn btn-outline-secondary" type="button" id="btnQtyPlus">+</button>
+								<div class="pd-purchase-row mb-4">
+									<div class="qty-stepper" aria-label="Số lượng sản phẩm">
+										<button class="btn btn-outline-secondary" type="button" id="btnQtyMinus" disabled>-</button>
+										<input type="number" class="form-control text-center" id="qtyInput" value="1" min="1"
+											th:attr="max=${firstVariant.quantity != null and firstVariant.quantity > 0 ? (firstVariant.quantity > 10 ? 10 : firstVariant.quantity) : 1}">
+										<button class="btn btn-outline-secondary" type="button" id="btnQtyPlus"
+											th:disabled="${firstVariant.quantity == null or firstVariant.quantity <= 1}">+</button>
 									</div>
 
 									<button class="btn btn-brand flex-grow-1 js-add-cart"
-										id="btnAddToCart" type="button" th:attr="data-id=${product.id}">
+										id="btnAddToCart" type="button" th:attr="data-id=${product.id}, data-variant-id=${firstVariant.id}"
+										th:disabled="${firstVariant.quantity <= 0}">
 										<i class="fas fa-cart-plus me-2"></i>Thêm vào giỏ hàng
 									</button>
 
@@ -306,16 +248,16 @@ th:replace="~{layouts/customer-layout :: layout(
 				<ul class="nav nav-tabs" id="productTabs" role="tablist">
 					<li class="nav-item" role="presentation">
 						<button class="nav-link active" data-bs-toggle="tab"
-							data-bs-target="#tab-desc" type="button" role="tab"
-							aria-controls="tab-desc" aria-selected="true">
-							<i class="fas fa-align-left me-2"></i>Mô tả sản phẩm
+							data-bs-target="#tab-specs" type="button" role="tab"
+							aria-controls="tab-specs" aria-selected="true">
+							<i class="fas fa-list-check me-2"></i>Thông số kỹ thuật
 						</button>
 					</li>
 					<li class="nav-item" role="presentation">
 						<button class="nav-link" data-bs-toggle="tab"
-							data-bs-target="#tab-specs" type="button" role="tab"
-							aria-controls="tab-specs" aria-selected="false">
-							<i class="fas fa-list-check me-2"></i>Thông số kỹ thuật
+							data-bs-target="#tab-desc" type="button" role="tab"
+							aria-controls="tab-desc" aria-selected="false">
+							<i class="fas fa-align-left me-2"></i>Mô tả sản phẩm
 						</button>
 					</li>
 					<li class="nav-item" role="presentation">
@@ -330,14 +272,14 @@ th:replace="~{layouts/customer-layout :: layout(
 				<div class="tab-content pt-4">
 
 					<!-- Tab 1: Mô tả -->
-					<div class="tab-pane fade show active" id="tab-desc" role="tabpanel">
+					<div class="tab-pane fade" id="tab-desc" role="tabpanel">
 						<div class="p-3 bg-white rounded border" style="line-height: 1.8;">
 							<p style="white-space: pre-line;" th:text="${product.description}">Mô tả chi tiết sản phẩm.</p>
 						</div>
 					</div>
 
 					<!-- Tab 2: Thông số kỹ thuật -->
-					<div class="tab-pane fade" id="tab-specs" role="tabpanel">
+					<div class="tab-pane fade show active" id="tab-specs" role="tabpanel">
 						<div class="table-responsive bg-white rounded border p-3">
 							<table class="table table-striped mb-0">
 								<tbody>
@@ -353,11 +295,26 @@ th:replace="~{layouts/customer-layout :: layout(
 										<th>Danh mục</th>
 										<td th:text="${product.category != null ? product.category.name : 'N/A'}">Category</td>
 									</tr>
-									<!-- Style values của variant đầu tiên, có guard -->
-									<th:block th:if="${product.variants != null and !product.variants.isEmpty()}">
-										<tr th:each="sv : ${product.variants[0].styleValues}">
-											<th th:text="${sv.styleName}">Thuộc tính</th>
-											<td th:text="${sv.name}">Giá trị</td>
+								</tbody>
+							</table>
+						</div>
+						<h3 class="h6 fw-bold mt-4">Cấu hình có sẵn</h3>
+						<div class="table-responsive bg-white rounded border p-3">
+							<table class="table table-striped align-middle mb-0">
+								<thead><tr><th>Phiên bản</th><th>Thuộc tính</th><th>Giá</th><th>Tồn kho</th></tr></thead>
+								<tbody id="variantSpecsRows">
+									<th:block th:each="v, iterStat : ${product.variants}"
+									          th:with="specPrice=${v.promotionalPrice != null and v.promotionalPrice > 0 ? v.promotionalPrice : (v.price != null ? v.price : 0)}">
+										<tr>
+											<td th:text="${'Cấu hình ' + (iterStat.index + 1)}">Cấu hình 1</td>
+											<td>
+												<span th:each="sv, styleStat : ${v.styleValues}">
+													<strong th:text="${sv.styleName + ': '}">Màu sắc: </strong><span th:text="${sv.name}">Grey</span><span th:if="${!styleStat.last}"> · </span>
+												</span>
+												<span th:if="${v.styleValues == null or v.styleValues.isEmpty()}" class="text-muted">Mặc định</span>
+											</td>
+											<td th:text="${#numbers.formatDecimal(specPrice, 0, 'POINT', 0, 'POINT') + ' ₫'}">20.000.000 ₫</td>
+											<td th:text="${v.quantity != null ? v.quantity : 0}">0</td>
 										</tr>
 									</th:block>
 								</tbody>
@@ -407,9 +364,9 @@ th:replace="~{layouts/customer-layout :: layout(
 					</span>
 					<h2 class="section-title h4">Sản phẩm liên quan</h2>
 				</div>
-				<div class="row g-3 g-md-4">
+				<div class="row g-3 g-md-4 related-products-grid">
 					<div th:each="p : ${relatedProducts}"
-						class="col-6 col-md-4 col-lg-3 product-col">
+						class="col-6 col-md-4 col-lg-3 related-product-col product-col">
 						<article class="product-card" th:attr="data-id=${p.id}">
 							<div class="card-media">
 								<span

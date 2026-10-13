@@ -60,15 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!isoString) return '---';
     try {
       const d = new Date(isoString);
-      if (isNaN(d.getTime())) return isoString;
-      const pad = n => String(n).padStart(2, '0');
-      const hours = pad(d.getHours());
-      const minutes = pad(d.getMinutes());
-      const seconds = pad(d.getSeconds());
-      const day = pad(d.getDate());
-      const month = pad(d.getMonth() + 1);
-      const year = d.getFullYear();
-      return `${hours}:${minutes}:${seconds} - ${day}/${month}/${year}`;
+      return d.toLocaleString('vi-VN');
     } catch {
       return isoString;
     }
@@ -190,13 +182,19 @@ document.addEventListener('DOMContentLoaded', () => {
           const u = res.data;
 
           const detailAvatarImg = document.getElementById('detailAvatarImg');
-          const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(u.fullName || 'User')}&background=0d6efd&color=fff`;
-          if (detailAvatarImg) {
-            detailAvatarImg.onerror = () => {
-              detailAvatarImg.onerror = null;
-              detailAvatarImg.src = fallbackAvatar;
-            };
-            detailAvatarImg.src = (u.avatar && u.avatar.trim()) ? u.avatar.trim() : fallbackAvatar;
+          const detailAvatar = document.getElementById('detailAvatar');
+          if (u.avatar) {
+            if (detailAvatarImg) {
+              detailAvatarImg.src = u.avatar;
+              detailAvatarImg.style.display = 'block';
+            }
+            if (detailAvatar) detailAvatar.style.display = 'none';
+          } else {
+            if (detailAvatarImg) detailAvatarImg.style.display = 'none';
+            if (detailAvatar) {
+              detailAvatar.style.display = 'flex';
+              detailAvatar.textContent = (u.fullName || 'U').charAt(0).toUpperCase();
+            }
           }
 
           document.getElementById('detailFullName').textContent = u.fullName || '---';
