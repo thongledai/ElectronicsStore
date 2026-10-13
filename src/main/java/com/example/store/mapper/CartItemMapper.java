@@ -24,6 +24,7 @@ public class CartItemMapper {
                         .filter(url -> url != null && !url.isBlank())
                         .findFirst()
                         .orElse(null);
+
         BigDecimal subtotal = productVariant.getPrice().multiply(BigDecimal.valueOf(cartItem.getCount()));
 
         return new CartItemDTO(cartItem.getId(),

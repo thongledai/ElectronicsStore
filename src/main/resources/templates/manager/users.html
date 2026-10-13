@@ -1,28 +1,191 @@
 <!DOCTYPE html>
 <html lang="vi" th:replace="~{layouts/dashboard-layout :: layout('Người dùng', 'manager', 'users', ~{::section.content})}">
-<head><title>Người dùng | TechNova</title></head>
+<head>
+  <title>Người dùng | TechNova</title>
+</head>
 <body>
-<section class="content"><div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4"><div><h1 class="title">Người dùng</h1>
-<div class="subtitle">Quản lý và theo dõi người dùng trong hệ thống.</div>
-</div>
-<button class="btn btn-primary btn-sm" data-demo-action="Thêm mới"><i class="fa-solid fa-plus me-1"></i>Thêm mới</button></div>
-<div class="panel mb-3"><div class="row g-2 align-items-center"><div class="col-md-6"><input class="form-control" placeholder="Tìm kiếm..." data-search-table="#dataTable"></div>
-<div class="col-md-6 text-md-end"><span class="muted">Dữ liệu minh họa · 4 bản ghi</span></div>
-</div>
-</div>
-<div class="panel"><h2 class="paneltitle mb-3">Người dùng</h2>
-<div class="table-responsive"><table class="table" id="dataTable"><thead><tr><th>Mã người dùng</th><th>Họ tên</th><th>Email</th><th>Vai trò</th><th>Trạng thái</th><th>Thao tác</th></tr>
-</thead>
-<tbody><tr><td>U001</td><td>Nguyễn Minh Anh</td><td>minhanh@example.com</td><td>Customer</td><td><span class="status green">Hoạt động</span></td><td><button class="action" data-demo-action="Xem chi tiết"><i class="fa-regular fa-eye"></i></button> <button class="action" data-demo-action="Chỉnh sửa"><i class="fa-solid fa-pen"></i></button></td></tr>
-<tr><td>U002</td><td>Trần Quốc Bảo</td><td>quocbao@example.com</td><td>SaleEmployee</td><td><span class="status green">Hoạt động</span></td><td><button class="action" data-demo-action="Xem chi tiết"><i class="fa-regular fa-eye"></i></button> <button class="action" data-demo-action="Chỉnh sửa"><i class="fa-solid fa-pen"></i></button></td></tr>
-<tr><td>U003</td><td>Lê Thu Hà</td><td>thuha@example.com</td><td>Customer</td><td><span class="status green">Hoạt động</span></td><td><button class="action" data-demo-action="Xem chi tiết"><i class="fa-regular fa-eye"></i></button> <button class="action" data-demo-action="Chỉnh sửa"><i class="fa-solid fa-pen"></i></button></td></tr>
-<tr><td>U004</td><td>Phạm Gia Huy</td><td>giahuy@example.com</td><td>Shipper</td><td><span class="status red">Tạm khóa</span></td><td><button class="action" data-demo-action="Xem chi tiết"><i class="fa-regular fa-eye"></i></button> <button class="action" data-demo-action="Chỉnh sửa"><i class="fa-solid fa-pen"></i></button></td></tr>
-</tbody>
-</table>
-</div>
-<div class="d-flex justify-content-between"><span class="muted">Trang 1/1</span><div class="btn-group btn-group-sm"><button class="btn btn-outline-secondary">Trước</button><button class="btn btn-primary">1</button><button class="btn btn-outline-secondary">Sau</button></div>
-</div>
-</div>
+<section class="content">
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div>
+      <h1 class="title">Người dùng</h1>
+      <div class="subtitle">Quản lý và theo dõi người dùng trong hệ thống.</div>
+    </div>
+    <button class="btn btn-primary btn-sm" id="btnOpenCreateUserModal">
+      <i class="fa-solid fa-plus me-1"></i>Thêm mới
+    </button>
+  </div>
+
+  <div class="panel mb-3">
+    <div class="row g-2 align-items-center">
+      <div class="col-md-6">
+        <input class="form-control" id="searchInput" placeholder="Tìm kiếm..." autocomplete="off">
+      </div>
+      <div class="col-md-6 text-md-end">
+        <span class="muted" id="totalRecordsText">Đang tải...</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2 class="paneltitle mb-3">Người dùng</h2>
+    <div class="table-responsive">
+      <table class="table" id="dataTable">
+        <thead>
+          <tr>
+            <th style="width: 50px;">Avatar</th>
+            <th>Mã người dùng</th>
+            <th>Họ tên</th>
+            <th>Email</th>
+            <th>Vai trò</th>
+            <th>Trạng thái</th>
+            <th>Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="userTableBody">
+          <tr>
+            <td colspan="7" class="text-center py-4 text-muted">Đang tải dữ liệu...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-3">
+      <span class="muted" id="pageInfoText">Trang 1/1</span>
+      <div class="btn-group btn-group-sm" id="paginationControls">
+        <button class="btn btn-outline-secondary" id="btnPrevPage">Trước</button>
+        <button class="btn btn-primary" id="btnCurrentPage">1</button>
+        <button class="btn btn-outline-secondary" id="btnNextPage">Sau</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Thêm / Sửa Người dùng -->
+  <div class="modal fade" id="userFormModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="userModalTitle">Thêm mới người dùng</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <form id="userForm" novalidate>
+          <input type="hidden" id="userId">
+          <div class="modal-body">
+            <!-- Avatar Upload & Preview -->
+            <div class="mb-3 text-center">
+              <div class="position-relative d-inline-block">
+                <img id="avatarPreview" src="https://ui-avatars.com/api/?name=User&background=6c757d&color=fff" class="rounded-circle border shadow-sm object-fit-cover" style="width: 84px; height: 84px;" alt="Avatar">
+                <label for="userAvatarFile" class="btn btn-sm btn-light border position-absolute bottom-0 end-0 rounded-circle p-0 d-flex align-items-center justify-content-center shadow-sm" style="width: 28px; height: 28px; cursor: pointer;" title="Chọn ảnh đại diện">
+                  <i class="fa-solid fa-camera text-secondary" style="font-size: 13px;"></i>
+                </label>
+              </div>
+              <input type="file" id="userAvatarFile" class="d-none" accept="image/png, image/jpeg, image/webp">
+              <div class="form-text small mt-1">Hỗ trợ JPG, PNG, WEBP (tối đa 10MB)</div>
+              <div class="invalid-feedback text-center" id="avatarError"></div>
+            </div>
+
+            <div class="mb-3" id="userCodeGroup" style="display:none;">
+              <label class="form-label fw-semibold">Mã người dùng</label>
+              <input type="text" class="form-control" id="userCodeInput" disabled>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold" for="userFullName">Họ tên <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="userFullName" placeholder="Ví dụ: Nguyễn Văn A">
+              <div class="invalid-feedback"></div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold" for="userEmail">Email <span class="text-danger">*</span></label>
+              <input type="email" class="form-control" id="userEmail" placeholder="email@example.com">
+              <div class="invalid-feedback"></div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold" for="userPhone">Số điện thoại <span class="text-danger" id="phoneAsterisk">*</span></label>
+              <input type="tel" class="form-control" id="userPhone" placeholder="0912345678">
+              <div class="invalid-feedback"></div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold" for="userRole">Vai trò <span class="text-danger">*</span></label>
+              <select class="form-select" id="userRole">
+                <option value="">-- Chọn vai trò --</option>
+              </select>
+              <div class="invalid-feedback"></div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold" id="lblPassword" for="userPassword">Mật khẩu <span class="text-danger" id="pwdAsterisk">*</span></label>
+              <input type="password" class="form-control" id="userPassword" placeholder="Tối thiểu 6 ký tự">
+              <small class="text-muted" id="pwdHelpText" style="display:none;">Để trống nếu không muốn đổi mật khẩu</small>
+              <div class="invalid-feedback"></div>
+            </div>
+            <div class="form-check form-switch mt-2">
+              <input class="form-check-input" type="checkbox" id="userIsActive" checked>
+              <label class="form-check-label fw-semibold" for="userIsActive" id="userIsActiveLabel">Hoạt động</label>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+            <button type="submit" class="btn btn-primary btn-sm" id="btnSaveUser">Lưu thông tin</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Xem chi tiết Người dùng -->
+  <div class="modal fade" id="userDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Chi tiết người dùng</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <div class="modal-body">
+          <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+            <div class="rounded-circle overflow-hidden border shadow-sm flex-shrink-0" style="width: 58px; height: 58px;">
+              <img id="detailAvatarImg" class="w-100 h-100 object-fit-cover" alt="Avatar" src="https://ui-avatars.com/api/?name=User&background=0d6efd&color=fff">
+            </div>
+            <div class="min-w-0">
+              <h5 class="mb-0 fw-bold text-truncate" id="detailFullName">---</h5>
+              <span class="text-muted" id="detailUserCode">---</span>
+            </div>
+          </div>
+          <div class="row g-3">
+            <div class="col-12 col-sm-6">
+              <label class="text-muted small">Email</label>
+              <div class="fw-semibold text-break" id="detailEmail" style="word-break: break-all; overflow-wrap: anywhere;">---</div>
+            </div>
+            <div class="col-12 col-sm-6">
+              <label class="text-muted small">Số điện thoại</label>
+              <div class="fw-semibold text-break" id="detailPhone">---</div>
+            </div>
+            <div class="col-6">
+              <label class="text-muted small">Vai trò</label>
+              <div><span class="badge bg-secondary" id="detailRole">---</span></div>
+            </div>
+            <div class="col-6">
+              <label class="text-muted small">Trạng thái</label>
+              <div id="detailStatus">---</div>
+            </div>
+            <div class="col-6">
+              <label class="text-muted small">Điểm tích lũy</label>
+              <div class="fw-semibold" id="detailPoint">0</div>
+            </div>
+            <div class="col-6">
+              <label class="text-muted small">Số dư ví</label>
+              <div class="fw-semibold text-success" id="detailEWallet">0 ₫</div>
+            </div>
+            <div class="col-12">
+              <label class="text-muted small">Ngày tạo tài khoản</label>
+              <div class="fw-semibold" id="detailCreatedAt">---</div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script th:src="@{/js/manager/users.js}"></script>
 </section>
 </body>
 </html>
