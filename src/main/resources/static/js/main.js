@@ -1022,8 +1022,10 @@ function initAccountLabel() {
     localStorage.removeItem('technova_user');
     localStorage.removeItem('technova_last_active');
     localStorage.removeItem('technova_last_ping');
+    localStorage.removeItem('technova_remember_me');
     storageSet(STORE.user, null);
     document.cookie = 'JWT_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    document.cookie = 'REFRESH_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     document.cookie = 'JSESSIONID=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
   }
 
@@ -1034,8 +1036,10 @@ function initAccountLabel() {
       localStorage.removeItem('technova_user');
       localStorage.removeItem('technova_last_active');
       localStorage.removeItem('technova_last_ping');
+      localStorage.removeItem('technova_remember_me');
       storageSet(STORE.user, null);
       document.cookie = 'JWT_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      document.cookie = 'REFRESH_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
       document.cookie = 'JSESSIONID=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     });
   });
@@ -1065,6 +1069,8 @@ function initSessionManager() {
   const user = (typeof storageGet === 'function' && typeof STORE !== 'undefined') ? storageGet(STORE.user, null) : null;
   const hasSession = !!(token || (user && user.email));
 
+  const isRememberMe = localStorage.getItem('technova_remember_me') === 'true';
+
   const clearAllSessionData = () => {
     try {
       localStorage.removeItem('technova_jwt');
@@ -1072,15 +1078,17 @@ function initSessionManager() {
       localStorage.removeItem('technova_user');
       localStorage.removeItem('technova_last_active');
       localStorage.removeItem('technova_last_ping');
+      localStorage.removeItem('technova_remember_me');
       if (typeof storageSet === 'function' && typeof STORE !== 'undefined') {
         storageSet(STORE.user, null);
       }
       document.cookie = 'JWT_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      document.cookie = 'REFRESH_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
       document.cookie = 'JSESSIONID=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     } catch (e) {}
   };
 
-  if (hasSession) {
+  if (hasSession && !isRememberMe) {
     const lastActiveStr = localStorage.getItem('technova_last_active');
     const lastActive = lastActiveStr ? parseInt(lastActiveStr, 10) : 0;
     const now = Date.now();
@@ -1119,38 +1127,124 @@ function initSessionManager() {
   };
   window.addEventListener('beforeunload', onPageUnload);
   window.addEventListener('pagehide', onPageUnload);
+}
 
-  setInterval(() => {
-    const currentToken = localStorage.getItem('technova_jwt');
-    if (!currentToken) return;
+// Global Silent Refresh & Fetch Interceptor (Chống giật lag, tự động refresh token trong nền)
+(function setupAuthFetchInterceptor() {
+  if (window.__AUTH_INTERCEPTOR_SETUP__) return;
+  window.__AUTH_INTERCEPTOR_SETUP__ = true;
 
-    const now = Date.now();
-    const lastPing = parseInt(localStorage.getItem('technova_last_ping') || '0', 10);
-    if (now - lastPing < 50000) {
-      localStorage.setItem('technova_last_active', now.toString());
-      return;
+  const originalFetch = window.fetch;
+  let isRefreshing = false;
+  let refreshQueue = [];
+
+  function processQueue(error, newToken) {
+    refreshQueue.forEach(prom => {
+      if (error) {
+        prom.reject(error);
+      } else {
+        prom.resolve(newToken);
+      }
+    });
+    refreshQueue = [];
+  }
+
+  async function silentRefreshToken() {
+    try {
+      const res = await originalFetch('/auth/refresh-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin'
+      });
+      const data = await res.json();
+      if (res.ok && data.success && data.data?.token) {
+        localStorage.setItem('technova_jwt', data.data.token);
+        if (data.data?.user?.role) {
+          localStorage.setItem('technova_role', data.data.user.role);
+        }
+        localStorage.setItem('technova_last_active', Date.now().toString());
+        return data.data.token;
+      }
+      return null;
+    } catch (e) {
+      return null;
     }
+  }
 
-    localStorage.setItem('technova_last_ping', now.toString());
-    localStorage.setItem('technova_last_active', now.toString());
+  window.fetch = async function (resource, options = {}) {
+    options = options || {};
+    let token = localStorage.getItem('technova_jwt');
 
-    fetch('/auth/ping', {
-      method: 'GET',
-      headers: { 'Authorization': 'Bearer ' + currentToken }
-    }).then(res => {
-      if (res.status === 401 || res.status === 403) {
-        clearAllSessionData();
-        if (window.location.pathname.startsWith('/manager') ||
-            window.location.pathname.startsWith('/employee') ||
-            window.location.pathname.startsWith('/shipper')) {
-          window.location.replace('/login?error=session_expired');
-        } else if (typeof initAccountLabel === 'function') {
-          initAccountLabel();
+    if (token) {
+      if (!options.headers) {
+        options.headers = {};
+      }
+      const isHeadersInstance = typeof Headers !== 'undefined' && options.headers instanceof Headers;
+      const hasAuth = isHeadersInstance ? options.headers.has('Authorization') : (options.headers['Authorization'] || options.headers['authorization']);
+      if (!hasAuth) {
+        if (isHeadersInstance) {
+          options.headers.set('Authorization', 'Bearer ' + token);
+        } else {
+          options.headers['Authorization'] = 'Bearer ' + token;
         }
       }
-    }).catch(() => {});
-  }, 60000);
-}
+    }
+
+    let response = await originalFetch(resource, options);
+
+    const urlStr = typeof resource === 'string' ? resource : (resource?.url || '');
+    if (response.status === 401 && !urlStr.includes('/auth/refresh-token') && !urlStr.includes('/auth/login')) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          refreshQueue.push({
+            resolve: (newToken) => {
+              if (typeof Headers !== 'undefined' && options.headers instanceof Headers) {
+                options.headers.set('Authorization', 'Bearer ' + newToken);
+              } else {
+                options.headers['Authorization'] = 'Bearer ' + newToken;
+              }
+              resolve(originalFetch(resource, options));
+            },
+            reject: (err) => reject(err)
+          });
+        });
+      }
+
+      isRefreshing = true;
+      const newToken = await silentRefreshToken();
+      isRefreshing = false;
+
+      if (newToken) {
+        processQueue(null, newToken);
+        if (typeof Headers !== 'undefined' && options.headers instanceof Headers) {
+          options.headers.set('Authorization', 'Bearer ' + newToken);
+        } else {
+          options.headers['Authorization'] = 'Bearer ' + newToken;
+        }
+        return originalFetch(resource, options);
+      } else {
+        processQueue(new Error('Session expired'), null);
+        localStorage.removeItem('technova_jwt');
+        localStorage.removeItem('technova_role');
+        localStorage.removeItem('technova_user');
+        localStorage.removeItem('technova_last_active');
+        localStorage.removeItem('technova_remember_me');
+        document.cookie = 'JWT_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        document.cookie = 'REFRESH_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+
+        if (window.location.pathname.startsWith('/manager') ||
+            window.location.pathname.startsWith('/employee') ||
+            window.location.pathname.startsWith('/shipper') ||
+            window.location.pathname.startsWith('/customer/cart') ||
+            window.location.pathname.startsWith('/profile')) {
+          window.location.replace('/login?error=session_expired');
+        }
+      }
+    }
+
+    return response;
+  };
+})();
 
 // Chạy kiểm tra timeout ngay khi file nạp vào
 initSessionManager();

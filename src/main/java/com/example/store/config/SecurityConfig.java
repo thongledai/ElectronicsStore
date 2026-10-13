@@ -44,7 +44,7 @@ public class SecurityConfig {
                 // Public Authentication REST APIs
                 .requestMatchers(
                     "/auth/login", "/auth/register", "/auth/signup", "/auth/forgot-password", "/auth/resend-otp", "/auth/verify-otp",
-                    "/auth/google", "/auth/google/**", "/auth/ping"
+                    "/auth/google", "/auth/google/**", "/auth/refresh-token", "/auth/logout"
                 ).permitAll()
 
 
@@ -102,13 +102,19 @@ public class SecurityConfig {
                 .logoutUrl("/logout")
                 .invalidateHttpSession(true)
                 .clearAuthentication(true)
-                .deleteCookies("JSESSIONID", "JWT_TOKEN")
+                .deleteCookies("JSESSIONID", "JWT_TOKEN", "REFRESH_TOKEN")
                 .logoutSuccessHandler((request, response, authentication) -> {
                     Cookie cookie = new Cookie("JWT_TOKEN", "");
                     cookie.setPath("/");
                     cookie.setHttpOnly(true);
                     cookie.setMaxAge(0);
                     response.addCookie(cookie);
+
+                    Cookie refreshCookie = new Cookie("REFRESH_TOKEN", "");
+                    refreshCookie.setPath("/");
+                    refreshCookie.setHttpOnly(true);
+                    refreshCookie.setMaxAge(0);
+                    response.addCookie(refreshCookie);
 
                     Cookie jsession = new Cookie("JSESSIONID", "");
                     jsession.setPath("/");

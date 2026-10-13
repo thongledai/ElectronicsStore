@@ -34,7 +34,10 @@ import com.example.store.enums.BusinessMessage;
 import com.example.store.exception.AccountNotActivatedException;
 import com.example.store.exception.BusinessException;
 import com.example.store.exception.ResourceNotFoundException;
+import com.example.store.entity.RefreshToken;
+import com.example.store.service.auth.IRefreshTokenService;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +51,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final IJwtService jwtService;
+    private final IRefreshTokenService refreshTokenService;
     private final IOtpService otpService;
     private final IEmailService emailService;
     private final UserMapper userMapper;
@@ -112,15 +116,23 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
             throw new AccountNotActivatedException(user.getEmail());
         }
 
-        long expiration = loginDTO.isRememberMe() ? (7L * 24 * 60 * 60 * 1000) : jwtService.getExpirationTime();
+        long expiration = jwtService.getExpirationTime(); // 45 phút Access Token
         String token = jwtService.generateToken(user, expiration);
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user, loginDTO.isRememberMe());
 
         if (response != null) {
             Cookie jwtCookie = new Cookie("JWT_TOKEN", token);
             jwtCookie.setHttpOnly(true);
             jwtCookie.setPath("/");
-            jwtCookie.setMaxAge(45 * 60); // 45 phút (2700s) sliding window
+            jwtCookie.setMaxAge(45 * 60); // 45 phút (2700s)
             response.addCookie(jwtCookie);
+
+            int refreshMaxAge = (int) (refreshTokenService.getRefreshTokenDuration(loginDTO.isRememberMe()) / 1000);
+            Cookie refreshCookie = new Cookie("REFRESH_TOKEN", refreshToken.getToken());
+            refreshCookie.setHttpOnly(true);
+            refreshCookie.setPath("/");
+            refreshCookie.setMaxAge(refreshMaxAge);
+            response.addCookie(refreshCookie);
         }
 
         String roleName = user.getRole() != null ? user.getRole().getName() : "CUSTOMER";
@@ -129,6 +141,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
 
         return AuthResponseDTO.builder()
                 .token(token)
+                .refreshToken(refreshToken.getToken())
                 .tokenType("Bearer")
                 .expiresIn(expiration)
                 .redirectUrl(redirectUrl)
@@ -181,15 +194,23 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
             user = userRepository.save(user);
         }
 
-        long expiration = 7L * 24 * 60 * 60 * 1000; // 7 days expiration for Google login
+        long expiration = jwtService.getExpirationTime(); // 45 phút Access Token
         String token = jwtService.generateToken(user, expiration);
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user, true); // 30 ngày cho Google
 
         if (response != null) {
             Cookie jwtCookie = new Cookie("JWT_TOKEN", token);
             jwtCookie.setHttpOnly(true);
             jwtCookie.setPath("/");
-            jwtCookie.setMaxAge(45 * 60); // 45 phút (2700s) sliding window
+            jwtCookie.setMaxAge(45 * 60); // 45 phút (2700s)
             response.addCookie(jwtCookie);
+
+            int refreshMaxAge = (int) (refreshTokenService.getRefreshTokenDuration(true) / 1000);
+            Cookie refreshCookie = new Cookie("REFRESH_TOKEN", refreshToken.getToken());
+            refreshCookie.setHttpOnly(true);
+            refreshCookie.setPath("/");
+            refreshCookie.setMaxAge(refreshMaxAge);
+            response.addCookie(refreshCookie);
         }
 
         String roleName = user.getRole() != null ? user.getRole().getName() : "CUSTOMER";
@@ -198,6 +219,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
 
         return AuthResponseDTO.builder()
                 .token(token)
+                .refreshToken(refreshToken.getToken())
                 .tokenType("Bearer")
                 .expiresIn(expiration)
                 .redirectUrl(redirectUrl)
@@ -354,5 +376,93 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
             case "CUSTOMER", "ROLE_CUSTOMER" -> "/customer/index";
             default -> "/customer/index";
         };
+    }
+
+    @Override
+    @Transactional
+    public AuthResponseDTO refreshToken(String refreshTokenStr, HttpServletRequest request, HttpServletResponse response) {
+        String tokenToVerify = refreshTokenStr;
+
+        if (tokenToVerify == null || tokenToVerify.isBlank()) {
+            if (request != null && request.getCookies() != null) {
+                for (Cookie cookie : request.getCookies()) {
+                    if ("REFRESH_TOKEN".equals(cookie.getName())) {
+                        tokenToVerify = cookie.getValue();
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (tokenToVerify == null || tokenToVerify.isBlank()) {
+            throw new BusinessException("Không tìm thấy Refresh Token. Vui lòng đăng nhập lại!");
+        }
+
+        RefreshToken newRefreshToken = refreshTokenService.rotateRefreshToken(tokenToVerify);
+        User user = newRefreshToken.getUser();
+
+        long accessExpiration = jwtService.getExpirationTime();
+        String newAccessToken = jwtService.generateToken(user, accessExpiration);
+
+        if (response != null) {
+            Cookie jwtCookie = new Cookie("JWT_TOKEN", newAccessToken);
+            jwtCookie.setHttpOnly(true);
+            jwtCookie.setPath("/");
+            jwtCookie.setMaxAge(45 * 60);
+            response.addCookie(jwtCookie);
+
+            long remainingSeconds = newRefreshToken.getExpiryDate().getEpochSecond() - java.time.Instant.now().getEpochSecond();
+            int refreshMaxAge = Math.max(0, (int) remainingSeconds);
+            Cookie refreshCookie = new Cookie("REFRESH_TOKEN", newRefreshToken.getToken());
+            refreshCookie.setHttpOnly(true);
+            refreshCookie.setPath("/");
+            refreshCookie.setMaxAge(refreshMaxAge);
+            response.addCookie(refreshCookie);
+        }
+
+        String roleName = user.getRole() != null ? user.getRole().getName() : "CUSTOMER";
+        String redirectUrl = getRedirectUrlForRole(roleName);
+        UserResponseDTO userResponse = userMapper.toUserResponseDTO(user);
+
+        return AuthResponseDTO.builder()
+                .token(newAccessToken)
+                .refreshToken(newRefreshToken.getToken())
+                .tokenType("Bearer")
+                .expiresIn(accessExpiration)
+                .redirectUrl(redirectUrl)
+                .user(userResponse)
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
+        String tokenToRevoke = null;
+        if (request != null && request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("REFRESH_TOKEN".equals(cookie.getName())) {
+                    tokenToRevoke = cookie.getValue();
+                    break;
+                }
+            }
+        }
+
+        if (tokenToRevoke != null && !tokenToRevoke.isBlank()) {
+            refreshTokenService.revokeToken(tokenToRevoke);
+        }
+
+        if (response != null) {
+            Cookie jwtCookie = new Cookie("JWT_TOKEN", "");
+            jwtCookie.setHttpOnly(true);
+            jwtCookie.setPath("/");
+            jwtCookie.setMaxAge(0);
+            response.addCookie(jwtCookie);
+
+            Cookie refreshCookie = new Cookie("REFRESH_TOKEN", "");
+            refreshCookie.setHttpOnly(true);
+            refreshCookie.setPath("/");
+            refreshCookie.setMaxAge(0);
+            response.addCookie(refreshCookie);
+        }
     }
 }

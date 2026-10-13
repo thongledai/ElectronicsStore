@@ -86,7 +86,9 @@
           localStorage.removeItem('technova_user');
           localStorage.removeItem('technova_last_active');
           localStorage.removeItem('technova_last_ping');
+          localStorage.removeItem('technova_remember_me');
           document.cookie = 'JWT_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+          document.cookie = 'REFRESH_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
           document.cookie = 'JSESSIONID=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
         } catch (e) { /* storage error */ }
       });
@@ -97,6 +99,7 @@
   function initSessionManager() {
     const TIMEOUT_MS = 45 * 60 * 1000; // 45 phút
     const token = localStorage.getItem('technova_jwt');
+    const isRememberMe = localStorage.getItem('technova_remember_me') === 'true';
 
     const clearAllSessionData = () => {
       try {
@@ -105,12 +108,14 @@
         localStorage.removeItem('technova_user');
         localStorage.removeItem('technova_last_active');
         localStorage.removeItem('technova_last_ping');
+        localStorage.removeItem('technova_remember_me');
         document.cookie = 'JWT_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        document.cookie = 'REFRESH_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
         document.cookie = 'JSESSIONID=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
       } catch (e) {}
     };
 
-    if (token) {
+    if (token && !isRememberMe) {
       const lastActiveStr = localStorage.getItem('technova_last_active');
       const lastActive = lastActiveStr ? parseInt(lastActiveStr, 10) : 0;
       const now = Date.now();
@@ -145,31 +150,6 @@
     };
     window.addEventListener('beforeunload', onPageUnload);
     window.addEventListener('pagehide', onPageUnload);
-
-    setInterval(() => {
-      const currentToken = localStorage.getItem('technova_jwt');
-      if (!currentToken) return;
-
-      const now = Date.now();
-      const lastPing = parseInt(localStorage.getItem('technova_last_ping') || '0', 10);
-      if (now - lastPing < 50000) {
-        localStorage.setItem('technova_last_active', now.toString());
-        return;
-      }
-
-      localStorage.setItem('technova_last_ping', now.toString());
-      localStorage.setItem('technova_last_active', now.toString());
-
-      fetch('/auth/ping', {
-        method: 'GET',
-        headers: { 'Authorization': 'Bearer ' + currentToken }
-      }).then(res => {
-        if (res.status === 401 || res.status === 403) {
-          clearAllSessionData();
-          window.location.replace('/login?error=session_expired');
-        }
-      }).catch(() => {});
-    }, 60000);
   }
 
   /* ---------- User Avatar & Identity in Dashboard Topbar ---------- */
