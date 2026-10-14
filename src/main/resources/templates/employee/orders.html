@@ -39,7 +39,7 @@
             <table class="delivery-table">
                 <thead><tr><th scope="col">Mã đơn</th><th scope="col">Khách hàng</th><th scope="col">Ngày đặt</th><th scope="col">Tổng thanh toán</th><th scope="col">Trạng thái đơn</th><th scope="col">Vận chuyển GHN</th><th scope="col"><span class="visually-hidden">Thao tác</span></th></tr></thead>
                 <tbody>
-                <tr th:each="order : ${orders.content}">
+                <tr th:each="order : ${orders.content}" th:attr="data-shipment-url=@{/api/employee/orders/{id}/ghn-shipment(id=${order.id})},data-has-shipment=${order.ghnOrderCode != null}">
                     <td><span class="delivery-order-id" th:text="|#${#strings.substring(order.id.toString(), 0, 8).toUpperCase()}|">#D867DEF1</span></td>
                     <td><span class="delivery-customer-name" th:text="${order.user.fullName}">Khách hàng</span><span class="delivery-secondary" th:text="${order.phone}">Số điện thoại</span></td>
                     <td><span th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy')}">14/10/2026</span><span class="delivery-secondary" th:text="${#temporals.format(order.createdAt, 'HH:mm')}">14:30</span></td>
