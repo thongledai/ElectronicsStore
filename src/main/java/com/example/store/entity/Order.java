@@ -46,9 +46,6 @@ public class Order {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "delivery_id", nullable = false)
-    private Delivery delivery;
 
     @Column(nullable = false, length = 500, columnDefinition = "nvarchar(500)")
     private String address;

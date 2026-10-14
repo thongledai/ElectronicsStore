@@ -16,18 +16,18 @@ import com.example.store.entity.Order;
 import jakarta.persistence.LockModeType;
 
 public interface OrderRepository extends JpaRepository<Order, UUID> {
-    @EntityGraph(attributePaths = {"user", "status", "delivery", "payment"})
+    @EntityGraph(attributePaths = {"user", "status", "payment"})
     @Query("select o from Order o where (:status is null or upper(o.status.name) = upper(:status)) "
             + "and (:keyword is null or :keyword = '' or lower(o.user.fullName) like lower(concat('%', :keyword, '%')) "
             + "or o.phone like concat('%', :keyword, '%') or lower(o.ghnOrderCode) like lower(concat('%', :keyword, '%'))) ")
     Page<Order> search(@Param("status") String status, @Param("keyword") String keyword, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"user", "status", "delivery", "payment", "items", "items.variant", "items.variant.product"})
+    @EntityGraph(attributePaths = {"user", "status", "payment", "items", "items.variant", "items.variant.product"})
     @Query("select o from Order o where o.id = :id")
     Optional<Order> findDetailedById(@Param("id") UUID id);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @EntityGraph(attributePaths = {"user", "status", "delivery", "payment"})
+    @EntityGraph(attributePaths = {"user", "status", "payment"})
     @Query("select o from Order o where o.id = :id")
     Optional<Order> findByIdForUpdate(@Param("id") UUID id);
 
