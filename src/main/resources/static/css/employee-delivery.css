@@ -500,3 +500,17 @@
 .delivery-page .btn-link {
   text-decoration: none;
 }
+
+/* Giữ khoảng cách giữa thông tin đơn hàng và biểu mẫu tạo vận đơn gọn, nhất quán. */
+.delivery-page > .row.mb-3 {
+  margin-bottom: .75rem !important;
+}
+
+.delivery-page > .delivery-panel.mb-3,
+.delivery-page > #shipmentForm.delivery-panel.mb-3 {
+  margin-bottom: .75rem !important;
+}
+
+.delivery-page #shipmentForm .delivery-panel-title {
+  margin-bottom: .75rem;
+}
