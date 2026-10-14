@@ -9,9 +9,9 @@
             <a th:href="@{/employee/orders}" class="small">← Quay lại danh sách đơn hàng</a>
             <h1 class="title mt-2">Chi tiết đơn hàng</h1>
             <div class="delivery-detail-id">
-                <span class="delivery-order-id" th:text="|#${#strings.substring(order.id.toString(), 0, 8).toUpperCase()}|">#D867DEF1</span>
+                <span class="delivery-order-id" th:text="${displayOrderCode}">#D867DEF1</span>
                 <button type="button" class="btn btn-sm btn-outline-secondary"
-                        th:attr="data-copy-value=|#${#strings.substring(order.id.toString(), 0, 8).toUpperCase()}|">Sao chép mã đơn</button>
+                        th:attr="data-copy-value=${displayOrderCode}">Sao chép mã đơn</button>
             </div>
         </div>
         <span id="orderStatus" class="delivery-status status-neutral"
