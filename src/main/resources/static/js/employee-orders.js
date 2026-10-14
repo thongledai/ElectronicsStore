@@ -260,7 +260,11 @@
 
     const updatedElement = document.getElementById('ghnStatusUpdatedAt');
     if (updatedElement && shipment.ghnStatusUpdatedAt) {
-      updatedElement.textContent = 'Cập nhật lúc ' + formatDateTime(shipment.ghnStatusUpdatedAt);
+      const previousEventTime = updatedElement.dataset.eventTime || '';
+      const nextEventTime = String(shipment.ghnStatusUpdatedAt);
+      if (previousEventTime && nextEventTime && previousEventTime !== nextEventTime) statusChanged = true;
+      updatedElement.dataset.eventTime = nextEventTime;
+      updatedElement.textContent = 'Cập nhật lúc ' + formatDateTime(nextEventTime);
     }
 
     return statusChanged;
