@@ -1,9 +1,9 @@
-package com.example.store.dto.request;
+package com.example.store.dto.cart;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import lombok.experimental.FieldDefaults;
+
 import java.util.UUID;
 
 @Builder

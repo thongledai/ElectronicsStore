@@ -1,5 +1,6 @@
 package com.example.store.entity;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -30,8 +31,23 @@ public class OrderItem {
     @JoinColumn(name = "variant_id", nullable = false)
     private ProductVariant variant;
 
+    @Column(nullable = false, columnDefinition = "nvarchar(255)")
+    private String productName;
+
+    @Column(columnDefinition = "nvarchar(255)")
+    private String variantDescription;
+
+    @Column(length = 500)
+    private String imageUrl;
+
+    @Column(nullable = false, precision = 15, scale = 2)
+    private BigDecimal unitPrice;
+
     @Column(nullable = false)
-    private Integer count;
+    private Integer quantity;
+
+    @Column(nullable = false, precision = 15, scale = 2)
+    private BigDecimal subtotal;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

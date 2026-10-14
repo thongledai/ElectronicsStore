@@ -1,8 +1,8 @@
 package com.example.store.service.cart.impl;
 
-import com.example.store.dto.request.AddToCartRequest;
-import com.example.store.dto.request.UpdateCartItemRequest;
-import com.example.store.dto.respone.CartItemDTO;
+import com.example.store.dto.cart.AddToCartRequest;
+import com.example.store.dto.cart.UpdateCartItemRequest;
+import com.example.store.dto.cart.CartItemDTO;
 import com.example.store.entity.Cart;
 import com.example.store.entity.CartItem;
 import com.example.store.entity.Product;
@@ -27,6 +27,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class CartServiceImpl implements ICartService {
+
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final CartItemMapper cartItemMapper;
@@ -43,12 +44,13 @@ public class CartServiceImpl implements ICartService {
 
     @Override
     public CartItemDTO addToCart(UUID userId, AddToCartRequest request) {
+        // Kiem tra san pham co ton tai hay khong
         ProductVariant variant = variantRepository.findById(request.productVariantId())
                 .orElseThrow(() -> new AppException(ProductErrorCode.VARIANT_NOT_FOUND));
 
-        Product product = variant.getProduct();
-        if (!product.isActive() || !product.isSelling()) {
-            throw new AppException(ProductErrorCode.PRODUCT_NOT_AVAILABLE);
+        // Kiem tra san pham co dang ban hay khong
+        if (!variant.isActive() || !variant.isSelling()) {
+            throw new AppException(ProductErrorCode.VARIANT_NOT_FOUND);
         }
 
         Cart cart = getOrCreateCart(userId);
@@ -81,11 +83,27 @@ public class CartServiceImpl implements ICartService {
         });
     }
 
+
     private CartItem findOwnedItem(UUID userId, UUID cartItemId) {
         Cart cart = cartRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(CartErrorCode.CART_ITEM_NOT_FOUND));
         return cartItemRepository.findByIdAndCartId(cartItemId, cart.getId())
                 .orElseThrow(() -> new AppException(CartErrorCode.CART_ITEM_NOT_FOUND));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CartItem> getOwnedItems(UUID userId, List<UUID> itemIds) {
+        Cart cart = cartRepository.findByUserId(userId)
+                .orElseThrow(() -> new AppException(CartErrorCode.CART_ITEM_NOT_FOUND));
+
+        List<CartItem> items = cartItemRepository.findByIdInAndCartId(itemIds, cart.getId());
+
+        // Có id lạ (không tồn tại hoặc của người khác) thì từ chối cả lô
+        if (items.size() != new HashSet<>(itemIds).size()) {
+            throw new AppException(CartErrorCode.CART_ITEM_NOT_FOUND);
+        }
+        return items;
     }
 
     private void validateQuantity(ProductVariant variant, int quantity) {
@@ -119,16 +137,7 @@ public class CartServiceImpl implements ICartService {
     @Override
     @Transactional
     public void removeItems(UUID userId, List<UUID> itemIds) {
-        Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new AppException(CartErrorCode.CART_ITEM_NOT_FOUND));
-
-        List<CartItem> items = cartItemRepository.findByIdInAndCartId(itemIds, cart.getId());
-
-        // Có id không thuộc giỏ này (hoặc không tồn tại) thì từ chối cả lô
-        if (items.size() != new HashSet<>(itemIds).size()) {
-            throw new AppException(CartErrorCode.CART_ITEM_NOT_FOUND);
-        }
-        cartItemRepository.deleteAll(items);
+        cartItemRepository.deleteAll(getOwnedItems(userId, itemIds));
     }
 
     @Override
@@ -136,5 +145,10 @@ public class CartServiceImpl implements ICartService {
     public void clearCart(UUID userId) {
         cartRepository.findByUserId(userId)
                 .ifPresent(cart -> cartItemRepository.deleteAllByCartId(cart.getId()));
+    }
+
+    @Override
+    public long countItems(UUID userId) {
+        return cartItemRepository.countByUserId(userId);
     }
 }

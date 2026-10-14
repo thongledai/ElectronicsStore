@@ -1,6 +1,6 @@
 package com.example.store.mapper;
 
-import com.example.store.dto.respone.CartItemDTO;
+import com.example.store.dto.cart.CartItemDTO;
 import com.example.store.entity.CartItem;
 import com.example.store.entity.Product;
 import com.example.store.entity.ProductVariant;
@@ -8,7 +8,6 @@ import com.example.store.entity.StyleValue;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -34,7 +33,8 @@ public class CartItemMapper {
                 productVariant.getPrice(),
                 cartItem.getCount(),
                 subtotal,
-                getStyleValues(productVariant)
+                getStyleValues(productVariant),
+                productVariant.getQuantity()
                 );
     }
 
