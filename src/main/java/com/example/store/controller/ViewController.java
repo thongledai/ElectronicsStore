@@ -61,9 +61,15 @@ public class ViewController {
         return "customer/wishlist";
     }
 
+    // Trang hồ sơ cá nhân dùng chung cho tất cả các Role
+    @GetMapping("/profile")
+    public String profile() {
+        return "profile";
+    }
+
     @GetMapping("/customer/profile")
-    public String customerProfile() {
-        return "customer/profile";
+    public String customerProfileRedirect() {
+        return "redirect:/profile";
     }
 
 
