@@ -24,7 +24,7 @@
     <div class="row g-3 mb-3">
         <div class="col-lg-6">
             <section class="delivery-panel">
-                <h2 class="delivery-panel-title"><span class="delivery-panel-icon" aria-hidden="true">👤</span>Thông tin người nhận</h2>
+                <h2 class="delivery-panel-title"><span class="delivery-panel-icon" aria-hidden="true"><i class="fa-solid fa-user"></i></span>Thông tin người nhận</h2>
                 <div class="delivery-recipient-line"><span class="delivery-recipient-label">Họ và tên</span><span class="delivery-recipient-value" th:text="${order.user.fullName}">Khách hàng</span></div>
                 <div class="delivery-recipient-line"><span class="delivery-recipient-label">Số điện thoại</span><span class="delivery-recipient-value" th:text="${order.phone}">Số điện thoại</span></div>
                 <div class="delivery-recipient-line"><span class="delivery-recipient-label">Địa chỉ đã đặt</span><span class="delivery-recipient-value" th:text="${order.address}">Địa chỉ giao hàng</span></div>
@@ -32,7 +32,7 @@
         </div>
         <div class="col-lg-6">
             <section class="delivery-panel">
-                <h2 class="delivery-panel-title"><span class="delivery-panel-icon" aria-hidden="true">🚚</span>Thông tin vận chuyển</h2>
+                <h2 class="delivery-panel-title"><span class="delivery-panel-icon" aria-hidden="true"><i class="fa-solid fa-truck-fast"></i></span>Thông tin vận chuyển</h2>
                 <div class="delivery-facts">
                     <div class="delivery-fact">
                         <span class="delivery-fact-label">Mã vận đơn GHN</span>
@@ -71,7 +71,7 @@
     </div>
 
     <section class="delivery-panel mb-3">
-        <h2 class="delivery-panel-title"><span class="delivery-panel-icon" aria-hidden="true">📦</span>Sản phẩm trong đơn</h2>
+        <h2 class="delivery-panel-title"><span class="delivery-panel-icon" aria-hidden="true"><i class="fa-solid fa-box-open"></i></span>Sản phẩm trong đơn</h2>
         <div class="table-responsive">
             <table class="delivery-product-table">
                 <thead><tr><th>Sản phẩm</th><th class="text-end">Số lượng</th></tr></thead>
@@ -91,7 +91,7 @@
     </section>
 
     <section class="delivery-panel mb-3" th:if="${order.status.name.equalsIgnoreCase('NOT_PROCESSED') and order.ghnOrderCode == null}">
-        <h2 class="delivery-panel-title"><span class="delivery-panel-icon" aria-hidden="true">✓</span>Xác nhận đơn hàng</h2>
+        <h2 class="delivery-panel-title"><span class="delivery-panel-icon" aria-hidden="true"><i class="fa-solid fa-check"></i></span>Xác nhận đơn hàng</h2>
         <p class="delivery-muted-note">Xác nhận sau khi đã kiểm tra sản phẩm, thông tin nhận hàng và phương thức thanh toán.</p>
         <button type="button" class="btn btn-primary mt-3" id="confirmOrderButton"
                 th:attr="data-url=@{/api/employee/orders/{id}/confirm(id=${order.id})}">Xác nhận đơn hàng</button>
@@ -100,7 +100,7 @@
     <form class="delivery-panel mb-3" id="shipmentForm"
           th:if="${order.status.name.equalsIgnoreCase('CONFIRMED') and order.ghnOrderCode == null}"
           th:attr="data-url=@{/api/employee/orders/{id}/ghn-shipment(id=${order.id})}">
-        <h2 class="delivery-panel-title"><span class="delivery-panel-icon" aria-hidden="true">🚚</span>Tạo vận đơn</h2>
+        <h2 class="delivery-panel-title"><span class="delivery-panel-icon" aria-hidden="true"><i class="fa-solid fa-truck-fast"></i></span>Tạo vận đơn</h2>
         <p class="delivery-muted-note mb-3">Xác nhận địa chỉ nhận hàng và thông số kiện hàng trước khi gửi yêu cầu tạo vận đơn. Tên tỉnh/thành và phường/xã được lấy trực tiếp từ danh mục GHN.</p>
 
         <div id="ghnAddressPicker" class="delivery-address-form"
@@ -134,7 +134,7 @@
     </form>
 
     <section class="delivery-panel mb-3" th:if="${order.ghnOrderCode != null}">
-        <h2 class="delivery-panel-title"><span class="delivery-panel-icon" aria-hidden="true">↗</span>Lịch sử vận chuyển</h2>
+        <h2 class="delivery-panel-title"><span class="delivery-panel-icon" aria-hidden="true"><i class="fa-solid fa-clock-rotate-left"></i></span>Lịch sử vận chuyển</h2>
         <div id="ghnEventHistory">
             <div class="delivery-status-note" th:if="${#lists.isEmpty(ghnEvents)}"><span class="delivery-note-dot" aria-hidden="true"></span><span>Chưa nhận được cập nhật trạng thái từ GHN. Lịch sử sẽ xuất hiện khi GHN gửi cập nhật.</span></div>
             <div class="delivery-recipient-line" th:each="event : ${ghnEvents}">
