@@ -225,20 +225,27 @@
   const refreshButton = document.getElementById('refreshShipmentButton');
 
   const updateShipmentView = shipment => {
-    if (!shipment) return;
+    if (!shipment) return false;
+    let statusChanged = false;
 
     const codeElement = document.getElementById('ghnOrderCode');
     if (codeElement && shipment.ghnOrderCode) codeElement.textContent = shipment.ghnOrderCode;
 
     const statusElement = document.getElementById('ghnStatus');
     if (statusElement) {
-      statusElement.dataset.ghnStatus = shipment.ghnStatus || '';
+      const previousStatus = normalizeGhnStatus(statusElement.dataset.ghnStatus);
+      const nextStatus = normalizeGhnStatus(shipment.ghnStatus);
+      if (previousStatus && nextStatus && previousStatus !== nextStatus) statusChanged = true;
+      statusElement.dataset.ghnStatus = nextStatus;
       applyGhnStatus(statusElement);
     }
 
     const orderStatusElement = document.getElementById('orderStatus');
     if (orderStatusElement && shipment.orderStatus) {
-      orderStatusElement.dataset.orderStatus = shipment.orderStatus;
+      const previousOrderStatus = normalizeOrderStatus(orderStatusElement.dataset.orderStatus);
+      const nextOrderStatus = normalizeOrderStatus(shipment.orderStatus);
+      if (previousOrderStatus && nextOrderStatus && previousOrderStatus !== nextOrderStatus) statusChanged = true;
+      orderStatusElement.dataset.orderStatus = nextOrderStatus;
       applyOrderStatus(orderStatusElement);
     }
 
@@ -255,6 +262,8 @@
     if (updatedElement && shipment.ghnStatusUpdatedAt) {
       updatedElement.textContent = 'Cập nhật lúc ' + formatDateTime(shipment.ghnStatusUpdatedAt);
     }
+
+    return statusChanged;
   };
 
   const refreshShipment = async silent => {
@@ -262,8 +271,9 @@
     if (!silent) setBusy(refreshButton, true, 'Đang cập nhật…');
     try {
       const result = await getJson(refreshButton.dataset.url);
-      updateShipmentView(result.data);
+      const statusChanged = updateShipmentView(result.data);
       if (!silent) showNotice(result.message || 'Đã cập nhật thông tin vận chuyển.', true);
+      if (statusChanged) window.setTimeout(() => window.location.reload(), 1200);
     } catch (error) {
       if (!silent) showNotice(error.message || 'Không tải được thông tin vận chuyển.', false);
     } finally {
