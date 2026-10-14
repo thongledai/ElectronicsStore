@@ -50,6 +50,8 @@ public class EmployeeOrderViewController {
         var order = orderRepository.findDetailedById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng."));
         model.addAttribute("order", order);
+        model.addAttribute("ghnEvents", order.getGhnOrderCode() == null ? java.util.List.of()
+                : webhookEventRepository.findTop20ByOrderCodeOrderByEventTimeDesc(order.getGhnOrderCode()));
         model.addAttribute("latestGhnStatusTime", order.getGhnOrderCode() == null ? null
                 : webhookEventRepository.findFirstByOrderCodeOrderByEventTimeDesc(order.getGhnOrderCode())
                         .map(event -> GHN_TIME_FORMAT.format(event.getEventTime())).orElse(null));
