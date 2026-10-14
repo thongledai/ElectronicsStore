@@ -477,3 +477,26 @@
 @media (max-width: 420px) {
   .delivery-facts { grid-template-columns: 1fr; }
 }
+
+.delivery-page .btn-outline-primary {
+  border: 1px solid var(--blue);
+  color: var(--blue);
+  background: transparent;
+}
+.delivery-page .btn-outline-primary:hover {
+  color: #fff;
+  background: var(--blue);
+}
+.delivery-page .btn-outline-secondary {
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  background: transparent;
+}
+.delivery-page .btn-outline-secondary:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+  background: var(--surface-2);
+}
+.delivery-page .btn-link {
+  text-decoration: none;
+}
