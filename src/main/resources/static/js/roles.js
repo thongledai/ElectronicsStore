@@ -186,9 +186,11 @@
 
     document.querySelectorAll('.role-avatar').forEach(el => {
       if (user && user.avatar) {
-        el.innerHTML = `<img src="${user.avatar}" class="w-100 h-100 rounded-circle object-fit-cover" alt="avatar" onerror="this.onerror=null; this.parentElement.textContent='${role.charAt(0)}';">`;
+        el.innerHTML = `<img src="${user.avatar}" class="w-100 h-100 rounded-circle object-fit-cover" alt="">`;
       } else {
-        el.textContent = role.charAt(0);
+        const fallback = el.querySelector('.js-role-avatar-fallback');
+        if (fallback) fallback.textContent = role.charAt(0);
+        else el.textContent = role.charAt(0);
       }
     });
 
