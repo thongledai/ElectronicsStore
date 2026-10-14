@@ -262,7 +262,7 @@
     if (updatedElement && shipment.ghnStatusUpdatedAt) {
       const previousEventTime = updatedElement.dataset.eventTime || '';
       const nextEventTime = String(shipment.ghnStatusUpdatedAt);
-      if (previousEventTime && nextEventTime && previousEventTime !== nextEventTime) statusChanged = true;
+      if (nextEventTime && previousEventTime !== nextEventTime) statusChanged = true;
       updatedElement.dataset.eventTime = nextEventTime;
       updatedElement.textContent = 'Cập nhật lúc ' + formatDateTime(nextEventTime);
     }
