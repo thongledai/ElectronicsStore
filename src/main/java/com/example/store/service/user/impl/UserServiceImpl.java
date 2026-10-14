@@ -4,7 +4,7 @@ import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 
-import com.example.store.dto.customer.CustomerProfileUpdateRequestDTO;
+import com.example.store.dto.user.ProfileUpdateRequestDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -208,7 +208,7 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     @Transactional(readOnly = true)
-    public UserResponseDTO getCustomerProfile(String email) {
+    public UserResponseDTO getProfile(String email) {
         User user = userRepository.findByEmail(email.toLowerCase().trim())
                 .orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.USER_NOT_FOUND_EMAIL, email));
         return userMapper.toUserResponseDTO(user);
@@ -216,7 +216,7 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     @Transactional
-    public UserResponseDTO updateCustomerProfile(String email, CustomerProfileUpdateRequestDTO requestDTO, org.springframework.web.multipart.MultipartFile avatarFile) {
+    public UserResponseDTO updateProfile(String email, ProfileUpdateRequestDTO requestDTO, org.springframework.web.multipart.MultipartFile avatarFile) {
         User user = userRepository.findByEmail(email.toLowerCase().trim())
                 .orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.USER_NOT_FOUND_EMAIL, email));
 
