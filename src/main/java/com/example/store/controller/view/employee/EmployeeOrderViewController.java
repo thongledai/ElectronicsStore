@@ -55,6 +55,9 @@ public class EmployeeOrderViewController {
         model.addAttribute("latestGhnStatusTime", order.getGhnOrderCode() == null ? null
                 : webhookEventRepository.findFirstByOrderCodeOrderByEventTimeDesc(order.getGhnOrderCode())
                         .map(event -> GHN_TIME_FORMAT.format(event.getEventTime())).orElse(null));
+        model.addAttribute("latestGhnStatusEventTime", order.getGhnOrderCode() == null ? null
+                : webhookEventRepository.findFirstByOrderCodeOrderByEventTimeDesc(order.getGhnOrderCode())
+                        .map(event -> event.getEventTime()).orElse(null));
         model.addAttribute("defaultPaymentTypeId", orderMapper.getPaymentTypeId());
         model.addAttribute("defaultWeight", Math.max(1, orderMapper.calculateTotalWeightGram(order)));
         model.addAttribute("defaultLength", orderMapper.getDefaultLengthCm());
