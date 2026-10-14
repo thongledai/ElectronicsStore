@@ -1,6 +1,8 @@
 package com.example.store.controller.view.employee;
 
 import java.util.UUID;
+import java.util.Map;
+import java.util.stream.Collectors;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
@@ -32,13 +34,24 @@ public class EmployeeOrderViewController {
     private final GhnOrderMapper orderMapper;
     private final GhnWebhookEventRepository webhookEventRepository;
 
+    private String generateOrderCode(UUID orderId) {
+        if (orderId == null) {
+            return "ORD001";
+        }
+        return "ORD" + String.format("%03d", Math.abs(orderId.hashCode() % 1000));
+    }
+
     @GetMapping
     public String orders(@RequestParam(required = false) String status,
             @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "0") int page, Model model) {
         String normalizedStatus = OrderStatusName.fromDbName(status).map(OrderStatusName::getDbName).orElse(null);
-        model.addAttribute("orders", orderRepository.search(normalizedStatus, keyword,
-                PageRequest.of(Math.max(0, page), 25, Sort.by(Sort.Direction.DESC, "createdAt"))));
+        var orders = orderRepository.search(normalizedStatus, keyword,
+                PageRequest.of(Math.max(0, page), 25, Sort.by(Sort.Direction.DESC, "createdAt")));
+        model.addAttribute("orders", orders);
+        Map<UUID, String> orderCodes = orders.getContent().stream()
+                .collect(Collectors.toMap(order -> order.getId(), order -> generateOrderCode(order.getId())));
+        model.addAttribute("orderCodes", orderCodes);
         model.addAttribute("keyword", keyword == null ? "" : keyword);
         model.addAttribute("statusFilter", normalizedStatus == null ? "" : normalizedStatus);
         model.addAttribute("active", "orders");
@@ -50,6 +63,7 @@ public class EmployeeOrderViewController {
         var order = orderRepository.findDetailedById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng."));
         model.addAttribute("order", order);
+        model.addAttribute("displayOrderCode", generateOrderCode(order.getId()));
         model.addAttribute("ghnEvents", order.getGhnOrderCode() == null ? java.util.List.of()
                 : webhookEventRepository.findTop20ByOrderCodeOrderByEventTimeDesc(order.getGhnOrderCode()));
         model.addAttribute("latestGhnStatusTime", order.getGhnOrderCode() == null ? null
