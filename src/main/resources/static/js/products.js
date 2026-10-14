@@ -518,7 +518,8 @@ function applyUrlParams() {
 /* ==========================================================================
    8. INIT
    ========================================================================== */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  if (window.productCatalogReady) await window.productCatalogReady;
   // Cache DOM nodes once
   Object.assign(els, {
     productGrid: document.getElementById('productGrid'),
