@@ -541,8 +541,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // Set the slider ceiling to the most expensive product, rounded up
-  const maxProductPrice = Math.max(...PRODUCTS.map(p => p.price));
-  PRICE_CEILING = Math.ceil(maxProductPrice / 10000) * 10000;
+  const maxProductPrice = PRODUCTS.length ? Math.max(...PRODUCTS.map(p => p.price)) : 0;
+  PRICE_CEILING = Math.max(10000, Math.ceil(maxProductPrice / 10000) * 10000);
   els.priceRange.max = PRICE_CEILING;
   els.priceRange.value = PRICE_CEILING;
   state.maxPrice = PRICE_CEILING;
