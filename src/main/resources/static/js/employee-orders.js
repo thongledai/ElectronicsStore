@@ -107,6 +107,8 @@
       if (shipment) {
         const codeElement = document.getElementById('ghnOrderCode');
         const statusElement = document.getElementById('ghnStatus');
+        const orderStatusElement = document.getElementById('orderStatus');
+        const updatedAtElement = document.getElementById('ghnStatusUpdatedAt');
 
         if (codeElement && shipment.ghnOrderCode) {
           codeElement.textContent = shipment.ghnOrderCode;
@@ -115,6 +117,15 @@
         if (statusElement) {
           statusElement.textContent =
             shipment.ghnStatus || 'Chưa có dữ liệu trạng thái';
+        }
+
+        if (orderStatusElement && shipment.orderStatus) {
+          orderStatusElement.textContent = shipment.orderStatus;
+        }
+
+        if (updatedAtElement && shipment.ghnStatusUpdatedAt) {
+          updatedAtElement.textContent = new Date(shipment.ghnStatusUpdatedAt)
+            .toLocaleString('vi-VN');
         }
       }
 
@@ -469,13 +480,9 @@
     previewButton.disabled = true;
 
     try {
-      /*
-       * Lưu lựa chọn địa chỉ qua endpoint hiện có.
-       * Backend phải xác minh provinceId/wardId và quan hệ cha-con,
-       * sau đó tự lấy tên chuẩn GHN trước khi dựng payload tạo đơn.
-       */
-      await postJson(form.dataset.urlAddress, payload);
-
+      // createShipment validates and saves the selected address in the same
+      // transaction as shipment creation, so a GHN rejection cannot overwrite
+      // the order's previously saved customer address.
       const result = await postJson(form.dataset.url, payload);
       const shipment = result.data;
 

@@ -1,6 +1,8 @@
 package com.example.store.controller.view.employee;
 
 import java.util.UUID;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -15,6 +17,7 @@ import com.example.store.enums.OrderStatusName;
 import com.example.store.exception.ResourceNotFoundException;
 import com.example.store.mapper.GhnOrderMapper;
 import com.example.store.repository.OrderRepository;
+import com.example.store.repository.GhnWebhookEventRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,8 +25,12 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/employee/orders")
 @RequiredArgsConstructor
 public class EmployeeOrderViewController {
+    private static final DateTimeFormatter GHN_TIME_FORMAT =
+            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
+                    .withZone(ZoneId.of("Asia/Ho_Chi_Minh"));
     private final OrderRepository orderRepository;
     private final GhnOrderMapper orderMapper;
+    private final GhnWebhookEventRepository webhookEventRepository;
 
     @GetMapping
     public String orders(@RequestParam(required = false) String status,
@@ -43,6 +50,9 @@ public class EmployeeOrderViewController {
         var order = orderRepository.findDetailedById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng."));
         model.addAttribute("order", order);
+        model.addAttribute("latestGhnStatusTime", order.getGhnOrderCode() == null ? null
+                : webhookEventRepository.findFirstByOrderCodeOrderByEventTimeDesc(order.getGhnOrderCode())
+                        .map(event -> GHN_TIME_FORMAT.format(event.getEventTime())).orElse(null));
         model.addAttribute("newAddressModel", orderMapper.isNewAddressModel());
         model.addAttribute("defaultPaymentTypeId", orderMapper.getPaymentTypeId());
         model.addAttribute("defaultWeight", Math.max(1, orderMapper.calculateTotalWeightGram(order)));

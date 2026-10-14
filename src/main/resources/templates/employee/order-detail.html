@@ -13,7 +13,7 @@
             <h1 class="title mt-2">Chi tiết đơn hàng</h1>
             <div class="subtitle text-break" th:text="${order.id}">order-id</div>
         </div>
-        <span class="badge text-bg-secondary fs-6"
+        <span id="orderStatus" class="badge text-bg-secondary fs-6"
               th:text="${order.status.name}">CONFIRMED</span>
     </div>
 
@@ -55,6 +55,11 @@
                     Trạng thái GHN:
                     <strong id="ghnStatus"
                             th:text="${order.ghnStatus ?: 'Chưa có dữ liệu'}">Chưa có dữ liệu</strong>
+                </div>
+                <div>
+                    Cập nhật GHN lúc:
+                    <strong id="ghnStatusUpdatedAt"
+                            th:text="${latestGhnStatusTime ?: 'Chưa nhận callback'}">Chưa nhận callback</strong>
                 </div>
                 <div th:if="${order.ghnShippingFee != null}">
                     Phí GHN:
@@ -102,7 +107,7 @@
     </div>
 
     <div class="panel mb-4"
-         th:if="${order.status.name.equalsIgnoreCase('NOT_PROCESSED')}">
+         th:if="${order.status.name.equalsIgnoreCase('NOT_PROCESSED') and order.ghnOrderCode == null}">
         <h2 class="h5">Xác nhận đơn hàng</h2>
         <p class="text-muted">
             Chỉ xác nhận khi đã kiểm tra thông tin đơn hàng theo quy trình hiện tại.
@@ -119,7 +124,6 @@
           id="shipmentForm"
           th:if="${order.status.name.equalsIgnoreCase('CONFIRMED') and order.ghnOrderCode == null}"
           th:attr="data-url=@{/api/employee/orders/{id}/ghn-shipment(id=${order.id})},
-                   data-url-address=@{/api/employee/orders/{id}/ghn-address(id=${order.id})},
                    data-url-preview=@{/api/employee/orders/{id}/ghn-shipment/preview(id=${order.id})}">
 
         <h2 class="h5">Tạo vận đơn GHN staging</h2>

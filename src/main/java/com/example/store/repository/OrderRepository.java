@@ -32,4 +32,8 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     Optional<Order> findByIdForUpdate(@Param("id") UUID id);
 
     Optional<Order> findByGhnOrderCode(String ghnOrderCode);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select o from Order o where o.ghnOrderCode = :ghnOrderCode")
+    Optional<Order> findByGhnOrderCodeForUpdate(@Param("ghnOrderCode") String ghnOrderCode);
 }

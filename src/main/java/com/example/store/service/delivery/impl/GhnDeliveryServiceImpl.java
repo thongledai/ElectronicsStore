@@ -26,6 +26,7 @@ import com.example.store.exception.ResourceNotFoundException;
 import com.example.store.mapper.GhnOrderMapper;
 import com.example.store.repository.OrderRepository;
 import com.example.store.repository.OrderStatusRepository;
+import com.example.store.repository.GhnWebhookEventRepository;
 import com.example.store.service.delivery.GhnApiClient;
 import com.example.store.service.delivery.IGhnAddressService;
 import com.example.store.service.delivery.IGhnDeliveryService;
@@ -38,6 +39,7 @@ public class GhnDeliveryServiceImpl implements IGhnDeliveryService {
     private static final ZoneId VIETNAM = ZoneId.of("Asia/Ho_Chi_Minh");
     private final OrderRepository orderRepository;
     private final OrderStatusRepository orderStatusRepository;
+    private final GhnWebhookEventRepository webhookEventRepository;
     private final GhnOrderMapper orderMapper;
     private final GhnApiClient apiClient;
     private final IGhnAddressService addressService;
@@ -314,9 +316,14 @@ public class GhnDeliveryServiceImpl implements IGhnDeliveryService {
     }
 
     private GhnShipmentResponseDTO response(Order order, boolean alreadyCreated) {
+        var lastUpdate = StringUtils.hasText(order.getGhnOrderCode())
+                ? webhookEventRepository.findFirstByOrderCodeOrderByEventTimeDesc(order.getGhnOrderCode())
+                        .map(event -> event.getEventTime()).orElse(null)
+                : null;
         return GhnShipmentResponseDTO.builder().orderId(order.getId())
                 .orderStatus(order.getStatus().getName()).ghnOrderCode(order.getGhnOrderCode())
                 .ghnStatus(order.getGhnStatus()).ghnShippingFee(order.getGhnShippingFee())
-                .expectedDeliveryTime(order.getExpectedDeliveryTime()).alreadyCreated(alreadyCreated).build();
+                .expectedDeliveryTime(order.getExpectedDeliveryTime()).ghnStatusUpdatedAt(lastUpdate)
+                .alreadyCreated(alreadyCreated).build();
     }
 }

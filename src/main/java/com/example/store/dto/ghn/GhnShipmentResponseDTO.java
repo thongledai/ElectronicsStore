@@ -2,6 +2,7 @@ package com.example.store.dto.ghn;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 import lombok.Builder;
@@ -15,5 +16,6 @@ public class GhnShipmentResponseDTO {
     String ghnStatus;
     BigDecimal ghnShippingFee;
     LocalDateTime expectedDeliveryTime;
+    Instant ghnStatusUpdatedAt;
     boolean alreadyCreated;
 }
