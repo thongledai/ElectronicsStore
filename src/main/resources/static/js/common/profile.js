@@ -129,7 +129,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (cached.role) {
           const summaryRole = document.getElementById('summaryRole');
-          if (summaryRole) summaryRole.textContent = cached.role.replace('ROLE_', '');
+          const roleUpper = cached.role.replace('ROLE_', '').toUpperCase();
+          if (summaryRole) summaryRole.textContent = roleUpper;
+
+          const mgmtLink = document.querySelector('.js-mgmt-link');
+          if (mgmtLink && roleUpper !== 'CUSTOMER') {
+            mgmtLink.style.display = 'flex';
+            const rolePath = roleUpper === 'MANAGER' ? '/manager/index' : (roleUpper === 'EMPLOYEE' ? '/employee/index' : '/shipper/index');
+            mgmtLink.setAttribute('href', rolePath);
+          }
         }
         const avatarPreview = document.getElementById('avatarPreview');
         if (avatarPreview) {
@@ -146,10 +154,10 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ---------- Fetch Profile ---------- */
   async function loadProfile() {
     try {
-      const res = await fetch('/api/customer/profile', { headers: authHeaders() }).then(r => r.json());
+      const res = await fetch('/api/profile', { headers: authHeaders() }).then(r => r.json());
       if (!res.success) {
         if (res.message && res.message.includes('login')) {
-          location.href = '/login?redirect=/customer/profile';
+          location.href = '/login?redirect=/profile';
           return;
         }
         throw new Error(res.message);
@@ -163,8 +171,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const summaryEmail = document.getElementById('summaryEmail');
       if (summaryEmail) summaryEmail.textContent = u.email || '---';
 
+      const roleUpper = (u.role || 'CUSTOMER').replace('ROLE_', '').toUpperCase();
       const summaryRole = document.getElementById('summaryRole');
-      if (summaryRole) summaryRole.textContent = (u.role || 'CUSTOMER').replace('ROLE_', '');
+      if (summaryRole) summaryRole.textContent = roleUpper;
+
+      const mgmtLink = document.querySelector('.js-mgmt-link');
+      if (mgmtLink && roleUpper !== 'CUSTOMER') {
+        mgmtLink.style.display = 'flex';
+        const rolePath = roleUpper === 'MANAGER' ? '/manager/index' : (roleUpper === 'EMPLOYEE' ? '/employee/index' : '/shipper/index');
+        mgmtLink.setAttribute('href', rolePath);
+      }
 
       const summaryUserCode = document.getElementById('summaryUserCode');
       if (summaryUserCode) summaryUserCode.textContent = `Mã: ${u.userCode || '---'}`;
@@ -274,7 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('avatarFile', avatarFile);
       }
 
-      const res = await fetch('/api/customer/profile', {
+      const res = await fetch('/api/profile', {
         method: 'PUT',
         headers: authHeaders(),
         body: formData
