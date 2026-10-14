@@ -514,3 +514,30 @@
 .delivery-page #shipmentForm .delivery-panel-title {
   margin-bottom: .75rem;
 }
+
+/* Chi tiết đơn hàng: loại bỏ chiều cao kéo giãn và khoảng trống không cần thiết. */
+.delivery-page .row.g-3.mb-3 > [class*="col-"] > .delivery-panel {
+  height: auto;
+}
+.delivery-page .delivery-page-header {
+  margin-bottom: .85rem;
+}
+.delivery-page .delivery-panel {
+  padding: 1rem;
+}
+.delivery-page .delivery-panel-title {
+  margin-bottom: .7rem;
+}
+.delivery-page .delivery-recipient-line {
+  gap: .65rem;
+  padding: .48rem 0;
+}
+.delivery-page .delivery-facts {
+  gap: .55rem;
+}
+.delivery-page .delivery-fact {
+  padding: .65rem;
+}
+.delivery-page .delivery-status-note {
+  margin-top: .65rem;
+}

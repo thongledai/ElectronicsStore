@@ -8,6 +8,30 @@
 [data-role] .layout { display: flex; min-height: 100vh; }
 [data-role] .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 
+/* Giữ sidebar đứng yên; chỉ vùng nội dung chính cuộn trên desktop. */
+[data-role="employee"] .layout,
+[data-role="manager"] .layout {
+  height: 100vh;
+  min-height: 0;
+  overflow: hidden;
+}
+[data-role="employee"] .role-navbar,
+[data-role="manager"] .role-navbar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 30;
+  height: 100vh;
+  max-height: 100vh;
+  overflow-y: auto;
+}
+[data-role="employee"] .main,
+[data-role="manager"] .main {
+  height: 100vh;
+  margin-left: 260px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
 /* ---- Sidebar ---- */
 [data-role] .role-navbar {
   width: 260px; flex: 0 0 260px; position: sticky; top: 0; height: 100vh; overflow-y: auto;
@@ -128,7 +152,11 @@
 /* ---- Small screens: sidebar becomes a collapsible top bar ---- */
 @media (max-width: 991.98px) {
   [data-role] .layout { flex-direction: column; }
-  [data-role] .role-navbar { position: sticky; top: 0; z-index: 30; width: 100%; flex: none; height: auto; max-height: 100vh; padding: .75rem 1rem; }
+  [data-role="employee"] .layout,
+  [data-role="manager"] .layout { height: auto; min-height: 100vh; overflow: visible; }
+  [data-role] .role-navbar { position: sticky; inset: auto; top: 0; z-index: 30; width: 100%; flex: none; height: auto; max-height: 100vh; padding: .75rem 1rem; }
+  [data-role="employee"] .main,
+  [data-role="manager"] .main { height: auto; margin-left: 0; overflow: visible; }
   [data-role] .nav-toggle { display: inline-grid; place-items: center; }
   [data-role] .nav-caption { margin: .5rem 0 0; }
   [data-role] .nav-actions { margin-top: .75rem; padding-top: .75rem; }

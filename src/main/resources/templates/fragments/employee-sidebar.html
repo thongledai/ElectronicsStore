@@ -9,8 +9,9 @@
     <div class="nav-links collapse d-lg-flex" id="roleNavLinks">
         <a th:href="@{/employee/index}" th:classappend="${active == 'index'} ? 'active'"
            th:attr="aria-current=${active == 'index'} ? 'page'"><i class="fa-solid fa-chart-pie"></i><span>Tổng quan</span></a>
-        <a th:href="@{/employee/orders}" th:classappend="${active == 'orders'} ? 'active'"
-           th:attr="aria-current=${active == 'orders'} ? 'page'"><i class="fa-solid fa-receipt"></i><span>Đơn hàng</span></a>
+        <a th:href="@{/employee/orders}"
+           th:classappend="${active == 'orders' and (statusFilter == null or statusFilter == '')} ? 'active'"
+           th:attr="aria-current=${active == 'orders' and (statusFilter == null or statusFilter == '')} ? 'page'"><i class="fa-solid fa-receipt"></i><span>Tất cả đơn hàng</span></a>
         <a th:href="@{/employee/orders(status='NOT_PROCESSED')}" th:classappend="${statusFilter == 'NOT_PROCESSED'} ? 'active'" th:attr="aria-current=${statusFilter == 'NOT_PROCESSED'} ? 'page'"><i class="fa-solid fa-bell"></i><span>Chưa xử lý</span></a>
         <a th:href="@{/employee/orders(status='CONFIRMED')}" th:classappend="${statusFilter == 'CONFIRMED'} ? 'active'" th:attr="aria-current=${statusFilter == 'CONFIRMED'} ? 'page'"><i class="fa-solid fa-clipboard-check"></i><span>Đã xác nhận</span></a>
         <a th:href="@{/employee/orders(status='SHIPPING')}" th:classappend="${statusFilter == 'SHIPPING'} ? 'active'" th:attr="aria-current=${statusFilter == 'SHIPPING'} ? 'page'"><i class="fa-solid fa-truck"></i><span>Đang vận chuyển</span></a>

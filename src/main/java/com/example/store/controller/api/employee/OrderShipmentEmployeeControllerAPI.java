@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.store.dto.common.ApiResponse;
+import com.example.store.enums.DeliveryMessage;
+import com.example.store.enums.EmployeeMessage;
 import com.example.store.dto.ghn.GhnAddressOptionDTO;
 import com.example.store.dto.ghn.GhnShipmentCreateRequestDTO;
 import com.example.store.dto.ghn.GhnShipmentResponseDTO;
@@ -34,24 +36,24 @@ public class OrderShipmentEmployeeControllerAPI {
     @PostMapping("/{orderId}/confirm")
     public ResponseEntity<ApiResponse<Void>> confirm(@PathVariable UUID orderId) {
         deliveryService.confirmOrder(orderId);
-        return ResponseEntity.ok(ApiResponse.success("Đã xác nhận đơn hàng."));
+        return ResponseEntity.ok(ApiResponse.success(EmployeeMessage.ORDER_CONFIRMED.getMessage()));
     }
 
     @GetMapping("/ghn-address/provinces")
     public ResponseEntity<ApiResponse<List<GhnAddressOptionDTO>>> provinces() {
-        return ResponseEntity.ok(ApiResponse.success("Danh sách tỉnh/thành GHN.", addressService.getProvinces()));
+        return ResponseEntity.ok(ApiResponse.success(DeliveryMessage.GHN_PROVINCES_LOADED.getMessage(), addressService.getProvinces()));
     }
 
     @GetMapping("/ghn-address/provinces/{provinceId}/wards")
     public ResponseEntity<ApiResponse<List<GhnAddressOptionDTO>>> wards(@PathVariable Integer provinceId) {
-        return ResponseEntity.ok(ApiResponse.success("Danh sách phường/xã GHN.", addressService.getWards(provinceId)));
+        return ResponseEntity.ok(ApiResponse.success(DeliveryMessage.GHN_WARDS_LOADED.getMessage(), addressService.getWards(provinceId)));
     }
 
     @PostMapping("/{orderId}/ghn-address")
     public ResponseEntity<ApiResponse<Void>> saveAddress(@PathVariable UUID orderId,
             @Valid @RequestBody GhnShipmentCreateRequestDTO request) {
         deliveryService.saveAddressSelection(orderId, request);
-        return ResponseEntity.ok(ApiResponse.success("Đã lưu địa chỉ GHN cho đơn hàng."));
+        return ResponseEntity.ok(ApiResponse.success(DeliveryMessage.GHN_ADDRESS_SAVED.getMessage()));
     }
 
     
@@ -64,7 +66,7 @@ public class OrderShipmentEmployeeControllerAPI {
                 deliveryService.previewShipment(orderId, request);
 
         return ResponseEntity.ok(
-                ApiResponse.success("Preview payload GHN thành công.", result));
+                ApiResponse.success(DeliveryMessage.GHN_PREVIEW_CREATED.getMessage(), result));
     }
 
 
@@ -73,13 +75,13 @@ public class OrderShipmentEmployeeControllerAPI {
             @Valid @RequestBody GhnShipmentCreateRequestDTO request) {
         GhnShipmentResponseDTO result = deliveryService.createShipment(orderId, request);
         String message = result.isAlreadyCreated()
-                ? "Đơn hàng đã có vận đơn GHN, không tạo thêm."
-                : "Tạo vận đơn GHN staging thành công.";
+                ? DeliveryMessage.GHN_SHIPMENT_ALREADY_EXISTS.getMessage()
+                : DeliveryMessage.GHN_SHIPMENT_CREATED.getMessage();
         return ResponseEntity.ok(ApiResponse.success(message, result));
     }
 
     @GetMapping("/{orderId}/ghn-shipment")
     public ResponseEntity<ApiResponse<GhnShipmentResponseDTO>> getShipment(@PathVariable UUID orderId) {
-        return ResponseEntity.ok(ApiResponse.success("Thông tin vận chuyển GHN.", deliveryService.getShipment(orderId)));
+        return ResponseEntity.ok(ApiResponse.success(DeliveryMessage.GHN_SHIPMENT_LOADED.getMessage(), deliveryService.getShipment(orderId)));
     }
 }
