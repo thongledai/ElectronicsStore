@@ -2,8 +2,8 @@
    TechNova Electronics — Products Listing Page
    --------------------------------------------------------------------------
    Implements search, category / brand / price / rating filtering, sorting,
-   grid-vs-list views and pagination. All filtering runs client-side over the
-   PRODUCTS array from js/data.js.
+   grid-vs-list views and pagination. The PRODUCTS array is loaded from the
+   backend API by js/data.js; no sample product catalogue is embedded here.
 
    URL parameters supported (so links from the home page and nav work):
      ?category=laptops      pre-select a category filter
