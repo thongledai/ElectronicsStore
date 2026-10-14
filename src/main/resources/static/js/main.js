@@ -929,9 +929,13 @@ function initAccountLabel() {
 
   const syncRoleUI = (hasPass) => {
     const role = getCleanRole();
-    const isManager = isLoggedIn && (role === 'MANAGER' || role === 'ADMIN');
+    const isManager = isLoggedIn && role === 'MANAGER';
+    const isEmployee = isLoggedIn && role === 'EMPLOYEE';
     document.querySelectorAll('.js-nav-manager').forEach(el => {
       el.style.display = isManager ? 'block' : 'none';
+      document.querySelectorAll('.js-nav-employee').forEach(el => {
+        el.style.display = isEmployee ? 'block' : 'none';
+      });
     });
 
     let resetUrl = '/customer/reset-password';
