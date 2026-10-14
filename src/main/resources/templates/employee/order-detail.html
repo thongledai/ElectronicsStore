@@ -11,12 +11,12 @@
             <div class="delivery-detail-id">
                 <span class="delivery-order-id" th:text="|#${#strings.substring(order.id.toString(), 0, 8).toUpperCase()}|">#D867DEF1</span>
                 <button type="button" class="btn btn-sm btn-outline-secondary"
-                        th:attr="data-copy-value=${order.id}">Sao chép mã đơn</button>
+                        th:attr="data-copy-value=|#${#strings.substring(order.id.toString(), 0, 8).toUpperCase()}|">Sao chép mã đơn</button>
             </div>
         </div>
         <span id="orderStatus" class="delivery-status status-neutral"
               th:attr="data-order-status=${order.status.name}"
-              th:text="${order.status.name}">Trạng thái đơn</span>
+              th:text="${order.status.name == 'NOT_PROCESSED' ? 'Chờ xác nhận' : (order.status.name == 'CONFIRMED' ? 'Đã xác nhận' : (order.status.name == 'SHIPPING' ? 'Đang giao hàng' : (order.status.name == 'DELIVERED' ? 'Đã giao hàng' : (order.status.name == 'CANCELLED' ? 'Đã hủy' : (order.status.name == 'RETURNED' ? 'Đã hoàn hàng' : 'Đang cập nhật')))))}">Trạng thái đơn</span>
     </div>
 
     <div id="orderNotice" class="alert d-none delivery-notice" role="status" aria-live="polite"></div>
