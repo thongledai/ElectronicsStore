@@ -278,6 +278,34 @@
     }, 15000);
   }
 
+  const orderListRows = Array.from(document.querySelectorAll('tr[data-shipment-url]'));
+  const refreshOrderListStatuses = async () => {
+    const rows = orderListRows.filter(row => row.dataset.hasShipment === 'true');
+    await Promise.allSettled(rows.map(async row => {
+      const result = await getJson(row.dataset.shipmentUrl);
+      const shipment = result.data;
+      if (!shipment) return;
+      const orderStatus = row.querySelector('[data-order-status]');
+      if (orderStatus && shipment.orderStatus) {
+        orderStatus.dataset.orderStatus = shipment.orderStatus;
+        applyOrderStatus(orderStatus);
+      }
+      const ghnStatus = row.querySelector('[data-ghn-status]');
+      if (ghnStatus) {
+        ghnStatus.dataset.ghnStatus = shipment.ghnStatus || '';
+        applyGhnStatus(ghnStatus);
+      }
+      const codeElement = row.querySelector('.delivery-ghn-code');
+      if (codeElement && shipment.ghnOrderCode) codeElement.textContent = shipment.ghnOrderCode;
+    }));
+  };
+
+  if (orderListRows.length > 0) {
+    window.setInterval(() => {
+      if (!document.hidden) refreshOrderListStatuses();
+    }, 20000);
+  }
+
   const form = document.getElementById('shipmentForm');
   if (!form) return;
 
