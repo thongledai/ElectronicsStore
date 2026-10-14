@@ -64,6 +64,7 @@
                             th:if="${order.ghnOrderCode != null}"
                             th:attr="data-url=@{/api/employee/orders/{id}/ghn-shipment(id=${order.id})}">Làm mới thông tin</button>
                     <span class="delivery-refresh-hint" id="ghnStatusUpdatedAt"
+                          th:attr="data-event-time=${latestGhnStatusEventTime}"
                           th:text="${latestGhnStatusTime != null ? 'Cập nhật lúc ' + latestGhnStatusTime : 'Chưa nhận cập nhật từ GHN'}">Chưa nhận cập nhật từ GHN</span>
                 </div>
             </section>
