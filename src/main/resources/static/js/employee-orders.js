@@ -371,6 +371,13 @@
     return Array.from(select.options).find(option => option.value && normalize(option.textContent) === expected) || null;
   };
 
+  const extractStreetAddress = (address, wardName, provinceName) => {
+    const administrativeNames = new Set([normalize(wardName), normalize(provinceName)].filter(Boolean));
+    const parts = String(address || '').split(',').map(part => part.trim()).filter(Boolean);
+    while (parts.length && administrativeNames.has(normalize(parts[parts.length - 1]))) parts.pop();
+    return parts.join(', ');
+  };
+
   const loadWards = async (provinceId, preferredWard) => {
     wardSelect.disabled = true;
     fillSelect(wardSelect, [], 'Đang tải phường/xã…');
@@ -398,6 +405,14 @@
         provinceSelect.value = matchedProvince.value;
         await loadWards(matchedProvince.value, picker.dataset.currentWard || '');
         const currentWard = picker.dataset.currentWard || '';
+        const matchedCurrentWard = wardSelect.selectedOptions[0];
+        if (addressInput && !addressInput.value.trim() && matchedCurrentWard) {
+          addressInput.value = extractStreetAddress(
+            picker.dataset.currentAddress,
+            matchedCurrentWard.textContent,
+            matchedProvince.textContent
+          );
+        }
         setAddressMessage(
           currentWard && !findExactName(wardSelect, currentWard)
             ? 'Địa chỉ phường/xã cũ không trùng danh mục hiện tại. Hãy chọn phường/xã giao hàng chính xác.'

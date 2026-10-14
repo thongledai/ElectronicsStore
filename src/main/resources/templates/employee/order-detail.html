@@ -108,7 +108,8 @@
              th:attr="data-url-provinces=@{/api/employee/orders/ghn-address/provinces},
                       data-url-wards-prefix=@{/api/employee/orders/ghn-address/provinces/},
                       data-current-province=${order.toProvinceName},
-                      data-current-ward=${order.toWardName}">
+                      data-current-ward=${order.toWardName},
+                      data-current-address=${order.address}">
             <div class="row g-3">
                 <div class="col-md-6"><label class="form-label" for="ghnProvince">Tỉnh/thành phố</label><select class="form-select" id="ghnProvince" name="provinceId" required><option value="">Đang tải danh sách…</option></select></div>
                 <div class="col-md-6"><label class="form-label" for="ghnWard">Phường/xã</label><select class="form-select" id="ghnWard" name="wardId" required disabled><option value="">Chọn tỉnh/thành trước</option></select></div>
