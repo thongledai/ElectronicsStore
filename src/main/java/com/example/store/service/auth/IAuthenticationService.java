@@ -22,6 +22,8 @@ public interface IAuthenticationService {
     ApiResponse<?> setPassword(String currentUserEmail, com.example.store.dto.auth.SetPasswordDTO setPasswordDTO);
     boolean hasPassword(String email);
     String getRedirectUrlForRole(String roleName);
+    AuthResponseDTO refreshToken(String refreshTokenStr, jakarta.servlet.http.HttpServletRequest request, HttpServletResponse response);
+    void logout(jakarta.servlet.http.HttpServletRequest request, HttpServletResponse response);
 }
 
 

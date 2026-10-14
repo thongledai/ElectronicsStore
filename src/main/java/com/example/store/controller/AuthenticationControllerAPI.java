@@ -27,12 +27,29 @@ public class AuthenticationControllerAPI {
     private final IAuthenticationService authenticationService;
     private final GoogleAuthService googleAuthService;
 
+
     /**
-     * Heartbeat ping để duy trì phiên làm việc ngầm khi người dùng đang mở web
+     * Làm mới Access Token bằng Refresh Token (Silent Refresh / Token Rotation)
      */
-    @GetMapping("/ping")
-    public ResponseEntity<ApiResponse<String>> ping() {
-        return ResponseEntity.ok(ApiResponse.success("Session active", "pong"));
+    @PostMapping("/refresh-token")
+    public ResponseEntity<ApiResponse<AuthResponseDTO>> refreshToken(
+            @RequestBody(required = false) RefreshTokenRequestDTO requestDTO,
+            jakarta.servlet.http.HttpServletRequest httpRequest,
+            HttpServletResponse httpResponse) {
+        String tokenStr = requestDTO != null ? requestDTO.getRefreshToken() : null;
+        AuthResponseDTO authResponse = authenticationService.refreshToken(tokenStr, httpRequest, httpResponse);
+        return ResponseEntity.ok(ApiResponse.success("Làm mới phiên làm việc thành công!", authResponse));
+    }
+
+    /**
+     * Đăng xuất tài khoản (thu hồi Refresh Token và xóa cookie)
+     */
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<String>> logout(
+            jakarta.servlet.http.HttpServletRequest httpRequest,
+            HttpServletResponse httpResponse) {
+        authenticationService.logout(httpRequest, httpResponse);
+        return ResponseEntity.ok(ApiResponse.success("Đăng xuất thành công!", "OK"));
     }
 
 

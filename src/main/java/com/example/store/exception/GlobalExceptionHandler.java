@@ -108,6 +108,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.error(ApiMessage.INTERNAL_ERROR));
     }
+    @ExceptionHandler(AccountNotActivatedException.class)
+    public ResponseEntity<ApiResponse<Map<String, Object>>> handleAccountNotActivated(AccountNotActivatedException ex) {
+        Map<String, Object> data = Map.of(
+                "email", ex.getEmail() != null ? ex.getEmail() : "",
+                "pendingActivation", true
+        );
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ApiResponse<>(false, "ACCOUNT_NOT_ACTIVATED", data));
+    }
 
     private String resolveValidationMessage(String key) {
         try {

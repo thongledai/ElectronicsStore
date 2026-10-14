@@ -44,7 +44,7 @@ public class SecurityConfig {
                 // Public Authentication REST APIs
                 .requestMatchers(
                     "/auth/login", "/auth/register", "/auth/signup", "/auth/forgot-password", "/auth/resend-otp", "/auth/verify-otp",
-                    "/auth/google", "/auth/google/**", "/auth/ping"
+                    "/auth/google", "/auth/google/**", "/auth/refresh-token", "/auth/logout"
                 ).permitAll()
 
 
@@ -64,10 +64,10 @@ public class SecurityConfig {
                 .requestMatchers("/manager/**").hasAnyAuthority("MANAGER", "ROLE_MANAGER")
                 .requestMatchers("/employee/**").hasAnyAuthority("EMPLOYEE", "ROLE_EMPLOYEE")
                 .requestMatchers("/shipper/**").hasAnyAuthority("SHIPPER", "ROLE_SHIPPER")
-                // Customer pages & APIs (must be authenticated)
+                // Authenticated user pages & APIs (shared across all roles)
                 .requestMatchers("/customer/cart", "/customer/wishlist").authenticated()
-                .requestMatchers("/customer/profile").hasAnyAuthority("CUSTOMER", "ROLE_CUSTOMER")
-                .requestMatchers("/api/customer/profile").authenticated()
+                .requestMatchers("/profile", "/customer/profile").authenticated()
+                .requestMatchers("/api/profile").authenticated()
 
                 // Any other request
                 .anyRequest().permitAll()
@@ -102,13 +102,19 @@ public class SecurityConfig {
                 .logoutUrl("/logout")
                 .invalidateHttpSession(true)
                 .clearAuthentication(true)
-                .deleteCookies("JSESSIONID", "JWT_TOKEN")
+                .deleteCookies("JSESSIONID", "JWT_TOKEN", "REFRESH_TOKEN")
                 .logoutSuccessHandler((request, response, authentication) -> {
                     Cookie cookie = new Cookie("JWT_TOKEN", "");
                     cookie.setPath("/");
                     cookie.setHttpOnly(true);
                     cookie.setMaxAge(0);
                     response.addCookie(cookie);
+
+                    Cookie refreshCookie = new Cookie("REFRESH_TOKEN", "");
+                    refreshCookie.setPath("/");
+                    refreshCookie.setHttpOnly(true);
+                    refreshCookie.setMaxAge(0);
+                    response.addCookie(refreshCookie);
 
                     Cookie jsession = new Cookie("JSESSIONID", "");
                     jsession.setPath("/");

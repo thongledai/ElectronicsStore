@@ -8,9 +8,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.store.dto.common.PageResponse;
-import com.example.store.dto.user.UserResponseDTO;
-import com.example.store.dto.customer.CustomerProfileUpdateRequestDTO;
+import com.example.store.dto.user.ProfileUpdateRequestDTO;
 import com.example.store.dto.user.UserCreateRequestDTO;
+import com.example.store.dto.user.UserResponseDTO;
 import com.example.store.dto.user.UserUpdateRequestDTO;
 
 public interface IUserService {
@@ -23,6 +23,6 @@ public interface IUserService {
     void deleteUser(UUID id, Principal principal);
     List<String> getAllRoles();
 
-    UserResponseDTO getCustomerProfile(String email);
-    UserResponseDTO updateCustomerProfile(String email, CustomerProfileUpdateRequestDTO requestDTO, MultipartFile avatarFile);
+    UserResponseDTO getProfile(String email);
+    UserResponseDTO updateProfile(String email, ProfileUpdateRequestDTO requestDTO, MultipartFile avatarFile);
 }

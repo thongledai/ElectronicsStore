@@ -1,4 +1,4 @@
-package com.example.store.controller.api.customer;
+package com.example.store.controller.api.common;
 
 import java.security.Principal;
 
@@ -15,8 +15,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.store.common.annotation.AuditAction;
 import com.example.store.dto.common.ApiResponse;
+import com.example.store.dto.user.ProfileUpdateRequestDTO;
 import com.example.store.dto.user.UserResponseDTO;
-import com.example.store.dto.customer.CustomerProfileUpdateRequestDTO;
 import com.example.store.enums.ApiMessage;
 import com.example.store.service.user.IUserService;
 
@@ -24,9 +24,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/customer/profile")
+@RequestMapping("/api/profile")
 @RequiredArgsConstructor
-public class CustomerProfileControllerAPI {
+public class ProfileControllerAPI {
 
     private final IUserService userService;
 
@@ -35,7 +35,7 @@ public class CustomerProfileControllerAPI {
         if (principal == null) {
             return ResponseEntity.status(401).body(ApiResponse.error(ApiMessage.AUTH_LOGIN_REQUIRED));
         }
-        UserResponseDTO profile = userService.getCustomerProfile(principal.getName());
+        UserResponseDTO profile = userService.getProfile(principal.getName());
         return ResponseEntity.ok(ApiResponse.success(ApiMessage.USER_DETAIL_SUCCESS, profile));
     }
 
@@ -43,12 +43,12 @@ public class CustomerProfileControllerAPI {
     @AuditAction("Cập nhật thông tin cá nhân (kèm avatar)")
     public ResponseEntity<ApiResponse<UserResponseDTO>> updateProfileMultipart(
             Principal principal,
-            @Valid @ModelAttribute CustomerProfileUpdateRequestDTO requestDTO,
+            @Valid @ModelAttribute ProfileUpdateRequestDTO requestDTO,
             @RequestPart(value = "avatarFile", required = false) MultipartFile avatarFile) {
         if (principal == null) {
             return ResponseEntity.status(401).body(ApiResponse.error(ApiMessage.AUTH_LOGIN_REQUIRED));
         }
-        UserResponseDTO updated = userService.updateCustomerProfile(principal.getName(), requestDTO, avatarFile);
+        UserResponseDTO updated = userService.updateProfile(principal.getName(), requestDTO, avatarFile);
         return ResponseEntity.ok(ApiResponse.success(ApiMessage.USER_UPDATE_SUCCESS, updated));
     }
 
@@ -56,11 +56,11 @@ public class CustomerProfileControllerAPI {
     @AuditAction("Cập nhật thông tin cá nhân")
     public ResponseEntity<ApiResponse<UserResponseDTO>> updateProfileJson(
             Principal principal,
-            @Valid @RequestBody CustomerProfileUpdateRequestDTO requestDTO) {
+            @Valid @RequestBody ProfileUpdateRequestDTO requestDTO) {
         if (principal == null) {
             return ResponseEntity.status(401).body(ApiResponse.error(ApiMessage.AUTH_LOGIN_REQUIRED));
         }
-        UserResponseDTO updated = userService.updateCustomerProfile(principal.getName(), requestDTO, null);
+        UserResponseDTO updated = userService.updateProfile(principal.getName(), requestDTO, null);
         return ResponseEntity.ok(ApiResponse.success(ApiMessage.USER_UPDATE_SUCCESS, updated));
     }
 }

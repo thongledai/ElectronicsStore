@@ -55,13 +55,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
 
-            // Sliding window 120 giây (2 phút) cho Cookie JWT_TOKEN khi còn đang truy cập web
+            // Sliding window 45 phút (2700 giây) cho Cookie JWT_TOKEN khi còn đang truy cập web
             String uri = request.getRequestURI();
             if (!isStaticResource(uri)) {
                 Cookie jwtCookie = new Cookie("JWT_TOKEN", token);
                 jwtCookie.setHttpOnly(true);
                 jwtCookie.setPath("/");
-                jwtCookie.setMaxAge(120); // 2 phút
+                jwtCookie.setMaxAge(45 * 60); // 45 phút (2700 giây)
                 response.addCookie(jwtCookie);
             }
         }
