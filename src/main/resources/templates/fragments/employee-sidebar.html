@@ -11,12 +11,12 @@
            th:attr="aria-current=${active == 'index'} ? 'page'"><i class="fa-solid fa-chart-pie"></i><span>Tổng quan</span></a>
         <a th:href="@{/employee/orders}" th:classappend="${active == 'orders'} ? 'active'"
            th:attr="aria-current=${active == 'orders'} ? 'page'"><i class="fa-solid fa-receipt"></i><span>Đơn hàng</span></a>
-        <a th:href="@{/employee/orders(status='NOT_PROCESSED')}"><i class="fa-solid fa-bell"></i><span>Chưa xử lý</span></a>
-        <a th:href="@{/employee/orders(status='CONFIRMED')}"><i class="fa-solid fa-clipboard-check"></i><span>Đã xác nhận</span></a>
-        <a th:href="@{/employee/orders(status='SHIPPING')}"><i class="fa-solid fa-truck"></i><span>Đang vận chuyển</span></a>
-        <a th:href="@{/employee/orders(status='DELIVERED')}"><i class="fa-solid fa-circle-check"></i><span>Đã giao</span></a>
-        <a th:href="@{/employee/orders(status='CANCELLED')}"><i class="fa-solid fa-ban"></i><span>Đã hủy</span></a>
-        <a th:href="@{/employee/orders(status='RETURNED')}"><i class="fa-solid fa-arrow-rotate-left"></i><span>Đã hoàn</span></a>
+        <a th:href="@{/employee/orders(status='NOT_PROCESSED')}" th:classappend="${statusFilter == 'NOT_PROCESSED'} ? 'active'" th:attr="aria-current=${statusFilter == 'NOT_PROCESSED'} ? 'page'"><i class="fa-solid fa-bell"></i><span>Chưa xử lý</span></a>
+        <a th:href="@{/employee/orders(status='CONFIRMED')}" th:classappend="${statusFilter == 'CONFIRMED'} ? 'active'" th:attr="aria-current=${statusFilter == 'CONFIRMED'} ? 'page'"><i class="fa-solid fa-clipboard-check"></i><span>Đã xác nhận</span></a>
+        <a th:href="@{/employee/orders(status='SHIPPING')}" th:classappend="${statusFilter == 'SHIPPING'} ? 'active'" th:attr="aria-current=${statusFilter == 'SHIPPING'} ? 'page'"><i class="fa-solid fa-truck"></i><span>Đang vận chuyển</span></a>
+        <a th:href="@{/employee/orders(status='DELIVERED')}" th:classappend="${statusFilter == 'DELIVERED'} ? 'active'" th:attr="aria-current=${statusFilter == 'DELIVERED'} ? 'page'"><i class="fa-solid fa-circle-check"></i><span>Đã giao</span></a>
+        <a th:href="@{/employee/orders(status='CANCELLED')}" th:classappend="${statusFilter == 'CANCELLED'} ? 'active'" th:attr="aria-current=${statusFilter == 'CANCELLED'} ? 'page'"><i class="fa-solid fa-ban"></i><span>Đã hủy</span></a>
+        <a th:href="@{/employee/orders(status='RETURNED')}" th:classappend="${statusFilter == 'RETURNED'} ? 'active'" th:attr="aria-current=${statusFilter == 'RETURNED'} ? 'page'"><i class="fa-solid fa-arrow-rotate-left"></i><span>Đã hoàn</span></a>
         <a th:href="@{/employee/reset-password}" th:classappend="${active == 'reset-password'} ? 'active'"
            th:attr="aria-current=${active == 'reset-password'} ? 'page'"><i class="fa-solid fa-key"></i><span>Đổi mật khẩu</span></a>
     </div>
