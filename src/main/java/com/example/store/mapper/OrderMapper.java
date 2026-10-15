@@ -18,7 +18,9 @@ public class OrderMapper {
                 o.getCreatedAt(),
                 o.getUser().getFullName(),
                 o.getPhone(),
-                o.getAddress(),
+                java.util.stream.Stream.of(o.getToDetailAddress(), o.getToWardName(), o.getToProvinceName())
+                        .filter(java.util.Objects::nonNull)
+                        .collect(java.util.stream.Collectors.joining(", ")),
                 items,
                 o.getSubtotal(),
                 o.getShippingFee(),

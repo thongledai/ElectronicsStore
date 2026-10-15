@@ -94,13 +94,18 @@ public class OrderServiceImpl implements IOrderService {
         OrderStatus initial = orderStatusRepository.findByName(OrderStatusName.NOT_PROCESSED)
                 .orElseThrow(() -> new AppException(OrderErrorCode.ORDER_STATUS_NOT_CONFIGURED));
 
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(CartErrorCode.CART_ITEM_NOT_FOUND));
+        String[] addressParts = splitAddress(user.getAddresses());
+
         Order order = Order.builder()
-                .user(userRepository.getReferenceById(userId))
-                .delivery(delivery)
+                .user(user)
+                .toDetailAddress(addressParts[0])
+                .toWardName(addressParts[1])
+                .toProvinceName(addressParts[2])
                 .payment(payment)
                 .status(initial)
                 .phone(req.phone())
-                .address(req.address())
                 .note(req.note())
                 .subtotal(price.subtotal())
                 .shippingFee(price.shippingFee())
@@ -131,6 +136,16 @@ public class OrderServiceImpl implements IOrderService {
         cartItemRepository.deleteAll(items);
 
         return orderMapper.toOrderDTO(order);
+    }
+
+    /** Split a single saved address: detail, ward, province. */
+    private String[] splitAddress(String address) {
+        String[] parts = address == null ? new String[0] : address.trim().split("\\s*,\\s*", 3);
+        return new String[] {
+                parts.length > 0 && !parts[0].isBlank() ? parts[0] : null,
+                parts.length > 1 && !parts[1].isBlank() ? parts[1] : null,
+                parts.length > 2 && !parts[2].isBlank() ? parts[2] : null
+        };
     }
 
     private Map<UUID, ProductVariant> lockVariants(List<CartItem> items) {
