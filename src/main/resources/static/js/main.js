@@ -218,12 +218,12 @@ const Cart = {
 
   /** True if a product id is already in the cart. */
   has(id) {
-    return this.all().some(i => i.id === Number(id));
+    return this.all().some(i => String(i.id) === String(id));
   },
 
   /** Quantity currently in the cart for a product (0 if absent). */
   qtyOf(id) {
-    const item = this.all().find(i => i.id === Number(id));
+    const item = this.all().find(i => String(i.id) === String(id));
     return item ? item.qty : 0;
   },
 
@@ -272,7 +272,7 @@ const Cart = {
     if (qty === 0) return this.remove(id, true);
 
     const items = this.all();
-    const existing = items.find(i => i.id === Number(id));
+    const existing = items.find(i => String(i.id) === String(id));
     if (existing) existing.qty = qty;
     this.save(items);
   },
@@ -280,7 +280,7 @@ const Cart = {
   /** Removes a product line entirely. */
   remove(id, silent = false) {
     const product = getProductById(id);
-    this.save(this.all().filter(i => i.id !== Number(id)));
+    this.save(this.all().filter(i => String(i.id) !== String(id)));
     if (!silent && product) {
       showToast(UiMessage.PRODUCT_REMOVED_TITLE, UiMessage.PRODUCT_REMOVED(product.name), 'info');
     }
@@ -362,7 +362,7 @@ const Wishlist = {
   },
 
   has(id) {
-    return this.all().includes(Number(id));
+    return this.all().some(savedId => String(savedId) === String(id));
   },
 
   add(id) {
@@ -375,7 +375,7 @@ const Wishlist = {
 
   remove(id, silent = false) {
     const product = getProductById(id);
-    this.save(this.all().filter(i => i !== Number(id)));
+    this.save(this.all().filter(i => String(i) !== String(id)));
     if (!silent && product) {
       showToast(UiMessage.WISHLIST_REMOVED_TITLE, UiMessage.WISHLIST_REMOVED(product.name), 'info');
     }
@@ -412,12 +412,12 @@ const Recent = {
   add(id) {
     let ids = storageGet(STORE.recent, []);
     if (!Array.isArray(ids)) ids = [];
-    ids = [Number(id), ...ids.filter(i => i !== Number(id))].slice(0, 8);
+    ids = [String(id), ...ids.filter(i => String(i) !== String(id))].slice(0, 8);
     storageSet(STORE.recent, ids);
   },
   detailed(excludeId) {
     return storageGet(STORE.recent, [])
-      .filter(id => id !== Number(excludeId))
+      .filter(id => String(id) !== String(excludeId))
       .map(id => getProductById(id))
       .filter(Boolean);
   }
@@ -929,9 +929,14 @@ function initAccountLabel() {
 
   const syncRoleUI = (hasPass) => {
     const role = getCleanRole();
-    const isManager = isLoggedIn && (role === 'MANAGER' || role === 'ADMIN');
+    const isManager = isLoggedIn && role === 'MANAGER';
+    const isEmployee = isLoggedIn && role === 'EMPLOYEE';
     document.querySelectorAll('.js-nav-manager').forEach(el => {
       el.style.display = isManager ? 'block' : 'none';
+      document.querySelectorAll('.js-nav-employee').forEach(el => {
+        el.style.display = isEmployee ? 'block' : 'none';
+      });
+
     });
 
     let resetUrl = '/customer/reset-password';
@@ -1252,7 +1257,8 @@ initSessionManager();
 /* ==========================================================================
    15. BOOTSTRAP THE PAGE
    ========================================================================== */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  if (window.productCatalogReady) await window.productCatalogReady;
   initTheme();
   initCategoryMenu();
   initHeaderSearch();

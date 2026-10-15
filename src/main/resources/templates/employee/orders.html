@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="vi"
+      th:replace="~{layouts/dashboard-layout :: layout('Quản lý đơn hàng', 'employee', 'orders', ~{::section.content})}">
+<head><title>Quản lý đơn hàng | TechNova</title></head>
+<body>
+<section class="content order-management delivery-page">
+    <div class="delivery-page-header">
+        <div>
+            <h1 class="title">Đơn hàng</h1>
+            <p class="subtitle mb-0">Xác nhận đơn, tạo vận đơn và theo dõi quá trình giao hàng.</p>
+        </div>
+        <div class="delivery-count"><i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i><span th:text="|${orders.totalElements} đơn hàng|">0 đơn hàng</span></div>
+    </div>
+
+    <form class="delivery-filter" method="get" th:action="@{/employee/orders}">
+        <label class="delivery-search">
+            <span class="visually-hidden">Tìm kiếm đơn hàng</span>
+            <span class="delivery-search-icon" aria-hidden="true">⌕</span>
+            <input id="orderKeyword" class="form-control" name="keyword" th:value="${keyword}" placeholder="Tên khách hàng, điện thoại hoặc mã vận đơn">
+        </label>
+        <label>
+            <span class="visually-hidden">Lọc trạng thái</span>
+            <select id="orderStatusFilter" class="form-select" name="status">
+                <option value="">Tất cả trạng thái</option>
+                <option value="NOT_PROCESSED" th:selected="${statusFilter == 'NOT_PROCESSED'}">Chờ xác nhận</option>
+                <option value="CONFIRMED" th:selected="${statusFilter == 'CONFIRMED'}">Đã xác nhận</option>
+                <option value="SHIPPING" th:selected="${statusFilter == 'SHIPPING'}">Đang giao hàng</option>
+                <option value="DELIVERED" th:selected="${statusFilter == 'DELIVERED'}">Đã giao hàng</option>
+                <option value="CANCELLED" th:selected="${statusFilter == 'CANCELLED'}">Đã hủy</option>
+                <option value="RETURNED" th:selected="${statusFilter == 'RETURNED'}">Đã hoàn hàng</option>
+            </select>
+        </label>
+        <button class="btn btn-primary" type="submit">Tìm kiếm</button>
+        <a class="btn btn-outline-secondary" th:href="@{/employee/orders}">Xóa lọc</a>
+    </form>
+
+    <div class="delivery-table-card">
+        <div class="delivery-table-wrap">
+            <table class="delivery-table">
+                <thead><tr><th scope="col">Mã đơn</th><th scope="col">Khách hàng</th><th scope="col">Ngày đặt</th><th scope="col">Tổng thanh toán</th><th scope="col">Trạng thái đơn</th><th scope="col">Vận chuyển GHN</th><th scope="col"><span class="visually-hidden">Thao tác</span></th></tr></thead>
+                <tbody>
+                <tr th:each="order : ${orders.content}" th:attr="data-shipment-url=@{/api/employee/orders/{id}/ghn-shipment(id=${order.id})},data-has-shipment=${order.ghnOrderCode != null}">
+                    <td><span class="delivery-order-id" th:text="${orderCodes[order.id]}">#D867DEF1</span></td>
+                    <td><span class="delivery-customer-name" th:text="${order.user.fullName}">Khách hàng</span><span class="delivery-secondary" th:text="${order.phone}">Số điện thoại</span></td>
+                    <td><span th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy')}">14/10/2026</span><span class="delivery-secondary" th:text="${#temporals.format(order.createdAt, 'HH:mm')}">14:30</span></td>
+                    <td><span class="delivery-money" th:text="|${#numbers.formatDecimal(order.amountFromUser, 0, 'COMMA', 0, 'POINT')} ₫|">0 ₫</span></td>
+                    <td><span class="delivery-status status-neutral order-status-label" th:attr="data-order-status=${order.status.name}">Đang cập nhật</span></td>
+                    <td class="delivery-ghn-cell">
+                        <span class="delivery-ghn-code" th:text="${order.ghnOrderCode != null ? order.ghnOrderCode : 'Chưa tạo vận đơn'}">Chưa tạo vận đơn</span>
+                        <span class="delivery-status status-neutral ghn-status-label" th:attr="data-ghn-status=${order.ghnStatus}">Chưa có thông tin</span>
+                    </td>
+                    <td><div class="delivery-table-actions"><a class="btn btn-outline-primary" th:href="@{/employee/orders/{id}(id=${order.id})}">Chi tiết</a></div></td>
+                </tr>
+                <tr th:if="${orders.empty}"><td colspan="7" class="delivery-empty"><div class="fw-semibold mb-1">Không tìm thấy đơn hàng</div><span>Thử thay đổi từ khóa hoặc bộ lọc trạng thái.</span></td></tr>
+                </tbody>
+            </table>
+        </div>
+        <nav class="delivery-pagination" aria-label="Phân trang đơn hàng" th:if="${orders.totalPages > 1}">
+            <span th:text="|Trang ${orders.number + 1} / ${orders.totalPages} · ${orders.totalElements} đơn hàng|">Trang 1 / 1</span>
+            <div class="d-flex gap-2">
+                <a class="btn btn-outline-secondary" th:if="${orders.hasPrevious()}" th:href="@{/employee/orders(page=${orders.number - 1},keyword=${keyword},status=${statusFilter})}">Trang trước</a>
+                <a class="btn btn-outline-secondary" th:if="${orders.hasNext()}" th:href="@{/employee/orders(page=${orders.number + 1},keyword=${keyword},status=${statusFilter})}">Trang sau</a>
+            </div>
+        </nav>
+    </div>
+    <p class="delivery-muted-note mt-3 mb-0">Trạng thái vận chuyển chỉ được cập nhật từ GHN; mở chi tiết đơn hàng để xem phí vận chuyển và lịch sử giao hàng.</p>
+</section>
+</body>
+</html>
