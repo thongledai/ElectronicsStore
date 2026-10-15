@@ -25,19 +25,10 @@ public class RegisterDTO {
     @Pattern(regexp = "^(0|\\+84)[35789][0-9]{8}$", message = "PHONE_INVALID")
     private String phone;
 
-    private String mobileNumber;
-
     @NotBlank(message = "PASSWORD_REQUIRED")
     @Size(min = 6, message = "PASSWORD_MIN_LENGTH")
     private String password;
 
     @NotBlank(message = "CONFIRM_PASSWORD_REQUIRED")
     private String confirmPassword;
-
-    public String getResolvedPhone() {
-        if (phone != null && !phone.isBlank()) {
-            return phone;
-        }
-        return mobileNumber;
-    }
 }

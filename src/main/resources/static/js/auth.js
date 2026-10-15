@@ -151,10 +151,12 @@ function clearAuthSession() {
     localStorage.removeItem('technova_user');
     localStorage.removeItem('technova_last_active');
     localStorage.removeItem('technova_last_ping');
+    localStorage.removeItem('technova_remember_me');
     if (typeof storageSet === 'function' && typeof STORE !== 'undefined') {
       storageSet(STORE.user, null);
     }
     document.cookie = 'JWT_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    document.cookie = 'REFRESH_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     document.cookie = 'JSESSIONID=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
   } catch (e) {
     /* storage error */
@@ -394,14 +396,15 @@ async function handleGoogleLoginPayload(payload) {
       if (data.data?.user?.role) {
         localStorage.setItem('technova_role', data.data.user.role);
       }
+      localStorage.setItem('technova_remember_me', 'true');
       localStorage.setItem('technova_last_active', Date.now().toString());
-      localStorage.setItem('technova_last_ping', Date.now().toString());
 
       if (typeof storageSet === 'function' && typeof STORE !== 'undefined') {
         storageSet(STORE.user, {
           name: data.data?.user?.fullName || 'User',
           email: data.data?.user?.email || '',
           role: data.data?.user?.role,
+          avatar: data.data?.user?.avatar || null,
           hasPassword: data.data?.user?.hasPassword ?? false,
           loggedInAt: new Date().toISOString()
         });
@@ -501,14 +504,19 @@ async function handleLogin(e) {
       if (data.data?.user?.role) {
         localStorage.setItem('technova_role', data.data.user.role);
       }
+      if (rememberMe) {
+        localStorage.setItem('technova_remember_me', 'true');
+      } else {
+        localStorage.removeItem('technova_remember_me');
+      }
       localStorage.setItem('technova_last_active', Date.now().toString());
-      localStorage.setItem('technova_last_ping', Date.now().toString());
 
       if (typeof storageSet === 'function' && typeof STORE !== 'undefined') {
         storageSet(STORE.user, {
           name: data.data?.user?.fullName || 'User',
           email: data.data?.user?.email || email,
           role: data.data?.user?.role,
+          avatar: data.data?.user?.avatar || null,
           hasPassword: data.data?.user?.hasPassword ?? true,
           loggedInAt: new Date().toISOString()
         });

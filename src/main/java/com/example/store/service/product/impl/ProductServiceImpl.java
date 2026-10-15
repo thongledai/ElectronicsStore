@@ -84,6 +84,9 @@ public class ProductServiceImpl implements IProductService {
 				}
 			}
 		}
+		boolean filterByCategory = filterDTO.getCategoryId() != null
+				|| (filterDTO.getCategory() != null && filterDTO.getCategory().stream()
+						.anyMatch(value -> value != null && !value.trim().isEmpty()));
 
 		// 2. Resolve Brand IDs
 		Set<Long> brandIds = new HashSet<>();
@@ -103,6 +106,9 @@ public class ProductServiceImpl implements IProductService {
 				}
 			}
 		}
+		boolean filterByBrand = filterDTO.getBrandId() != null
+				|| (filterDTO.getBrand() != null && filterDTO.getBrand().stream()
+						.anyMatch(value -> value != null && !value.trim().isEmpty()));
 
 		// 3. Resolve sorting and pagination
 		int pageNum = filterDTO.getPage() != null ? Math.max(0, filterDTO.getPage()) : 0;
@@ -112,9 +118,10 @@ public class ProductServiceImpl implements IProductService {
 		Pageable pageable = PageRequest.of(pageNum, pageSize, sort);
 
 		Page<Product> productPage = productRepository.searchPublicProducts(filterDTO.getKeyword(),
-				!categoryIds.isEmpty(), categoryIds.isEmpty() ? Set.of(new UUID(0L, 0L)) : categoryIds,
-				!brandIds.isEmpty(), brandIds.isEmpty() ? Set.of(-1L) : brandIds, filterDTO.getMinPrice(),
-				filterDTO.getMaxPrice(), filterDTO.getMinRating(), filterDTO.getInStock(), filterDTO.getOnSale(),
+				filterByCategory, categoryIds.isEmpty() ? Set.of(new UUID(0L, 0L)) : categoryIds,
+				filterByBrand, brandIds.isEmpty() ? Set.of(-1L) : brandIds, filterDTO.getMinPrice(),
+				filterDTO.getMaxPrice(), filterDTO.getMinRating(), filterDTO.getInStock(), filterDTO.getOutOfStock(),
+				filterDTO.getOnSale(),
 				pageable);
 
 		List<Product> products = productPage.getContent();
@@ -447,7 +454,7 @@ public class ProductServiceImpl implements IProductService {
 
 	private Sort buildSort(String sortParam) {
 		if (sortParam == null || sortParam.trim().isEmpty()) {
-			return Sort.by(Sort.Direction.DESC, "createdAt");
+			return Sort.by(Sort.Direction.DESC, "createdAt").and(Sort.by(Sort.Direction.DESC, "id"));
 		}
 
 		String effectivePriceExpression = """
@@ -458,24 +465,26 @@ public class ProductServiceImpl implements IProductService {
 				end)
 				from ProductVariant v
 				where v.product = p
-										and v.isSelling = true)
+										and v.isSelling = true
+										and v.isActive = true)
 				""";
 
-		return switch (sortParam.toLowerCase()) {
+		return switch (sortParam.trim().toLowerCase()) {
 		case "price-asc" ->
-			JpaSort.unsafe(Sort.Direction.ASC, effectivePriceExpression).and(Sort.by(Sort.Direction.ASC, "name"));
+			JpaSort.unsafe(Sort.Direction.ASC, effectivePriceExpression).and(Sort.by(Sort.Direction.ASC, "name")).and(Sort.by(Sort.Direction.ASC, "id"));
 		case "price-desc" ->
-			JpaSort.unsafe(Sort.Direction.DESC, effectivePriceExpression).and(Sort.by(Sort.Direction.ASC, "name"));
+			JpaSort.unsafe(Sort.Direction.DESC, effectivePriceExpression).and(Sort.by(Sort.Direction.ASC, "name")).and(Sort.by(Sort.Direction.ASC, "id"));
+		case "oldest" -> Sort.by(Sort.Direction.ASC, "createdAt").and(Sort.by(Sort.Direction.ASC, "id"));
 		case "popular" -> JpaSort.unsafe(Sort.Direction.DESC,
 				"(select coalesce(sum(v.sold), 0) from ProductVariant v where v.product = p and v.isSelling = true)")
-				.and(Sort.by(Sort.Direction.DESC, "createdAt"));
+				.and(Sort.by(Sort.Direction.DESC, "createdAt")).and(Sort.by(Sort.Direction.DESC, "id"));
 		case "discount" -> JpaSort.unsafe(Sort.Direction.DESC,
 				"(select max(case when v.promotionalPrice is not null and v.promotionalPrice < v.price then v.price - v.promotionalPrice else 0 end) from ProductVariant v where v.product = p and v.isSelling = true)")
-				.and(Sort.by(Sort.Direction.DESC, "createdAt"));
-		case "rating" -> Sort.by(Sort.Direction.DESC, "rating").and(Sort.by(Sort.Direction.DESC, "createdAt"));
-		case "name-asc" -> Sort.by(Sort.Direction.ASC, "name");
-		case "name-desc" -> Sort.by(Sort.Direction.DESC, "name");
-		default -> Sort.by(Sort.Direction.DESC, "createdAt");
+				.and(Sort.by(Sort.Direction.DESC, "createdAt")).and(Sort.by(Sort.Direction.DESC, "id"));
+		case "rating" -> Sort.by(Sort.Direction.DESC, "rating").and(Sort.by(Sort.Direction.DESC, "createdAt")).and(Sort.by(Sort.Direction.DESC, "id"));
+		case "name-asc" -> Sort.by(Sort.Direction.ASC, "name").and(Sort.by(Sort.Direction.ASC, "id"));
+		case "name-desc" -> Sort.by(Sort.Direction.DESC, "name").and(Sort.by(Sort.Direction.DESC, "id"));
+		default -> Sort.by(Sort.Direction.DESC, "createdAt").and(Sort.by(Sort.Direction.DESC, "id"));
 		};
 	}
 

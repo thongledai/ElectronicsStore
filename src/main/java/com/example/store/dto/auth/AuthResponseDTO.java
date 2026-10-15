@@ -1,6 +1,6 @@
 package com.example.store.dto.auth;
 
-import com.example.store.dto.common.UserResponseDTO;
+import com.example.store.dto.user.UserResponseDTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class AuthResponseDTO {
     private String token;
+    private String refreshToken;
     @Builder.Default
     private String tokenType = "Bearer";
     private long expiresIn;

@@ -18,11 +18,12 @@ public class CartItemMapper {
         String firstImageUrl = productVariant.getImages() == null
                 ? null
                 : productVariant.getImages().stream()
-                .filter(image -> image != null)
-                .map(image -> image.getImageUrl())
-                .filter(url -> url != null && !url.isBlank())
-                .findFirst()
-                .orElse(null);
+                        .filter(image -> image != null)
+                        .map(image -> image.getImageUrl())
+                        .filter(url -> url != null && !url.isBlank())
+                        .findFirst()
+                        .orElse(null);
+
         BigDecimal subtotal = productVariant.getPrice().multiply(BigDecimal.valueOf(cartItem.getCount()));
 
         return new CartItemDTO(cartItem.getId(),

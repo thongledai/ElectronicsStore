@@ -92,7 +92,14 @@ public enum BusinessMessage {
     AUTH_GOOGLE_TOKEN_INVALID("Invalid Google token: %s"),
     AUTH_GOOGLE_EMAIL_NOT_VERIFIED("Google account email is not verified!"),
     AUTH_GOOGLE_FAILED("Google authentication failed: %s"),
-    AUTH_NO_ACCOUNT_FOUND_EMAIL("No account found with this email address!");
+    AUTH_NO_ACCOUNT_FOUND_EMAIL("No account found with this email address!"),
+
+    USER_NOT_FOUND_ID("Không tìm thấy người dùng với ID: %s"),
+    USER_EMAIL_EXISTS("Email này đã được sử dụng: %s"),
+    USER_PHONE_EXISTS("Số điện thoại này đã được sử dụng: %s"),
+    USER_ROLE_NOT_FOUND("Không tìm thấy vai trò: %s"),
+    USER_CANNOT_DELETE_SELF("Bạn không thể tự xóa tài khoản của chính mình!"),
+    USER_HAS_ORDERS_DELETE("Không thể xóa người dùng này vì đã có dữ liệu đơn hàng trong hệ thống!");
 
     private final String message;
 

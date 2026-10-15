@@ -86,7 +86,9 @@
           localStorage.removeItem('technova_user');
           localStorage.removeItem('technova_last_active');
           localStorage.removeItem('technova_last_ping');
+          localStorage.removeItem('technova_remember_me');
           document.cookie = 'JWT_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+          document.cookie = 'REFRESH_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
           document.cookie = 'JSESSIONID=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
         } catch (e) { /* storage error */ }
       });
@@ -95,8 +97,9 @@
 
   /* ---------- Session Inactivity & Heartbeat Manager ---------- */
   function initSessionManager() {
-    const TIMEOUT_MS = 2 * 60 * 1000; // 2 phút
+    const TIMEOUT_MS = 45 * 60 * 1000; // 45 phút
     const token = localStorage.getItem('technova_jwt');
+    const isRememberMe = localStorage.getItem('technova_remember_me') === 'true';
 
     const clearAllSessionData = () => {
       try {
@@ -105,12 +108,14 @@
         localStorage.removeItem('technova_user');
         localStorage.removeItem('technova_last_active');
         localStorage.removeItem('technova_last_ping');
+        localStorage.removeItem('technova_remember_me');
         document.cookie = 'JWT_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        document.cookie = 'REFRESH_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
         document.cookie = 'JSESSIONID=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
       } catch (e) {}
     };
 
-    if (token) {
+    if (token && !isRememberMe) {
       const lastActiveStr = localStorage.getItem('technova_last_active');
       const lastActive = lastActiveStr ? parseInt(lastActiveStr, 10) : 0;
       const now = Date.now();
@@ -145,32 +150,78 @@
     };
     window.addEventListener('beforeunload', onPageUnload);
     window.addEventListener('pagehide', onPageUnload);
-
-    setInterval(() => {
-      const currentToken = localStorage.getItem('technova_jwt');
-      if (!currentToken) return;
-
-      const now = Date.now();
-      const lastPing = parseInt(localStorage.getItem('technova_last_ping') || '0', 10);
-      if (now - lastPing < 25000) {
-        localStorage.setItem('technova_last_active', now.toString());
-        return;
-      }
-
-      localStorage.setItem('technova_last_ping', now.toString());
-      localStorage.setItem('technova_last_active', now.toString());
-
-      fetch('/auth/ping', {
-        method: 'GET',
-        headers: { 'Authorization': 'Bearer ' + currentToken }
-      }).then(res => {
-        if (res.status === 401 || res.status === 403) {
-          clearAllSessionData();
-          window.location.replace('/login?error=session_expired');
-        }
-      }).catch(() => {});
-    }, 35000);
   }
+
+  /* ---------- User Avatar & Identity in Dashboard Topbar ---------- */
+  function initUserAvatar() {
+    let user = null;
+    try {
+      user = JSON.parse(localStorage.getItem('technova_user') || 'null');
+    } catch (_) {}
+
+    const token = localStorage.getItem('technova_jwt');
+    let role = (localStorage.getItem('technova_role') || (user && user.role) || document.documentElement.getAttribute('data-role') || 'Manager').toUpperCase();
+
+    const fullName = user && (user.name || user.fullName) ? (user.name || user.fullName) : role;
+    const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=0d6efd&color=fff`;
+    const avatarUrl = user && user.avatar ? user.avatar : defaultAvatar;
+
+    document.querySelectorAll('.js-topbar-username').forEach(el => {
+      el.textContent = fullName;
+    });
+    document.querySelectorAll('.js-topbar-name').forEach(el => {
+      el.textContent = 'Xin chào, ' + fullName;
+    });
+    document.querySelectorAll('.js-topbar-role').forEach(el => {
+      el.textContent = role.replace('ROLE_', '');
+    });
+
+    document.querySelectorAll('.js-topbar-avatar').forEach(img => {
+      img.onerror = () => {
+        img.onerror = null;
+        img.src = defaultAvatar;
+      };
+      img.src = avatarUrl;
+    });
+
+    document.querySelectorAll('.role-avatar').forEach(el => {
+      if (user && user.avatar) {
+        el.innerHTML = `<img src="${user.avatar}" class="w-100 h-100 rounded-circle object-fit-cover" alt="avatar" onerror="this.onerror=null; this.parentElement.textContent='${role.charAt(0)}';">`;
+      } else {
+        el.textContent = role.charAt(0);
+      }
+    });
+
+    // Background fetch if user data is missing in cache
+    if (token && (!user || !user.avatar || !user.name)) {
+      fetch('/api/profile', {
+        headers: { 'Accept': 'application/json', 'Authorization': 'Bearer ' + token }
+      }).then(r => r.ok ? r.json() : null)
+        .then(res => {
+          if (res && res.success && res.data) {
+            const u = res.data;
+            const updated = {
+              ...(user || {}),
+              name: u.fullName || user?.name || role,
+              email: u.email || user?.email || '',
+              role: u.role || user?.role || role,
+              avatar: u.avatar || null
+            };
+            try { localStorage.setItem('technova_user', JSON.stringify(updated)); } catch (_) {}
+            initUserAvatar();
+          }
+        }).catch(() => {});
+    }
+  }
+
+  window.updateDashboardUserAvatar = function(avatarUrl, newName) {
+    let user = {};
+    try { user = JSON.parse(localStorage.getItem('technova_user') || '{}'); } catch (_) {}
+    if (avatarUrl !== undefined) user.avatar = avatarUrl;
+    if (newName) user.name = newName;
+    try { localStorage.setItem('technova_user', JSON.stringify(user)); } catch (_) {}
+    initUserAvatar();
+  };
 
   initSessionManager();
 
@@ -179,6 +230,7 @@
     initTableSearch();
     initDemoActions();
     initLogoutHandler();
+    initUserAvatar();
   });
 
   window.toast = toast;

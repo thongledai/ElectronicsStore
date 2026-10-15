@@ -872,25 +872,129 @@ function initAccountLabel() {
     el.style.display = isLoggedIn ? 'block' : 'none';
   });
 
-  // Hiển thị nút "Management" trên Navbar Customer nếu là Manager
-  const userRole = (localStorage.getItem('technova_role') || (user && user.role) || '').toUpperCase();
-  const isManager = isLoggedIn && (userRole === 'MANAGER' || userRole === 'ROLE_MANAGER');
-  document.querySelectorAll('.js-nav-manager').forEach(el => {
-    el.style.display = isManager ? 'block' : 'none';
+  // Render circular avatar on navbar when logged in
+  const avatarImgs = document.querySelectorAll('.js-user-avatar');
+  const userIcons = document.querySelectorAll('.js-user-icon');
+
+  const applyAvatar = (avatarUrl) => {
+    if (isLoggedIn && avatarUrl) {
+      avatarImgs.forEach(img => {
+        img.src = avatarUrl;
+        img.style.display = 'block';
+      });
+      userIcons.forEach(icon => {
+        icon.style.display = 'none';
+      });
+    } else {
+      avatarImgs.forEach(img => {
+        img.style.display = 'none';
+      });
+      userIcons.forEach(icon => {
+        icon.style.display = 'inline-block';
+      });
+    }
+  };
+
+  applyAvatar(user?.avatar);
+
+  window.updateHeaderUserAvatar = function(avatarUrl, fullName) {
+    const currentUser = (typeof storageGet === 'function' ? storageGet(STORE.user, {}) : {}) || {};
+    if (avatarUrl !== undefined) currentUser.avatar = avatarUrl;
+    if (fullName) currentUser.name = fullName;
+    if (typeof storageSet === 'function') storageSet(STORE.user, currentUser);
+    applyAvatar(avatarUrl);
+    if (fullName) {
+      document.querySelectorAll('.js-account-greeting').forEach(el => {
+        el.textContent = 'Hello, ' + fullName.split(' ')[0];
+      });
+    }
+  };
+
+  // Helper lấy role chuẩn (bỏ tiền tố ROLE_)
+  const getCleanRole = () => {
+    let r = (localStorage.getItem('technova_role') || (user && user.role) || '').toUpperCase();
+    if (!r && token) {
+      try {
+        const parts = token.split('.');
+        if (parts.length === 3) {
+          const payload = JSON.parse(atob(parts[1]));
+          if (payload && payload.role) {
+            r = String(payload.role).toUpperCase();
+          }
+        }
+      } catch (_) {}
+    }
+    return r.replace('ROLE_', '');
+  };
+
+  const syncRoleUI = (hasPass) => {
+    const role = getCleanRole();
+    const isManager = isLoggedIn && (role === 'MANAGER' || role === 'ADMIN');
+    document.querySelectorAll('.js-nav-manager').forEach(el => {
+      el.style.display = isManager ? 'block' : 'none';
+    });
+
+    let resetUrl = '/customer/reset-password';
+    let linkText = 'Change Password';
+
+    if (role === 'MANAGER' || role === 'ADMIN') {
+      resetUrl = '/manager/reset-password';
+    } else if (role === 'EMPLOYEE') {
+      resetUrl = '/employee/reset-password';
+    } else if (role === 'SHIPPER') {
+      resetUrl = '/shipper/reset-password';
+    } else {
+      // CUSTOMER hoặc mặc định
+      if (isLoggedIn && hasPass === false) {
+        resetUrl = '/customer/set-password';
+        linkText = 'Set Password';
+      }
+    }
+
+    document.querySelectorAll('.js-password-link').forEach(el => {
+      el.setAttribute('href', resetUrl);
+      const textEl = el.querySelector('.js-password-link-text');
+      if (textEl) textEl.textContent = linkText;
+    });
+  };
+
+  // If logged in and avatar is missing in cache, fetch profile in background
+  if (isLoggedIn && (!user || typeof user.avatar === 'undefined')) {
+    const authHdr = {};
+    if (token) authHdr['Authorization'] = `Bearer ${token}`;
+    fetch('/api/profile', { headers: { 'Accept': 'application/json', ...authHdr } })
+      .then(r => r.ok ? r.json() : null)
+      .then(res => {
+        if (res && res.success && res.data) {
+          const u = res.data;
+          const updatedUser = {
+            ...(user || {}),
+            name: u.fullName || user?.name || 'User',
+            email: u.email || user?.email || '',
+            role: u.role || user?.role,
+            avatar: u.avatar || null
+          };
+          if (u.role) localStorage.setItem('technova_role', u.role);
+          if (typeof storageSet === 'function') storageSet(STORE.user, updatedUser);
+          applyAvatar(u.avatar);
+          if (u.fullName) {
+            document.querySelectorAll('.js-account-greeting').forEach(el => {
+              el.textContent = 'Hello, ' + u.fullName.split(' ')[0];
+            });
+          }
+          syncRoleUI(user?.hasPassword);
+        }
+      })
+      .catch(() => {});
+  }
+
+  // Hiển thị nút Profile dùng chung /profile cho tất cả các role đã đăng nhập
+  document.querySelectorAll('.js-profile-item').forEach(el => {
+    el.style.display = isLoggedIn ? 'block' : 'none';
   });
 
   const updatePasswordLinks = (hasPass) => {
-    document.querySelectorAll('.js-password-link').forEach(el => {
-      if (isLoggedIn && hasPass === false) {
-        el.setAttribute('href', '/customer/set-password');
-        const textEl = el.querySelector('.js-password-link-text');
-        if (textEl) textEl.textContent = 'Set Password';
-      } else {
-        el.setAttribute('href', '/customer/reset-password');
-        const textEl = el.querySelector('.js-password-link-text');
-        if (textEl) textEl.textContent = 'Change Password';
-      }
-    });
+    syncRoleUI(hasPass);
   };
 
   updatePasswordLinks(user?.hasPassword);
@@ -918,8 +1022,10 @@ function initAccountLabel() {
     localStorage.removeItem('technova_user');
     localStorage.removeItem('technova_last_active');
     localStorage.removeItem('technova_last_ping');
+    localStorage.removeItem('technova_remember_me');
     storageSet(STORE.user, null);
     document.cookie = 'JWT_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    document.cookie = 'REFRESH_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     document.cookie = 'JSESSIONID=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
   }
 
@@ -930,8 +1036,10 @@ function initAccountLabel() {
       localStorage.removeItem('technova_user');
       localStorage.removeItem('technova_last_active');
       localStorage.removeItem('technova_last_ping');
+      localStorage.removeItem('technova_remember_me');
       storageSet(STORE.user, null);
       document.cookie = 'JWT_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      document.cookie = 'REFRESH_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
       document.cookie = 'JSESSIONID=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     });
   });
@@ -950,16 +1058,18 @@ function initTooltips() {
 
 /**
  * Session Manager:
- * - Tắt web quá 2 phút: xóa sạch session/token/cookie, chuyển về /login nếu là trang bảo vệ.
- * - Tắt web dưới 2 phút: duy trì phiên làm việc nguyên vẹn.
- * - Đang mở web: Heartbeat ngầm mỗi 35s duy trì phiên mà không làm giật/chớp web.
+ * - Tắt web quá 45 phút: xóa sạch session/token/cookie, chuyển về /login nếu là trang bảo vệ.
+ * - Tắt web dưới 45 phút: duy trì phiên làm việc nguyên vẹn.
+ * - Đang mở web: Heartbeat ngầm mỗi 1 phút duy trì phiên mà không làm giật/chớp web.
  * - Hỗ trợ đồng bộ nhiều tab mở cùng lúc (Multi-tab throttle).
  */
 function initSessionManager() {
-  const TIMEOUT_MS = 2 * 60 * 1000; // 2 phút
+  const TIMEOUT_MS = 45 * 60 * 1000; // 45 phút
   const token = localStorage.getItem('technova_jwt');
   const user = (typeof storageGet === 'function' && typeof STORE !== 'undefined') ? storageGet(STORE.user, null) : null;
   const hasSession = !!(token || (user && user.email));
+
+  const isRememberMe = localStorage.getItem('technova_remember_me') === 'true';
 
   const clearAllSessionData = () => {
     try {
@@ -968,15 +1078,17 @@ function initSessionManager() {
       localStorage.removeItem('technova_user');
       localStorage.removeItem('technova_last_active');
       localStorage.removeItem('technova_last_ping');
+      localStorage.removeItem('technova_remember_me');
       if (typeof storageSet === 'function' && typeof STORE !== 'undefined') {
         storageSet(STORE.user, null);
       }
       document.cookie = 'JWT_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      document.cookie = 'REFRESH_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
       document.cookie = 'JSESSIONID=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     } catch (e) {}
   };
 
-  if (hasSession) {
+  if (hasSession && !isRememberMe) {
     const lastActiveStr = localStorage.getItem('technova_last_active');
     const lastActive = lastActiveStr ? parseInt(lastActiveStr, 10) : 0;
     const now = Date.now();
@@ -1015,38 +1127,124 @@ function initSessionManager() {
   };
   window.addEventListener('beforeunload', onPageUnload);
   window.addEventListener('pagehide', onPageUnload);
+}
 
-  setInterval(() => {
-    const currentToken = localStorage.getItem('technova_jwt');
-    if (!currentToken) return;
+// Global Silent Refresh & Fetch Interceptor (Chống giật lag, tự động refresh token trong nền)
+(function setupAuthFetchInterceptor() {
+  if (window.__AUTH_INTERCEPTOR_SETUP__) return;
+  window.__AUTH_INTERCEPTOR_SETUP__ = true;
 
-    const now = Date.now();
-    const lastPing = parseInt(localStorage.getItem('technova_last_ping') || '0', 10);
-    if (now - lastPing < 25000) {
-      localStorage.setItem('technova_last_active', now.toString());
-      return;
+  const originalFetch = window.fetch;
+  let isRefreshing = false;
+  let refreshQueue = [];
+
+  function processQueue(error, newToken) {
+    refreshQueue.forEach(prom => {
+      if (error) {
+        prom.reject(error);
+      } else {
+        prom.resolve(newToken);
+      }
+    });
+    refreshQueue = [];
+  }
+
+  async function silentRefreshToken() {
+    try {
+      const res = await originalFetch('/auth/refresh-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin'
+      });
+      const data = await res.json();
+      if (res.ok && data.success && data.data?.token) {
+        localStorage.setItem('technova_jwt', data.data.token);
+        if (data.data?.user?.role) {
+          localStorage.setItem('technova_role', data.data.user.role);
+        }
+        localStorage.setItem('technova_last_active', Date.now().toString());
+        return data.data.token;
+      }
+      return null;
+    } catch (e) {
+      return null;
     }
+  }
 
-    localStorage.setItem('technova_last_ping', now.toString());
-    localStorage.setItem('technova_last_active', now.toString());
+  window.fetch = async function (resource, options = {}) {
+    options = options || {};
+    let token = localStorage.getItem('technova_jwt');
 
-    fetch('/auth/ping', {
-      method: 'GET',
-      headers: { 'Authorization': 'Bearer ' + currentToken }
-    }).then(res => {
-      if (res.status === 401 || res.status === 403) {
-        clearAllSessionData();
-        if (window.location.pathname.startsWith('/manager') ||
-            window.location.pathname.startsWith('/employee') ||
-            window.location.pathname.startsWith('/shipper')) {
-          window.location.replace('/login?error=session_expired');
-        } else if (typeof initAccountLabel === 'function') {
-          initAccountLabel();
+    if (token) {
+      if (!options.headers) {
+        options.headers = {};
+      }
+      const isHeadersInstance = typeof Headers !== 'undefined' && options.headers instanceof Headers;
+      const hasAuth = isHeadersInstance ? options.headers.has('Authorization') : (options.headers['Authorization'] || options.headers['authorization']);
+      if (!hasAuth) {
+        if (isHeadersInstance) {
+          options.headers.set('Authorization', 'Bearer ' + token);
+        } else {
+          options.headers['Authorization'] = 'Bearer ' + token;
         }
       }
-    }).catch(() => {});
-  }, 35000);
-}
+    }
+
+    let response = await originalFetch(resource, options);
+
+    const urlStr = typeof resource === 'string' ? resource : (resource?.url || '');
+    if (response.status === 401 && !urlStr.includes('/auth/refresh-token') && !urlStr.includes('/auth/login')) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          refreshQueue.push({
+            resolve: (newToken) => {
+              if (typeof Headers !== 'undefined' && options.headers instanceof Headers) {
+                options.headers.set('Authorization', 'Bearer ' + newToken);
+              } else {
+                options.headers['Authorization'] = 'Bearer ' + newToken;
+              }
+              resolve(originalFetch(resource, options));
+            },
+            reject: (err) => reject(err)
+          });
+        });
+      }
+
+      isRefreshing = true;
+      const newToken = await silentRefreshToken();
+      isRefreshing = false;
+
+      if (newToken) {
+        processQueue(null, newToken);
+        if (typeof Headers !== 'undefined' && options.headers instanceof Headers) {
+          options.headers.set('Authorization', 'Bearer ' + newToken);
+        } else {
+          options.headers['Authorization'] = 'Bearer ' + newToken;
+        }
+        return originalFetch(resource, options);
+      } else {
+        processQueue(new Error('Session expired'), null);
+        localStorage.removeItem('technova_jwt');
+        localStorage.removeItem('technova_role');
+        localStorage.removeItem('technova_user');
+        localStorage.removeItem('technova_last_active');
+        localStorage.removeItem('technova_remember_me');
+        document.cookie = 'JWT_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        document.cookie = 'REFRESH_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+
+        if (window.location.pathname.startsWith('/manager') ||
+            window.location.pathname.startsWith('/employee') ||
+            window.location.pathname.startsWith('/shipper') ||
+            window.location.pathname.startsWith('/customer/cart') ||
+            window.location.pathname.startsWith('/profile')) {
+          window.location.replace('/login?error=session_expired');
+        }
+      }
+    }
+
+    return response;
+  };
+})();
 
 // Chạy kiểm tra timeout ngay khi file nạp vào
 initSessionManager();

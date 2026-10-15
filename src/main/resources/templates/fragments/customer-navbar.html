@@ -45,10 +45,11 @@
             <span class="icon-badge js-cart-count" data-count="0">0</span>
           </a>
           <div class="dropdown d-none d-sm-inline-flex">
-            <button class="icon-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Account" title="Tài khoản">
-              <i class="far fa-user"></i>
+            <button class="icon-btn js-account-btn p-0 d-inline-flex align-items-center justify-content-center overflow-hidden" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Account" title="Tài khoản">
+              <i class="far fa-user js-user-icon"></i>
+              <img class="rounded-circle object-fit-cover js-user-avatar border shadow-sm" style="width: 34px; height: 34px; display: none;" alt="Avatar">
             </button>
-            <ul class="dropdown-menu dropdown-menu-end shadow-sm js-account-menu" style="min-width: 200px;">
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm js-account-menu" style="min-width: 210px;">
               <!-- Guest: Sign In / Register -->
               <li class="js-auth-guest">
                 <a class="dropdown-item py-2" th:href="@{/login}">
@@ -56,16 +57,20 @@
                 </a>
               </li>
 
-              <!-- Authenticated: Change Password and Sign Out -->
+              <!-- Authenticated: Greeting, Profile, Change Password and Sign Out -->
               <li class="js-auth-user" style="display: none;">
                 <h6 class="dropdown-header js-account-greeting">My Account</h6>
+              </li>
+              <li class="js-auth-user js-profile-item" style="display: none;">
+                <a class="dropdown-item py-2" th:href="@{/profile}">
+                  <i class="fas fa-user-gear me-2 text-primary"></i>Profile
+                </a>
               </li>
               <li class="js-auth-user" style="display: none;">
                 <a class="dropdown-item py-2 js-password-link" th:href="@{/customer/reset-password}">
                   <i class="fas fa-key me-2 text-warning"></i><span class="js-password-link-text">Change Password</span>
                 </a>
               </li>
-
               <li class="js-auth-user" style="display: none;">
                 <hr class="dropdown-divider my-1">
               </li>
@@ -96,16 +101,12 @@
           <li class="nav-item"><a class="nav-link" th:href="@{/customer/products}">Products</a></li>
           <li class="nav-item"><a class="nav-link" th:href="@{/pages/about}">About</a></li>
           <li class="nav-item"><a class="nav-link" th:href="@{/pages/contact}">Contact</a></li>
-          <li class="nav-item"><a class="nav-link" th:href="@{/manager/index}">Management</a></li>
+            <li class="nav-item js-nav-manager" style="display: none;">
+                <a class="nav-link" th:href="@{/manager/index}">Management</a>
+            </li>
           
         </ul>
 
-        <!-- Live product search -->
-        <form class="header-search me-lg-3" role="search">
-          <input type="search" placeholder="Search laptops, phones, audio…" aria-label="Search products" autocomplete="off">
-          <button type="submit" aria-label="Search"><i class="fas fa-magnifying-glass"></i></button>
-          <div class="search-suggestions"></div>
-        </form>
       </div>
 
     </div>
@@ -150,7 +151,7 @@
           <li class="nav-item"><a class="nav-link" th:href="@{/pages/about}">About</a></li>
           <li class="nav-item"><a class="nav-link" th:href="@{/pages/contact}">Contact</a></li>
           <li class="nav-item js-nav-manager" style="display: none;">
-            <a class="nav-link text-warning fw-semibold" th:href="@{/manager/index}"><i class="fas fa-gauge-high me-1"></i>Management</a>
+            <a class="nav-link" th:href="@{/manager/index}">Management</a>
           </li>
         </ul>
       </div>
