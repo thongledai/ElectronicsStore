@@ -25,107 +25,110 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                // Static resources
-                .requestMatchers(
-                    "/css/**", "/js/**", "/images/**", "/fonts/**", 
-                    "/webjars/**", "/favicon.ico", "/error"
-                ).permitAll()
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        // Static resources
+                        .requestMatchers(
+                                "/css/**", "/js/**", "/images/**", "/fonts/**",
+                                "/webjars/**", "/favicon.ico", "/error")
+                        .permitAll()
 
-                // Public HTML pages
-                .requestMatchers(
-                    "/", "/login", "/register", "/forgot-password", "/verify-otp",
-                    "/customer/index", "/customer/products", "/customer/product-details",
-                    "/pages/**"
-                ).permitAll()
+                        // Public HTML pages
+                        .requestMatchers(
+                                "/", "/login", "/register", "/forgot-password", "/verify-otp",
+                                "/customer/index", "/customer/products", "/customer/product-details",
+                                "/pages/**")
+                        .permitAll()
 
-                // Public Authentication REST APIs
-                .requestMatchers(
-                    "/auth/login", "/auth/register", "/auth/signup", "/auth/forgot-password", "/auth/resend-otp", "/auth/verify-otp",
-                    "/auth/google", "/auth/google/**", "/auth/refresh-token", "/auth/logout"
-                ).permitAll()
+                        // Public Authentication REST APIs
+                        .requestMatchers(
+                                "/auth/login", "/auth/register", "/auth/signup", "/auth/forgot-password",
+                                "/auth/resend-otp", "/auth/verify-otp",
+                                "/auth/google", "/auth/google/**", "/auth/refresh-token", "/auth/logout")
+                        .permitAll()
 
+                        // Reset & Set Password & Status APIs (must be authenticated)
+                        .requestMatchers("/auth/reset-password", "/auth/set-password", "/auth/has-password")
+                        .authenticated()
 
-                // Reset & Set Password & Status APIs (must be authenticated)
-                .requestMatchers("/auth/reset-password", "/auth/set-password", "/auth/has-password").authenticated()
+                        // Cart APIs (chỉ khách hàng)
+                        .requestMatchers("/cart/**").hasAnyAuthority("CUSTOMER", "ROLE_CUSTOMER")
 
-                // Cart APIs (chỉ khách hàng)
-                .requestMatchers("/cart/**").hasAnyAuthority("CUSTOMER", "ROLE_CUSTOMER")
+                        // Role-based reset password pages
+                        .requestMatchers("/manager/reset-password").hasAnyAuthority("MANAGER", "ROLE_MANAGER")
+                        .requestMatchers("/employee/reset-password").hasAnyAuthority("EMPLOYEE", "ROLE_EMPLOYEE")
+                        .requestMatchers("/customer/reset-password", "/customer/set-password")
+                        .hasAnyAuthority("CUSTOMER", "ROLE_CUSTOMER")
 
-                // Role-based reset password pages
-                .requestMatchers("/manager/reset-password").hasAnyAuthority("MANAGER", "ROLE_MANAGER")
-                .requestMatchers("/employee/reset-password").hasAnyAuthority("EMPLOYEE", "ROLE_EMPLOYEE")
-                .requestMatchers("/customer/reset-password", "/customer/set-password").hasAnyAuthority("CUSTOMER", "ROLE_CUSTOMER")
+                        // Role-based dashboards
+                        .requestMatchers("/manager/**").hasAnyAuthority("MANAGER", "ROLE_MANAGER")
+                        .requestMatchers("/employee/**").hasAnyAuthority("EMPLOYEE", "ROLE_EMPLOYEE")
 
-                // Role-based dashboards
-                .requestMatchers("/manager/**").hasAnyAuthority("MANAGER", "ROLE_MANAGER")
-                .requestMatchers("/employee/**").hasAnyAuthority("EMPLOYEE", "ROLE_EMPLOYEE")
-      
-                // Authenticated user pages & APIs (shared across all roles)
-                .requestMatchers("/customer/cart", "/customer/wishlist").authenticated()
-                .requestMatchers("/profile", "/customer/profile").authenticated()
-                .requestMatchers("/api/profile").authenticated()
+                        // Authenticated user pages & APIs (shared across all roles)
+                        .requestMatchers("/customer/cart", "/customer/wishlist").authenticated()
+                        .requestMatchers("/profile", "/customer/profile").authenticated()
+                        .requestMatchers("/api/profile").authenticated()
 
-                // Any other request
-                .anyRequest().permitAll()
-            )
-            .exceptionHandling(ex -> ex
-                .authenticationEntryPoint((request, response, authException) -> {
-                    String uri = request.getRequestURI();
-                    String accept = request.getHeader("Accept");
-                    if (uri.startsWith("/auth/") || (accept != null && accept.contains(MediaType.APPLICATION_JSON_VALUE))) {
-                        response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                        response.setCharacterEncoding("UTF-8");
-                        response.getWriter().write("{\"success\":false,\"message\":\"Yêu cầu đăng nhập để truy cập tài nguyên này!\"}");
-                    } else {
-                        response.sendRedirect("/login?error=unauthorized");
-                    }
-                })
-                .accessDeniedHandler((request, response, accessDeniedException) -> {
-                    String uri = request.getRequestURI();
-                    String accept = request.getHeader("Accept");
-                    if (uri.startsWith("/auth/") || (accept != null && accept.contains(MediaType.APPLICATION_JSON_VALUE))) {
-                        response.setStatus(HttpStatus.FORBIDDEN.value());
-                        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                        response.setCharacterEncoding("UTF-8");
-                        response.getWriter().write("{\"success\":false,\"message\":\"Bạn không có quyền truy cập vào tài nguyên này!\"}");
-                    } else {
-                        response.sendRedirect("/login?error=forbidden");
-                    }
-                })
-            )
-            .logout(logout -> logout
-                .logoutUrl("/logout")
-                .invalidateHttpSession(true)
-                .clearAuthentication(true)
-                .deleteCookies("JSESSIONID", "JWT_TOKEN", "REFRESH_TOKEN")
-                .logoutSuccessHandler((request, response, authentication) -> {
-                    Cookie cookie = new Cookie("JWT_TOKEN", "");
-                    cookie.setPath("/");
-                    cookie.setHttpOnly(true);
-                    cookie.setMaxAge(0);
-                    response.addCookie(cookie);
+                        // Any other request
+                        .anyRequest().permitAll())
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            String uri = request.getRequestURI();
+                            String accept = request.getHeader("Accept");
+                            if (uri.startsWith("/auth/")
+                                    || (accept != null && accept.contains(MediaType.APPLICATION_JSON_VALUE))) {
+                                response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                                response.setCharacterEncoding("UTF-8");
+                                response.getWriter().write(
+                                        "{\"success\":false,\"message\":\"Yêu cầu đăng nhập để truy cập tài nguyên này!\"}");
+                            } else {
+                                response.sendRedirect("/login?error=unauthorized");
+                            }
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            String uri = request.getRequestURI();
+                            String accept = request.getHeader("Accept");
+                            if (uri.startsWith("/auth/")
+                                    || (accept != null && accept.contains(MediaType.APPLICATION_JSON_VALUE))) {
+                                response.setStatus(HttpStatus.FORBIDDEN.value());
+                                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                                response.setCharacterEncoding("UTF-8");
+                                response.getWriter().write(
+                                        "{\"success\":false,\"message\":\"Bạn không có quyền truy cập vào tài nguyên này!\"}");
+                            } else {
+                                response.sendRedirect("/login?error=forbidden");
+                            }
+                        }))
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .invalidateHttpSession(true)
+                        .clearAuthentication(true)
+                        .deleteCookies("JSESSIONID", "JWT_TOKEN", "REFRESH_TOKEN")
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            Cookie cookie = new Cookie("JWT_TOKEN", "");
+                            cookie.setPath("/");
+                            cookie.setHttpOnly(true);
+                            cookie.setMaxAge(0);
+                            response.addCookie(cookie);
 
-                    Cookie refreshCookie = new Cookie("REFRESH_TOKEN", "");
-                    refreshCookie.setPath("/");
-                    refreshCookie.setHttpOnly(true);
-                    refreshCookie.setMaxAge(0);
-                    response.addCookie(refreshCookie);
+                            Cookie refreshCookie = new Cookie("REFRESH_TOKEN", "");
+                            refreshCookie.setPath("/");
+                            refreshCookie.setHttpOnly(true);
+                            refreshCookie.setMaxAge(0);
+                            response.addCookie(refreshCookie);
 
-                    Cookie jsession = new Cookie("JSESSIONID", "");
-                    jsession.setPath("/");
-                    jsession.setMaxAge(0);
-                    response.addCookie(jsession);
+                            Cookie jsession = new Cookie("JSESSIONID", "");
+                            jsession.setPath("/");
+                            jsession.setMaxAge(0);
+                            response.addCookie(jsession);
 
-                    org.springframework.security.core.context.SecurityContextHolder.clearContext();
-                    response.sendRedirect("/login?logout=true");
-                })
-                .permitAll()
-            )
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                            org.springframework.security.core.context.SecurityContextHolder.clearContext();
+                            response.sendRedirect("/login?logout=true");
+                        })
+                        .permitAll())
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

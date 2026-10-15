@@ -10,9 +10,9 @@ import com.example.store.mapper.CartItemMapper;
 import com.example.store.mapper.OrderMapper;
 import com.example.store.repository.*;
 import com.example.store.service.cart.ICartService;
-import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -26,141 +26,161 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class OrderServiceImpl implements IOrderService {
 
-    private final ICartService cartService;
-    private final PricingCalculator pricingCalculator;
-    private final CartItemMapper cartItemMapper;
-    private final DeliveryRepository deliveryRepository;
-    private final PaymentMethodRepository paymentMethodRepository;
-    private final OrderRepository orderRepository;
-    private final OrderStatusRepository orderStatusRepository;
-    private final UserRepository userRepository;
-    private final ProductVariantRepository variantRepository;
-    private final CartItemRepository cartItemRepository;
-    private final OrderMapper orderMapper;
+        private final ICartService cartService;
+        private final PricingCalculator pricingCalculator;
+        private final CartItemMapper cartItemMapper;
+        private final PaymentMethodRepository paymentMethodRepository;
+        private final OrderRepository orderRepository;
+        private final OrderStatusRepository orderStatusRepository;
+        private final UserRepository userRepository;
+        private final ProductVariantRepository variantRepository;
+        private final CartItemRepository cartItemRepository;
+        private final OrderMapper orderMapper;
 
-    @Override
-    @Transactional(readOnly = true)
-    public CheckoutPreviewDTO preview(UUID userId, CheckoutPreviewRequest req) {
-        List<CartItem> items = cartService.getOwnedItems(userId, req.cartItemIds());
-        Delivery delivery = resolveDelivery(req.deliveryId());
-        PriceBreakdown price = pricingCalculator.calculate(items, delivery);
+        @Override
+        @Transactional(readOnly = true)
+        public CheckoutPreviewDTO preview(
+                        UUID userId,
+                        CheckoutPreviewRequest req) {
 
-        return new CheckoutPreviewDTO(
-                items.stream().map(cartItemMapper::toCartItemDTO).toList(),
-                delivery.getId(),
-                price.subtotal(), price.shippingFee(), price.discount(), price.total());
-    }
+                List<CartItem> items = cartService.getOwnedItems(userId, req.cartItemIds());
 
-    private Delivery resolveDelivery(UUID deliveryId) {
-        if (deliveryId != null) {
-            return deliveryRepository.findById(deliveryId)
-                    .filter(Delivery::getIsActive)
-                    .orElseThrow(() -> new AppException(OrderErrorCode.DELIVERY_NOT_AVAILABLE));
+                /*
+                 * Chưa tính phí GHN ở đây vì cần gọi quy trình preview
+                 * GHN hiện có với địa chỉ và thông tin kiện hàng thực tế.
+                 * Không tự ý giả định phí vận chuyển bằng 0.
+                 */
+                BigDecimal shippingFee = BigDecimal.ZERO;
+                PriceBreakdown price = pricingCalculator.calculate(items, shippingFee);
+
+                return new CheckoutPreviewDTO(
+                                items.stream()
+                                                .map(cartItemMapper::toCartItemDTO)
+                                                .toList(),
+                                price.subtotal(),
+                                price.shippingFee(),
+                                price.discount(),
+                                price.total());
         }
 
-        // Tu dong chon phuong thuc dang duoc hoat dong
-        return deliveryRepository.findByIsActiveTrue().stream()
-                .findFirst()
-                .orElseThrow(() -> new AppException(OrderErrorCode.DELIVERY_NOT_AVAILABLE));
-    }
+        @Override
+        @Transactional
+        public OrderDTO placeOrder(UUID userId, CheckoutRequest req) {
 
-    @Override
-    @Transactional
-    public OrderDTO placeOrder(UUID userId, CheckoutRequest req) {
+                // 1. Lấy các sản phẩm thuộc giỏ hàng của người dùng.
+                List<CartItem> items = cartService.getOwnedItems(userId, req.cartItemIds());
 
-        // 1-3. Lấy dữ liệu đầu vào và kiểm tra
-        List<CartItem> items = cartService.getOwnedItems(userId, req.cartItemIds());
-        Delivery delivery = resolveDelivery(req.deliveryId());
-        PaymentMethod payment = paymentMethodRepository.findById(req.paymentMethodId())
-                .orElseThrow(() -> new AppException(OrderErrorCode.PAYMENT_METHOD_NOT_SUPPORTED));
+                // 2. Kiểm tra phương thức thanh toán.
+                PaymentMethod payment = paymentMethodRepository.findById(req.paymentMethodId())
+                                .orElseThrow(() -> new AppException(
+                                                OrderErrorCode.PAYMENT_METHOD_NOT_SUPPORTED));
 
-        // 4. Khóa variant, kiểm tra bán được và đủ kho
-        Map<UUID, ProductVariant> variants = lockVariants(items);
-        for (CartItem ci : items) {
-            ProductVariant v = variants.get(ci.getVariant().getId());
-            Product p = v.getProduct();
-            if (!p.isActive() || !p.isSelling()) {
-                throw new AppException(CartErrorCode.CART_ITEM_NOT_FOUND);
-            }
-            if (v.getQuantity() == null || v.getQuantity() < ci.getCount()) {
-                throw new AppException(ProductErrorCode.INSUFFICIENT_STOCK);
-            }
+                // 3. Khóa biến thể sản phẩm để tránh bán vượt tồn kho.
+                Map<UUID, ProductVariant> variants = lockVariants(items);
+
+                for (CartItem item : items) {
+                        ProductVariant variant = variants.get(item.getVariant().getId());
+
+                        if (variant == null) {
+                                throw new AppException(
+                                                CartErrorCode.CART_ITEM_NOT_FOUND);
+                        }
+
+                        Product product = variant.getProduct();
+
+                        if (!product.isActive() || !product.isSelling()) {
+                                throw new AppException(
+                                                CartErrorCode.CART_ITEM_NOT_FOUND);
+                        }
+
+                        if (variant.getQuantity() == null
+                                        || variant.getQuantity() < item.getCount()) {
+                                throw new AppException(
+                                                ProductErrorCode.INSUFFICIENT_STOCK);
+                        }
+                }
+
+                // 4. Lấy người dùng.
+                User user = userRepository.findById(userId)
+                                .orElseThrow(() -> new AppException(
+                                                CartErrorCode.CART_ITEM_NOT_FOUND));
+
+                // 5. Kiểm tra địa chỉ riêng của đơn hàng.
+                String address = req.address() == null
+                                ? ""
+                                : req.address().trim();
+
+                if (address.isBlank()) {
+                        throw new IllegalArgumentException(
+                                        "Vui lòng nhập địa chỉ nhận hàng.");
+                }
+
+                /*
+                 * Địa chỉ phải được chọn/kiểm tra bằng danh mục GHN.
+                 * Không nên tự suy đoán tỉnh và phường chỉ dựa vào chuỗi.
+                 *
+                 * Tạm tách địa chỉ theo định dạng:
+                 * Địa chỉ chi tiết, Phường/Xã, Tỉnh/Thành phố.
+                 */
+                String[] addressParts = splitAddress(address);
+
+                /*
+                 * Chưa có phí GHN đã xác nhận thì không được tạo đơn
+                 * với tổng tiền giả. Phần này cần được nối với kết quả
+                 * preview GHN thật trước khi bật luồng đặt hàng.
+                 */
+                throw new UnsupportedOperationException(
+                                "Cần tích hợp phí preview GHN trước khi hoàn tất đặt hàng.");
         }
 
-        // 5. Tính tiền từ giá trong DB
-        PriceBreakdown price = pricingCalculator.calculate(items, delivery);
+        /**
+         * Tách địa chỉ theo định dạng:
+         * Địa chỉ chi tiết, Phường/Xã, Tỉnh/Thành phố.
+         */
+        private String[] splitAddress(String address) {
+                String[] parts = address == null
+                                ? new String[0]
+                                : address.trim().split("\\s*,\\s*", 3);
 
-        // 6. Tạo Order
-        OrderStatus initial = orderStatusRepository.findByName(OrderStatusName.NOT_PROCESSED)
-                .orElseThrow(() -> new AppException(OrderErrorCode.ORDER_STATUS_NOT_CONFIGURED));
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(CartErrorCode.CART_ITEM_NOT_FOUND));
-        String[] addressParts = splitAddress(user.getAddresses());
-
-        Order order = Order.builder()
-                .user(user)
-                .toDetailAddress(addressParts[0])
-                .toWardName(addressParts[1])
-                .toProvinceName(addressParts[2])
-                .payment(payment)
-                .status(initial)
-                .phone(req.phone())
-                .note(req.note())
-                .subtotal(price.subtotal())
-                .shippingFee(price.shippingFee())
-                .discount(price.discount())
-                .total(price.total())
-                .build();
-
-        for (CartItem ci : items) {
-            ProductVariant v = variants.get(ci.getVariant().getId());
-            order.addItem(OrderItem.builder()
-                    .variant(v)
-                    .productName(v.getProduct().getName())
-                    .variantDescription(describe(v))
-                    .imageUrl(firstImage(v))
-                    .unitPrice(v.getPrice())
-                    .quantity(ci.getCount())
-                    .subtotal(v.getPrice().multiply(BigDecimal.valueOf(ci.getCount())))
-                    .build());
-
-            // 7. Trừ kho
-            v.setQuantity(v.getQuantity() - ci.getCount());
+                return new String[] {
+                                parts.length > 0 && !parts[0].isBlank()
+                                                ? parts[0]
+                                                : null,
+                                parts.length > 1 && !parts[1].isBlank()
+                                                ? parts[1]
+                                                : null,
+                                parts.length > 2 && !parts[2].isBlank()
+                                                ? parts[2]
+                                                : null
+                };
         }
 
-        // 8. Lưu (cascade lưu luôn OrderItem)
-        orderRepository.save(order);
+        private Map<UUID, ProductVariant> lockVariants(
+                        List<CartItem> items) {
 
-        // 9. Xóa các dòng đã mua khỏi giỏ
-        cartItemRepository.deleteAll(items);
+                Set<UUID> ids = items.stream()
+                                .map(item -> item.getVariant().getId())
+                                .collect(Collectors.toSet());
 
-        return orderMapper.toOrderDTO(order);
-    }
+                return variantRepository.findAllByIdForUpdate(ids)
+                                .stream()
+                                .collect(Collectors.toMap(
+                                                ProductVariant::getId,
+                                                Function.identity()));
+        }
 
-    /** Split a single saved address: detail, ward, province. */
-    private String[] splitAddress(String address) {
-        String[] parts = address == null ? new String[0] : address.trim().split("\\s*,\\s*", 3);
-        return new String[] {
-                parts.length > 0 && !parts[0].isBlank() ? parts[0] : null,
-                parts.length > 1 && !parts[1].isBlank() ? parts[1] : null,
-                parts.length > 2 && !parts[2].isBlank() ? parts[2] : null
-        };
-    }
+        private String describe(ProductVariant variant) {
+                return variant.getStyleValues()
+                                .stream()
+                                .map(StyleValue::getName)
+                                .collect(Collectors.joining(", "));
+        }
 
-    private Map<UUID, ProductVariant> lockVariants(List<CartItem> items) {
-        Set<UUID> ids = items.stream().map(i -> i.getVariant().getId()).collect(Collectors.toSet());
-        return variantRepository.findAllByIdForUpdate(ids).stream()
-                .collect(Collectors.toMap(ProductVariant::getId, Function.identity()));
-    }
-
-    private String describe(ProductVariant v) {
-        return v.getStyleValues().stream()
-                .map(StyleValue::getName).collect(Collectors.joining(", "));
-    }
-
-    private String firstImage(ProductVariant v) {
-        return v.getImages().stream().findFirst()
-                .map(ProductVariantImage::getImageUrl).orElse(null);
-    }
+        private String firstImage(ProductVariant variant) {
+                return variant.getImages()
+                                .stream()
+                                .findFirst()
+                                .map(ProductVariantImage::getImageUrl)
+                                .orElse(null);
+        }
 }

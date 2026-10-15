@@ -23,8 +23,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class GhnApiClient {
     private static final String CREATE_PATH = "/shiip/public-api/v2/shipping-order/create";
-    private static final ParameterizedTypeReference<GhnApiResponse<GhnCreateOrderData>> TYPE =
-            new ParameterizedTypeReference<>() {};
+    private static final ParameterizedTypeReference<GhnApiResponse<GhnCreateOrderData>> TYPE = new ParameterizedTypeReference<>() {
+    };
 
     private final RestClient restClient;
     private final String token;
@@ -58,7 +58,7 @@ public class GhnApiClient {
         }
 
         final GhnApiResponse<GhnCreateOrderData> response;
-        final int[] httpStatus = {0};
+        final int[] httpStatus = { 0 };
         try {
             response = restClient.post().uri(CREATE_PATH).body(request).exchange((req, res) -> {
                 httpStatus[0] = res.getStatusCode().value();
@@ -70,7 +70,8 @@ public class GhnApiClient {
                 }
             });
         } catch (ResourceAccessException ex) {
-            // Có thể GHN đã nhận request nhưng client timeout. Không đổi client_order_code khi đối soát/retry.
+            // Có thể GHN đã nhận request nhưng client timeout. Không đổi client_order_code
+            // khi đối soát/retry.
             log.warn("GHN create connection/timeout error: {}", safeMessage(ex.getMessage()));
             throw new BusinessException(
                     DeliveryMessage.GHN_RESPONSE_UNCONFIRMED.getMessage());
@@ -82,7 +83,8 @@ public class GhnApiClient {
         if (response == null || response.getCode() == null || response.getCode() != 200
                 || response.getData() == null || !StringUtils.hasText(response.getData().getOrderCode())) {
             String code = response == null ? "" : safeMessage(response.getCodeMessage());
-            String message = response == null ? DeliveryMessage.GHN_BODY_UNREADABLE.getMessage() : safeMessage(response.getMessage());
+            String message = response == null ? DeliveryMessage.GHN_BODY_UNREADABLE.getMessage()
+                    : safeMessage(response.getMessage());
             log.warn("GHN rejected create order: httpStatus={}, code={}, codeMessage={}, message={}",
                     httpStatus[0], safeMessage(response == null ? null : String.valueOf(response.getCode())),
                     code, message);
@@ -103,12 +105,15 @@ public class GhnApiClient {
         if (normalized.contains("route not found") || normalized.contains("service fee error")) {
             return DeliveryMessage.GHN_ROUTE_NOT_FOUND.getMessage();
         }
-        String detail = StringUtils.hasText(message) ? message : (StringUtils.hasText(code) ? code : DeliveryMessage.GHN_UNKNOWN_REASON.getMessage());
-        return String.format(DeliveryMessage.GHN_REJECTED_PREFIX.getMessage(), httpStatus, detail.substring(0, Math.min(detail.length(), 250)));
+        String detail = StringUtils.hasText(message) ? message
+                : (StringUtils.hasText(code) ? code : DeliveryMessage.GHN_UNKNOWN_REASON.getMessage());
+        return String.format(DeliveryMessage.GHN_REJECTED_PREFIX.getMessage(), httpStatus,
+                detail.substring(0, Math.min(detail.length(), 250)));
     }
 
     private String safeMessage(String value) {
-        if (value == null) return "";
+        if (value == null)
+            return "";
         return value.replaceAll("[\\r\\n\\t]", " ").substring(0, Math.min(value.length(), 250));
     }
 }

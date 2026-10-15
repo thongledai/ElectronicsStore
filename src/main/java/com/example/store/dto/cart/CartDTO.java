@@ -5,12 +5,12 @@ import java.util.List;
 
 public record CartDTO(
         List<CartItemDTO> items,
-        int totalLines,          // số dòng trong giỏ
-        int totalQuantity,       // tổng số lượng của mọi dòng
-        int selectedLines,       // số dòng đã chọn (và còn bán)
+        int totalLines, // số dòng trong giỏ
+        int totalQuantity, // tổng số lượng của mọi dòng
+        int selectedLines, // số dòng đã chọn (và còn bán)
         int selectedQuantity,
-        BigDecimal totalAmount,  // chỉ tính dòng đã chọn và còn bán
-        boolean allSelected      // mọi dòng còn bán đều đã chọn
+        BigDecimal totalAmount, // chỉ tính dòng đã chọn và còn bán
+        boolean allSelected // mọi dòng còn bán đều đã chọn
 ) {
     public static CartDTO from(List<CartItemDTO> items) {
         List<CartItemDTO> payable = items.stream().filter(CartItemDTO::available).toList();
@@ -23,7 +23,6 @@ public record CartDTO(
                 chosen.size(),
                 chosen.stream().mapToInt(CartItemDTO::quantity).sum(),
                 chosen.stream().map(CartItemDTO::subtotal).reduce(BigDecimal.ZERO, BigDecimal::add),
-                !payable.isEmpty() && payable.stream().allMatch(CartItemDTO::selected)
-        );
+                !payable.isEmpty() && payable.stream().allMatch(CartItemDTO::selected));
     }
 }

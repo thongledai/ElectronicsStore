@@ -53,7 +53,8 @@ public class GhnWebhookController {
     }
 
     private boolean constantTimeEquals(String expected, String actual) {
-        if (expected == null || actual == null) return false;
+        if (expected == null || actual == null)
+            return false;
         return MessageDigest.isEqual(expected.getBytes(StandardCharsets.UTF_8),
                 actual.getBytes(StandardCharsets.UTF_8));
     }

@@ -32,7 +32,7 @@ public class OrderController {
     @PostMapping("/orders")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<OrderDTO> place(@AuthenticationPrincipal CustomUserDetails user,
-                                       @Valid @RequestBody CheckoutRequest req) {
+            @Valid @RequestBody CheckoutRequest req) {
         return ApiResponse.success("Đặt hàng thành công", orderService.placeOrder(user.getId(), req));
     }
 }
