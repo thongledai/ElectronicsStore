@@ -113,13 +113,9 @@ public class Order {
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
-<<<<<<< HEAD
-}
-=======
 
     public void addItem(OrderItem item) {
         items.add(item);
         item.setOrder(this);
     }
 }
->>>>>>> origin/main
