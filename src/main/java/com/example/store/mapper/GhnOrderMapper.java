@@ -49,7 +49,7 @@ public class GhnOrderMapper {
 public GhnCreateOrderRequest toCreateOrderRequest(Order order) {
     return toCreateOrderRequest(
             order,
-            order.getAddress(),
+            order.getToDetailAddress(),
             order.getToWardName(),
             order.getToProvinceName());
 }
@@ -70,7 +70,7 @@ public GhnCreateOrderRequest toCreateOrderRequest(
             .toPhone(normalizePhone(order.getPhone()))
             .toAddress(toAddress == null ? null : toAddress.trim())
             .toWardName(toWardName == null ? null : toWardName.trim())
-            .toDistrictName(newAddressModel ? null : trim(order.getToDistrictName()))
+            .toDistrictName(null)
             .toProvinceName(toProvinceName == null ? null : toProvinceName.trim())
             .isNewToAddress(newAddressModel)
             .serviceTypeId(SERVICE_TYPE_STANDARD)

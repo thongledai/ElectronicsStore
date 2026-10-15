@@ -57,13 +57,11 @@ public class SecurityConfig {
                 // Role-based reset password pages
                 .requestMatchers("/manager/reset-password").hasAnyAuthority("MANAGER", "ROLE_MANAGER")
                 .requestMatchers("/employee/reset-password").hasAnyAuthority("EMPLOYEE", "ROLE_EMPLOYEE")
-                .requestMatchers("/shipper/reset-password").hasAnyAuthority("SHIPPER", "ROLE_SHIPPER")
                 .requestMatchers("/customer/reset-password", "/customer/set-password").hasAnyAuthority("CUSTOMER", "ROLE_CUSTOMER")
 
                 // Role-based dashboards
                 .requestMatchers("/manager/**").hasAnyAuthority("MANAGER", "ROLE_MANAGER")
                 .requestMatchers("/employee/**").hasAnyAuthority("EMPLOYEE", "ROLE_EMPLOYEE")
-                .requestMatchers("/shipper/**").hasAnyAuthority("SHIPPER", "ROLE_SHIPPER")
                 // Authenticated user pages & APIs (shared across all roles)
                 .requestMatchers("/customer/cart", "/customer/wishlist").authenticated()
                 .requestMatchers("/profile", "/customer/profile").authenticated()

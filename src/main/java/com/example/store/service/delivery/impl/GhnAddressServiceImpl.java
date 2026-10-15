@@ -12,6 +12,7 @@ import com.example.store.dto.ghn.GhnAddressData;
 import com.example.store.dto.ghn.GhnAddressOptionDTO;
 import com.example.store.dto.ghn.GhnApiResponse;
 import com.example.store.exception.BusinessException;
+import com.example.store.enums.DeliveryMessage;
 import com.example.store.service.delivery.IGhnAddressService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +30,7 @@ public class GhnAddressServiceImpl implements IGhnAddressService {
     @Override public List<GhnAddressOptionDTO> getProvinces() { return getCatalog(PROVINCES); }
 
     @Override public List<GhnAddressOptionDTO> getWards(Integer provinceId) {
-        if (provinceId == null || provinceId <= 0) throw new BusinessException("Chọn tỉnh/thành trước khi tải phường/xã.");
+        if (provinceId == null || provinceId <= 0) throw new BusinessException(DeliveryMessage.ADDRESS_PROVINCE_REQUIRED.getMessage());
         return getCatalog(WARDS + "?province_id=" + provinceId + "&offset=0&limit=200");
     }
 
@@ -37,7 +38,7 @@ public class GhnAddressServiceImpl implements IGhnAddressService {
         try {
             GhnApiResponse<List<GhnAddressData>> response = restClient.get().uri(uri).retrieve().body(TYPE);
             if (response == null || response.getCode() == null || response.getCode() != 200 || response.getData() == null) {
-                throw new BusinessException("GHN không trả về danh mục địa chỉ hợp lệ. Kiểm tra token, Shop ID và môi trường.");
+                throw new BusinessException(DeliveryMessage.ADDRESS_CATALOG_INVALID.getMessage());
             }
             return response.getData().stream()
                     .filter(item -> item.getStatus() == null || item.getStatus() == 1)
@@ -48,7 +49,7 @@ public class GhnAddressServiceImpl implements IGhnAddressService {
             throw ex;
         } catch (Exception ex) {
             log.error("GHN address catalog failed at {}: {}", uri, ex.getMessage());
-            throw new BusinessException("Không tải được danh mục địa chỉ GHN. Kiểm tra log backend.");
+            throw new BusinessException(DeliveryMessage.ADDRESS_CATALOG_LOAD_FAILED.getMessage());
         }
     }
 }

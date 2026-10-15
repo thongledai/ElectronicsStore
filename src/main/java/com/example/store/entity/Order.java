@@ -47,14 +47,11 @@ public class Order {
     private User user;
 
 
-    @Column(nullable = false, length = 500, columnDefinition = "nvarchar(500)")
-    private String address;
+    @Column(length = 500, columnDefinition = "nvarchar(500)")
+    private String toDetailAddress;
 
     @Column(length = 150, columnDefinition = "nvarchar(150)")
     private String toProvinceName;
-
-    @Column(length = 150, columnDefinition = "nvarchar(150)")
-    private String toDistrictName;
 
     @Column(length = 150, columnDefinition = "nvarchar(150)")
     private String toWardName;

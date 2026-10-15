@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.store.enums.OrderStatusName;
+import com.example.store.enums.EmployeeMessage;
 import com.example.store.exception.ResourceNotFoundException;
 import com.example.store.mapper.GhnOrderMapper;
 import com.example.store.repository.OrderRepository;
@@ -61,7 +62,7 @@ public class EmployeeOrderViewController {
     @GetMapping("/{orderId}")
     public String orderDetail(@PathVariable UUID orderId, Model model) {
         var order = orderRepository.findDetailedById(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng."));
+                .orElseThrow(() -> new ResourceNotFoundException(EmployeeMessage.ORDER_NOT_FOUND.getMessage()));
         model.addAttribute("order", order);
         model.addAttribute("displayOrderCode", generateOrderCode(order.getId()));
         model.addAttribute("ghnEvents", order.getGhnOrderCode() == null ? java.util.List.of()

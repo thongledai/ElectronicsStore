@@ -15,6 +15,7 @@ import com.example.store.dto.ghn.GhnApiResponse;
 import com.example.store.dto.ghn.GhnCreateOrderData;
 import com.example.store.dto.ghn.GhnCreateOrderRequest;
 import com.example.store.exception.BusinessException;
+import com.example.store.enums.DeliveryMessage;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -39,21 +40,21 @@ public class GhnApiClient {
 
     public GhnCreateOrderData createOrder(GhnCreateOrderRequest request) {
         if (!StringUtils.hasText(token) || !StringUtils.hasText(shopId)) {
-            throw new BusinessException("Chưa cấu hình GHN_TOKEN hoặc GHN_SHOP_ID.");
+            throw new BusinessException(DeliveryMessage.GHN_CONFIG_MISSING.getMessage());
         }
         if (request == null) {
-            throw new BusinessException("Dữ liệu tạo đơn GHN không được để trống.");
+            throw new BusinessException(DeliveryMessage.GHN_ORDER_DATA_REQUIRED.getMessage());
         }
         if (!Boolean.TRUE.equals(request.getIsNewToAddress())) {
-            throw new BusinessException("Tạo vận đơn phải dùng mô hình địa chỉ mới của GHN.");
+            throw new BusinessException(DeliveryMessage.GHN_NEW_ADDRESS_REQUIRED.getMessage());
         }
         if (StringUtils.hasText(request.getToDistrictName())) {
-            throw new BusinessException("Mô hình địa chỉ mới không được gửi to_district_name.");
+            throw new BusinessException(DeliveryMessage.GHN_DISTRICT_NOT_ALLOWED.getMessage());
         }
         if (!StringUtils.hasText(request.getToWardName())
                 || !StringUtils.hasText(request.getToProvinceName())
                 || !StringUtils.hasText(request.getToAddress())) {
-            throw new BusinessException("Thiếu địa chỉ, tên phường/xã hoặc tên tỉnh/thành GHN.");
+            throw new BusinessException(DeliveryMessage.GHN_ADDRESS_FIELDS_MISSING.getMessage());
         }
 
         final GhnApiResponse<GhnCreateOrderData> response;
@@ -72,16 +73,16 @@ public class GhnApiClient {
             // Có thể GHN đã nhận request nhưng client timeout. Không đổi client_order_code khi đối soát/retry.
             log.warn("GHN create connection/timeout error: {}", safeMessage(ex.getMessage()));
             throw new BusinessException(
-                    "Không nhận được phản hồi xác định từ GHN. Không đổi mã tham chiếu đơn; hãy kiểm tra vận đơn trước khi thử lại.");
+                    DeliveryMessage.GHN_RESPONSE_UNCONFIRMED.getMessage());
         } catch (RestClientException ex) {
             log.warn("GHN create HTTP client error: {}", safeMessage(ex.getMessage()));
-            throw new BusinessException("Không thể đọc phản hồi tạo vận đơn từ GHN. Kiểm tra log backend.");
+            throw new BusinessException(DeliveryMessage.GHN_RESPONSE_UNREADABLE.getMessage());
         }
 
         if (response == null || response.getCode() == null || response.getCode() != 200
                 || response.getData() == null || !StringUtils.hasText(response.getData().getOrderCode())) {
             String code = response == null ? "" : safeMessage(response.getCodeMessage());
-            String message = response == null ? "Không đọc được body phản hồi GHN" : safeMessage(response.getMessage());
+            String message = response == null ? DeliveryMessage.GHN_BODY_UNREADABLE.getMessage() : safeMessage(response.getMessage());
             log.warn("GHN rejected create order: httpStatus={}, code={}, codeMessage={}, message={}",
                     httpStatus[0], safeMessage(response == null ? null : String.valueOf(response.getCode())),
                     code, message);
@@ -94,16 +95,16 @@ public class GhnApiClient {
         String normalized = (code + " " + message).toLowerCase(Locale.ROOT)
                 .replace('_', ' ').replace('-', ' ').replaceAll("\\s+", " ");
         if (normalized.contains("to address conflict") || normalized.contains("address conflict")) {
-            return "GHN từ chối địa chỉ (TO_ADDRESS_CONFLICT). Đã ghi lại mã lỗi/message để chẩn đoán; hãy kiểm tra tên tỉnh/phường nguyên văn từ danh mục GHN và payload Preview, không tự đổi địa chỉ giao hàng.";
+            return DeliveryMessage.GHN_ADDRESS_CONFLICT.getMessage();
         }
         if (normalized.contains("phone invalid")) {
-            return "Số điện thoại người nhận hoặc cửa hàng không hợp lệ theo GHN.";
+            return DeliveryMessage.GHN_PHONE_INVALID.getMessage();
         }
         if (normalized.contains("route not found") || normalized.contains("service fee error")) {
-            return "GHN không tìm được tuyến/dịch vụ cho địa chỉ và cấu hình hiện tại.";
+            return DeliveryMessage.GHN_ROUTE_NOT_FOUND.getMessage();
         }
-        String detail = StringUtils.hasText(message) ? message : (StringUtils.hasText(code) ? code : "không rõ nguyên nhân");
-        return "GHN từ chối tạo vận đơn (HTTP " + httpStatus + "): " + detail.substring(0, Math.min(detail.length(), 250));
+        String detail = StringUtils.hasText(message) ? message : (StringUtils.hasText(code) ? code : DeliveryMessage.GHN_UNKNOWN_REASON.getMessage());
+        return String.format(DeliveryMessage.GHN_REJECTED_PREFIX.getMessage(), httpStatus, detail.substring(0, Math.min(detail.length(), 250)));
     }
 
     private String safeMessage(String value) {

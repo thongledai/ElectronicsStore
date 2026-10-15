@@ -15,6 +15,7 @@ import com.example.store.entity.GhnWebhookEvent;
 import com.example.store.entity.Order;
 import com.example.store.entity.OrderStatus;
 import com.example.store.enums.OrderStatusName;
+import com.example.store.enums.DeliveryMessage;
 import com.example.store.exception.BusinessException;
 import com.example.store.repository.GhnWebhookEventRepository;
 import com.example.store.repository.OrderRepository;
@@ -55,20 +56,20 @@ public class GhnWebhookServiceImpl implements IGhnWebhookService {
                 || !StringUtils.hasText(callback.getType())
                 || callback.getTime() == null) {
             throw new BusinessException(
-                    "Payload callback GHN thiếu OrderCode, Type hoặc Time.");
+                    DeliveryMessage.WEBHOOK_PAYLOAD_INVALID.getMessage());
         }
 
         if (callback.getShopId() == null
                 || !String.valueOf(callback.getShopId()).equals(configuredShopId)) {
             throw new BusinessException(
-                    "ShopID callback không khớp cấu hình GHN.");
+                    DeliveryMessage.WEBHOOK_SHOP_MISMATCH.getMessage());
         }
 
         String type = callback.getType().trim().toLowerCase(Locale.ROOT);
 
         if (!ALLOWED_TYPES.contains(type)) {
             throw new BusinessException(
-                    "Loại callback GHN chưa được hỗ trợ: " + type);
+                    String.format(DeliveryMessage.WEBHOOK_TYPE_UNSUPPORTED_PREFIX.getMessage(), type));
         }
 
         if (eventRepository.existsByOrderCodeAndEventTypeAndEventTime(
@@ -83,13 +84,13 @@ public class GhnWebhookServiceImpl implements IGhnWebhookService {
 
         if (order == null) {
             throw new IllegalArgumentException(
-                    "Không tìm thấy đơn nội bộ tương ứng callback GHN.");
+                    DeliveryMessage.WEBHOOK_ORDER_NOT_FOUND.getMessage());
         }
 
         if (StringUtils.hasText(order.getGhnOrderCode())
                 && !order.getGhnOrderCode().equals(callback.getOrderCode())) {
             throw new IllegalArgumentException(
-                    "ClientOrderCode đã liên kết với một mã vận đơn GHN khác.");
+                    DeliveryMessage.WEBHOOK_ORDER_CODE_CONFLICT.getMessage());
         }
 
         if (eventRepository.existsByOrderCodeAndEventTypeAndEventTime(
@@ -132,7 +133,7 @@ public class GhnWebhookServiceImpl implements IGhnWebhookService {
                         .filter(status -> OrderStatusName.fromDbName(status.getName()).orElse(null) == statusToApply)
                         .findFirst()
                         .orElseThrow(() -> new IllegalStateException(
-                                "Missing order_status row for " + statusToApply.getDbName()));
+                                String.format(DeliveryMessage.STATUS_ROW_MISSING.getMessage(), statusToApply.getDbName())));
                 order.setStatus(target);
             }
             orderRepository.save(order);

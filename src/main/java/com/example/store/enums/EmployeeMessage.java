@@ -2,7 +2,8 @@ package com.example.store.enums;
 
 /** Tin nhắn nghiệp vụ trả về từ các API dành cho nhân viên. */
 public enum EmployeeMessage {
-    ORDER_CONFIRMED("Đã xác nhận đơn hàng.");
+    ORDER_CONFIRMED("Đã xác nhận đơn hàng."),
+    ORDER_NOT_FOUND("Không tìm thấy đơn hàng.");
 
     private final String message;
 
