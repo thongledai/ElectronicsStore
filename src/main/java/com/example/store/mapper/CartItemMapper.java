@@ -35,8 +35,15 @@ public class CartItemMapper {
                 cartItem.getCount(),
                 subtotal,
                 getStyleValues(productVariant),
+                this.isAvailable(productVariant),
                 productVariant.getQuantity()
                 );
+    }
+
+    private boolean isAvailable(ProductVariant productVariant) {
+        Product product = productVariant.getProduct();
+        return product.isActive() && product.isSelling()
+                && productVariant.isActive() && productVariant.isSelling();
     }
 
     private String getStyleValues(ProductVariant variant) {

@@ -13,16 +13,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.UUID;
-
 @RestController
 @RequiredArgsConstructor
-@RequestMapping()
 public class OrderController {
+
     private final IOrderService orderService;
 
-    @PostMapping("/checkout/preview")
+    @PostMapping("/checkout")
     public ApiResponse<CheckoutPreviewDTO> preview(
             @AuthenticationPrincipal CustomUserDetails user,
             @Valid @RequestBody CheckoutPreviewRequest req) {
@@ -31,8 +28,9 @@ public class OrderController {
 
     @PostMapping("/orders")
     @ResponseStatus(HttpStatus.CREATED)
-    public ApiResponse<OrderDTO> place(@AuthenticationPrincipal CustomUserDetails user,
-                                       @Valid @RequestBody CheckoutRequest req) {
+    public ApiResponse<OrderDTO> place(
+            @AuthenticationPrincipal CustomUserDetails user,
+            @Valid @RequestBody CheckoutRequest req) {
         return ApiResponse.success("Đặt hàng thành công", orderService.placeOrder(user.getId(), req));
     }
 }

@@ -4,14 +4,15 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 public record CartItemDTO(
-        UUID id,                        // id của CartItem, dùng để cập nhật/xóa dòng
+        UUID id,
         UUID productId,
         UUID productVariantId,
         String productName,
         String productImageUrl,
-        BigDecimal unitPrice,           // giá hiện tại của sản phẩm
+        BigDecimal unitPrice,
         int quantity,
-        BigDecimal subtotal,           // unitPrice × count
+        BigDecimal subtotal,
         String styleValues,
+        boolean isAvailable,        // còn bán
         Integer availableStock
 ) {}

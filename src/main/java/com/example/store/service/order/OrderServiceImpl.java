@@ -91,12 +91,11 @@ public class OrderServiceImpl implements IOrderService {
         PriceBreakdown price = pricingCalculator.calculate(items, delivery);
 
         // 6. Tạo Order
-        OrderStatus initial = orderStatusRepository.findByName(OrderStatusName.NOT_PROCESSED)
+        OrderStatus initial = orderStatusRepository.findByName("NOT_PROCESSED")
                 .orElseThrow(() -> new AppException(OrderErrorCode.ORDER_STATUS_NOT_CONFIGURED));
 
         Order order = Order.builder()
                 .user(userRepository.getReferenceById(userId))
-                .delivery(delivery)
                 .payment(payment)
                 .status(initial)
                 .phone(req.phone())
