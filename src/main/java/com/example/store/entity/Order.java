@@ -65,7 +65,17 @@ public class Order {
     private Boolean isPaidBefore = false;
 
     @Column(nullable = false, precision = 18, scale = 2)
-    private BigDecimal amountFromUser;
+    private BigDecimal subtotal;
+    @Column(nullable = false, precision = 18, scale = 2)
+    private BigDecimal shippingFee;
+    @Column(nullable = false, precision = 18, scale = 2)
+    private BigDecimal discount;
+
+    @Column(nullable = false, precision = 18, scale = 2)
+    private BigDecimal total;
+
+    @Column(length = 500, columnDefinition = "nvarchar(500)")
+    private String note;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "payment_id", nullable = false)
@@ -89,4 +99,9 @@ public class Order {
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    public void addItem(OrderItem item) {
+        items.add(item);
+        item.setOrder(this);
+    }
 }

@@ -1,4 +1,4 @@
-package com.example.store.dto.respone;
+package com.example.store.dto.cart;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -12,5 +12,6 @@ public record CartItemDTO(
         BigDecimal unitPrice,           // giá hiện tại của sản phẩm
         int quantity,
         BigDecimal subtotal,           // unitPrice × count
-        String styleValues
+        String styleValues,
+        Integer availableStock
 ) {}

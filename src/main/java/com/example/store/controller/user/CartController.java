@@ -1,10 +1,10 @@
 package com.example.store.controller.user;
 
 import com.example.store.dto.common.ApiResponse;
-import com.example.store.dto.request.AddToCartRequest;
-import com.example.store.dto.request.RemoveCartItemsRequest;
-import com.example.store.dto.request.UpdateCartItemRequest;
-import com.example.store.dto.respone.CartItemDTO;
+import com.example.store.dto.cart.AddToCartRequest;
+import com.example.store.dto.cart.RemoveCartItemsRequest;
+import com.example.store.dto.cart.UpdateCartItemRequest;
+import com.example.store.dto.cart.CartItemDTO;
 import com.example.store.security.CustomUserDetails;
 import com.example.store.service.cart.ICartService;
 import jakarta.validation.Valid;
@@ -61,9 +61,8 @@ public class CartController {
         return ApiResponse.success("Đã xóa các sản phẩm đã chọn");
     }
 
-    @DeleteMapping
-    public ApiResponse<Void> clearCart(@AuthenticationPrincipal CustomUserDetails user) {
-        cartService.clearCart(user.getId());
-        return ApiResponse.success("Đã xóa toàn bộ giỏ hàng");
+    @GetMapping("/count")
+    public ApiResponse<Long> count(@AuthenticationPrincipal CustomUserDetails user) {
+        return ApiResponse.success("OK", cartService.countItems(user.getId()));
     }
 }
