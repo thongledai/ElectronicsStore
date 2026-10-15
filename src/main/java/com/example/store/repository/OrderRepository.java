@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import java.util.List;
 
 import com.example.store.entity.Order;
 
@@ -36,4 +37,7 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select o from Order o where o.ghnOrderCode = :ghnOrderCode")
     Optional<Order> findByGhnOrderCodeForUpdate(@Param("ghnOrderCode") String ghnOrderCode);
+
+    Optional<Order> findByIdAndUserId(UUID id, UUID userId);
+    List<Order> findByUserIdOrderByCreatedAtDesc(UUID userId);
 }

@@ -17,6 +17,9 @@ public interface CartItemRepository extends JpaRepository<CartItem, UUID> {
     List<CartItem> findByIdInAndCartId(Collection<UUID> ids, UUID cartId);
     List<CartItem> findByCartId(UUID cartId);
 
+    @Query("SELECT COUNT(ci) FROM CartItem ci WHERE ci.cart.user.id = :userId")
+    long countByUserId(@Param("userId") UUID userId);
+
     @Modifying
     @Query("DELETE FROM CartItem ci WHERE ci.cart.id = :cartId")
     void deleteAllByCartId(@Param("cartId") UUID cartId);

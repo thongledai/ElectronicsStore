@@ -68,7 +68,17 @@ public class Order {
     private Boolean isPaidBefore = false;
 
     @Column(nullable = false, precision = 18, scale = 2)
-    private BigDecimal amountFromUser;
+    private BigDecimal subtotal;
+    @Column(nullable = false, precision = 18, scale = 2)
+    private BigDecimal shippingFee;
+    @Column(nullable = false, precision = 18, scale = 2)
+    private BigDecimal discount;
+
+    @Column(nullable = false, precision = 18, scale = 2)
+    private BigDecimal total;
+
+    @Column(length = 500, columnDefinition = "nvarchar(500)")
+    private String note;
 
     @Column(length = 50, unique = true)
     private String ghnOrderCode;
@@ -103,4 +113,13 @@ public class Order {
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+<<<<<<< HEAD
 }
+=======
+
+    public void addItem(OrderItem item) {
+        items.add(item);
+        item.setOrder(this);
+    }
+}
+>>>>>>> origin/main

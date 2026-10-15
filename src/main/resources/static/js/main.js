@@ -936,6 +936,7 @@ function initAccountLabel() {
       document.querySelectorAll('.js-nav-employee').forEach(el => {
         el.style.display = isEmployee ? 'block' : 'none';
       });
+
     });
 
     let resetUrl = '/customer/reset-password';

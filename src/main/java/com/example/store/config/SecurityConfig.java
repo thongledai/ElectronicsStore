@@ -62,6 +62,7 @@ public class SecurityConfig {
                 // Role-based dashboards
                 .requestMatchers("/manager/**").hasAnyAuthority("MANAGER", "ROLE_MANAGER")
                 .requestMatchers("/employee/**").hasAnyAuthority("EMPLOYEE", "ROLE_EMPLOYEE")
+      
                 // Authenticated user pages & APIs (shared across all roles)
                 .requestMatchers("/customer/cart", "/customer/wishlist").authenticated()
                 .requestMatchers("/profile", "/customer/profile").authenticated()
