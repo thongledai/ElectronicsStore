@@ -17,7 +17,6 @@ public class GhnCreateOrderRequest {
     @JsonProperty("to_phone") private String toPhone;
     @JsonProperty("to_address") private String toAddress;
     @JsonProperty("to_ward_name") private String toWardName;
-    @JsonProperty("to_district_name") private String toDistrictName;
     @JsonProperty("to_province_name") private String toProvinceName;
     @JsonProperty("is_new_to_address") private Boolean isNewToAddress;
     @JsonProperty("service_type_id") private Integer serviceTypeId;
@@ -25,9 +24,9 @@ public class GhnCreateOrderRequest {
     private Integer length;
     private Integer width;
     private Integer height;
-    @JsonProperty("cod_amount") private Long codAmount;
-    @JsonProperty("order_value") private Long orderValue;
-    @JsonProperty("insurance_value") private Long insuranceValue;
+    @JsonProperty("content") private String content;
+    @JsonProperty("cod_amount") private Integer codAmount;
+    @JsonProperty("order_value") private Integer orderValue;
     private List<Item> items;
 
     @Getter @Builder @JsonInclude(JsonInclude.Include.NON_NULL)

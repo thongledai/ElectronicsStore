@@ -20,8 +20,8 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class GhnAddressServiceImpl implements IGhnAddressService {
-    private static final String PROVINCES = "/shiip/public-api/v3/master-data/province/all?offset=0&limit=200";
-    private static final String WARDS = "/shiip/public-api/v3/master-data/ward/all-by-province-id";
+    private static final String PROVINCES = "https://dev-online-gateway.ghn.vn/shiip/public-api/v3/master-data/province/all";
+    private static final String WARDS = "https://dev-online-gateway.ghn.vn/shiip/public-api/v3/master-data/ward/all-by-province-id";
     private static final ParameterizedTypeReference<GhnApiResponse<List<GhnAddressData>>> TYPE = new ParameterizedTypeReference<>() {};
     private final RestClient restClient;
 
@@ -48,6 +48,7 @@ public class GhnAddressServiceImpl implements IGhnAddressService {
         } catch (BusinessException ex) {
             throw ex;
         } catch (Exception ex) {
+            log.error("GHN address catalog failed at {}", uri, ex);
             log.error("GHN address catalog failed at {}: {}", uri, ex.getMessage());
             throw new BusinessException(DeliveryMessage.ADDRESS_CATALOG_LOAD_FAILED.getMessage());
         }

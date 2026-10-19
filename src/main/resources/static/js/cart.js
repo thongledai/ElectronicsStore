@@ -1,342 +1,327 @@
 /* ==========================================================================
-   TechNova Electronics — Shopping Cart Page
-   --------------------------------------------------------------------------
-   Renders the cart lines, handles quantity changes and removals, applies
-   coupons and calculates the subtotal / GST / shipping / grand total.
-   Cart data itself lives in the Cart manager in js/main.js (localStorage).
+   TechNova Electronics — Shopping Cart Page (nối backend /cart)
    ========================================================================== */
 
 'use strict';
 
-/* ==========================================================================
-   1. RENDER CART LINES
-   ========================================================================== */
+const CART_API = '/cart';
+const CHECKOUT_URL = '/customer/checkout';   // đổi nếu trang thanh toán có URL khác
+const MAX_QTY = 99;
+
+let cartItems = [];
+let selectedIds = new Set();
+let firstLoad = true;
+let busy = false;
+
+/* ---------- Tiện ích ---------- */
+function fmtMoney(n) {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(Number(n) || 0);
+}
+
+function esc(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => (
+        { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+    ));
+}
+
+function notify(title, message, type) {
+    if (typeof showToast === 'function') showToast(title, message, type || 'info');
+    else alert(message);
+}
+
+function productLink(item) {
+    return item.slug ? `/customer/products/${encodeURIComponent(item.slug)}` : '/customer/products';
+}
+
+async function api(method, url, body) {
+    const res = await fetch(url, {
+        method,
+        credentials: 'same-origin',
+        headers: {
+            'Accept': 'application/json',
+            ...(body ? { 'Content-Type': 'application/json' } : {})
+        },
+        body: body ? JSON.stringify(body) : undefined
+    });
+
+    if (res.status === 401) {
+        window.location.href = '/login?error=unauthorized';
+        throw new Error('UNAUTHENTICATED');
+    }
+
+    let json = null;
+    try { json = await res.json(); } catch (e) { /* không có body */ }
+
+    if (!res.ok || (json && json.success === false)) {
+        throw new Error((json && json.message) || 'Có lỗi xảy ra, vui lòng thử lại.');
+    }
+    return json;
+}
+
+/* ---------- Chuẩn hóa dữ liệu từ CartItemDTO ---------- */
+function normalizeItem(raw) {
+    const stock = raw.availableStock ?? MAX_QTY;
+    const qty = Number(raw.quantity ?? raw.count ?? 1);
+    return {
+        id: raw.id,
+        slug: raw.productSlug || '',
+        name: raw.productName || '',
+        variant: raw.styleValues || '',
+        image: raw.productImageUrl || '/images/placeholder.webp',
+        price: Number(raw.unitPrice || 0),
+        qty: qty,
+        stock: Number(stock),
+        // còn bán (nếu backend có trả cờ available) và đủ hàng
+        canBuy: (raw.isAvailable ?? raw.available) !== false && Number(stock) >= qty && Number(stock) > 0
+    };
+}
+
+/* ---------- Tải giỏ hàng ---------- */
+async function loadCart() {
+    try {
+        const json = await api('GET', CART_API);
+        cartItems = (Array.isArray(json && json.data) ? json.data : []).map(normalizeItem);
+    } catch (e) {
+        if (e.message !== 'UNAUTHENTICATED') notify('Lỗi', e.message, 'danger');
+        cartItems = [];
+    }
+    syncSelection();
+    renderCart();
+    if (typeof updateBadges === 'function') updateBadges();   // cập nhật số trên header
+}
+
+/** Lần đầu: chọn sẵn mọi món mua được. Các lần sau: giữ lựa chọn, bỏ món không còn. */
+function syncSelection() {
+    const buyable = cartItems.filter(i => i.canBuy).map(i => i.id);
+    if (firstLoad) {
+        selectedIds = new Set(buyable);
+        firstLoad = false;
+    } else {
+        selectedIds = new Set([...selectedIds].filter(id => buyable.includes(id)));
+    }
+}
+
+/* ---------- Hiển thị ---------- */
 function renderCart() {
-  const items = Cart.detailed();
-  const layout = document.getElementById('cartLayout');
-  const empty = document.getElementById('cartEmpty');
+    const layout = document.getElementById('cartLayout');
+    const empty = document.getElementById('cartEmpty');
+    const isEmpty = cartItems.length === 0;
 
-  // Toggle between the empty state and the full layout
-  const isEmpty = items.length === 0;
-  layout.hidden = isEmpty;
-  empty.hidden = !isEmpty;
+    layout.hidden = isEmpty;
+    empty.hidden = !isEmpty;
+    hideUnsupportedBlocks();
+    if (isEmpty) return;
 
-  if (isEmpty) {
-    renderSuggestions();
-    return;
-  }
+    const unitCount = cartItems.reduce((s, i) => s + i.qty, 0);
+    document.getElementById('cartHeading').textContent =
+        `Your items (${cartItems.length} product${cartItems.length === 1 ? '' : 's'}, ${unitCount} unit${unitCount === 1 ? '' : 's'})`;
 
-  const unitCount = Cart.count();
-  document.getElementById('cartHeading').textContent =
-    `Your items (${items.length} product${items.length === 1 ? '' : 's'}, ${unitCount} unit${unitCount === 1 ? '' : 's'})`;
+    document.getElementById('cartItems').innerHTML = cartItems.map(item => {
+        const maxQty = Math.max(1, Math.min(item.stock, MAX_QTY));
+        const lineTotal = item.price * item.qty;
+        const checked = selectedIds.has(item.id) ? 'checked' : '';
+        const disabledSelect = item.canBuy ? '' : 'disabled';
 
-  document.getElementById('cartItems').innerHTML = items.map(item => {
-    const lineTotal = item.price * item.qty;
-    const maxQty = Math.min(item.stock, CONFIG.maxQtyPerItem);
-    const inWishlist = Wishlist.has(item.id);
+        let note = '';
+        if (item.stock <= 0) note = '<p class="stock-note mt-1 mb-0 text-danger">Out of stock</p>';
+        else if (item.qty > item.stock) note = `<p class="stock-note mt-1 mb-0 text-danger">Only ${item.stock} left, please reduce quantity</p>`;
+        else if (!item.canBuy) note = '<p class="stock-note mt-1 mb-0 text-danger">No longer available</p>';
+        else if (item.stock <= 10) note = `<p class="stock-note mt-1 mb-0">Only ${item.stock} left</p>`;
 
-    return `
-      <article class="cart-item" data-id="${item.id}">
+        return `
+      <article class="cart-item ${item.canBuy ? '' : 'opacity-75'}" data-id="${esc(item.id)}">
 
-        <a class="ci-media" href="${ROUTES.productDetails}?id=${item.id}">
-          <img src="${item.images[0]}" alt="${escapeHtml(item.name)}" loading="lazy">
+        <a class="ci-media" href="${productLink(item)}">
+          <img src="${esc(item.image)}" alt="${esc(item.name)}" loading="lazy"
+               onerror="this.onerror=null;this.src='/images/placeholder.webp';">
         </a>
 
         <div>
-          <p class="ci-cat mb-0">${escapeHtml(item.brand)} · ${getCategoryName(item.category)}</p>
+          <label class="small d-flex align-items-center gap-2 mb-1">
+            <input type="checkbox" class="form-check-input mt-0 js-select" data-id="${esc(item.id)}" ${checked} ${disabledSelect}>
+            Select
+          </label>
+
           <h3 class="ci-name">
-            <a href="${ROUTES.productDetails}?id=${item.id}">${escapeHtml(item.name)}</a>
+            <a href="${productLink(item)}">${esc(item.name)}</a>
           </h3>
+          ${item.variant ? `<p class="small text-muted mb-1">${esc(item.variant)}</p>` : ''}
 
           <div class="d-flex align-items-baseline gap-2">
-            <span class="price">${formatPrice(item.price)}</span>
-            ${item.oldPrice ? `<span class="price-old small">${formatPrice(item.oldPrice)}</span>` : ''}
+            <span class="price">${fmtMoney(item.price)}</span>
           </div>
 
-          ${item.stock <= 10 ? `<p class="stock-note mt-1 mb-0">Only ${item.stock} left</p>` : ''}
+          ${note}
 
           <div class="ci-controls">
-            <div class="qty-stepper" role="group" aria-label="Quantity for ${escapeHtml(item.name)}">
-              <button type="button" class="js-qty-minus" data-id="${item.id}"
+            <div class="qty-stepper" role="group" aria-label="Quantity for ${esc(item.name)}">
+              <button type="button" class="js-qty-minus" data-id="${esc(item.id)}"
                       aria-label="Decrease quantity" ${item.qty <= 1 ? 'disabled' : ''}>
                 <i class="fas fa-minus"></i>
               </button>
-              <input type="number" class="js-qty-input" data-id="${item.id}"
+              <input type="number" class="js-qty-input" data-id="${esc(item.id)}"
                      value="${item.qty}" min="1" max="${maxQty}" aria-label="Quantity">
-              <button type="button" class="js-qty-plus" data-id="${item.id}"
+              <button type="button" class="js-qty-plus" data-id="${esc(item.id)}"
                       aria-label="Increase quantity" ${item.qty >= maxQty ? 'disabled' : ''}>
                 <i class="fas fa-plus"></i>
               </button>
             </div>
 
-            <button class="btn-link-danger js-remove" data-id="${item.id}" type="button">
+            <button class="btn-link-danger js-remove" data-id="${esc(item.id)}" type="button">
               <i class="fas fa-trash-can"></i> Remove
-            </button>
-
-            <button class="btn-link-danger js-save-later" data-id="${item.id}" type="button">
-              <i class="${inWishlist ? 'fas' : 'far'} fa-heart"></i>
-              ${inWishlist ? 'In wishlist' : 'Save for later'}
             </button>
           </div>
         </div>
 
         <div class="ci-total">
           <span class="small text-muted d-block d-md-none">Line total</span>
-          <span class="amount">${formatPrice(lineTotal)}</span>
-          ${item.qty > 1 ? `<div class="small text-muted">${item.qty} × ${formatPrice(item.price)}</div>` : ''}
+          <span class="amount">${fmtMoney(lineTotal)}</span>
+          ${item.qty > 1 ? `<div class="small text-muted">${item.qty} × ${fmtMoney(item.price)}</div>` : ''}
         </div>
 
       </article>`;
-  }).join('');
+    }).join('');
 
-  renderSummary();
-  renderSuggestions();
-}
-
-/* ==========================================================================
-   2. ORDER SUMMARY
-   ========================================================================== */
-function renderSummary() {
-  const totals = Cart.totals();
-  const coupon = getActiveCoupon();
-  const unitCount = Cart.count();
-
-  document.getElementById('subtotalLabel').textContent = `Subtotal (${unitCount} item${unitCount === 1 ? '' : 's'})`;
-  document.getElementById('subtotal').textContent = formatPrice(totals.subtotal);
-  document.getElementById('tax').textContent = formatPrice(totals.tax);
-  document.getElementById('total').textContent = formatPrice(totals.total);
-
-  // Discount row only appears when a coupon is active
-  const discountRow = document.getElementById('discountRow');
-  discountRow.hidden = totals.discount <= 0;
-  document.getElementById('discountAmount').textContent = `−${formatPrice(totals.discount)}`;
-
-  // Shipping shows "FREE" in green rather than ₹0
-  const shippingRow = document.getElementById('shippingRow');
-  const shippingCell = document.getElementById('shipping');
-  if (totals.shipping === 0) {
-    shippingCell.textContent = 'FREE';
-    shippingRow.classList.add('free');
-  } else {
-    shippingCell.textContent = formatPrice(totals.shipping);
-    shippingRow.classList.remove('free');
-  }
-
-  // Total savings note
-  const savingsNote = document.getElementById('savingsNote');
-  if (totals.savings > 0) {
-    savingsNote.hidden = false;
-    savingsNote.innerHTML = `<i class="fas fa-tags me-1"></i>You're saving <strong>${formatPrice(totals.savings)}</strong> on this order.`;
-  } else {
-    savingsNote.hidden = true;
-  }
-
-  renderShipMeter(totals.subtotal);
-  renderCouponState(coupon);
-}
-
-/** Progress bar showing how far the user is from free shipping. */
-function renderShipMeter(subtotal) {
-  const fill = document.getElementById('shipFill');
-  const text = document.getElementById('shipText');
-  const threshold = CONFIG.freeShippingAbove;
-
-  const pct = Math.min(100, (subtotal / threshold) * 100);
-  fill.style.width = pct + '%';
-
-  if (subtotal >= threshold) {
-    text.innerHTML = '<i class="fas fa-circle-check text-success me-1"></i>You\'ve unlocked <strong>free delivery</strong>!';
-  } else {
-    const remaining = threshold - subtotal;
-    text.innerHTML = `Add <strong>${formatPrice(remaining)}</strong> more to get free delivery.`;
-  }
-}
-
-/** Swaps between the coupon input and the "applied" confirmation strip. */
-function renderCouponState(coupon) {
-  const area = document.getElementById('couponArea');
-
-  if (coupon) {
-    area.innerHTML = `
-      <div class="coupon-applied mb-3">
-        <span><i class="fas fa-ticket me-2"></i><strong>${escapeHtml(coupon.code)}</strong> — ${escapeHtml(coupon.label)}</span>
-        <button class="btn-link-danger" id="removeCouponBtn" type="button" aria-label="Remove coupon">
-          <i class="fas fa-xmark"></i>
-        </button>
-      </div>`;
-
-    document.getElementById('removeCouponBtn').addEventListener('click', () => {
-      storageSet(STORE.coupon, null);
-      renderSummary();
-      showToast(UiMessage.COUPON_REMOVED_TITLE, UiMessage.COUPON_REMOVED, 'info');
-    });
-  } else {
-    area.innerHTML = `
-      <div class="coupon-box">
-        <input type="text" class="form-control" id="couponInput" placeholder="Coupon code" aria-label="Coupon code">
-        <button class="btn btn-brand" id="applyCouponBtn" type="button">Apply</button>
-      </div>
-      <p class="small text-muted mb-3">
-        Try <code>TECHNOVA10</code>, <code>STUDENT15</code>, <code>FLAT500</code> or <code>FREESHIP</code>
-      </p>`;
-
-    bindCouponInput();
-  }
-}
-
-/** Validates and applies a coupon code entered by the user. */
-function bindCouponInput() {
-  const btn = document.getElementById('applyCouponBtn');
-  const input = document.getElementById('couponInput');
-  if (!btn || !input) return;
-
-  const apply = () => {
-    const code = input.value.trim().toUpperCase();
-
-    if (!code) {
-      showToast(UiMessage.COUPON_CODE_REQUIRED_TITLE, UiMessage.COUPON_CODE_REQUIRED, 'warning');
-      input.focus();
-      return;
-    }
-
-    const coupon = COUPONS[code];
-    if (!coupon) {
-      showToast(UiMessage.COUPON_INVALID_TITLE, UiMessage.COUPON_INVALID(code), 'danger');
-      input.classList.add('is-invalid');
-      setTimeout(() => input.classList.remove('is-invalid'), 1800);
-      return;
-    }
-
-    // Some coupons require a minimum order value
-    const subtotal = Cart.totals().subtotal;
-    if (coupon.minOrder && subtotal < coupon.minOrder) {
-      showToast(UiMessage.COUPON_MINIMUM_TITLE, UiMessage.COUPON_MINIMUM(code, formatPrice(coupon.minOrder)), 'warning', 4000);
-      return;
-    }
-
-    storageSet(STORE.coupon, code);
     renderSummary();
-    showToast(UiMessage.COUPON_APPLIED_TITLE, UiMessage.COUPON_APPLIED(code, coupon.label), 'success');
-  };
-
-  btn.addEventListener('click', apply);
-  input.addEventListener('keydown', e => {
-    if (e.key === 'Enter') { e.preventDefault(); apply(); }
-  });
 }
 
-/* ==========================================================================
-   3. SUGGESTED PRODUCTS
-   --------------------------------------------------------------------------
-   Suggests best sellers the customer does not already have in their cart.
-   ========================================================================== */
-function renderSuggestions() {
-  const grid = document.getElementById('suggestGrid');
-  const section = document.getElementById('suggestSection');
-  if (!grid) return;
+/** Tạm tính chỉ để hiển thị. Số tiền thật do server tính ở bước checkout. */
+function renderSummary() {
+    const chosen = cartItems.filter(i => selectedIds.has(i.id));
+    const qty = chosen.reduce((s, i) => s + i.qty, 0);
+    const subtotal = chosen.reduce((s, i) => s + i.price * i.qty, 0);
 
-  const inCart = Cart.all().map(i => i.id);
-  const suggestions = PRODUCTS
-    .filter(p => !inCart.includes(p.id) && p.stock > 0)
-    .sort((a, b) => (b.bestSeller - a.bestSeller) || (b.rating - a.rating))
-    .slice(0, 4);
+    const setText = (id, text) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = text;
+    };
+    setText('subtotalLabel', `Subtotal (${qty} item${qty === 1 ? '' : 's'})`);
+    setText('subtotal', fmtMoney(subtotal));
+    setText('shipping', 'Tính ở bước thanh toán');
+    setText('total', fmtMoney(subtotal));
 
-  if (!suggestions.length) {
-    section.hidden = true;
-    return;
-  }
+    const buyable = cartItems.filter(i => i.canBuy);
+    const selectAll = document.getElementById('selectAll');
+    if (selectAll) {
+        selectAll.checked = buyable.length > 0 && buyable.every(i => selectedIds.has(i.id));
+    }
 
-  section.hidden = false;
-  renderProductGrid(suggestions, grid);
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    if (checkoutBtn) checkoutBtn.disabled = chosen.length === 0;
 }
 
-/* ==========================================================================
-   4. EVENT HANDLERS
-   ========================================================================== */
+/** Ẩn các khối của bản demo mà backend chưa có. */
+function hideUnsupportedBlocks() {
+    ['couponArea', 'discountRow', 'shipMeter', 'savingsNote', 'suggestSection'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.hidden = true;
+    });
+    const tax = document.getElementById('tax');
+    if (tax && tax.parentElement) tax.parentElement.hidden = true;
+}
+
+/* ---------- Thao tác ---------- */
+async function runAction(action, okTitle, okMessage) {
+    if (busy) return;
+    busy = true;
+    try {
+        await action();
+        if (okMessage) notify(okTitle, okMessage, 'info');
+    } catch (e) {
+        if (e.message !== 'UNAUTHENTICATED') notify('Lỗi', e.message, 'danger');
+    } finally {
+        busy = false;
+        await loadCart();    // luôn tải lại để hiển thị đúng dữ liệu server
+    }
+}
+
+function updateQty(itemId, value) {
+    const item = cartItems.find(i => String(i.id) === String(itemId));
+    if (!item) return;
+
+    let qty = Math.floor(Number(value));
+    if (!Number.isFinite(qty) || qty < 1) qty = 1;
+    if (qty > MAX_QTY) qty = MAX_QTY;
+    if (qty === item.qty) { renderCart(); return; }
+
+    runAction(() => api('PUT', `${CART_API}/items/${encodeURIComponent(itemId)}`, { count: qty }));
+}
+
+function removeItem(itemId) {
+    runAction(() => api('DELETE', `${CART_API}/items/${encodeURIComponent(itemId)}`),
+        'Đã xóa', 'Đã xóa sản phẩm khỏi giỏ hàng');
+}
+
+function clearCart() {
+    runAction(() => api('DELETE', CART_API), 'Đã xóa', 'Đã xóa toàn bộ giỏ hàng');
+}
+
+/* ---------- Sự kiện ---------- */
 function bindCartEvents() {
-  const list = document.getElementById('cartItems');
+    const list = document.getElementById('cartItems');
 
-  // Delegated handling for every control inside a cart line
-  list.addEventListener('click', e => {
+    list.addEventListener('click', e => {
+        const minus = e.target.closest('.js-qty-minus');
+        const plus = e.target.closest('.js-qty-plus');
+        if (minus || plus) {
+            const btn = minus || plus;
+            const item = cartItems.find(i => String(i.id) === String(btn.dataset.id));
+            if (item) updateQty(item.id, item.qty + (plus ? 1 : -1));
+            return;
+        }
 
-    // --- Quantity minus / plus ---
-    const minus = e.target.closest('.js-qty-minus');
-    const plus = e.target.closest('.js-qty-plus');
-    if (minus || plus) {
-      const btn = minus || plus;
-      const id = btn.dataset.id;
-      const current = Cart.qtyOf(id);
-      Cart.updateQty(id, current + (plus ? 1 : -1));
-      return;
+        const removeBtn = e.target.closest('.js-remove');
+        if (removeBtn) {
+            const row = removeBtn.closest('.cart-item');
+            if (row) row.classList.add('removing');
+            const id = removeBtn.dataset.id;
+            setTimeout(() => removeItem(id), 280);
+        }
+    });
+
+    list.addEventListener('change', e => {
+        const sel = e.target.closest('.js-select');
+        if (sel) {
+            if (sel.checked) selectedIds.add(sel.dataset.id);
+            else selectedIds.delete(sel.dataset.id);
+            renderSummary();
+            return;
+        }
+        const input = e.target.closest('.js-qty-input');
+        if (input) updateQty(input.dataset.id, input.value);
+    });
+
+    const selectAll = document.getElementById('selectAll');
+    if (selectAll) {
+        selectAll.addEventListener('change', e => {
+            selectedIds = e.target.checked
+                ? new Set(cartItems.filter(i => i.canBuy).map(i => i.id))
+                : new Set();
+            renderCart();
+        });
     }
 
-    // --- Remove line (with a short slide-out animation) ---
-    const removeBtn = e.target.closest('.js-remove');
-    if (removeBtn) {
-      const id = removeBtn.dataset.id;
-      const row = removeBtn.closest('.cart-item');
-      row.classList.add('removing');
-      setTimeout(() => Cart.remove(id), 280);
-      return;
+    const clearBtn = document.getElementById('clearCartBtn');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            if (cartItems.length && confirm('Remove all items from your cart?')) clearCart();
+        });
     }
 
-    // --- Save for later: copy into the wishlist, then drop from the cart ---
-    const saveBtn = e.target.closest('.js-save-later');
-    if (saveBtn) {
-      const id = saveBtn.dataset.id;
-      if (!Wishlist.has(id)) Wishlist.add(id);
-      const row = saveBtn.closest('.cart-item');
-      row.classList.add('removing');
-      setTimeout(() => Cart.remove(id, true), 280);
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    if (checkoutBtn) {
+        checkoutBtn.addEventListener('click', () => {
+            if (selectedIds.size === 0) {
+                notify('Chưa chọn sản phẩm', 'Vui lòng chọn ít nhất một sản phẩm', 'warning');
+                return;
+            }
+            sessionStorage.setItem('checkoutItemIds', JSON.stringify([...selectedIds]));
+            window.location.href = CHECKOUT_URL;
+        });
     }
-  });
-
-  // Typed quantity values
-  list.addEventListener('change', e => {
-    const input = e.target.closest('.js-qty-input');
-    if (!input) return;
-    Cart.updateQty(input.dataset.id, input.value);
-  });
-
-  // --- Clear the whole cart ---
-  document.getElementById('clearCartBtn').addEventListener('click', () => {
-    if (!Cart.count()) return;
-    if (confirm('Remove all items from your cart?')) {
-      Cart.clear();
-      showToast(UiMessage.CART_CLEARED_TITLE, UiMessage.CART_CLEARED, 'info');
-    }
-  });
-
-  // --- Demo checkout ---
-  document.getElementById('checkoutBtn').addEventListener('click', () => {
-    if (!Cart.count()) {
-      showToast(UiMessage.CART_EMPTY_TITLE, UiMessage.CART_EMPTY, 'warning');
-      return;
-    }
-
-    // Generate a plausible-looking demo order reference
-    const ref = 'TN-' + String(Date.now()).slice(-6);
-    document.getElementById('orderRef').textContent = ref;
-
-    const modal = new bootstrap.Modal(document.getElementById('checkoutModal'));
-    modal.show();
-
-    // Empty the cart once the confirmation is dismissed
-    document.getElementById('checkoutModal').addEventListener('hidden.bs.modal', () => {
-      Cart.clear();
-      showToast(UiMessage.ORDER_PLACED_TITLE, UiMessage.ORDER_PLACED(ref), 'success', 5000);
-    }, { once: true });
-  });
 }
 
-/* ==========================================================================
-   5. INIT
-   ========================================================================== */
 document.addEventListener('DOMContentLoaded', () => {
-  renderCart();
-  bindCartEvents();
-
-  // Re-render whenever the cart changes from anywhere on the page
-  document.addEventListener('cart:changed', renderCart);
-  document.addEventListener('wishlist:changed', renderCart);
+    bindCartEvents();
+    loadCart();
 });

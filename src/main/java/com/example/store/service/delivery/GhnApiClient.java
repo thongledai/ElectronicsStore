@@ -12,7 +12,7 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
 import com.example.store.dto.ghn.GhnApiResponse;
-import com.example.store.dto.ghn.GhnCreateOrderData;
+import com.example.store.dto.ghn.GhnCreateOrderResponse;
 import com.example.store.dto.ghn.GhnCreateOrderRequest;
 import com.example.store.exception.BusinessException;
 import com.example.store.enums.DeliveryMessage;
@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class GhnApiClient {
     private static final String CREATE_PATH = "/shiip/public-api/v2/shipping-order/create";
-    private static final ParameterizedTypeReference<GhnApiResponse<GhnCreateOrderData>> TYPE = new ParameterizedTypeReference<>() {
+    private static final ParameterizedTypeReference<GhnApiResponse<GhnCreateOrderResponse>> TYPE = new ParameterizedTypeReference<>() {
     };
 
     private final RestClient restClient;
@@ -38,7 +38,7 @@ public class GhnApiClient {
         this.shopId = shopId;
     }
 
-    public GhnCreateOrderData createOrder(GhnCreateOrderRequest request) {
+    public GhnCreateOrderResponse createOrder(GhnCreateOrderRequest request) {
         if (!StringUtils.hasText(token) || !StringUtils.hasText(shopId)) {
             throw new BusinessException(DeliveryMessage.GHN_CONFIG_MISSING.getMessage());
         }
@@ -48,16 +48,13 @@ public class GhnApiClient {
         if (!Boolean.TRUE.equals(request.getIsNewToAddress())) {
             throw new BusinessException(DeliveryMessage.GHN_NEW_ADDRESS_REQUIRED.getMessage());
         }
-        if (StringUtils.hasText(request.getToDistrictName())) {
-            throw new BusinessException(DeliveryMessage.GHN_DISTRICT_NOT_ALLOWED.getMessage());
-        }
         if (!StringUtils.hasText(request.getToWardName())
                 || !StringUtils.hasText(request.getToProvinceName())
                 || !StringUtils.hasText(request.getToAddress())) {
             throw new BusinessException(DeliveryMessage.GHN_ADDRESS_FIELDS_MISSING.getMessage());
         }
 
-        final GhnApiResponse<GhnCreateOrderData> response;
+        final GhnApiResponse<GhnCreateOrderResponse> response;
         final int[] httpStatus = { 0 };
         try {
             response = restClient.post().uri(CREATE_PATH).body(request).exchange((req, res) -> {

@@ -14,5 +14,6 @@ public record CartItemDTO(
         BigDecimal subtotal,
         String styleValues,
         boolean isAvailable,        // còn bán
-        Integer availableStock
+        Integer availableStock,
+        String productSlug
 ) {}

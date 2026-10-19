@@ -52,7 +52,7 @@ public class SecurityConfig {
                 .requestMatchers("/auth/reset-password", "/auth/set-password", "/auth/has-password").authenticated()
 
                 // Cart APIs (chỉ khách hàng)
-                .requestMatchers("/cart/**", "/checkout/**").hasAnyAuthority("CUSTOMER", "ROLE_CUSTOMER")
+                .requestMatchers("/cart/**", "/api/cart/**", "/checkout/**", "/preview-order/**", "/orders/**").hasAnyAuthority("CUSTOMER", "ROLE_CUSTOMER")
 
                 // Role-based reset password pages
                 .requestMatchers("/manager/reset-password").hasAnyAuthority("MANAGER", "ROLE_MANAGER")
@@ -65,7 +65,7 @@ public class SecurityConfig {
                 .requestMatchers("/employee/**").hasAnyAuthority("EMPLOYEE", "ROLE_EMPLOYEE")
                 .requestMatchers("/shipper/**").hasAnyAuthority("SHIPPER", "ROLE_SHIPPER")
                 // Authenticated user pages & APIs (shared across all roles)
-                .requestMatchers("/customer/cart", "/customer/wishlist").authenticated()
+                .requestMatchers("/customer/wishlist").authenticated()
                 .requestMatchers("/profile", "/customer/profile").authenticated()
                 .requestMatchers("/api/profile").authenticated()
 

@@ -98,7 +98,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ApiResponse<?>> handleRuntimeException(RuntimeException ex) {
-        log.warn("Lỗi runtime: {}", ex.getMessage());
+//        log.warn("Lỗi runtime: {}", ex.getMessage());
+        log.error("Lỗi runtime", ex);
         return ResponseEntity.badRequest().body(ApiResponse.error(ex.getMessage()));
     }
 
@@ -108,6 +109,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.error(ApiMessage.INTERNAL_ERROR));
     }
+
     @ExceptionHandler(AccountNotActivatedException.class)
     public ResponseEntity<ApiResponse<Map<String, Object>>> handleAccountNotActivated(AccountNotActivatedException ex) {
         Map<String, Object> data = Map.of(

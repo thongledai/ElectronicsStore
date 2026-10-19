@@ -8,5 +8,4 @@ import com.example.store.entity.OrderStatus;
 
 public interface OrderStatusRepository extends JpaRepository<OrderStatus, Integer> {
     Optional<OrderStatus> findByNameIgnoreCase(String name);
-
 }

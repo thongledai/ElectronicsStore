@@ -9,12 +9,11 @@ import com.example.store.dto.ghn.GhnCreateOrderPreviewDTO;
 
 public interface IGhnDeliveryService {
     void confirmOrder(UUID orderId);
-    void saveAddressSelection(UUID orderId, GhnShipmentCreateRequestDTO request);
+//    void saveAddressSelection(UUID orderId, GhnShipmentCreateRequestDTO request);
     GhnShipmentResponseDTO createShipment(UUID orderId, GhnShipmentCreateRequestDTO request);
-    GhnShipmentResponseDTO getShipment(UUID orderId);
-    
-GhnCreateOrderPreviewDTO previewShipment(
-        UUID orderId,
-        GhnShipmentCreateRequestDTO request);
-
+//    GhnShipmentResponseDTO getShipment(UUID orderId);
+//
+//    GhnCreateOrderPreviewDTO previewShipment(
+//        UUID orderId,
+//        GhnShipmentCreateRequestDTO request);
 }

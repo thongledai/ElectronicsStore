@@ -193,7 +193,8 @@ function dismissToast(toast) {
    ========================================================================== */
 const Cart = {
 
-  /** Raw cart array from localStorage. */
+  /** Raw
+   *  array from localStorage. */
   all() {
     const items = storageGet(STORE.cart, []);
     return Array.isArray(items) ? items : [];
@@ -567,27 +568,40 @@ function initGlobalActions() {
    ========================================================================== */
 
 /** Refreshes the cart / wishlist count bubbles in the header. */
-function updateBadges() {
-  const map = [
-    { selector: '.js-cart-count', value: Cart.count() },
-    { selector: '.js-wishlist-count', value: Wishlist.count() }
-  ];
-
-  map.forEach(({ selector, value }) => {
+/** Gán số vào mọi badge theo selector, có hiệu ứng khi số đổi. */
+function setBadge(selector, value) {
     document.querySelectorAll(selector).forEach(el => {
-      const previous = el.textContent.trim();
-      el.textContent = value;
-      el.dataset.count = value;
-      // Bump animation only when the number actually changed
-      if (previous !== String(value) && value > 0) {
-        el.classList.remove('bump');
-        void el.offsetWidth;        // force reflow so the animation replays
-        el.classList.add('bump');
-      }
+        const previous = el.textContent.trim();
+        el.textContent = value;
+        el.dataset.count = value;
+        if (previous !== String(value) && value > 0) {
+            el.classList.remove('bump');
+            void el.offsetWidth;
+            el.classList.add('bump');
+        }
     });
-  });
 }
 
+/** Số dòng trong giỏ lấy từ server. Chưa đăng nhập thì hiện 0. */
+async function refreshCartBadge() {
+    try {
+        const res = await fetch('/cart/count', {
+            credentials: 'same-origin',
+            headers: { 'Accept': 'application/json' }
+        });
+        if (!res.ok) { setBadge('.js-cart-count', 0); return; }
+        const body = await res.json();
+        setBadge('.js-cart-count', Number(body.data) || 0);
+    } catch (e) {
+        setBadge('.js-cart-count', 0);
+    }
+}
+
+/** Refreshes the cart / wishlist count bubbles in the header. */
+function updateBadges() {
+    setBadge('.js-wishlist-count', Wishlist.count());
+    refreshCartBadge();
+}
 /** Marks the current page's nav link as active. */
 function markActiveNav() {
   const current = location.pathname.replace(/\/+$/, '');
@@ -1240,7 +1254,7 @@ function initSessionManager() {
         if (window.location.pathname.startsWith('/manager') ||
             window.location.pathname.startsWith('/employee') ||
             window.location.pathname.startsWith('/shipper') ||
-            window.location.pathname.startsWith('/customer/cart') ||
+            window.location.pathname.startsWith('/cart') ||
             window.location.pathname.startsWith('/profile')) {
           window.location.replace('/login?error=session_expired');
         }

@@ -36,7 +36,8 @@ public class CartItemMapper {
                 subtotal,
                 getStyleValues(productVariant),
                 this.isAvailable(productVariant),
-                productVariant.getQuantity()
+                productVariant.getQuantity(),
+                product.getSlug()
                 );
     }
 

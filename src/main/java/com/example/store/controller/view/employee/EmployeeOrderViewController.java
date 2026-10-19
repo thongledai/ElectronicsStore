@@ -6,14 +6,14 @@ import java.util.stream.Collectors;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
+import com.example.store.dto.common.ApiResponse;
+import com.example.store.service.delivery.IGhnDeliveryService;
+import com.example.store.service.order.IOrderService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.store.enums.OrderStatusName;
 import com.example.store.enums.EmployeeMessage;
@@ -59,26 +59,26 @@ public class EmployeeOrderViewController {
         return "employee/orders";
     }
 
-    @GetMapping("/{orderId}")
-    public String orderDetail(@PathVariable UUID orderId, Model model) {
-        var order = orderRepository.findDetailedById(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException(EmployeeMessage.ORDER_NOT_FOUND.getMessage()));
-        model.addAttribute("order", order);
-        model.addAttribute("displayOrderCode", generateOrderCode(order.getId()));
-        model.addAttribute("ghnEvents", order.getGhnOrderCode() == null ? java.util.List.of()
-                : webhookEventRepository.findTop20ByOrderCodeOrderByEventTimeDesc(order.getGhnOrderCode()));
-        model.addAttribute("latestGhnStatusTime", order.getGhnOrderCode() == null ? null
-                : webhookEventRepository.findFirstByOrderCodeOrderByEventTimeDesc(order.getGhnOrderCode())
-                        .map(event -> GHN_TIME_FORMAT.format(event.getEventTime())).orElse(null));
-        model.addAttribute("latestGhnStatusEventTime", order.getGhnOrderCode() == null ? null
-                : webhookEventRepository.findFirstByOrderCodeOrderByEventTimeDesc(order.getGhnOrderCode())
-                        .map(event -> event.getEventTime()).orElse(null));
-        model.addAttribute("defaultPaymentTypeId", orderMapper.getPaymentTypeId());
-        model.addAttribute("defaultWeight", Math.max(1, orderMapper.calculateTotalWeightGram(order)));
-        model.addAttribute("defaultLength", orderMapper.getDefaultLengthCm());
-        model.addAttribute("defaultWidth", orderMapper.getDefaultWidthCm());
-        model.addAttribute("defaultHeight", orderMapper.getDefaultHeightCm());
-        model.addAttribute("active", "orders");
-        return "employee/order-detail";
-    }
+//    @GetMapping("/{orderId}")
+//    public String orderDetail(@PathVariable UUID orderId, Model model) {
+//        var order = orderRepository.findDetailedById(orderId)
+//                .orElseThrow(() -> new ResourceNotFoundException(EmployeeMessage.ORDER_NOT_FOUND.getMessage()));
+//        model.addAttribute("order", order);
+//        model.addAttribute("displayOrderCode", generateOrderCode(order.getId()));
+//        model.addAttribute("ghnEvents", order.getGhnOrderCode() == null ? java.util.List.of()
+//                : webhookEventRepository.findTop20ByOrderCodeOrderByEventTimeDesc(order.getGhnOrderCode()));
+//        model.addAttribute("latestGhnStatusTime", order.getGhnOrderCode() == null ? null
+//                : webhookEventRepository.findFirstByOrderCodeOrderByEventTimeDesc(order.getGhnOrderCode())
+//                        .map(event -> GHN_TIME_FORMAT.format(event.getEventTime())).orElse(null));
+//        model.addAttribute("latestGhnStatusEventTime", order.getGhnOrderCode() == null ? null
+//                : webhookEventRepository.findFirstByOrderCodeOrderByEventTimeDesc(order.getGhnOrderCode())
+//                        .map(event -> event.getEventTime()).orElse(null));
+//        model.addAttribute("defaultPaymentTypeId", orderMapper.getPaymentTypeId());
+//        model.addAttribute("defaultWeight", Math.max(1, orderMapper.calculateTotalWeightGram(order)));
+//        model.addAttribute("defaultLength", orderMapper.getDefaultLengthCm());
+//        model.addAttribute("defaultWidth", orderMapper.getDefaultWidthCm());
+//        model.addAttribute("defaultHeight", orderMapper.getDefaultHeightCm());
+//        model.addAttribute("active", "orders");
+//        return "employee/order-detail";
+//    }
 }

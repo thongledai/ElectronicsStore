@@ -2,11 +2,7 @@ package com.example.store.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -46,8 +42,12 @@ public class Order {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Column(columnDefinition = "nvarchar(255)") private String detailAddress;
+    @Column(columnDefinition = "nvarchar(100)") private String wardName;
+    @Column(columnDefinition = "nvarchar(100)") private String provinceName;
+
     @Column(nullable = false, length = 500, columnDefinition = "nvarchar(500)")
-    private String address;
+    private String fullAddress;
 
     @Column(nullable = false, length = 11)
     private String phone;
@@ -60,10 +60,15 @@ public class Order {
     @Column(nullable = false)
     private Boolean isPaidBefore = false;
 
+    @Column(length = 100)
+    private String toName;
+
     @Column(nullable = false, precision = 18, scale = 2)
     private BigDecimal subtotal;
+
     @Column(nullable = false, precision = 18, scale = 2)
     private BigDecimal shippingFee;
+
     @Column(nullable = false, precision = 18, scale = 2)
     private BigDecimal discount;
 
@@ -72,6 +77,12 @@ public class Order {
 
     @Column(length = 500, columnDefinition = "nvarchar(500)")
     private String note;
+
+    @Column(name = "ghn_order_code", length = 50, unique = true)
+    private String ghnOrderCode;
+
+    @Column(name = "expectedDeliveryDate")
+    private LocalDateTime expectedDeliveryDate;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "payment_id", nullable = false)
