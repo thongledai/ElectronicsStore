@@ -22,20 +22,33 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @Slf4j
 public class GhnApiClient {
-    private static final String CREATE_PATH = "/shiip/public-api/v2/shipping-order/create";
     private static final ParameterizedTypeReference<GhnApiResponse<GhnCreateOrderResponse>> TYPE = new ParameterizedTypeReference<>() {
     };
 
     private final RestClient restClient;
     private final String token;
     private final String shopId;
+    private final String baseUrl;
 
     public GhnApiClient(@Qualifier("ghnRestClient") RestClient restClient,
             @Value("${ghn.token:}") String token,
-            @Value("${ghn.shop-id:}") String shopId) {
+            @Value("${ghn.shop-id:}") String shopId,
+            @Value("${ghn.base-url:https://dev-online-gateway.ghn.vn}") String baseUrl) {
         this.restClient = restClient;
         this.token = token;
         this.shopId = shopId;
+        this.baseUrl = baseUrl;
+    }
+
+    private String getCreateUri() {
+        String base = StringUtils.hasText(baseUrl) ? baseUrl.trim() : "https://dev-online-gateway.ghn.vn";
+        while (base.endsWith("/")) {
+            base = base.substring(0, base.length() - 1);
+        }
+        if (base.endsWith("/shiip/public-api")) {
+            return base + "/v2/shipping-order/create";
+        }
+        return base + "/shiip/public-api/v2/shipping-order/create";
     }
 
     public GhnCreateOrderResponse createOrder(GhnCreateOrderRequest request) {
@@ -57,7 +70,7 @@ public class GhnApiClient {
         final GhnApiResponse<GhnCreateOrderResponse> response;
         final int[] httpStatus = { 0 };
         try {
-            response = restClient.post().uri(CREATE_PATH).body(request).exchange((req, res) -> {
+            response = restClient.post().uri(getCreateUri()).body(request).exchange((req, res) -> {
                 httpStatus[0] = res.getStatusCode().value();
                 try {
                     return res.bodyTo(TYPE);
