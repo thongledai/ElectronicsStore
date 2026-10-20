@@ -547,5 +547,120 @@ document.addEventListener('DOMContentLoaded', function () {
 
     }, true);
 
+    /* =========================================================
+   ADD TO CART (trang danh sách): mặc định 1 sản phẩm,
+   variant có giá cao nhất trong sản phẩm
+   ========================================================= */
+    (function setupListAddToCart() {
+        var grid = document.getElementById('productGrid');
+        if (!grid) return;
+
+        var pending = new Set();   // chặn bấm liên tục trên cùng một sản phẩm
+
+        function toast(title, message, type) {
+            if (window.showToast) window.showToast(title, message, type);
+            else alert(message);
+        }
+
+        // Giá khách thực trả: giống công thức ở product-details.js
+        function effectivePrice(v) {
+            var promo = Number(v.promotionalPrice);
+            return promo > 0 ? promo : (Number(v.price) || 0);
+        }
+
+        // Variant còn hàng có giá cao nhất
+        function pickDefaultVariant(variants) {
+            var inStock = variants.filter(function (v) { return Number(v.quantity) > 0; });
+            if (inStock.length === 0) return null;
+            return inStock.reduce(function (best, v) {
+                return effectivePrice(v) > effectivePrice(best) ? v : best;
+            });
+        }
+
+        function getSlug(btn) {
+            if (btn.dataset.slug) return btn.dataset.slug;
+            var link = btn.closest('.product-card, article, .card')
+                ?.querySelector('a[href*="/customer/products/"]');
+            if (!link) return null;
+            var parts = link.getAttribute('href').split('?')[0].split('/').filter(Boolean);
+            return parts[parts.length - 1] || null;
+        }
+
+        async function addToCart(btn) {
+            var slug = getSlug(btn);
+            if (!slug) {
+                toast('Lỗi', 'Không xác định được sản phẩm', 'danger');
+                return;
+            }
+            if (pending.has(slug)) return;
+            pending.add(slug);
+
+            var oldHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+            try {
+                // 1) Lấy variants của sản phẩm
+                var pRes = await fetch('/api/products/' + encodeURIComponent(slug), {
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (!pRes.ok) throw new Error('HTTP ' + pRes.status);
+                var pBody = await pRes.json();
+                var variants = pBody && pBody.success && pBody.data && pBody.data.variants;
+
+                if (!Array.isArray(variants) || variants.length === 0) {
+                    toast('Thông báo', 'Sản phẩm chưa có phiên bản để mua', 'warning');
+                    return;
+                }
+
+                var variant = pickDefaultVariant(variants);
+                if (!variant) {
+                    toast('Thông báo', 'Sản phẩm tạm hết hàng', 'warning');
+                    return;
+                }
+
+                // 2) Thêm vào giỏ, số lượng mặc định = 1
+                var res = await fetch('/cart/items', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ productVariantId: variant.id, count: 1 })
+                });
+
+                if (res.status === 401) {
+                    window.location.href = '/login?error=unauthorized';
+                    return;
+                }
+
+                var body = null;
+                try { body = await res.json(); } catch (e) {}
+
+                if (!res.ok || !body || body.success === false) {
+                    toast('Lỗi', (body && body.message) || 'Không thể thêm vào giỏ hàng', 'danger');
+                    return;
+                }
+
+                toast('Đã thêm', body.message || 'Đã thêm vào giỏ hàng', 'success');
+                if (typeof refreshCartBadge === 'function') refreshCartBadge();
+            } catch (e) {
+                console.error(e);
+                toast('Lỗi', 'Không thể kết nối máy chủ', 'danger');
+            } finally {
+                pending.delete(slug);
+                btn.disabled = false;
+                btn.innerHTML = oldHtml;
+            }
+        }
+
+        // Delegation: vẫn chạy khi lưới sản phẩm được render lại
+        grid.addEventListener('click', function (event) {
+            var btn = event.target.closest('.js-add-cart');
+            if (!btn || btn.disabled) return;
+            event.preventDefault();
+            event.stopPropagation();
+            addToCart(btn);
+        });
+    })();
+
 
 }); /* end DOMContentLoaded */
