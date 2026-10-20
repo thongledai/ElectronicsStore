@@ -1,9 +1,11 @@
 package com.example.store.service.order;
 
+import com.example.store.entity.GhnWebhookEvent;
 import com.example.store.entity.Order;
 import com.example.store.enums.DeliveryMessage;
 import com.example.store.enums.OrderStatusName;
 import com.example.store.exception.ResourceNotFoundException;
+import com.example.store.repository.GhnWebhookEventRepository;
 import com.example.store.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -14,8 +16,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -25,8 +30,12 @@ import java.util.stream.Collectors;
 public class EmployeeOrderServiceImpl implements IEmployeeOrderService {
     private static final int PAGE_SIZE = 20;
     private static final int MAX_KEYWORD_LENGTH = 100;
+    private static final DateTimeFormatter GHN_TIME_FORMAT =
+            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
+                    .withZone(ZoneId.of("Asia/Ho_Chi_Minh"));
 
     private final OrderRepository orderRepository;
+    private final GhnWebhookEventRepository webhookEventRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -56,6 +65,26 @@ public class EmployeeOrderServiceImpl implements IEmployeeOrderService {
                 Order::getId,
                 o -> orderCode(o.getId()),
                 (a, b) -> a));                 // phòng trùng khóa, tránh lỗi "Duplicate key"
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<GhnWebhookEvent> getGhnEvents(String ghnOrderCode) {
+        if (!StringUtils.hasText(ghnOrderCode)) {
+            return List.of();
+        }
+        return webhookEventRepository.findTop20ByOrderCodeOrderByEventTimeDesc(ghnOrderCode);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public String getFormattedLatestGhnStatusTime(String ghnOrderCode) {
+        if (!StringUtils.hasText(ghnOrderCode)) {
+            return null;
+        }
+        return webhookEventRepository.findFirstByOrderCodeOrderByEventTimeDesc(ghnOrderCode)
+                .map(event -> GHN_TIME_FORMAT.format(event.getEventTime()))
+                .orElse(null);
     }
 
     public static String orderCode(UUID id) {

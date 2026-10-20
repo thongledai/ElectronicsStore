@@ -4,10 +4,17 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Getter @Builder
+@Getter
+@Setter
+@Builder(toBuilder = true)
+@NoArgsConstructor
+@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class GhnCreateOrderRequest {
     @JsonProperty("payment_type_id") private Integer paymentTypeId;
@@ -29,7 +36,12 @@ public class GhnCreateOrderRequest {
     @JsonProperty("order_value") private Integer orderValue;
     private List<Item> items;
 
-    @Getter @Builder @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Getter
+    @Setter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Item {
         private String name;
         private String code;

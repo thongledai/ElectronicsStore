@@ -63,98 +63,6 @@ public class GhnDeliveryServiceImpl implements IGhnDeliveryService {
         orderRepository.save(order);
     }
 
-//    @Override
-//    @Transactional
-//    public void saveAddressSelection(UUID orderId, GhnShipmentCreateRequestDTO input) {
-//        Order order = orderRepository.findById(orderId)
-//                .orElseThrow(() -> new ResourceNotFoundException(DeliveryMessage.ORDER_NOT_FOUND.getMessage()));
-//        ensureConfirmed(order);
-//        if (StringUtils.hasText(order.getGhnOrderCode()))
-//            throw new BusinessException(DeliveryMessage.ORDER_HAS_SHIPMENT_ADDRESS_CHANGE.getMessage());
-//        validateAndApplyAddress(order, input);
-//    }
-//
-//    @Override
-//    @Transactional(readOnly = true)
-//    public GhnCreateOrderPreviewDTO previewShipment(
-//            UUID orderId,
-//            GhnShipmentCreateRequestDTO input) {
-//
-//        Order order = orderRepository.findDetailedById(orderId)
-//                .orElseThrow(() -> new ResourceNotFoundException(DeliveryMessage.ORDER_NOT_FOUND.getMessage()));
-//
-//        ensureConfirmed(order);
-//
-//        if (StringUtils.hasText(order.getGhnOrderCode())) {
-//            throw new BusinessException(
-//                    DeliveryMessage.ORDER_HAS_SHIPMENT_PREVIEW.getMessage());
-//        }
-//
-//        if (!ghnOrderMapper.isNewAddressModel()) {
-//            throw new BusinessException(
-//                    DeliveryMessage.NEW_ADDRESS_MODEL_REQUIRED.getMessage());
-//        }
-//
-//        if (input == null)
-//            throw new BusinessException(DeliveryMessage.ADDRESS_INPUT_REQUIRED.getMessage());
-//
-//        String detail = input.getAddressDetail() == null
-//                ? ""
-//                : input.getAddressDetail().trim();
-//
-//        if (!StringUtils.hasText(detail)) {
-//            throw new BusinessException(
-//                    DeliveryMessage.ADDRESS_DETAIL_REQUIRED.getMessage());
-//        }
-//
-//        if (detail.length() > 500) {
-//            throw new BusinessException(
-//                    DeliveryMessage.ADDRESS_DETAIL_TOO_LONG.getMessage());
-//        }
-//
-//        GhnAddressOptionDTO province = input.getProvinceId() == null ? null
-//                : addressService.getProvinces()
-//                        .stream()
-//                        .filter(item -> item.getId() != null
-//                                && item.getId().equals(input.getProvinceId()))
-//                        .findFirst()
-//                        .orElse(null);
-//
-//        GhnAddressOptionDTO ward = province == null || input.getWardId() == null ? null
-//                : addressService.getWards(province.getId())
-//                        .stream()
-//                        .filter(item -> item.getId() != null
-//                                && item.getId().equals(input.getWardId()))
-//                        .findFirst()
-//                        .orElse(null);
-//
-//        String toAddress = composeAddress(detail, ward == null ? null : ward.getName(),
-//                province == null ? null : province.getName());
-//
-//        validatePreviewReady(order, toAddress, ward == null ? null : ward.getName(),
-//                province == null ? null : province.getName());
-//
-//        GhnCreateOrderRequest base = ghnOrderMapper.toCreateOrderRequest(
-//                order,
-//                toAddress,
-//                ward == null ? null : ward.getName(),
-//                province == null ? null : province.getName());
-//
-//        GhnCreateOrderRequest payload = applyOverrides(base, order, input);
-//
-//        return GhnCreateOrderPreviewDTO.builder()
-//                .sourceAddress(order.getDetailAddress())
-//                .provinceId(province == null ? null : province.getId())
-//                .wardId(ward == null ? null : ward.getId())
-//                .provinceName(province == null ? null : province.getName())
-//                .wardName(ward == null ? null : ward.getName())
-//                .addressSource(
-//                        "GHN staging v3 master-data API; freshly fetched for this request")
-//                .validated(true)
-//                .payload(payload)
-//                .build();
-//    }
-
     @Override
     @Transactional
     public GhnShipmentResponseDTO createShipment(UUID orderId, GhnShipmentCreateRequestDTO input) {
@@ -166,160 +74,58 @@ public class GhnDeliveryServiceImpl implements IGhnDeliveryService {
 
         ensureConfirmed(order);
         GhnCreateOrderRequest request = ghnOrderMapper.toCreateOrderRequest(order);
+
+        // Áp dụng thông số kiện hàng từ form người dùng nếu có
+        if (input != null) {
+            if (input.getWeight() != null && input.getWeight() > 0) request.setWeight(input.getWeight());
+            if (input.getLength() != null && input.getLength() > 0) request.setLength(input.getLength());
+            if (input.getWidth() != null && input.getWidth() > 0) request.setWidth(input.getWidth());
+            if (input.getHeight() != null && input.getHeight() > 0) request.setHeight(input.getHeight());
+        }
+
         GhnCreateOrderResponse result = apiClient.createOrder(request);
 
         order.setGhnOrderCode(result.getOrderCode());
-        if (result.getExpectedDeliveryTime() != null)
+        if (result.getExpectedDeliveryTime() != null) {
             order.setExpectedDeliveryDate(LocalDateTime.ofInstant(Instant.parse(result.getExpectedDeliveryTime()), VIETNAM));
+        }
+
+        // Đồng bộ dữ liệu chuẩn hóa vào entity
+        if (!StringUtils.hasText(order.getFullAddress()) && StringUtils.hasText(request.getToAddress())) {
+            order.setFullAddress(request.getToAddress());
+        }
+        if (!StringUtils.hasText(order.getWardName()) && StringUtils.hasText(request.getToWardName())) {
+            order.setWardName(request.getToWardName());
+        }
+        if (!StringUtils.hasText(order.getProvinceName()) && StringUtils.hasText(request.getToProvinceName())) {
+            order.setProvinceName(request.getToProvinceName());
+        }
+        if (!StringUtils.hasText(order.getToName()) && StringUtils.hasText(request.getToName())) {
+            order.setToName(request.getToName());
+        }
+
         orderRepository.save(order);
         return response(order, false);
     }
 
-//    @Override
-//    @Transactional(readOnly = true)
-//    public GhnShipmentResponseDTO getShipment(UUID orderId) {
-//        Order order = orderRepository.findDetailedById(orderId)
-//                .orElseThrow(() -> new ResourceNotFoundException(DeliveryMessage.ORDER_NOT_FOUND.getMessage()));
-//        return response(order, StringUtils.hasText(order.getGhnOrderCode()));
-//    }
-
-//    private void validateAndApplyAddress(Order order, GhnShipmentCreateRequestDTO input) {
-//        if (!ghnOrderMapper.isNewAddressModel())
-//            throw new BusinessException(DeliveryMessage.NEW_ADDRESS_MODEL_REQUIRED.getMessage());
-//        if (input == null)
-//            throw new BusinessException(DeliveryMessage.ADDRESS_INPUT_REQUIRED.getMessage());
-//        String detail = input.getAddressDetail() == null ? "" : input.getAddressDetail().trim();
-//        if (!StringUtils.hasText(detail))
-//            throw new BusinessException(DeliveryMessage.ADDRESS_DETAIL_REQUIRED.getMessage());
-//        if (detail.length() > 500)
-//            throw new BusinessException(DeliveryMessage.ADDRESS_DETAIL_TOO_LONG.getMessage());
-//
-//        GhnAddressOptionDTO province = input.getProvinceId() == null ? null
-//                : addressService.getProvinces().stream()
-//                        .filter(item -> item.getId() != null && item.getId().equals(input.getProvinceId()))
-//                        .findFirst()
-//                        .orElse(null);
-//        GhnAddressOptionDTO ward = province == null || input.getWardId() == null ? null
-//                : addressService.getWards(province.getId()).stream()
-//                        .filter(item -> item.getId() != null && item.getId().equals(input.getWardId()))
-//                        .findFirst()
-//                        .orElse(null);
-//
-//        order.setProvinceName(province == null ? null : province.getName());
-//        order.setWardName(ward == null ? null : ward.getName());
-//        order.setDetailAddress(detail);
-//        orderRepository.save(order);
-//    }
+    @Override
+    @Transactional(readOnly = true)
+    public GhnShipmentResponseDTO getShipment(UUID orderId) {
+        Order order = orderRepository.findDetailedById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException(DeliveryMessage.ORDER_NOT_FOUND.getMessage()));
+        return response(order, StringUtils.hasText(order.getGhnOrderCode()));
+    }
 
     private String normalize(String value) {
         return Normalizer.normalize(value, Normalizer.Form.NFD).replaceAll("\\p{M}+", "")
                 .replaceAll("[^a-zA-Z0-9]+", " ").trim().toLowerCase(Locale.ROOT);
     }
-//
-//    private void validateReady(Order order) {
-//        List<String> invalid = new ArrayList<>();
-//        if (order.getUser() == null || !StringUtils.hasText(order.getUser().getFullName()))
-//            invalid.add(DeliveryMessage.INVALID_RECIPIENT_NAME.getMessage());
-//        if (GhnOrderMapper.normalizePhone(order.getPhone()) == null)
-//            invalid.add(DeliveryMessage.INVALID_RECIPIENT_PHONE.getMessage());
-//        if (!StringUtils.hasText(order.getDetailAddress()))
-//            invalid.add(DeliveryMessage.INVALID_DETAIL_ADDRESS.getMessage());
-//        if (!StringUtils.hasText(order.getWardName()))
-//            invalid.add(DeliveryMessage.INVALID_WARD.getMessage());
-//        if (!StringUtils.hasText(order.getProvinceName()))
-//            invalid.add(DeliveryMessage.INVALID_PROVINCE.getMessage());
-//        if (order.getItems() == null || order.getItems().isEmpty())
-//            invalid.add(DeliveryMessage.INVALID_ORDER_ITEMS.getMessage());
-//        if (!invalid.isEmpty())
-//            throw new BusinessException(String.format(DeliveryMessage.SHIPMENT_DATA_MISSING_PREFIX.getMessage(),
-//                    String.join(", ", invalid)));
-//        if (ghnOrderMapper.calculateTotalWeightGram(order) <= 0
-//                || ghnOrderMapper.calculateTotalWeightGram(order) > GhnOrderMapper.MAX_WEIGHT_GRAM_SERVICE_2) {
-//            throw new BusinessException(DeliveryMessage.SHIPMENT_WEIGHT_INVALID.getMessage());
-//        }
-//        if (ghnOrderMapper.calculateCodAmount(order) > GhnOrderMapper.MAX_COD_AMOUNT)
-//            throw new BusinessException(DeliveryMessage.COD_LIMIT_EXCEEDED.getMessage());
-//    }
 
     private String composeAddress(String detail, String ward, String province) {
         return java.util.stream.Stream.of(detail, ward, province)
                 .filter(StringUtils::hasText)
                 .collect(java.util.stream.Collectors.joining(", "));
     }
-
-//    private GhnCreateOrderRequest applyOverrides(GhnCreateOrderRequest base, Order order,
-//            GhnShipmentCreateRequestDTO input) {
-//        int weight = input.getWeight() == null ? base.getWeight() : input.getWeight();
-//        int length = input.getLength() == null ? base.getLength() : input.getLength();
-//        int width = input.getWidth() == null ? base.getWidth() : input.getWidth();
-//        int height = input.getHeight() == null ? base.getHeight() : input.getHeight();
-//        int payment = input.getPaymentTypeId() == null ? base.getPaymentTypeId() : input.getPaymentTypeId();
-//        if (weight <= 0 || weight > 19_999 || length <= 0 || width <= 0 || height <= 0 || length > 200 || width > 200
-//                || height > 200) {
-//            throw new BusinessException(DeliveryMessage.SHIPMENT_DIMENSIONS_INVALID.getMessage());
-//        }
-//        if (payment != 1 && payment != 2)
-//            throw new BusinessException(DeliveryMessage.PAYMENT_TYPE_INVALID.getMessage());
-//        return GhnCreateOrderRequest.builder().paymentTypeId(payment).requiredNote("CHOXEMHANGKHONGTHU")
-//                .clientOrderCode(base.getClientOrderCode()).toName(base.getToName()).toPhone(base.getToPhone())
-//                .toAddress(base.getToAddress()).toWardName(base.getToWardName()).toDistrictName(null)
-//                .toProvinceName(base.getToProvinceName()).isNewToAddress(true).serviceTypeId(base.getServiceTypeId())
-//                .weight(weight).length(length).width(width).height(height).codAmount(base.getCodAmount())
-//                .orderValue(base.getOrderValue()).insuranceValue(base.getInsuranceValue()).items(base.getItems())
-//                .build();
-//    }
-
-//    private void validatePreviewReady(
-//            Order order,
-//            String toAddress,
-//            String wardName,
-//            String provinceName) {
-//
-//        List<String> invalid = new ArrayList<>();
-//
-//        if (order.getUser() == null
-//                || !StringUtils.hasText(order.getUser().getFullName())) {
-//            invalid.add(DeliveryMessage.INVALID_RECIPIENT_NAME.getMessage());
-//        }
-//
-//        if (GhnOrderMapper.normalizePhone(order.getPhone()) == null) {
-//            invalid.add(DeliveryMessage.INVALID_RECIPIENT_PHONE.getMessage());
-//        }
-//
-//        if (!StringUtils.hasText(toAddress)) {
-//            invalid.add(DeliveryMessage.INVALID_ADDRESS.getMessage());
-//        }
-//
-//        if (!StringUtils.hasText(wardName)) {
-//            invalid.add(DeliveryMessage.INVALID_WARD.getMessage());
-//        }
-//
-//        if (!StringUtils.hasText(provinceName)) {
-//            invalid.add(DeliveryMessage.INVALID_PROVINCE.getMessage());
-//        }
-//
-//        if (order.getItems() == null || order.getItems().isEmpty()) {
-//            invalid.add(DeliveryMessage.INVALID_ORDER_ITEMS.getMessage());
-//        }
-//
-//        if (!invalid.isEmpty()) {
-//            throw new BusinessException(
-//                    String.format(DeliveryMessage.SHIPMENT_DATA_MISSING_PREFIX.getMessage(),
-//                            String.join(", ", invalid)));
-//        }
-//
-//        int totalWeight = ghnOrderMapper.calculateTotalWeightGram(order);
-//
-//        if (totalWeight <= 0
-//                || totalWeight > GhnOrderMapper.MAX_WEIGHT_GRAM_SERVICE_2) {
-//            throw new BusinessException(
-//                    DeliveryMessage.SHIPMENT_WEIGHT_INVALID.getMessage());
-//        }
-//
-//        if (ghnOrderMapper.calculateCodAmount(order) > GhnOrderMapper.MAX_COD_AMOUNT) {
-//            throw new BusinessException(DeliveryMessage.COD_LIMIT_EXCEEDED.getMessage());
-//        }
-//    }
 
     private void ensureConfirmed(Order order) {
         if (currentStatus(order) != OrderStatusName.CONFIRMED)
