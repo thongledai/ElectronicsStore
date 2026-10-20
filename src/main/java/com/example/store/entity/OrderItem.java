@@ -31,22 +31,22 @@ public class OrderItem {
     @JoinColumn(name = "variant_id", nullable = false)
     private ProductVariant variant;
 
-    @Column(nullable = false, columnDefinition = "nvarchar(255)")
+    @Column(name = "product_name", columnDefinition = "nvarchar(255)")
     private String productName;
 
-    @Column(columnDefinition = "nvarchar(255)")
+    @Column(name = "variant_description", columnDefinition = "nvarchar(255)")
     private String variantDescription;
 
-    @Column(length = 500)
+    @Column(name = "image_url", length = 500)
     private String imageUrl;
 
-    @Column(nullable = false, precision = 15, scale = 2)
+    @Column(name = "unit_price", precision = 15, scale = 2)
     private BigDecimal unitPrice;
 
-    @Column(nullable = false)
+    @Column(name = "quantity")
     private Integer quantity;
 
-    @Column(nullable = false, precision = 15, scale = 2)
+    @Column(name = "subtotal", precision = 15, scale = 2)
     private BigDecimal subtotal;
 
     @CreationTimestamp
@@ -56,4 +56,46 @@ public class OrderItem {
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    @PrePersist
+    @PreUpdate
+    public void initDefaults() {
+        if (this.quantity == null || this.quantity <= 0) {
+            this.quantity = 1;
+        }
+        if (this.productName == null && this.variant != null && this.variant.getProduct() != null) {
+            this.productName = this.variant.getProduct().getName();
+        }
+        if (this.unitPrice == null && this.variant != null && this.variant.getPrice() != null) {
+            this.unitPrice = this.variant.getPrice();
+        }
+        if (this.subtotal == null && this.unitPrice != null && this.quantity != null) {
+            this.subtotal = this.unitPrice.multiply(BigDecimal.valueOf(this.quantity));
+        }
+    }
+
+    public Integer getQuantity() {
+        return (quantity != null && quantity > 0) ? quantity : 1;
+    }
+
+    public String getProductName() {
+        if (productName != null && !productName.trim().isEmpty()) {
+            return productName.trim();
+        }
+        if (variant != null && variant.getProduct() != null && variant.getProduct().getName() != null) {
+            return variant.getProduct().getName().trim();
+        }
+        return "Sản phẩm";
+    }
+
+    public BigDecimal getUnitPrice() {
+        if (unitPrice != null) return unitPrice;
+        if (variant != null && variant.getPrice() != null) return variant.getPrice();
+        return BigDecimal.ZERO;
+    }
+
+    public BigDecimal getSubtotal() {
+        if (subtotal != null) return subtotal;
+        return getUnitPrice().multiply(BigDecimal.valueOf(getQuantity()));
+    }
 }

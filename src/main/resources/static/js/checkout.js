@@ -5,6 +5,8 @@ const itemIds = JSON.parse(sessionStorage.getItem('checkoutItemIds') || '[]');
 /* ---------- State ---------- */
 let lines = [];              // các món đã chọn (từ POST /checkout)
 let baseSubtotal = null;     // tạm tính từ /checkout
+let baseDiscount = null;     // giảm giá từ /checkout
+let baseTotal = null;        // tổng thanh toán từ /checkout
 let preview = null;          // OrderPreviewDTO từ /preview-order
 let status = 'idle';         // 'idle' | 'loading' | 'ready' | 'error'
 let lastKey = null;          // "provinceId|wardCode" của lần preview thành công
@@ -92,17 +94,24 @@ async function loadCheckout() {
         lines = (d.items || []).map(i => {
             const qty = Number(i.quantity ?? i.count ?? 1);
             const price = Number(i.unitPrice || 0);
+            const origPrice = Number(i.originalPrice || price);
+            const promoPrice = i.promotionalPrice != null ? Number(i.promotionalPrice) : null;
+            const hasDiscount = promoPrice !== null && promoPrice > 0 && promoPrice < origPrice;
             return {
                 name: i.productName || '',
                 variant: i.styleValues || '',
                 image: i.productImageUrl || '/images/placeholder.webp',
                 price: price,
+                originalPrice: origPrice,
+                hasDiscount: hasDiscount,
                 qty: qty,
                 subtotal: Number(i.subtotal ?? price * qty),
                 unavailable: i.isAvailable === false
             };
         });
         baseSubtotal = Number(d.subtotal) || 0;
+        baseDiscount = Number(d.discount) || 0;
+        baseTotal = Number(d.total) || 0;
     } catch (e) {
         fail(e);
         if (e.message !== 'UNAUTHENTICATED') setTimeout(() => { location.href = '/customer/cart'; }, 1500);
@@ -180,8 +189,12 @@ function renderItems() {
              onerror="this.onerror=null;this.src='/images/placeholder.webp';">
         <div class="flex-grow-1">
           <div class="fw-semibold">${esc(l.name)}</div>
-          <div class="small text-muted">${esc(l.variant)}</div>
-          <div class="small">${money(l.price)} × ${l.qty}</div>
+          ${l.variant ? `<div class="small text-muted">${esc(l.variant)}</div>` : ''}
+          <div class="small d-flex align-items-baseline gap-1">
+            <span class="fw-semibold ${l.hasDiscount ? 'text-danger' : ''}">${money(l.price)}</span>
+            ${l.hasDiscount ? `<del class="text-muted small">${money(l.originalPrice)}</del>` : ''}
+            <span class="text-muted">× ${l.qty}</span>
+          </div>
           ${l.unavailable ? '<div class="small text-danger">Không đủ hàng hoặc ngừng bán</div>' : ''}
         </div>
         <div class="fw-bold">${money(l.subtotal)}</div>
@@ -202,9 +215,11 @@ function render() {
     const ready = status === 'ready' && preview;
     const hasUnavailable = lines.some(l => l.unavailable);
 
-    $('subtotal').textContent = ready ? money(preview.subtotal)
-        : (baseSubtotal !== null ? money(baseSubtotal) : '—');
+    // 1. Tổng tiền hàng (subtotal - tính theo giá gốc)
+    const currentSubtotal = ready ? preview.subtotal : baseSubtotal;
+    $('subtotal').textContent = currentSubtotal !== null ? money(currentSubtotal) : '—';
 
+    // 2. Phí vận chuyển
     $('shipping').textContent = {
         idle: 'Nhập đủ địa chỉ để tính',
         loading: 'Đang tính...',
@@ -212,10 +227,26 @@ function render() {
         ready: ready ? money(preview.shippingFee) : '—'
     }[status];
 
-    $('discount').textContent = ready
-        ? (Number(preview.discount) > 0 ? '−' + money(preview.discount) : money(0)) : '—';
+    // 3. Giảm giá (discount = (price - promotion_price) * count)
+    const currentDiscount = ready ? preview.discount : baseDiscount;
+    if (currentDiscount !== null) {
+        const numDiscount = Number(currentDiscount);
+        $('discount').textContent = numDiscount > 0 ? '−' + money(numDiscount) : money(0);
+    } else {
+        $('discount').textContent = '—';
+    }
+
+    // 4. Ngày giao dự kiến
     $('eta').textContent = ready ? formatEta(preview.expectedDeliveryTime) : '—';
-    $('total').textContent = ready ? money(preview.total) : '—';
+
+    // 5. Tổng thanh toán
+    if (ready) {
+        $('total').textContent = money(preview.total);
+    } else if (baseTotal !== null) {
+        $('total').textContent = money(baseTotal);
+    } else {
+        $('total').textContent = '—';
+    }
 
     const warn = $('warn');
     if (status === 'error') {

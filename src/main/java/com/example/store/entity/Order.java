@@ -19,6 +19,8 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -42,11 +44,16 @@ public class Order {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(columnDefinition = "nvarchar(255)") private String detailAddress;
-    @Column(columnDefinition = "nvarchar(100)") private String wardName;
-    @Column(columnDefinition = "nvarchar(100)") private String provinceName;
+    @Column(name = "detail_address", columnDefinition = "nvarchar(255)")
+    private String detailAddress;
 
-    @Column(nullable = false, length = 500, columnDefinition = "nvarchar(500)")
+    @Column(name = "ward_name", columnDefinition = "nvarchar(100)")
+    private String wardName;
+
+    @Column(name = "province_name", columnDefinition = "nvarchar(100)")
+    private String provinceName;
+
+    @Column(name = "full_address", length = 500, columnDefinition = "nvarchar(500)")
     private String fullAddress;
 
     @Column(nullable = false, length = 11)
@@ -60,19 +67,19 @@ public class Order {
     @Column(nullable = false)
     private Boolean isPaidBefore = false;
 
-    @Column(length = 100)
+    @Column(name = "to_name", length = 100)
     private String toName;
 
-    @Column(nullable = false, precision = 18, scale = 2)
+    @Column(precision = 18, scale = 2)
     private BigDecimal subtotal;
 
-    @Column(nullable = false, precision = 18, scale = 2)
+    @Column(precision = 18, scale = 2)
     private BigDecimal shippingFee;
 
-    @Column(nullable = false, precision = 18, scale = 2)
+    @Column(precision = 18, scale = 2)
     private BigDecimal discount;
 
-    @Column(nullable = false, precision = 18, scale = 2)
+    @Column(precision = 18, scale = 2)
     private BigDecimal total;
 
     @Column(length = 500, columnDefinition = "nvarchar(500)")
@@ -110,5 +117,104 @@ public class Order {
     public void addItem(OrderItem item) {
         items.add(item);
         item.setOrder(this);
+    }
+
+    @PrePersist
+    @PreUpdate
+    public void syncDatabaseColumns() {
+        if (!hasText(this.fullAddress)) {
+            List<String> parts = new ArrayList<>();
+            if (hasText(detailAddress)) parts.add(detailAddress.trim());
+            if (hasText(wardName)) parts.add(wardName.trim());
+            if (hasText(provinceName)) parts.add(provinceName.trim());
+            this.fullAddress = String.join(", ", parts);
+        }
+
+        if (this.subtotal == null) {
+            this.subtotal = this.total != null ? this.total : BigDecimal.ZERO;
+        }
+        if (this.shippingFee == null) {
+            this.shippingFee = BigDecimal.ZERO;
+        }
+        if (this.discount == null) {
+            this.discount = BigDecimal.ZERO;
+        }
+    }
+
+    public String getWardName() {
+        if (hasText(wardName)) return wardName.trim();
+        return extractWard(getFullAddress());
+    }
+
+    public String getProvinceName() {
+        if (hasText(provinceName)) return provinceName.trim();
+        return extractProvince(getFullAddress());
+    }
+
+    public String getFullAddress() {
+        if (hasText(fullAddress)) return fullAddress.trim();
+        List<String> parts = new ArrayList<>();
+        if (hasText(detailAddress)) parts.add(detailAddress.trim());
+        if (hasText(wardName)) parts.add(wardName.trim());
+        if (hasText(provinceName)) parts.add(provinceName.trim());
+        return String.join(", ", parts);
+    }
+
+    public String getDetailAddress() {
+        if (hasText(detailAddress)) return detailAddress.trim();
+        String full = getFullAddress();
+        if (hasText(full)) {
+            String[] parts = full.split(",");
+            if (parts.length > 0) return parts[0].trim();
+        }
+        return full;
+    }
+
+    public String getToName() {
+        if (hasText(toName)) return toName.trim();
+        if (user != null && hasText(user.getFullName())) return user.getFullName().trim();
+        return "Khách hàng";
+    }
+
+    public BigDecimal getTotal() {
+        return total != null ? total : BigDecimal.ZERO;
+    }
+
+    public BigDecimal getSubtotal() {
+        if (subtotal != null) return subtotal;
+        if (total != null) return total;
+        return BigDecimal.ZERO;
+    }
+
+    public BigDecimal getShippingFee() {
+        return shippingFee != null ? shippingFee : BigDecimal.ZERO;
+    }
+
+    public BigDecimal getDiscount() {
+        return discount != null ? discount : BigDecimal.ZERO;
+    }
+
+    private static boolean hasText(String str) {
+        return str != null && !str.trim().isEmpty();
+    }
+
+    private static String extractProvince(String addr) {
+        if (!hasText(addr)) return null;
+        String[] parts = addr.split(",");
+        if (parts.length >= 2) {
+            return parts[parts.length - 1].trim();
+        }
+        return null;
+    }
+
+    private static String extractWard(String addr) {
+        if (!hasText(addr)) return null;
+        String[] parts = addr.split(",");
+        if (parts.length >= 3) {
+            return parts[parts.length - 2].trim();
+        } else if (parts.length == 2) {
+            return parts[0].trim();
+        }
+        return null;
     }
 }
