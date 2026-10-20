@@ -27,7 +27,6 @@ public class OrderController {
     private final IOrderService orderService;
     private final IPaymentMethodService paymentMethodService;
 
-
     @PostMapping("/checkout")
     public ApiResponse<CheckoutPreviewDTO> checkout(
             @AuthenticationPrincipal CustomUserDetails user,

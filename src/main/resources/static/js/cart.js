@@ -62,13 +62,18 @@ async function api(method, url, body) {
 function normalizeItem(raw) {
     const stock = raw.availableStock ?? MAX_QTY;
     const qty = Number(raw.quantity ?? raw.count ?? 1);
+    const price = Number(raw.unitPrice || 0);
+    const origPrice = Number(raw.originalPrice || price);
+    const hasDiscount = origPrice > price;
     return {
         id: raw.id,
         slug: raw.productSlug || '',
         name: raw.productName || '',
         variant: raw.styleValues || '',
         image: raw.productImageUrl || '/images/placeholder.webp',
-        price: Number(raw.unitPrice || 0),
+        price: price,
+        originalPrice: origPrice,
+        hasDiscount: hasDiscount,
         qty: qty,
         stock: Number(stock),
         // còn bán (nếu backend có trả cờ available) và đủ hàng
@@ -148,7 +153,8 @@ function renderCart() {
           ${item.variant ? `<p class="small text-muted mb-1">${esc(item.variant)}</p>` : ''}
 
           <div class="d-flex align-items-baseline gap-2">
-            <span class="price">${fmtMoney(item.price)}</span>
+            <span class="price ${item.hasDiscount ? 'text-danger fw-bold' : ''}">${fmtMoney(item.price)}</span>
+            ${item.hasDiscount ? `<del class="text-muted small">${fmtMoney(item.originalPrice)}</del>` : ''}
           </div>
 
           ${note}

@@ -15,5 +15,15 @@ public record CartItemDTO(
         String styleValues,
         boolean isAvailable,        // còn bán
         Integer availableStock,
-        String productSlug
-) {}
+        String productSlug,
+        BigDecimal originalPrice,
+        BigDecimal promotionalPrice
+) {
+    public CartItemDTO(UUID id, UUID productId, UUID productVariantId, String productName,
+                       String productImageUrl, BigDecimal unitPrice, int quantity,
+                       BigDecimal subtotal, String styleValues, boolean isAvailable,
+                       Integer availableStock, String productSlug) {
+        this(id, productId, productVariantId, productName, productImageUrl, unitPrice, quantity,
+                subtotal, styleValues, isAvailable, availableStock, productSlug, unitPrice, null);
+    }
+}
