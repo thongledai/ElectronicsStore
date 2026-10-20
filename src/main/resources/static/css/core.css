@@ -508,3 +508,18 @@ code { color: var(--orange); background: var(--orange-light); padding: .08em .38
 .navbar-toggler { border: 1px solid var(--border); color: var(--text); padding: .35rem .6rem; }
 .navbar-toggler:focus { box-shadow: none; }
 
+/* ===== Tab trạng thái đơn hàng: màu khi được chọn ===== */
+#orderStatusTabs .nav-link.active,
+#orderStatusTabs .nav-link.active i {
+    color: #fff !important;
+}
+#orderStatusTabs .nav-link[data-status="ALL"].active           { background-color: #0d6efd; }
+#orderStatusTabs .nav-link[data-status="NOT_PROCESSED"].active { background-color: #f59f00; }
+#orderStatusTabs .nav-link[data-status="SHIPPING"].active      { background-color: #0d6efd; }
+#orderStatusTabs .nav-link[data-status="DELIVERED"].active     { background-color: #198754; }
+#orderStatusTabs .nav-link[data-status="CANCELLED"].active     { background-color: #dc3545; }
+#orderStatusTabs .nav-link[data-status="RETURNED"].active      { background-color: #6c757d; }
+#orderStatusTabs .nav-link:not(.active):hover {
+    background-color: rgba(0, 0, 0, .05);
+}
+
