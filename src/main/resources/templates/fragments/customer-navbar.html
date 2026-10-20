@@ -5,6 +5,27 @@
   ${URL} is declared once in layouts/customer-layout.html  (= <c:url value="/" var="URL"/> in JSP).
 -->
 <th:block th:fragment="navbar">
+<style>
+/* Hover trên avatar để mở popup đơn mua & tài khoản */
+@media (min-width: 576px) {
+  .js-account-dropdown {
+    position: relative;
+  }
+  .js-account-dropdown:hover > .js-account-menu,
+  .js-account-dropdown:focus-within > .js-account-menu {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateY(0);
+  }
+  .js-account-dropdown > .js-account-menu {
+    margin-top: 0.35rem !important;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+}
+</style>
+
 <!-- ==================================================================
      ANNOUNCEMENT BAR
      ================================================================== -->
@@ -14,7 +35,7 @@
     <div class="topbar-links">
       <a th:href="@{/pages/contact}"><i class="fas fa-headset me-1"></i>Support</a>
       <a th:href="@{/pages/about}"><i class="fas fa-store me-1"></i>About Us</a>
-      <a th:href="@{/login}"><i class="fas fa-user me-1"></i>Track Order</a>
+      <a th:href="@{/customer/orders}"><i class="fas fa-box me-1"></i>Đơn mua</a>
     </div>
   </div>
 </div>
@@ -44,13 +65,13 @@
             <i class="fas fa-cart-shopping"></i>
             <span class="icon-badge js-cart-count" data-count="0">0</span>
           </a>
-          <div class="dropdown d-none d-sm-inline-flex">
+          <div class="dropdown d-none d-sm-inline-flex js-account-dropdown">
             <button class="icon-btn js-account-btn p-0 d-inline-flex align-items-center justify-content-center overflow-hidden" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Account" title="Tài khoản">
               <i class="far fa-user js-user-icon"></i>
               <img class="rounded-circle object-fit-cover js-user-avatar border shadow-sm" style="width: 34px; height: 34px; display: none;" alt="Avatar">
             <script>(function(){try{var u=JSON.parse(localStorage.getItem('technova_user')||'null');var t=localStorage.getItem('technova_jwt');if((t||(u&&u.email))&&u&&u.avatar){var b=document.currentScript.closest('.js-account-btn');if(b){var img=b.querySelector('.js-user-avatar');var ico=b.querySelector('.js-user-icon');if(img){img.src=u.avatar;img.style.display='block';}if(ico){ico.style.display='none';}}}}catch(e){}})();</script>
             </button>
-            <ul class="dropdown-menu dropdown-menu-end shadow-sm js-account-menu" style="min-width: 210px;">
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm js-account-menu" style="min-width: 220px;">
               <!-- Guest: Sign In / Register -->
               <li class="js-auth-guest">
                 <a class="dropdown-item py-2" th:href="@{/login}">
@@ -58,9 +79,14 @@
                 </a>
               </li>
 
-              <!-- Authenticated: Greeting, Profile, Change Password and Sign Out -->
+              <!-- Authenticated: Greeting, Profile, Orders, Change Password and Sign Out -->
               <li class="js-auth-user" style="display: none;">
-                <h6 class="dropdown-header js-account-greeting">My Account</h6>
+                <h6 class="dropdown-header js-account-greeting py-2 border-bottom">My Account</h6>
+              </li>
+              <li class="js-auth-user" style="display: none;">
+                <a class="dropdown-item py-2 fw-semibold" th:href="@{/customer/orders}">
+                  <i class="fas fa-box-open me-2 text-info"></i>Đơn mua
+                </a>
               </li>
               <li class="js-auth-user js-profile-item" style="display: none;">
                 <a class="dropdown-item py-2" th:href="@{/profile}">

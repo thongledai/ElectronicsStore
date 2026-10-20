@@ -3,6 +3,7 @@ package com.example.store.repository;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -13,6 +14,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import java.util.List;
 
 import com.example.store.entity.Order;
 
@@ -60,6 +62,12 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     Optional<Order> findByGhnOrderCodeForUpdate(@Param("ghnOrderCode") String ghnOrderCode);
 
     Optional<Order> findByIdAndUserId(UUID id, UUID userId);
+
+    @EntityGraph(attributePaths = {"user", "status", "payment", "items", "items.variant", "items.variant.product"})
+    @Query("select o from Order o where o.id = :id and o.user.id = :userId")
+    Optional<Order> findDetailedByIdAndUserId(@Param("id") UUID id, @Param("userId") UUID userId);
+
+    @EntityGraph(attributePaths = {"status", "payment", "items", "items.variant", "items.variant.product"})
     List<Order> findByUserIdOrderByCreatedAtDesc(UUID userId);
 
     @Query("SELECT COUNT(o) FROM Order o WHERE UPPER(o.status.name) IN ('NOT_PROCESSED', 'CONFIRMED')")
@@ -77,4 +85,10 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
 
     @Query("SELECT COALESCE(SUM(o.total), 0) FROM Order o WHERE UPPER(o.status.name) = 'DELIVERED' AND o.createdAt >= :startDate AND o.createdAt <= :endDate")
     BigDecimal calculateRevenueBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
+    @EntityGraph(attributePaths = {"status", "payment", "items", "items.variant", "items.variant.product"})
+    List<Order> findByUserIdAndStatus_NameIgnoreCaseOrderByCreatedAtDesc(UUID userId, String statusName);
+
+    @EntityGraph(attributePaths = {"status", "payment", "items", "items.variant", "items.variant.product"})
+    List<Order> findByUserIdAndStatus_NameInIgnoreCaseOrderByCreatedAtDesc(UUID userId, Collection<String> statusNames);
 }

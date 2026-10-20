@@ -47,12 +47,14 @@ public class SecurityConfig {
                     "/auth/google", "/auth/google/**", "/auth/refresh-token", "/auth/logout"
                 ).permitAll()
 
-
                 // Reset & Set Password & Status APIs (must be authenticated)
                 .requestMatchers("/auth/reset-password", "/auth/set-password", "/auth/has-password").authenticated()
 
-                // Cart APIs (chỉ khách hàng)
-                .requestMatchers("/cart/**", "/api/cart/**", "/checkout/**", "/preview-order/**", "/orders/**").hasAnyAuthority("CUSTOMER", "ROLE_CUSTOMER")
+                // Cart & Order APIs & Pages (chỉ khách hàng)
+                .requestMatchers(
+                    "/cart/**", "/api/cart/**", "/checkout/**", "/preview-order/**",
+                    "/orders", "/orders/**", "/customer/orders", "/customer/orders/**"
+                ).hasAnyAuthority("CUSTOMER", "ROLE_CUSTOMER")
 
                 // Role-based reset password pages
                 .requestMatchers("/manager/reset-password").hasAnyAuthority("MANAGER", "ROLE_MANAGER")

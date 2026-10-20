@@ -185,8 +185,9 @@
             ${hasDiscount ? `<span class="price-old">${formatMoney(originalPrice)}</span>` : ''}
           </div>
           ${stockText}
-          <button class="btn btn-brand btn-sm w-100 mt-auto" type="button"${stock <= 0 ? ' disabled' : ''}>
-            <i class="fas fa-cart-plus me-1"></i>Add to cart
+          <button class="btn btn-brand btn-sm w-100 mt-auto js-add-cart" type="button"
+                  data-slug="${escapeHtml(slug)}"${stock <= 0 || !slug ? ' disabled' : ''}>
+            <i class="fas fa-cart-plus me-1"></i>Thêm vào giỏ
           </button>
         </div>
       </article>
@@ -337,14 +338,100 @@
     loadPage(1);
   });
 
-  window.addEventListener('popstate', () => {
-    setFormFromUrl();
-    loadPage(currentPage, false);
-  });
+    window.addEventListener('popstate', () => {
+        setFormFromUrl();
+        loadPage(currentPage, false);
+    });
 
-  setFormFromUrl();
-  fetchCategories().then(() => {
+    /* ===== ADD TO CART: mặc định 1 sản phẩm, variant giá cao nhất còn hàng ===== */
+    const addingSlugs = new Set();
+
+    function notify(title, text, type) {
+        if (window.showToast) window.showToast(title, text, type);
+        else alert(text);
+    }
+
+    function effectivePrice(variant) {
+        const promo = Number(variant.promotionalPrice);
+        return promo > 0 ? promo : (Number(variant.price) || 0);
+    }
+
+    function pickDefaultVariant(variants) {
+        const inStock = variants.filter(v => Number(v.quantity) > 0);
+        if (!inStock.length) return null;
+        return inStock.reduce((best, v) => effectivePrice(v) > effectivePrice(best) ? v : best);
+    }
+
+    async function addToCart(button) {
+        const slug = button.dataset.slug;
+        if (!slug || addingSlugs.has(slug)) return;
+        addingSlugs.add(slug);
+
+        const oldHtml = button.innerHTML;
+        button.disabled = true;
+        button.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+        try {
+            const productRes = await fetch('/api/products/' + encodeURIComponent(slug), {
+                headers: { Accept: 'application/json' }
+            });
+            if (!productRes.ok) throw new Error('HTTP ' + productRes.status);
+            const productBody = await productRes.json();
+            const variants = productBody?.success && productBody.data?.variants;
+
+            if (!Array.isArray(variants) || !variants.length) {
+                notify('Thông báo', 'Sản phẩm chưa có phiên bản để mua', 'warning');
+                return;
+            }
+            const variant = pickDefaultVariant(variants);
+            if (!variant) {
+                notify('Thông báo', 'Sản phẩm tạm hết hàng', 'warning');
+                return;
+            }
+
+            const res = await fetch('/cart/items', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productVariantId: variant.id, count: 1 })
+            });
+
+            if (res.status === 401) {
+                window.location.href = '/login?error=unauthorized';
+                return;
+            }
+
+            let body = null;
+            try { body = await res.json(); } catch (e) { /* không có body JSON */ }
+
+            if (!res.ok || !body || body.success === false) {
+                notify('Lỗi', body?.message || 'Không thể thêm vào giỏ hàng', 'danger');
+                return;
+            }
+
+            notify('Đã thêm', body.message || 'Đã thêm vào giỏ hàng', 'success');
+            if (typeof refreshCartBadge === 'function') refreshCartBadge();
+        } catch (error) {
+            console.error('Lỗi thêm vào giỏ:', error);
+            notify('Lỗi', 'Không thể kết nối máy chủ', 'danger');
+        } finally {
+            addingSlugs.delete(slug);
+            button.disabled = false;
+            button.innerHTML = oldHtml;
+        }
+    }
+
+    grid.addEventListener('click', event => {
+        const button = event.target.closest('.js-add-cart');
+        if (!button || button.disabled) return;
+        event.preventDefault();
+        event.stopPropagation();
+        addToCart(button);
+    });
+
     setFormFromUrl();
-    loadPage(currentPage, false);
-  });
+    fetchCategories().then(() => {
+        setFormFromUrl();
+        loadPage(currentPage, false);
+    });
 })();
