@@ -42,16 +42,15 @@
                     th:attr="data-order-id=${order.id},
                              data-order-code=${orderCodes[order.id]},
                              data-customer=${order.user.fullName},
-                             data-total=${#numbers.formatDecimal(order.amountFromUser, 0, 'COMMA', 0, 'POINT')},
+                             data-total=${#numbers.formatDecimal(order.total, 0, 'COMMA', 0, 'POINT')},
                              data-has-shipment=${order.ghnOrderCode != null}">
                     <td><span class="delivery-order-id" th:text="${orderCodes[order.id]}">#D867DEF1</span></td>
                     <td><span class="delivery-customer-name" th:text="${order.user.fullName}">Khách hàng</span><span class="delivery-secondary" th:text="${order.phone}">Số điện thoại</span></td>
                     <td><span th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy')}">14/10/2026</span><span class="delivery-secondary" th:text="${#temporals.format(order.createdAt, 'HH:mm')}">14:30</span></td>
-                    <td><span class="delivery-money" th:text="|${#numbers.formatDecimal(order.amountFromUser, 0, 'COMMA', 0, 'POINT')} ₫|">0 ₫</span></td>
+                    <td><span class="delivery-money" th:text="|${#numbers.formatDecimal(order.total, 0, 'COMMA', 0, 'POINT')} ₫|">0 ₫</span></td>
                     <td><span class="delivery-status status-neutral order-status-label" th:attr="data-order-status=${order.status.name}">Đang cập nhật</span></td>
                     <td class="delivery-ghn-cell">
                         <span class="delivery-ghn-code" th:text="${order.ghnOrderCode != null ? order.ghnOrderCode : 'Chưa tạo vận đơn'}">Chưa tạo vận đơn</span>
-                        <span class="delivery-status status-neutral ghn-status-label" th:attr="data-ghn-status=${order.ghnStatus}">Chưa có thông tin</span>
                     </td>
                     <td>
                         <div class="delivery-table-actions">

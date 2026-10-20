@@ -1,6 +1,8 @@
 package com.example.store.service.delivery.impl;
 
 import java.text.Normalizer;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
@@ -167,8 +169,8 @@ public class GhnDeliveryServiceImpl implements IGhnDeliveryService {
         GhnCreateOrderResponse result = apiClient.createOrder(request);
 
         order.setGhnOrderCode(result.getOrderCode());
-        order.setGhnOrderCode(result.getOrderCode());
-        order.setShippingFee(result.getTotalFee());
+        if (result.getExpectedDeliveryTime() != null)
+            order.setExpectedDeliveryDate(LocalDateTime.ofInstant(Instant.parse(result.getExpectedDeliveryTime()), VIETNAM));
         orderRepository.save(order);
         return response(order, false);
     }
