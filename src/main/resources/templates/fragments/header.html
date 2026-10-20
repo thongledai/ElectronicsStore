@@ -18,6 +18,13 @@
   <!-- Apply saved theme before first paint (no white flash in dark mode) -->
   <script>(function(){try{var t=localStorage.getItem("technova_theme");if(t)document.documentElement.setAttribute("data-theme",JSON.parse(t));else if(window.matchMedia("(prefers-color-scheme: dark)").matches)document.documentElement.setAttribute("data-theme","dark")}catch(e){}})();</script>
 
+  <!-- Apply logged-in auth state before first paint (no flash of Guest / Sign In in dropdown) -->
+  <script>(function(){try{var u=JSON.parse(localStorage.getItem('technova_user')||'null');var t=localStorage.getItem('technova_jwt');if(t||(u&&u.email)){document.documentElement.classList.add('user-logged-in');}}catch(e){}})();</script>
+  <style>
+    html.user-logged-in .js-auth-guest { display: none !important; }
+    html.user-logged-in .js-auth-user { display: block !important; }
+  </style>
+
   <!-- Google Fonts: Plus Jakarta Sans & Be Vietnam Pro (Full Vietnamese glyphs & Modern Tech UI) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

@@ -2,38 +2,181 @@
 <html lang="vi" th:replace="~{layouts/dashboard-layout :: layout('Thống kê hệ thống', 'manager', 'statistics', ~{::section.content})}">
 <head><title>Thống kê hệ thống | TechNova</title></head>
 <body>
-<section class="content"><div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4"><div><h1 class="title">Thống kê hệ thống</h1>
-<div class="subtitle">Thống kê doanh thu, người dùng mới và đơn hàng.</div>
-</div>
-<button class="btn btn-primary btn-sm" data-demo-action="Thêm mới"><i class="fa-solid fa-plus me-1"></i>Thêm mới</button></div>
-<div class="row g-3 mb-4"><div class="col-6 col-xl-3"><div class="stat"><div class="d-flex justify-content-between"><span class="statlabel">Doanh thu tháng</span><div class="staticon"><i class="fa-solid fa-wallet"></i></div>
-</div>
-<div class="statvalue">₫248,6M</div>
-<div class="muted">Tăng 12,8%</div>
-</div>
-</div>
-<div class="col-6 col-xl-3"><div class="stat"><div class="d-flex justify-content-between"><span class="statlabel">Người dùng mới</span><div class="staticon"><i class="fa-solid fa-users"></i></div>
-</div>
-<div class="statvalue">326</div>
-<div class="muted">Tháng 10/2026</div>
-</div>
-</div>
-<div class="col-6 col-xl-3"><div class="stat"><div class="d-flex justify-content-between"><span class="statlabel">Đơn hàng hoàn tất</span><div class="staticon"><i class="fa-solid fa-check"></i></div>
-</div>
-<div class="statvalue">1.106</div>
-<div class="muted">86% tổng đơn</div>
-</div>
-</div>
-</div>
-<div class="panel mb-3"><div class="row g-3"><div class="col-md-4"><label class="form-label">Loại thống kê</label><select class="form-select"><option>Doanh thu</option><option>Người dùng mới</option><option>Đơn hàng</option></select></div>
-<div class="col-md-4"><label class="form-label">Khoảng thời gian</label><select class="form-select"><option>Theo ngày</option><option>Theo tháng</option><option>Theo năm</option></select></div>
-<div class="col-md-4"><label class="form-label">Loại biểu đồ</label><select class="form-select"><option>Đường</option><option>Cột</option><option>Tròn</option></select></div>
-</div>
-</div>
-<div class="panel"><h2 class="paneltitle mb-3">Biểu đồ thống kê</h2>
-<div class="chart"><div><i class="fa-solid fa-chart-line fa-2x mb-2"></i><br>Khu vực hiển thị biểu đồ<br><small>Có thể tích hợp Chart.js khi có backend</small></div>
-</div>
-</div>
+<section class="content">
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div>
+      <h1 class="title">Thống kê hệ thống</h1>
+      <div class="subtitle">Phân tích chuyên sâu doanh thu, đơn hàng và xu hướng bán hàng.</div>
+    </div>
+    <a th:href="@{/manager/index}" class="btn btn-outline-secondary btn-sm">
+      <i class="fa-solid fa-arrow-left me-1"></i>Về trang Tổng quan
+    </a>
+  </div>
+
+  <!-- KPI tóm tắt trong kỳ -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="stat">
+        <div class="d-flex justify-content-between">
+          <span class="statlabel" id="statPeriodRevenueLabel">Doanh thu trong kỳ</span>
+          <div class="staticon"><i class="fa-solid fa-wallet"></i></div>
+        </div>
+        <div class="statvalue text-primary" id="statPeriodRevenue">...</div>
+        <div class="muted" id="statPeriodRevenueNote">Theo trạng thái đã chọn</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="stat">
+        <div class="d-flex justify-content-between">
+          <span class="statlabel">Số lượng đơn hàng</span>
+          <div class="staticon"><i class="fa-solid fa-check"></i></div>
+        </div>
+        <div class="statvalue" id="statPeriodOrders">...</div>
+        <div class="muted">Đơn hàng phát sinh trong kỳ</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="stat">
+        <div class="d-flex justify-content-between">
+          <span class="statlabel">Khách hàng mới</span>
+          <div class="staticon"><i class="fa-solid fa-users"></i></div>
+        </div>
+        <div class="statvalue" id="statPeriodUsers">...</div>
+        <div class="muted">Đăng ký tài khoản trong kỳ</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Thanh bộ lọc tương tác -->
+  <div class="panel mb-4">
+    <div class="row g-3 align-items-end">
+      <div class="col-sm-6 col-lg-3">
+        <label class="form-label small fw-semibold" for="filterPeriod">Khoảng thời gian</label>
+        <select class="form-select form-select-sm" id="filterPeriod">
+          <option value="7days">7 ngày gần nhất</option>
+          <option value="30days" selected>30 ngày gần nhất</option>
+          <option value="this_month">Tháng này</option>
+          <option value="this_year">Năm nay (12 tháng)</option>
+          <option value="custom">Tùy chọn khoảng ngày...</option>
+        </select>
+      </div>
+
+      <div class="col-sm-6 col-lg-3">
+        <label class="form-label small fw-semibold" for="filterOrderStatus">Trạng thái đơn hàng</label>
+        <select class="form-select form-select-sm" id="filterOrderStatus">
+          <option value="DELIVERED" selected>Đã giao hàng (Thực thu)</option>
+          <option value="NOT_PROCESSED">Chờ xác nhận</option>
+          <option value="CONFIRMED">Đã xác nhận</option>
+          <option value="SHIPPING">Đang giao hàng</option>
+          <option value="CANCELLED">Đã hủy</option>
+          <option value="RETURNED">Trả hàng</option>
+          <option value="ALL">Tất cả trạng thái</option>
+        </select>
+      </div>
+
+      <div class="col-sm-6 col-lg-3">
+        <label class="form-label small fw-semibold" for="filterType">Chỉ số thống kê</label>
+        <select class="form-select form-select-sm" id="filterType">
+          <option value="revenue" selected>Doanh thu (VNĐ)</option>
+          <option value="orders">Số lượng đơn hàng</option>
+        </select>
+      </div>
+
+      <div class="col-sm-6 col-lg-3">
+        <label class="form-label small fw-semibold" for="filterChartType">Loại biểu đồ</label>
+        <select class="form-select form-select-sm" id="filterChartType">
+          <option value="bar" selected>Biểu đồ Cột</option>
+          <option value="line">Biểu đồ Đường</option>
+        </select>
+      </div>
+
+      <!-- Khung tùy chỉnh ngày -->
+      <div class="col-12" id="customDateBox" style="display: none;">
+        <div class="d-flex flex-wrap align-items-center gap-2 p-2 rounded bg-light border">
+          <div class="d-flex align-items-center gap-1">
+            <span class="small text-muted">Từ ngày:</span>
+            <input type="date" class="form-control form-control-sm" id="filterStartDate">
+          </div>
+          <div class="d-flex align-items-center gap-1">
+            <span class="small text-muted">Đến ngày:</span>
+            <input type="date" class="form-control form-control-sm" id="filterEndDate">
+          </div>
+          <button class="btn btn-primary btn-sm" id="btnApplyCustomDate" type="button">
+            <i class="fa-solid fa-filter me-1"></i>Áp dụng
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Biểu đồ phân tích chính -->
+  <div class="panel mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="paneltitle mb-0" id="mainChartTitle">Xu hướng Doanh thu</h2>
+      <span class="muted small" id="chartSubtitle">Đang nạp dữ liệu...</span>
+    </div>
+    <div style="position: relative; height: 320px; width: 100%;">
+      <canvas id="analyticsChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Hàng phân tích chi tiết: Top sản phẩm + Cơ cấu danh mục -->
+  <div class="row g-4">
+    <!-- Top 5 sản phẩm bán chạy nhất -->
+    <div class="col-lg-7">
+      <div class="panel h-100">
+        <h2 class="paneltitle mb-3">Top 5 sản phẩm bán chạy nhất <span class="muted small fw-normal">(Đã nhận hàng)</span></h2>
+        <div class="table-responsive">
+          <table class="table align-middle" id="topProductsTable">
+            <thead>
+              <tr>
+                <th style="width: 50px;">Ảnh</th>
+                <th>Tên sản phẩm</th>
+                <th class="text-center" style="width: 80px;">Đã bán</th>
+                <th class="text-end" style="width: 120px;">Doanh thu</th>
+              </tr>
+            </thead>
+            <tbody id="topProductsBody">
+              <tr>
+                <td colspan="4" class="text-center text-muted py-4">Đang tải danh sách...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cơ cấu doanh số theo danh mục -->
+    <div class="col-lg-5">
+      <div class="panel h-100">
+        <h2 class="paneltitle mb-3">Cơ cấu doanh số danh mục</h2>
+        <div style="position: relative; height: 200px; width: 100%; margin-bottom: 1rem;">
+          <canvas id="categoryChart"></canvas>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-sm align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Danh mục</th>
+                <th class="text-end">Doanh số</th>
+                <th class="text-end">Tỷ trọng</th>
+              </tr>
+            </thead>
+            <tbody id="categoryTableBody">
+              <tr>
+                <td colspan="3" class="text-center text-muted py-3">Đang tải...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Thư viện Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- Logic JS Thống kê -->
+  <script th:src="@{/js/manager/statistics.js}" defer></script>
 </section>
 </body>
 </html>

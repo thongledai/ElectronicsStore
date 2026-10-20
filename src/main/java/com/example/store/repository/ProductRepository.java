@@ -234,4 +234,6 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
             @Param("categoryId") UUID categoryId,
             @Param("brandId") Long brandId,
             Pageable pageable);
+
+    long countByIsActiveTrue();
 }

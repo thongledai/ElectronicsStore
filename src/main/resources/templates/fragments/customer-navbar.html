@@ -48,6 +48,7 @@
             <button class="icon-btn js-account-btn p-0 d-inline-flex align-items-center justify-content-center overflow-hidden" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Account" title="Tài khoản">
               <i class="far fa-user js-user-icon"></i>
               <img class="rounded-circle object-fit-cover js-user-avatar border shadow-sm" style="width: 34px; height: 34px; display: none;" alt="Avatar">
+            <script>(function(){try{var u=JSON.parse(localStorage.getItem('technova_user')||'null');var t=localStorage.getItem('technova_jwt');if((t||(u&&u.email))&&u&&u.avatar){var b=document.currentScript.closest('.js-account-btn');if(b){var img=b.querySelector('.js-user-avatar');var ico=b.querySelector('.js-user-icon');if(img){img.src=u.avatar;img.style.display='block';}if(ico){ico.style.display='none';}}}}catch(e){}})();</script>
             </button>
             <ul class="dropdown-menu dropdown-menu-end shadow-sm js-account-menu" style="min-width: 210px;">
               <!-- Guest: Sign In / Register -->
@@ -81,6 +82,7 @@
                   </button>
                 </form>
               </li>
+              <script>(function(){try{var u=JSON.parse(localStorage.getItem('technova_user')||'null');var t=localStorage.getItem('technova_jwt');if(t||(u&&u.email)){var m=document.currentScript.closest('.js-account-menu');if(m){m.querySelectorAll('.js-auth-guest').forEach(function(e){e.style.display='none';});m.querySelectorAll('.js-auth-user').forEach(function(e){e.style.display='block';});if(u&&u.name){var g=m.querySelector('.js-account-greeting');if(g)g.textContent='Hello, '+u.name.split(' ')[0];}}}}catch(e){}})();</script>
             </ul>
           </div>
         </div>
@@ -110,6 +112,7 @@
               </a>
           </li>          
         </ul>
+        <script>(function(){try{var r=(localStorage.getItem('technova_role')||'').toUpperCase().replace('ROLE_','');if(!r){var u=JSON.parse(localStorage.getItem('technova_user')||'null');if(u&&u.role)r=String(u.role).toUpperCase().replace('ROLE_','');}if(!r){var t=localStorage.getItem('technova_jwt');if(t&&t.split('.').length===3){var p=JSON.parse(atob(t.split('.')[1]));if(p&&p.role)r=String(p.role).toUpperCase().replace('ROLE_','');}}if(r==='MANAGER'){var m=document.querySelector('.js-nav-manager');if(m)m.style.display='block';}else if(r==='EMPLOYEE'){var e=document.querySelector('.js-nav-employee');if(e)e.style.display='block';}}catch(err){}})();</script>
 
       </div>
 
