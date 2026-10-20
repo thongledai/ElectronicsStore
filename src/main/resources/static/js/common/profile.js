@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const mgmtLink = document.querySelector('.js-mgmt-link');
           if (mgmtLink && roleUpper !== 'CUSTOMER') {
             mgmtLink.style.display = 'flex';
-            const rolePath = roleUpper === 'MANAGER' ? '/manager/index' : (roleUpper === 'EMPLOYEE' ? '/employee/index' : '/shipper/index');
+            const rolePath = roleUpper === 'MANAGER' ? '/manager/index' : (roleUpper === 'EMPLOYEE' ? '/employee/orders' : '/shipper/index');
             mgmtLink.setAttribute('href', rolePath);
           }
         }
@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const mgmtLink = document.querySelector('.js-mgmt-link');
       if (mgmtLink && roleUpper !== 'CUSTOMER') {
         mgmtLink.style.display = 'flex';
-        const rolePath = roleUpper === 'MANAGER' ? '/manager/index' : (roleUpper === 'EMPLOYEE' ? '/employee/index' : '/shipper/index');
+        const rolePath = roleUpper === 'MANAGER' ? '/manager/index' : (roleUpper === 'EMPLOYEE' ? '/employee/orders' : '/shipper/index');
         mgmtLink.setAttribute('href', rolePath);
       }
 

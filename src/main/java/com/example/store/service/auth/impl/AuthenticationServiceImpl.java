@@ -371,7 +371,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         if (roleName == null) return "/customer/index";
         return switch (roleName.toUpperCase()) {
             case "MANAGER", "ROLE_MANAGER" -> "/manager/index";
-            case "EMPLOYEE", "ROLE_EMPLOYEE" -> "/employee/index";
+            case "EMPLOYEE", "ROLE_EMPLOYEE" -> "/employee/orders";
             case "SHIPPER", "ROLE_SHIPPER" -> "/shipper/index";
             case "CUSTOMER", "ROLE_CUSTOMER" -> "/customer/index";
             default -> "/customer/index";
