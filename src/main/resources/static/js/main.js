@@ -1,4 +1,4 @@
-/* ==========================================================================
+﻿/* ==========================================================================
    TechNova Electronics — Core Script (loaded on every page)
    --------------------------------------------------------------------------
    Responsibilities:
@@ -1060,6 +1060,25 @@ function initAccountLabel() {
       document.cookie = 'JWT_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
       document.cookie = 'REFRESH_TOKEN=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
       document.cookie = 'JSESSIONID=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    });
+  });
+
+  // Hover vao avatar de tu dong mo popup menu (Don mua, Profile...)
+  document.querySelectorAll('.js-account-dropdown').forEach(dd => {
+    let timer;
+    const btn = dd.querySelector('.js-account-btn');
+    dd.addEventListener('mouseenter', () => {
+      clearTimeout(timer);
+      if (window.bootstrap && btn) {
+        bootstrap.Dropdown.getOrCreateInstance(btn).show();
+      }
+    });
+    dd.addEventListener('mouseleave', () => {
+      timer = setTimeout(() => {
+        if (window.bootstrap && btn) {
+          bootstrap.Dropdown.getOrCreateInstance(btn).hide();
+        }
+      }, 180);
     });
   });
 }

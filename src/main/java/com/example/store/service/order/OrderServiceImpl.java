@@ -14,9 +14,9 @@ import com.example.store.service.cart.ICartService;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -155,6 +155,80 @@ public class OrderServiceImpl implements IOrderService {
         cartItemRepository.deleteAll(items);
 
         return orderMapper.toOrderReviewDTO(order);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CustomerOrderResponseDTO> getCustomerOrders(UUID userId, String status) {
+        String filter = normalizeStatus(status);
+        List<Order> orders;
+
+        if (filter == null) {
+            // Lấy tất cả đơn hàng của khách hàng
+            orders = orderRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        } else if ("SHIPPING".equalsIgnoreCase(filter)) {
+            // Trạng thái "Đang giao" bao gồm cả SHIPPING và các đơn CONFIRMED (đã xác nhận)
+            orders = orderRepository.findByUserIdAndStatus_NameInIgnoreCaseOrderByCreatedAtDesc(
+                    userId, List.of("SHIPPING", "CONFIRMED"));
+        } else {
+            // Lọc chính xác theo tên trạng thái (ví dụ: NOT_PROCESSED, DELIVERED, CANCELLED, RETURNED)
+            orders = orderRepository.findByUserIdAndStatus_NameIgnoreCaseOrderByCreatedAtDesc(userId, filter);
+        }
+
+        return orders.stream()
+                .map(orderMapper::toCustomerOrderResponseDTO)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public CustomerOrderResponseDTO getCustomerOrderDetail(UUID userId, UUID orderId) {
+        Order order = orderRepository.findDetailedByIdAndUserId(orderId, userId)
+                .orElseThrow(() -> new AppException(OrderErrorCode.ORDER_NOT_FOUND));
+        return orderMapper.toCustomerOrderResponseDTO(order);
+    }
+
+    @Override
+    @Transactional
+    public void cancelCustomerOrder(UUID userId, UUID orderId, CancelOrderRequest req) {
+        Order order = orderRepository.findDetailedByIdAndUserId(orderId, userId)
+                .orElseThrow(() -> new AppException(OrderErrorCode.ORDER_NOT_FOUND));
+
+        String currentStatus = order.getStatus() != null ? order.getStatus().getName() : "";
+        if (!"NOT_PROCESSED".equalsIgnoreCase(currentStatus)) {
+            throw new AppException(OrderErrorCode.ORDER_CANNOT_BE_CANCELLED);
+        }
+
+        OrderStatus cancelled = orderStatusRepository.findByNameIgnoreCase("CANCELLED")
+                .orElseThrow(() -> new AppException(OrderErrorCode.ORDER_STATUS_NOT_CONFIGURED));
+
+        order.setStatus(cancelled);
+
+        // Bổ sung lý do hủy vào ghi chú đơn hàng nếu có
+        if (req != null && StringUtils.hasText(req.reason())) {
+            String note = order.getNote();
+            String reasonText = "[Lý do hủy đơn: " + req.reason().trim() + "]";
+            order.setNote(StringUtils.hasText(note) ? note + " " + reasonText : reasonText);
+        }
+
+        // Hoàn trả lại số lượng tồn kho cho các variant trong đơn
+        for (OrderItem item : order.getItems()) {
+            if (item.getVariant() != null && item.getQuantity() != null && item.getQuantity() > 0) {
+                ProductVariant variant = item.getVariant();
+                int currentQty = variant.getQuantity() != null ? variant.getQuantity() : 0;
+                variant.setQuantity(currentQty + item.getQuantity());
+                variantRepository.save(variant);
+            }
+        }
+
+        orderRepository.save(order);
+    }
+
+    private String normalizeStatus(String status) {
+        if (!StringUtils.hasText(status) || "ALL".equalsIgnoreCase(status.trim())) {
+            return null;
+        }
+        return status.trim().toUpperCase();
     }
 
     private Map<UUID, ProductVariant> lockVariants(List<CartItem> items) {

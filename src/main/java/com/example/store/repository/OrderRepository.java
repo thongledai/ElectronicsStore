@@ -1,7 +1,9 @@
 package com.example.store.repository;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,7 +12,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import java.util.List;
 
 import com.example.store.entity.Order;
 
@@ -39,5 +40,17 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     Optional<Order> findByGhnOrderCodeForUpdate(@Param("ghnOrderCode") String ghnOrderCode);
 
     Optional<Order> findByIdAndUserId(UUID id, UUID userId);
+
+    @EntityGraph(attributePaths = {"user", "status", "payment", "items", "items.variant", "items.variant.product"})
+    @Query("select o from Order o where o.id = :id and o.user.id = :userId")
+    Optional<Order> findDetailedByIdAndUserId(@Param("id") UUID id, @Param("userId") UUID userId);
+
+    @EntityGraph(attributePaths = {"status", "payment", "items", "items.variant", "items.variant.product"})
     List<Order> findByUserIdOrderByCreatedAtDesc(UUID userId);
+
+    @EntityGraph(attributePaths = {"status", "payment", "items", "items.variant", "items.variant.product"})
+    List<Order> findByUserIdAndStatus_NameIgnoreCaseOrderByCreatedAtDesc(UUID userId, String statusName);
+
+    @EntityGraph(attributePaths = {"status", "payment", "items", "items.variant", "items.variant.product"})
+    List<Order> findByUserIdAndStatus_NameInIgnoreCaseOrderByCreatedAtDesc(UUID userId, Collection<String> statusNames);
 }
