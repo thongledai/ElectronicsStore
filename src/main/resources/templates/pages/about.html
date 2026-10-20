@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" th:replace="~{layouts/customer-layout :: layout(
-        'About Us — TechNova Electronics',
-        'Learn about TechNova Electronics — our story, our values, our team and the promises we make to every customer.',
+<html lang="vi" th:replace="~{layouts/customer-layout :: layout(
+        'Về Chúng Tôi — TechNova Electronics',
+        'Tìm hiểu về TechNova Electronics — câu chuyện của chúng tôi, đội ngũ phát triển và sứ mệnh mang đến sản phẩm công nghệ chính hãng cho mọi khách hàng.',
         ~{::main}, ~{}, 'about.js', false)}">
-<head><title>About Us — TechNova Electronics</title></head>
+<head><title>Về Chúng Tôi — TechNova Electronics</title></head>
 <body>
 
 <main>
@@ -11,11 +11,11 @@
   <!-- PAGE HEAD -->
   <section class="page-head">
     <div class="container">
-      <h1>About TechNova Electronics</h1>
+      <h1>Về TechNova Electronics</h1>
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a th:href="@{/customer/index}">Home</a></li>
-          <li class="breadcrumb-item active" aria-current="page">About</li>
+          <li class="breadcrumb-item"><a th:href="@{/customer/index}">Trang chủ</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Giới thiệu</li>
         </ol>
       </nav>
     </div>
@@ -29,54 +29,50 @@
       <div class="row align-items-center g-5">
 
         <div class="col-lg-6 reveal">
-          <span class="section-eyebrow"><i class="fas fa-book-open"></i>Our story</span>
-          <h2 class="section-title">A gadget store built by people who actually use the gadgets</h2>
+          <span class="section-eyebrow"><i class="fas fa-book-open"></i>Câu chuyện của chúng tôi</span>
+          <h2 class="section-title">Cửa hàng công nghệ được xây dựng bởi những người đam mê công nghệ</h2>
           <p class="text-muted">
-            TechNova started in 2019 as a two-person repair counter in Patiala. Customers kept
-            asking the same question — "where can I buy this without worrying it's a fake?" —
-            and we kept not having a good answer. So we became the answer.
+            TechNova Electronics được sáng lập và phát triển bởi nhóm kỹ sư công nghệ tại TP. Hồ Chí Minh.
+            Xuất phát từ câu hỏi mà mọi người tiêu dùng đều băn khoăn — "Mua thiết bị điện tử ở đâu để luôn an tâm về chất lượng và không lo hàng giả?" — chúng tôi đã quyết định xây dựng TechNova để trở thành câu trả lời đáng tin cậy nhất.
           </p>
           <p class="text-muted">
-            Today we stock 25 carefully chosen products across five categories. That number is
-            deliberately small. Every item on this site has been unboxed, used and argued about
-            by our team before it earned a place in the catalogue. If we would not recommend it
-            to a friend, we do not sell it.
+            Chúng tôi tập trung vào các dòng sản phẩm chọn lọc chất lượng cao thuộc các danh mục điện thoại, laptop, phụ kiện và thiết bị thông minh. Mỗi sản phẩm có mặt trên nền tảng đều trải qua quá trình kiểm thử nghiêm ngặt, đảm bảo nguồn gốc rõ ràng và chế độ bảo hành uy tín.
           </p>
 
           <div class="row g-3 mt-3">
             <div class="col-6">
               <div class="d-flex align-items-center gap-2">
                 <i class="fas fa-circle-check text-success"></i>
-                <span class="small">100% genuine, brand-sourced stock</span>
+                <span class="small">100% chính hãng từ các thương hiệu uy tín</span>
               </div>
             </div>
             <div class="col-6">
               <div class="d-flex align-items-center gap-2">
                 <i class="fas fa-circle-check text-success"></i>
-                <span class="small">Transparent, no-hidden-fee pricing</span>
+                <span class="small">Giá cả minh bạch, không phí ẩn</span>
               </div>
             </div>
             <div class="col-6">
               <div class="d-flex align-items-center gap-2">
                 <i class="fas fa-circle-check text-success"></i>
-                <span class="small">Support staffed by real technicians</span>
+                <span class="small">Hỗ trợ kỹ thuật bởi đội ngũ chuyên môn</span>
               </div>
             </div>
             <div class="col-6">
               <div class="d-flex align-items-center gap-2">
                 <i class="fas fa-circle-check text-success"></i>
-                <span class="small">Free doorstep pickup for returns</span>
+                <span class="small">Đổi trả nhanh chóng, giao hàng tận nơi</span>
               </div>
             </div>
           </div>
 
           <a th:href="@{/customer/products}" class="btn btn-brand btn-lg mt-4">
-            <i class="fas fa-bag-shopping me-2"></i>Browse Our Catalogue
+            <i class="fas fa-bag-shopping me-2"></i>Khám phá danh mục sản phẩm
           </a>
         </div>
 
         <div class="col-lg-6 reveal" data-delay="1">
-          <img th:src="@{/images/about-store.svg}" alt="Illustration of the TechNova Electronics storefront"
+          <img th:src="@{/images/about-store.svg}" alt="Giao diện cửa hàng TechNova Electronics"
                class="w-100 rounded" style="box-shadow:var(--shadow-lg)" width="640" height="460">
         </div>
 
@@ -92,26 +88,26 @@
       <div class="row g-3 g-md-4">
         <div class="col-6 col-lg-3 reveal">
           <div class="stat-card">
-            <div class="stat-num" data-count-to="50000" data-suffix="+">0</div>
-            <div class="stat-lbl">Orders delivered</div>
+            <div class="stat-num" data-count-to="100" data-suffix="%">0</div>
+            <div class="stat-lbl">Sản phẩm chính hãng</div>
           </div>
         </div>
         <div class="col-6 col-lg-3 reveal" data-delay="1">
           <div class="stat-card">
-            <div class="stat-num" data-count-to="7" data-suffix=" yrs">0</div>
-            <div class="stat-lbl">Years in business</div>
+            <div class="stat-num" data-count-to="99" data-suffix="%">0</div>
+            <div class="stat-lbl">Khách hàng hài lòng</div>
           </div>
         </div>
         <div class="col-6 col-lg-3 reveal" data-delay="2">
           <div class="stat-card">
-            <div class="stat-num" data-count-to="25" data-suffix="">0</div>
-            <div class="stat-lbl">Curated products</div>
+            <div class="stat-num" data-count-to="24" data-suffix="/7">0</div>
+            <div class="stat-lbl">Hỗ trợ trực tuyến</div>
           </div>
         </div>
         <div class="col-6 col-lg-3 reveal" data-delay="3">
           <div class="stat-card">
-            <div class="stat-num" data-count-to="98" data-suffix="%">0</div>
-            <div class="stat-lbl">Satisfaction rate</div>
+            <div class="stat-num" data-count-to="7" data-suffix=" ngày">0</div>
+            <div class="stat-lbl">Chính sách đổi trả</div>
           </div>
         </div>
       </div>
@@ -119,91 +115,36 @@
   </section>
 
   <!-- ================================================================
-       VALUES
-       ================================================================ -->
-  <section class="section pt-0">
-    <div class="container">
-      <div class="section-head text-center">
-        <span class="section-eyebrow"><i class="fas fa-heart"></i>What we stand for</span>
-        <h2 class="section-title">Four promises we don't break</h2>
-        <p class="section-subtitle">These aren't posters on a wall — they're the rules we use to decide what to stock and how to handle problems.</p>
-      </div>
-
-      <div class="row g-4">
-        <div class="col-md-6 col-lg-3 reveal">
-          <div class="value-card">
-            <div class="v-icon"><i class="fas fa-certificate"></i></div>
-            <h5>Authenticity first</h5>
-            <p>Every unit is sourced from the brand or an authorised national distributor. Serial numbers are verifiable, and warranty claims go through official channels.</p>
-          </div>
-        </div>
-        <div class="col-md-6 col-lg-3 reveal" data-delay="1">
-          <div class="value-card">
-            <div class="v-icon"><i class="fas fa-scale-balanced"></i></div>
-            <h5>Honest pricing</h5>
-            <p>The price you see includes tax. No handling fees appear at checkout, and we never inflate an MRP just to advertise a bigger discount.</p>
-          </div>
-        </div>
-        <div class="col-md-6 col-lg-3 reveal" data-delay="2">
-          <div class="value-card">
-            <div class="v-icon"><i class="fas fa-hand-holding-heart"></i></div>
-            <h5>Support that helps</h5>
-            <p>Our support team are technicians, not script readers. They can actually diagnose your problem, and they have authority to issue a replacement on the spot.</p>
-          </div>
-        </div>
-        <div class="col-md-6 col-lg-3 reveal" data-delay="3">
-          <div class="value-card">
-            <div class="v-icon"><i class="fas fa-recycle"></i></div>
-            <h5>Responsible e-waste</h5>
-            <p>We take back any old device you buy a replacement for, free of charge, and route it to a certified recycler. Packaging is plastic-free by default.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ================================================================
-       TIMELINE
+       JOURNEY / TIMELINE
        ================================================================ -->
   <section class="section pt-0">
     <div class="container">
       <div class="row g-5">
 
         <div class="col-lg-5">
-          <span class="section-eyebrow"><i class="fas fa-timeline"></i>Our journey</span>
-          <h2 class="section-title">From a repair counter to 50,000 orders</h2>
+          <span class="section-eyebrow"><i class="fas fa-timeline"></i>Hành trình phát triển</span>
+          <h2 class="section-title">Từ đề tài công nghệ đến nền tảng thương mại hiện đại</h2>
           <p class="text-muted">
-            Growth has been deliberately slow. We have turned down distribution deals that would
-            have forced us to stock products we do not believe in, and we would do it again.
+            TechNova được xây dựng với mục tiêu ứng dụng công nghệ hiện đại nhất (Spring Boot 3, JWT Authentication, Microservices, tích hợp API vận chuyển GHN) để tạo nên một hệ thống mua sắm an toàn, tốc độ và trải nghiệm mượt mà.
           </p>
         </div>
 
         <div class="col-lg-7">
           <div class="timeline">
             <div class="timeline-item reveal">
-              <div class="year">2019</div>
-              <h5>The repair counter</h5>
-              <p>Two engineers, one table, and a growing queue of people who couldn't find genuine parts anywhere in the city.</p>
-            </div>
-            <div class="timeline-item reveal">
-              <div class="year">2021</div>
-              <h5>First online storefront</h5>
-              <p>We listed 12 products and sold out of all of them in six weeks. The catalogue has stayed intentionally small ever since.</p>
-            </div>
-            <div class="timeline-item reveal">
-              <div class="year">2023</div>
-              <h5>Same-city 24-hour delivery</h5>
-              <p>Our own delivery fleet launched in Patiala and Chandigarh, cutting average delivery time from four days to under a day.</p>
+              <div class="year">2024</div>
+              <h5>Khởi đầu &amp; Nghiên cứu kiến trúc</h5>
+              <p>Phân tích nghiệp vụ thương mại điện tử, thiết kế cơ sở dữ liệu quan hệ và mô hình xác thực đa tầng với Access Token &amp; Refresh Token.</p>
             </div>
             <div class="timeline-item reveal">
               <div class="year">2025</div>
-              <h5>Nationwide shipping</h5>
-              <p>Partnering with three logistics providers let us reach every serviceable PIN code in India within four business days.</p>
+              <h5>Xây dựng nền tảng cốt lõi</h5>
+              <p>Hoàn thiện hệ thống quản lý sản phẩm, giỏ hàng, phân quyền người dùng (Customer, Manager, Employee, Shipper) và thiết kế giao diện Responsive.</p>
             </div>
             <div class="timeline-item reveal">
               <div class="year">2026</div>
-              <h5>50,000 orders and counting</h5>
-              <p>A 98% satisfaction rate and a return rate under 2% — numbers we're prouder of than the order count itself.</p>
+              <h5>Tích hợp dịch vụ &amp; Tối ưu hóa toàn diện</h5>
+              <p>Tích hợp hệ sinh thái giao vận thông minh GHN, tự động hóa phiên làm việc mượt mà và triển khai hệ thống quản trị chuyên sâu.</p>
             </div>
           </div>
         </div>
@@ -218,63 +159,64 @@
   <section class="section pt-0">
     <div class="container">
       <div class="section-head text-center">
-        <span class="section-eyebrow"><i class="fas fa-users"></i>The people</span>
-        <h2 class="section-title">Meet the team</h2>
-        <p class="section-subtitle">Small team, short chain of command. When you email us, one of these people reads it.</p>
+        <span class="section-eyebrow"><i class="fas fa-users"></i>Đội ngũ phát triển</span>
+        <h2 class="section-title">Nhóm thực hiện dự án</h2>
+        <p class="section-subtitle">Đội ngũ kỹ thuật trực tiếp thiết kế, phát triển và vận hành hệ thống TechNova Electronics.</p>
       </div>
 
-      <div class="row g-4">
-        <div class="col-6 col-lg-3 reveal">
-          <div class="team-card">
-            <div class="team-avatar">RS</div>
-            <h5>Ravneet Singh</h5>
-            <div class="role">Founder &amp; CEO</div>
-            <p>Started the original repair counter. Still personally tests every laptop before it goes on the site.</p>
-            <div class="team-social">
-              <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-              <a href="#" aria-label="X"><i class="fab fa-x-twitter"></i></a>
+      <div class="row g-4 justify-content-center">
+
+        <!-- Thành viên 1: Phan Ngọc Trung -->
+        <div class="col-md-6 col-lg-4 reveal">
+          <div class="team-card h-100 p-4">
+            <div class="team-avatar mb-3" style="background: linear-gradient(135deg, #0d6efd, #0b5ed7); color: #fff; font-weight: 700;">PT</div>
+            <h5 class="mb-1">Phan Ngọc Trung</h5>
+            <div class="role text-primary fw-semibold mb-3">Trưởng nhóm &amp; Fullstack Developer</div>
+            <p class="text-muted small">
+              Phụ trách kiến trúc hệ thống tổng thể, bảo mật tài khoản &amp; xác thực JWT/Token, tối ưu hóa cơ sở dữ liệu và vận hành hệ thống đơn hàng.
+            </p>
+            <div class="team-social mt-auto pt-2">
+              <a href="mailto:phanngoctrung2006@gmail.com" title="Email" aria-label="Email"><i class="fas fa-envelope"></i></a>
+              <a href="tel:0343089214" title="Điện thoại" aria-label="Phone"><i class="fas fa-phone"></i></a>
+              <a href="https://github.com" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><i class="fab fa-github"></i></a>
             </div>
           </div>
         </div>
 
-        <div class="col-6 col-lg-3 reveal" data-delay="1">
-          <div class="team-card">
-            <div class="team-avatar">AK</div>
-            <h5>Ananya Kapoor</h5>
-            <div class="role">Head of Operations</div>
-            <p>Runs sourcing and logistics. Responsible for the fact that 94% of orders ship within 24 hours.</p>
-            <div class="team-social">
-              <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-              <a href="#" aria-label="X"><i class="fab fa-x-twitter"></i></a>
+        <!-- Thành viên 2: Lê Đại Thông -->
+        <div class="col-md-6 col-lg-4 reveal" data-delay="1">
+          <div class="team-card h-100 p-4">
+            <div class="team-avatar mb-3" style="background: linear-gradient(135deg, #198754, #157347); color: #fff; font-weight: 700;">ĐT</div>
+            <h5 class="mb-1">Lê Đại Thông</h5>
+            <div class="role text-success fw-semibold mb-3">Backend Developer &amp; System Architect</div>
+            <p class="text-muted small">
+              Phát triển các dịch vụ giao vận GHN, quản lý kho hàng, danh mục sản phẩm, tính năng khuyến mãi và xử lý nghiệp vụ đơn hàng.
+            </p>
+            <div class="team-social mt-auto pt-2">
+              <a href="mailto:phanngoctrung2006@gmail.com" title="Email" aria-label="Email"><i class="fas fa-envelope"></i></a>
+              <a href="tel:0343089214" title="Điện thoại" aria-label="Phone"><i class="fas fa-phone"></i></a>
+              <a href="https://github.com" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><i class="fab fa-github"></i></a>
             </div>
           </div>
         </div>
 
-        <div class="col-6 col-lg-3 reveal" data-delay="2">
-          <div class="team-card">
-            <div class="team-avatar">MJ</div>
-            <h5>Mohit Jain</h5>
-            <div class="role">Lead Technician</div>
-            <p>Fifteen years repairing laptops and phones. If a product has a design flaw, he finds it in week one.</p>
-            <div class="team-social">
-              <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-              <a href="#" aria-label="X"><i class="fab fa-x-twitter"></i></a>
+        <!-- Thành viên 3: Trần Ngọc Thiện -->
+        <div class="col-md-6 col-lg-4 reveal" data-delay="2">
+          <div class="team-card h-100 p-4">
+            <div class="team-avatar mb-3" style="background: linear-gradient(135deg, #0dcaf0, #0aa2c0); color: #fff; font-weight: 700;">TT</div>
+            <h5 class="mb-1">Trần Ngọc Thiện</h5>
+            <div class="role text-info fw-semibold mb-3">Frontend Developer &amp; UI-UX Designer</div>
+            <p class="text-muted small">
+              Xây dựng giao diện người dùng hiện đại, tối ưu hóa tốc độ tải trang, nâng cao trải nghiệm khách hàng và tương thích đa thiết bị.
+            </p>
+            <div class="team-social mt-auto pt-2">
+              <a href="mailto:phanngoctrung2006@gmail.com" title="Email" aria-label="Email"><i class="fas fa-envelope"></i></a>
+              <a href="tel:0343089214" title="Điện thoại" aria-label="Phone"><i class="fas fa-phone"></i></a>
+              <a href="https://github.com" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><i class="fab fa-github"></i></a>
             </div>
           </div>
         </div>
 
-        <div class="col-6 col-lg-3 reveal" data-delay="3">
-          <div class="team-card">
-            <div class="team-avatar">SV</div>
-            <h5>Shreya Verma</h5>
-            <div class="role">Customer Experience</div>
-            <p>Leads the support desk. Holds the record for the fastest replacement dispatch: 41 minutes.</p>
-            <div class="team-social">
-              <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-              <a href="#" aria-label="X"><i class="fab fa-x-twitter"></i></a>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </section>
@@ -285,8 +227,8 @@
   <section class="section pt-0" id="faq">
     <div class="container">
       <div class="section-head text-center">
-        <span class="section-eyebrow"><i class="fas fa-circle-question"></i>Questions</span>
-        <h2 class="section-title">Frequently asked questions</h2>
+        <span class="section-eyebrow"><i class="fas fa-circle-question"></i>Giải đáp thắc mắc</span>
+        <h2 class="section-title">Câu hỏi thường gặp</h2>
       </div>
 
       <div class="row justify-content-center">
@@ -296,14 +238,12 @@
             <div class="accordion-item">
               <h3 class="accordion-header">
                 <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
-                  Are your products genuine and warranty-backed?
+                  Sản phẩm tại TechNova có chính hãng và đầy đủ bảo hành không?
                 </button>
               </h3>
               <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
                 <div class="accordion-body">
-                  Yes. Everything we sell comes from the brand directly or from an authorised
-                  national distributor, and ships with a valid manufacturer warranty. The invoice
-                  we issue is accepted at every brand service centre in India.
+                  Có. 100% sản phẩm được TechNova cung cấp đều là hàng chính hãng từ các nhà phân phối chính thức, đi kèm phiếu bảo hành tiêu chuẩn từ nhà sản xuất. Hóa đơn mua hàng tại TechNova được công nhận tại tất cả trung tâm bảo hành trên toàn quốc.
                 </div>
               </div>
             </div>
@@ -311,14 +251,12 @@
             <div class="accordion-item">
               <h3 class="accordion-header">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
-                  How long does delivery take?
+                  Thời gian giao hàng mất bao lâu?
                 </button>
               </h3>
               <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                 <div class="accordion-body">
-                  Orders placed before 4 PM are dispatched the same day. Delivery takes 24 hours
-                  within Patiala and Chandigarh, and 2–4 business days elsewhere in India. You'll
-                  get a live tracking link by SMS and email as soon as your parcel leaves us.
+                  Các đơn hàng tại khu vực TP. Hồ Chí Minh được hỗ trợ giao hỏa tốc trong ngày. Đối với các tỉnh thành khác trên toàn quốc, thời gian giao hàng từ 1 đến 3 ngày làm việc thông qua đối tác vận chuyển Giao Hàng Nhanh (GHN). Bạn có thể theo dõi hành trình đơn hàng theo thời gian thực.
                 </div>
               </div>
             </div>
@@ -326,14 +264,12 @@
             <div class="accordion-item">
               <h3 class="accordion-header">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
-                  What is your return policy?
+                  Chính sách đổi trả sản phẩm như thế nào?
                 </button>
               </h3>
               <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                 <div class="accordion-body">
-                  You have 7 days from delivery to return anything for a full refund, no reason
-                  required. The product needs its original box and accessories. We arrange a free
-                  doorstep pickup and refund within 5 business days of collection.
+                  TechNova hỗ trợ đổi trả miễn phí trong vòng 7 ngày kể từ khi nhận hàng nếu sản phẩm có lỗi từ nhà sản xuất hoặc không đúng mô tả. Sản phẩm cần giữ nguyên hộp và đầy đủ phụ kiện kèm theo.
                 </div>
               </div>
             </div>
@@ -341,43 +277,12 @@
             <div class="accordion-item">
               <h3 class="accordion-header">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
-                  Do you offer student discounts?
+                  TechNova hỗ trợ những phương thức thanh toán nào?
                 </button>
               </h3>
               <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                 <div class="accordion-body">
-                  We do. Verified students get 15% off using the code <code>STUDENT15</code> at
-                  checkout. Bulk orders for college labs and departments are quoted separately —
-                  <a th:href="@{/pages/contact}">get in touch</a> with your requirement.
-                </div>
-              </div>
-            </div>
-
-            <div class="accordion-item">
-              <h3 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5">
-                  Which payment methods do you accept?
-                </button>
-              </h3>
-              <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                <div class="accordion-body">
-                  UPI, all major credit and debit cards, RuPay, net banking and no-cost EMI on
-                  orders above ₹10,000. Cash on delivery is available for orders under ₹25,000
-                  in serviceable areas.
-                </div>
-              </div>
-            </div>
-
-            <div class="accordion-item">
-              <h3 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq6">
-                  Can I track my order without an account?
-                </button>
-              </h3>
-              <div id="faq6" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                <div class="accordion-body">
-                  Yes — the tracking link in your confirmation SMS works without logging in.
-                  Creating an account simply keeps your order history and addresses in one place.
+                  Chúng tôi hỗ trợ đa dạng phương thức: Thanh toán khi nhận hàng (COD), Chuyển khoản ngân hàng trực tuyến và các ví điện tử phổ biến. Mọi giao dịch đều được mã hóa bảo mật tuyệt đối.
                 </div>
               </div>
             </div>
@@ -392,18 +297,17 @@
   <section class="section pt-0">
     <div class="container">
       <div class="newsletter text-center reveal">
-        <h2 class="section-title text-white">Ready to find your next gadget?</h2>
-        <p class="mb-4">25 products, five categories, zero fakes. Have a question first? Our team replies within a few hours.</p>
+        <h2 class="section-title text-white">Bạn cần tìm thiết bị công nghệ phù hợp?</h2>
+        <p class="mb-4">Khám phá danh mục thiết bị chính hãng tại TechNova hoặc liên hệ ngay với nhóm chúng tôi để được tư vấn chu đáo nhất.</p>
         <div class="d-flex justify-content-center gap-2 flex-wrap">
-          <a th:href="@{/customer/products}" class="btn btn-accent btn-lg"><i class="fas fa-bag-shopping me-2"></i>Shop Now</a>
-          <a th:href="@{/pages/contact}" class="btn btn-lg btn-outline-light rounded-pill px-4"><i class="fas fa-envelope me-2"></i>Contact Us</a>
+          <a th:href="@{/customer/products}" class="btn btn-accent btn-lg"><i class="fas fa-bag-shopping me-2"></i>Xem sản phẩm</a>
+          <a th:href="@{/pages/contact}" class="btn btn-lg btn-outline-light rounded-pill px-4"><i class="fas fa-envelope me-2"></i>Liên hệ nhóm</a>
         </div>
       </div>
     </div>
   </section>
 
 </main>
-
 
 </body>
 </html>
