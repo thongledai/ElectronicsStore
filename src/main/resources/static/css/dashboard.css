@@ -1,0 +1,234 @@
+/* ==========================================================================
+   18. ROLE DASHBOARDS — Manager / Employee / Shipper
+   --------------------------------------------------------------------------
+   Used by layouts/dashboard-layout.html (<html data-role="...">).
+   Everything is scoped under [data-role] so the storefront is not affected,
+   and it only relies on the design tokens from section 01 (dark mode works).
+   ========================================================================== */
+[data-role] .layout { display: flex; min-height: 100vh; }
+[data-role] .main {
+    flex: 1;
+    min-width: 0;
+    width: calc(100% - 260px);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Giữ sidebar đứng yên; chỉ vùng nội dung chính cuộn trên desktop. */
+[data-role="employee"] .layout,
+[data-role="manager"] .layout {
+  height: 100vh;
+  min-height: 0;
+  overflow: hidden;
+}
+[data-role="employee"] .role-navbar,
+[data-role="manager"] .role-navbar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 30;
+    width: 260px;
+    height: 100vh;
+    max-height: 100vh;
+    overflow-y: auto;
+}
+[data-role="employee"] .main,
+[data-role="manager"] .main {
+    height: 100vh;
+    margin-left: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+/* ---- Sidebar ---- */
+[data-role] .role-navbar {
+  width: 260px; flex: 0 0 260px; position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  display: flex; flex-direction: column; gap: .35rem; padding: 1.25rem 1rem;
+  background: var(--navy); color: #fff;
+}
+[data-role] .role-brand-row { display: flex; align-items: center; justify-content: space-between; }
+[data-role] .role-navbar .brand { font-size: 1.4rem; font-weight: 700; color: #fff; letter-spacing: -.02em; }
+[data-role] .role-navbar .brand span { color: var(--orange); }
+[data-role] .nav-caption {
+  margin: 1rem .6rem .4rem; font-size: .72rem; font-weight: 600; letter-spacing: .1em;
+  text-transform: uppercase; color: rgba(255, 255, 255, .5);
+}
+[data-role] .nav-links { flex-direction: column; gap: .2rem; }
+[data-role] .nav-links a {
+  display: flex; align-items: center; gap: .75rem; padding: .62rem .85rem;
+  border-radius: var(--radius-sm); color: rgba(255, 255, 255, .72); font-size: .92rem; font-weight: 500;
+  transition: background var(--transition), color var(--transition);
+}
+[data-role] .nav-links a i { width: 1.2rem; text-align: center; }
+[data-role] .nav-links a:hover { background: rgba(255, 255, 255, .08); color: #fff; }
+[data-role] .nav-links a.active { background: var(--blue); color: #fff; box-shadow: var(--shadow-brand); }
+[data-role] .nav-actions {
+  margin-top: auto; padding-top: 1rem; display: flex; align-items: center; gap: .5rem;
+  border-top: 1px solid rgba(255, 255, 255, .12);
+}
+[data-role] .nav-actions > .dropdown { margin-left: auto; }
+[data-role] .theme-toggle, [data-role] .nav-toggle {
+  width: 38px; height: 38px; border: 0; border-radius: 50%; cursor: pointer;
+  background: rgba(255, 255, 255, .1); color: #fff; transition: background var(--transition);
+}
+[data-role] .theme-toggle:hover, [data-role] .nav-toggle:hover { background: rgba(255, 255, 255, .2); }
+[data-role] .nav-toggle { display: none; }
+[data-role] .role-avatar, [data-role] .avatar {
+  width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; flex: none;
+  background: var(--orange); color: #fff; font-weight: 700;
+}
+[data-role] .role-avatar { margin-left: auto; }
+[data-role] .avatar { background: var(--blue); }
+
+/* ---- Top bar & content ---- */
+[data-role] .top {
+  position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem; padding: .75rem 1.5rem; background: var(--surface); border-bottom: 1px solid var(--border);
+}
+[data-role] .content {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    padding: 1rem 1.25rem;
+    box-sizing: border-box;
+}
+
+[data-role] .content > .container {
+    width: 100%;
+    max-width: none;
+}
+[data-role] .muted { color: var(--text-muted); font-size: .85rem; }
+[data-role] .title { font-size: 1.6rem; margin: 0; }
+[data-role] .subtitle { color: var(--text-muted); font-size: .92rem; }
+
+/* ---- Cards ---- */
+[data-role] .panel, [data-role] .stat {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--shadow-sm); padding: 1.25rem;
+}
+[data-role] .stat { height: 100%; transition: transform var(--transition), box-shadow var(--transition); }
+[data-role] .stat:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+[data-role] .statlabel { font-size: .85rem; color: var(--text-muted); font-weight: 500; }
+[data-role] .statvalue { font-size: 1.75rem; font-weight: 700; line-height: 1.2; margin: .35rem 0 .15rem; }
+[data-role] .staticon {
+  width: 40px; height: 40px; border-radius: var(--radius-sm); display: grid; place-items: center;
+  background: var(--blue-light); color: var(--blue);
+}
+[data-role] .paneltitle { font-size: 1.05rem; margin: 0; }
+[data-role] .chart {
+  min-height: 280px; display: grid; place-items: center; text-align: center; color: var(--text-muted);
+  border: 2px dashed var(--border-strong); border-radius: var(--radius);
+}
+
+/* ---- Tables ---- */
+[data-role] .table { --bs-table-bg: transparent; --bs-table-color: var(--text); --bs-table-border-color: var(--border); color: var(--text); margin-bottom: 1rem; }
+[data-role] .table thead th {
+  font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap;
+  color: var(--text-muted); background: var(--surface-2); border-bottom-color: var(--border);
+}
+[data-role] .table td { vertical-align: middle; border-color: var(--border); }
+[data-role] .table tbody tr:hover { background: var(--surface-2); }
+
+/* ---- Status pills & action buttons ---- */
+[data-role] .status {
+  display: inline-block; padding: .22rem .7rem; border-radius: var(--radius-pill);
+  font-size: .78rem; font-weight: 600; white-space: nowrap;
+}
+[data-role] .status.blue   { background: rgba(27, 109, 243, .14); color: var(--blue); }
+[data-role] .status.green  { background: rgba(18, 184, 134, .16); color: var(--success); }
+[data-role] .status.yellow { background: rgba(245, 159, 0, .17);  color: var(--warning); }
+[data-role] .status.red    { background: rgba(224, 49, 49, .14);  color: var(--danger); }
+[data-role] .status.purple { background: rgba(132, 94, 247, .16); color: #845ef7; }
+[data-role] .status.orange { background: rgba(255, 122, 24, .16); color: var(--orange); }
+[data-role] .action {
+  width: 34px; height: 34px; border-radius: var(--radius-sm); cursor: pointer;
+  border: 1px solid var(--border); background: var(--surface); color: var(--text-muted);
+  transition: all var(--transition);
+}
+[data-role] .action:hover { background: var(--blue); border-color: var(--blue); color: #fff; }
+
+/* ---- Bootstrap controls follow the theme ---- */
+[data-role] .form-control, [data-role] .form-select {
+  background-color: var(--surface); color: var(--text); border-color: var(--border-strong);
+}
+[data-role] .form-control::placeholder { color: var(--text-muted); }
+[data-role] .form-control:focus, [data-role] .form-select:focus {
+  background-color: var(--surface); color: var(--text); border-color: var(--blue);
+  box-shadow: 0 0 0 .2rem rgba(27, 109, 243, .18);
+}
+[data-role] .btn-outline-secondary { color: var(--text-muted); border-color: var(--border-strong); }
+[data-role] .btn-outline-secondary:hover { background: var(--surface-3); color: var(--text); border-color: var(--border-strong); }
+[data-role] .btn-primary { --bs-btn-bg: var(--blue); --bs-btn-border-color: var(--blue); --bs-btn-hover-bg: var(--blue-dark); --bs-btn-hover-border-color: var(--blue-dark); }
+
+/* ---- Demo toast (js/roles.js) ---- */
+.role-toast-stack { position: fixed; right: 16px; bottom: 16px; z-index: 1080; display: flex; flex-direction: column; gap: .5rem; }
+.role-toast {
+  max-width: 340px; padding: .7rem 1rem; border-radius: var(--radius-sm); font-size: .88rem;
+  background: var(--navy-700); color: #fff; box-shadow: var(--shadow-lg);
+  opacity: 0; transform: translateY(8px); transition: opacity .25s, transform .25s;
+}
+.role-toast.show { opacity: 1; transform: none; }
+
+/* ---- Small screens: sidebar becomes a collapsible top bar ---- */
+@media (max-width: 991.98px) {
+  [data-role] .layout { flex-direction: column; }
+  [data-role="employee"] .layout,
+  [data-role="manager"] .layout { height: auto; min-height: 100vh; overflow: visible; }
+  [data-role] .role-navbar { position: sticky; inset: auto; top: 0; z-index: 30; width: 100%; flex: none; height: auto; max-height: 100vh; padding: .75rem 1rem; }
+[data-role="employee"] .main,
+[data-role="manager"] .main {
+    flex: 1 1 auto;
+    height: auto;
+    width: 100%;
+    margin-left: 0;
+    overflow: visible;
+}
+  [data-role] .nav-toggle { display: inline-grid; place-items: center; }
+  [data-role] .nav-caption { margin: .5rem 0 0; }
+  [data-role] .nav-actions { margin-top: .75rem; padding-top: .75rem; }
+  [data-role] .top { position: static; padding: .75rem 1rem; }
+  [data-role] .content { padding: 1rem; }
+  [data-role] .title { font-size: 1.35rem; }
+}
+
+
+.ghn-json-preview {
+    display: block;
+    max-height: 480px;
+    overflow: auto;
+    padding: 1rem;
+    margin: 0;
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: 0.5rem;
+    background: var(--bs-tertiary-bg, #f8f9fa);
+    color: var(--bs-body-color, #212529);
+    font-size: 0.875rem;
+    line-height: 1.6;
+    white-space: pre;
+    overflow-wrap: normal;
+    tab-size: 2;
+}
+
+#shipmentForm button:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+#ghnAddressMessage {
+    overflow-wrap: anywhere;
+}
+
+#ghnPreviewSection,
+#ghnPreviewPayload {
+    min-width: 0;
+}
+
+@media (max-width: 576px) {
+    .ghn-json-preview {
+        max-height: 360px;
+        padding: 0.75rem;
+        font-size: 0.8rem;
+    }
+
+    #shipmentForm .btn {
+        width: 100%;
+    }
+}

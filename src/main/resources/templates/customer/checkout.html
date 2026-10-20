@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="vi" th:replace="~{layouts/customer-layout :: layout(
+        'Checkout — TechNova Electronics',
+        'Thanh toán đơn hàng',
+        ~{::main}, ~{::#orderModal}, 'checkout.js', false)}">
+<head><title>Checkout</title></head>
+<body>
+
+<main>
+    <section class="page-head">
+        <div class="container">
+            <h1><i class="fas fa-lock me-2"></i>Thanh toán</h1>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="row g-4 align-items-start">
+
+                <!-- CỘT TRÁI: cuộn bình thường -->
+                <div class="col-lg-8 checkout-left">
+
+                    <div class="summary-panel mb-4">
+                        <h2 class="h6 mb-3"><i class="fas fa-location-dot me-2 text-primary"></i>Địa chỉ nhận hàng</h2>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small" for="toName">Họ tên người nhận</label>
+                                <input type="text" class="form-control" id="toName" placeholder="Nguyễn Văn A">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small" for="phone">Số điện thoại</label>
+                                <input type="tel" class="form-control" id="phone" placeholder="0901234567">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small" for="province">Tỉnh / Thành phố</label>
+                                <select class="form-select" id="province">
+                                    <option value="">-- Chọn tỉnh/thành --</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small" for="ward">Phường / Xã</label>
+                                <select class="form-select" id="ward" disabled>
+                                    <option value="">-- Chọn phường/xã --</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small" for="street">Số nhà, tên đường</label>
+                                <input type="text" class="form-control" id="street" placeholder="12 Lê Lợi">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small" for="note">Ghi chú (không bắt buộc)</label>
+                                <input type="text" class="form-control" id="note" maxlength="500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="summary-panel mb-4">
+                        <h2 class="h6 mb-3"><i class="fas fa-credit-card me-2 text-primary"></i>Phương thức thanh toán</h2>
+                        <div id="paymentMethods" class="d-flex flex-column gap-2">
+                            <p class="text-muted small mb-0">Đang tải...</p>
+                        </div>
+                    </div>
+
+                    <div class="summary-panel">
+                        <h2 class="h6 mb-3"><i class="fas fa-box me-2 text-primary"></i>Sản phẩm</h2>
+                        <div id="checkoutItems" class="d-flex flex-column gap-3">
+                            <p class="text-muted small mb-0">Đang tải sản phẩm...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CỘT PHẢI: dính cố định khi cuộn -->
+                <div class="col-lg-4">
+                    <div class="summary-panel checkout-sticky">
+                        <h2 class="h6 mb-3"><i class="fas fa-receipt me-2 text-primary"></i>Tóm tắt đơn hàng</h2>
+
+                        <div class="summary-row"><span>Tổng tiền hàng</span><span id="subtotal">—</span></div>
+                        <div class="summary-row"><span>Phí vận chuyển</span><span id="shipping">—</span></div>
+                        <div class="summary-row"><span>Giảm giá</span><span id="discount" class="text-success">—</span></div>
+                        <div class="summary-row"><span>Ngày giao dự kiến</span><span id="eta">—</span></div>
+
+                        <div class="summary-total">
+                            <span>Tổng thanh toán</span>
+                            <span class="grand" id="total">—</span>
+                        </div>
+
+                        <p class="small text-danger mt-2 mb-0" id="warn" hidden></p>
+
+                        <button class="btn btn-accent btn-lg w-100 mt-3" id="placeOrderBtn" type="button" disabled>
+                            <i class="fas fa-lock me-2"></i>Đặt hàng
+                        </button>
+                        <a th:href="@{/customer/cart}" class="btn btn-ghost w-100 mt-2">Quay lại giỏ hàng</a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <style>
+        .checkout-left .summary-panel {
+            position: static !important;
+            top: auto !important;
+        }
+        @media (min-width: 992px) {
+            .checkout-sticky {
+                position: sticky !important;
+                top: 90px;
+                max-height: calc(100vh - 110px);
+                overflow-y: auto;
+            }
+        }
+    </style>
+</main>
+
+<div class="modal fade" id="orderModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border)">
+            <div class="modal-body text-center p-4 p-md-5">
+                <h3 class="h4">Đặt hàng thành công!</h3>
+                <p class="text-muted">Mã đơn hàng của bạn:</p>
+                <p><strong id="orderRef"></strong></p>
+                <a th:href="@{/customer/products}" class="btn btn-brand">Tiếp tục mua sắm</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

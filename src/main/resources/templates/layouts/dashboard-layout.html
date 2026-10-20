@@ -9,13 +9,15 @@
     </html>
 
   Parameters
-    title    page title (shown in topbar and <title>)
+    title    page title (used for <title>; shipper also shows it in the topbar)
     role     'manager' | 'employee' | 'shipper'  -> picks fragments/{role}-sidebar
     active   key of the highlighted sidebar link (see each *-sidebar.html)
     content  page content                -> ~{::section.content}
 -->
 <html lang="vi" th:fragment="layout(title, role, active, content)" th:with="URL=@{/}" th:attr="data-role=${role}">
 <head th:replace="~{fragments/header :: head(${title + ' | TechNova'}, 'TechNova Electronics — khu vực quản lý')}"></head>
+<link rel="stylesheet" th:href="@{/css/dashboard.css}">
+<link rel="stylesheet" th:href="@{/css/employee-delivery.css}">
 <body>
 <script th:src="@{/js/ui-messages.js}"></script>
 <div class="layout">
@@ -23,7 +25,7 @@
   <nav th:replace="~{|fragments/${role}-sidebar| :: sidebar(${active})}"></nav>
 
   <main class="main">
-    <header th:replace="~{fragments/dashboard-topbar :: topbar(${role}, ${title})}"></header>
+    <th:block th:if="${role == 'shipper'}"><header th:replace="~{fragments/dashboard-topbar :: topbar(${role}, ${title})}"></header></th:block>
     <section th:replace="${content}"></section>
   </main>
 

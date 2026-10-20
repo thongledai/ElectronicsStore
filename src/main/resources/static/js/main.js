@@ -193,7 +193,8 @@ function dismissToast(toast) {
    ========================================================================== */
 const Cart = {
 
-  /** Raw cart array from localStorage. */
+  /** Raw
+   *  array from localStorage. */
   all() {
     const items = storageGet(STORE.cart, []);
     return Array.isArray(items) ? items : [];
@@ -218,12 +219,12 @@ const Cart = {
 
   /** True if a product id is already in the cart. */
   has(id) {
-    return this.all().some(i => i.id === Number(id));
+    return this.all().some(i => String(i.id) === String(id));
   },
 
   /** Quantity currently in the cart for a product (0 if absent). */
   qtyOf(id) {
-    const item = this.all().find(i => i.id === Number(id));
+    const item = this.all().find(i => String(i.id) === String(id));
     return item ? item.qty : 0;
   },
 
@@ -272,7 +273,7 @@ const Cart = {
     if (qty === 0) return this.remove(id, true);
 
     const items = this.all();
-    const existing = items.find(i => i.id === Number(id));
+    const existing = items.find(i => String(i.id) === String(id));
     if (existing) existing.qty = qty;
     this.save(items);
   },
@@ -280,7 +281,7 @@ const Cart = {
   /** Removes a product line entirely. */
   remove(id, silent = false) {
     const product = getProductById(id);
-    this.save(this.all().filter(i => i.id !== Number(id)));
+    this.save(this.all().filter(i => String(i.id) !== String(id)));
     if (!silent && product) {
       showToast(UiMessage.PRODUCT_REMOVED_TITLE, UiMessage.PRODUCT_REMOVED(product.name), 'info');
     }
@@ -362,7 +363,7 @@ const Wishlist = {
   },
 
   has(id) {
-    return this.all().includes(Number(id));
+    return this.all().some(savedId => String(savedId) === String(id));
   },
 
   add(id) {
@@ -375,7 +376,7 @@ const Wishlist = {
 
   remove(id, silent = false) {
     const product = getProductById(id);
-    this.save(this.all().filter(i => i !== Number(id)));
+    this.save(this.all().filter(i => String(i) !== String(id)));
     if (!silent && product) {
       showToast(UiMessage.WISHLIST_REMOVED_TITLE, UiMessage.WISHLIST_REMOVED(product.name), 'info');
     }
@@ -412,12 +413,12 @@ const Recent = {
   add(id) {
     let ids = storageGet(STORE.recent, []);
     if (!Array.isArray(ids)) ids = [];
-    ids = [Number(id), ...ids.filter(i => i !== Number(id))].slice(0, 8);
+    ids = [String(id), ...ids.filter(i => String(i) !== String(id))].slice(0, 8);
     storageSet(STORE.recent, ids);
   },
   detailed(excludeId) {
     return storageGet(STORE.recent, [])
-      .filter(id => id !== Number(excludeId))
+      .filter(id => String(id) !== String(excludeId))
       .map(id => getProductById(id))
       .filter(Boolean);
   }
@@ -567,27 +568,40 @@ function initGlobalActions() {
    ========================================================================== */
 
 /** Refreshes the cart / wishlist count bubbles in the header. */
-function updateBadges() {
-  const map = [
-    { selector: '.js-cart-count', value: Cart.count() },
-    { selector: '.js-wishlist-count', value: Wishlist.count() }
-  ];
-
-  map.forEach(({ selector, value }) => {
+/** Gán số vào mọi badge theo selector, có hiệu ứng khi số đổi. */
+function setBadge(selector, value) {
     document.querySelectorAll(selector).forEach(el => {
-      const previous = el.textContent.trim();
-      el.textContent = value;
-      el.dataset.count = value;
-      // Bump animation only when the number actually changed
-      if (previous !== String(value) && value > 0) {
-        el.classList.remove('bump');
-        void el.offsetWidth;        // force reflow so the animation replays
-        el.classList.add('bump');
-      }
+        const previous = el.textContent.trim();
+        el.textContent = value;
+        el.dataset.count = value;
+        if (previous !== String(value) && value > 0) {
+            el.classList.remove('bump');
+            void el.offsetWidth;
+            el.classList.add('bump');
+        }
     });
-  });
 }
 
+/** Số dòng trong giỏ lấy từ server. Chưa đăng nhập thì hiện 0. */
+async function refreshCartBadge() {
+    try {
+        const res = await fetch('/cart/count', {
+            credentials: 'same-origin',
+            headers: { 'Accept': 'application/json' }
+        });
+        if (!res.ok) { setBadge('.js-cart-count', 0); return; }
+        const body = await res.json();
+        setBadge('.js-cart-count', Number(body.data) || 0);
+    } catch (e) {
+        setBadge('.js-cart-count', 0);
+    }
+}
+
+/** Refreshes the cart / wishlist count bubbles in the header. */
+function updateBadges() {
+    setBadge('.js-wishlist-count', Wishlist.count());
+    refreshCartBadge();
+}
 /** Marks the current page's nav link as active. */
 function markActiveNav() {
   const current = location.pathname.replace(/\/+$/, '');
@@ -929,9 +943,14 @@ function initAccountLabel() {
 
   const syncRoleUI = (hasPass) => {
     const role = getCleanRole();
-    const isManager = isLoggedIn && (role === 'MANAGER' || role === 'ADMIN');
+    const isManager = isLoggedIn && role === 'MANAGER';
+    const isEmployee = isLoggedIn && role === 'EMPLOYEE';
     document.querySelectorAll('.js-nav-manager').forEach(el => {
       el.style.display = isManager ? 'block' : 'none';
+      document.querySelectorAll('.js-nav-employee').forEach(el => {
+        el.style.display = isEmployee ? 'block' : 'none';
+      });
+
     });
 
     let resetUrl = '/customer/reset-password';
@@ -1235,7 +1254,7 @@ function initSessionManager() {
         if (window.location.pathname.startsWith('/manager') ||
             window.location.pathname.startsWith('/employee') ||
             window.location.pathname.startsWith('/shipper') ||
-            window.location.pathname.startsWith('/customer/cart') ||
+            window.location.pathname.startsWith('/cart') ||
             window.location.pathname.startsWith('/profile')) {
           window.location.replace('/login?error=session_expired');
         }
@@ -1252,7 +1271,8 @@ initSessionManager();
 /* ==========================================================================
    15. BOOTSTRAP THE PAGE
    ========================================================================== */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  if (window.productCatalogReady) await window.productCatalogReady;
   initTheme();
   initCategoryMenu();
   initHeaderSearch();

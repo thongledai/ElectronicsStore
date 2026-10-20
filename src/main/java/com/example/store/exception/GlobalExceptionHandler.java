@@ -12,6 +12,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.example.store.dto.common.ApiResponse;
 import com.example.store.enums.ApiMessage;
@@ -96,9 +97,17 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(ApiMessage.ACCESS_DENIED));
     }
 
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiResponse<?>> handleNoResourceFound(NoResourceFoundException ex) {
+        log.debug("Tài nguyên tĩnh không tồn tại: {}", ex.getResourcePath());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error("Tài nguyên không tồn tại: " + ex.getResourcePath()));
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ApiResponse<?>> handleRuntimeException(RuntimeException ex) {
-        log.warn("Lỗi runtime: {}", ex.getMessage());
+//        log.warn("Lỗi runtime: {}", ex.getMessage());
+        log.error("Lỗi runtime", ex);
         return ResponseEntity.badRequest().body(ApiResponse.error(ex.getMessage()));
     }
 
@@ -108,6 +117,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.error(ApiMessage.INTERNAL_ERROR));
     }
+
     @ExceptionHandler(AccountNotActivatedException.class)
     public ResponseEntity<ApiResponse<Map<String, Object>>> handleAccountNotActivated(AccountNotActivatedException ex) {
         Map<String, Object> data = Map.of(

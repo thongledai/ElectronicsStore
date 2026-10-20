@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="vi"
+      th:replace="~{layouts/dashboard-layout :: layout('Chi tiết đơn hàng', 'employee', 'orders', ~{::section.content})}">
+<head><title>Chi tiết đơn hàng | TechNova</title></head>
+<body>
+<section class="content order-management delivery-page" th:attr="data-order-id=${order.id}">
+    <div class="delivery-page-header">
+        <div>
+            <a th:href="@{/employee/orders}" class="text-decoration-none small text-muted">
+                <i class="fa-solid fa-arrow-left me-1"></i>Quay lại danh sách đơn hàng
+            </a>
+            <h1 class="title mt-2">Chi tiết đơn hàng</h1>
+            <div class="delivery-detail-id">
+                <span class="delivery-order-id" th:text="${displayOrderCode}">#ORD001</span>
+                <button type="button" class="btn btn-sm btn-outline-secondary js-copy-btn"
+                        th:attr="data-copy-value=${displayOrderCode}" title="Sao chép mã đơn">
+                    <i class="fa-regular fa-copy me-1"></i>Sao chép mã đơn
+                </button>
+            </div>
+        </div>
+        <div>
+            <span id="orderStatus" class="delivery-status"
+                  th:classappend="${order.status.name == 'NOT_PROCESSED' ? 'status-warning' : (order.status.name == 'CONFIRMED' || order.status.name == 'SHIPPING' ? 'status-info' : (order.status.name == 'DELIVERED' ? 'status-success' : 'status-danger'))}"
+                  th:attr="data-order-status=${order.status.name}"
+                  th:text="${order.status.name == 'NOT_PROCESSED' ? 'Chờ xác nhận' : (order.status.name == 'CONFIRMED' ? 'Đã xác nhận' : (order.status.name == 'SHIPPING' ? 'Đang giao hàng' : (order.status.name == 'DELIVERED' ? 'Đã giao hàng' : (order.status.name == 'CANCELLED' ? 'Đã hủy' : (order.status.name == 'RETURNED' ? 'Đã hoàn hàng' : 'Đang cập nhật')))))}">
+                Trạng thái đơn
+            </span>
+        </div>
+    </div>
+
+    <!-- Thông báo tác vụ -->
+    <div id="orderNotice" class="alert d-none delivery-notice mb-3" role="status" aria-live="polite"></div>
+
+    <!-- Hàng thông tin chính -->
+    <div class="row g-3 mb-3">
+        <!-- Thông tin người nhận -->
+        <div class="col-lg-6">
+            <section class="delivery-panel">
+                <h2 class="delivery-panel-title">
+                    <span class="delivery-panel-icon" aria-hidden="true"><i class="fa-solid fa-user"></i></span>
+                    Thông tin người nhận
+                </h2>
+                <div class="delivery-recipient-line">
+                    <span class="delivery-recipient-label">Người nhận</span>
+                    <span class="delivery-recipient-value" th:text="${order.toName ?: (order.user != null ? order.user.fullName : 'Khách hàng')}">Họ tên người nhận</span>
+                </div>
+                <div class="delivery-recipient-line">
+                    <span class="delivery-recipient-label">Tài khoản đặt</span>
+                    <span class="delivery-recipient-value" th:text="${order.user != null ? order.user.fullName : 'Khách vãng lai'}">Tài khoản</span>
+                </div>
+                <div class="delivery-recipient-line">
+                    <span class="delivery-recipient-label">Số điện thoại</span>
+                    <span class="delivery-recipient-value">
+                        <a th:href="|tel:${order.phone}|" class="text-decoration-none" th:text="${order.phone}">0900000000</a>
+                    </span>
+                </div>
+                <div class="delivery-recipient-line">
+                    <span class="delivery-recipient-label">Địa chỉ nhận</span>
+                    <span class="delivery-recipient-value text-break" th:text="${order.fullAddress}">Địa chỉ giao hàng đầy đủ</span>
+                </div>
+                <div class="delivery-recipient-line">
+                    <span class="delivery-recipient-label">Ghi chú</span>
+                    <span class="delivery-recipient-value text-muted fw-normal" th:text="${order.note != null && !#strings.isEmpty(order.note) ? order.note : 'Không có ghi chú'}">Không có ghi chú</span>
+                </div>
+                <div class="delivery-recipient-line">
+                    <span class="delivery-recipient-label">Ngày đặt hàng</span>
+                    <span class="delivery-recipient-value fw-normal" th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm:ss')}">01/01/2026 10:00:00</span>
+                </div>
+            </section>
+        </div>
+
+        <!-- Thông tin vận chuyển GHN -->
+        <div class="col-lg-6">
+            <section class="delivery-panel">
+                <h2 class="delivery-panel-title">
+                    <span class="delivery-panel-icon" aria-hidden="true"><i class="fa-solid fa-truck-fast"></i></span>
+                    Thông tin vận chuyển
+                </h2>
+                <div class="delivery-facts">
+                    <div class="delivery-fact">
+                        <span class="delivery-fact-label">Mã vận đơn GHN</span>
+                        <span class="delivery-fact-value" id="ghnOrderCode" th:text="${order.ghnOrderCode ?: 'Chưa tạo vận đơn'}">Chưa tạo vận đơn</span>
+                        <button type="button" class="btn btn-sm btn-link px-0 py-1 js-copy-btn"
+                                th:if="${order.ghnOrderCode != null}"
+                                th:attr="data-copy-value=${order.ghnOrderCode}">
+                            <i class="fa-regular fa-copy me-1"></i>Sao chép mã vận đơn
+                        </button>
+                    </div>
+                    <div class="delivery-fact">
+                        <span class="delivery-fact-label">Trạng thái vận chuyển</span>
+                        <span class="delivery-status status-neutral" id="ghnStatus"
+                              th:attr="data-ghn-status=${order.ghnOrderCode != null ? order.status.name : ''}"
+                              th:text="${order.ghnOrderCode != null ? (order.status.name == 'SHIPPING' ? 'Đang giao hàng' : (order.status.name == 'DELIVERED' ? 'Đã giao hàng' : (order.status.name == 'CANCELLED' ? 'Đã hủy' : (order.status.name == 'RETURNED' ? 'Đã hoàn hàng' : 'Đã tạo vận đơn')))) : 'Chưa có thông tin'}">
+                            Chưa có thông tin
+                        </span>
+                    </div>
+                    <div class="delivery-fact">
+                        <span class="delivery-fact-label">Phí vận chuyển</span>
+                        <span class="delivery-fact-value" id="ghnShippingFee"
+                              th:text="${order.shippingFee != null ? #numbers.formatDecimal(order.shippingFee, 0, 'COMMA', 0, 'POINT') + ' ₫' : '0 ₫'}">0 ₫</span>
+                    </div>
+                    <div class="delivery-fact">
+                        <span class="delivery-fact-label">Dự kiến giao hàng</span>
+                        <span class="delivery-fact-value" id="expectedDeliveryTime"
+                              th:text="${order.expectedDeliveryDate != null ? #temporals.format(order.expectedDeliveryDate, 'dd/MM/yyyy HH:mm') : 'Chưa có dữ liệu'}">Chưa có dữ liệu</span>
+                    </div>
+                </div>
+
+                <div class="delivery-status-note mt-3">
+                    <span class="delivery-note-dot" aria-hidden="true"></span>
+                    <span>Trạng thái vận chuyển được cập nhật tự động từ đơn vị vận chuyển GHN.</span>
+                </div>
+
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-3" th:if="${order.ghnOrderCode != null}">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="refreshShipmentButton"
+                            th:attr="data-url=@{/api/employee/orders/{id}/ghn-shipment(id=${order.id})}">
+                        <i class="fa-solid fa-arrows-rotate me-1"></i>Làm mới thông tin
+                    </button>
+                    <span class="delivery-refresh-hint" id="ghnStatusUpdatedAt"
+                          th:text="${latestGhnStatusTime != null ? 'Cập nhật lúc: ' + latestGhnStatusTime : 'Chưa nhận sự kiện từ GHN'}">Chưa nhận sự kiện từ GHN</span>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Danh sách sản phẩm trong đơn -->
+    <section class="delivery-panel mb-3">
+        <h2 class="delivery-panel-title">
+            <span class="delivery-panel-icon" aria-hidden="true"><i class="fa-solid fa-boxes-stacked"></i></span>
+            Sản phẩm trong đơn hàng
+        </h2>
+        <div class="table-responsive">
+            <table class="table align-middle delivery-product-table mb-0">
+                <thead>
+                <tr>
+                    <th scope="col" style="min-width: 250px;">Sản phẩm</th>
+                    <th scope="col" style="min-width: 150px;">Phân loại</th>
+                    <th scope="col" class="text-end" style="min-width: 120px;">Đơn giá</th>
+                    <th scope="col" class="text-center" style="min-width: 100px;">Số lượng</th>
+                    <th scope="col" class="text-end" style="min-width: 130px;">Thành tiền</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="item : ${order.items}">
+                    <td>
+                        <div class="d-flex align-items-center gap-3">
+                            <img th:src="${item.imageUrl != null && !#strings.isEmpty(item.imageUrl) ? item.imageUrl : '/images/placeholder.webp'}"
+                                 alt="Ảnh sản phẩm"
+                                 class="rounded border"
+                                 style="width: 52px; height: 52px; object-fit: cover; flex-shrink: 0;"
+                                 onerror="this.onerror=null; this.src='/images/placeholder.webp';">
+                            <div>
+                                <span class="fw-semibold d-block text-truncate" style="max-width: 320px;" th:text="${item.productName}">Tên sản phẩm</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge bg-light text-dark border" th:text="${item.variantDescription != null && !#strings.isEmpty(item.variantDescription) ? item.variantDescription : 'Mặc định'}">Mặc định</span>
+                    </td>
+                    <td class="text-end">
+                        <span th:text="|${#numbers.formatDecimal(item.unitPrice, 0, 'COMMA', 0, 'POINT')} ₫|">0 ₫</span>
+                    </td>
+                    <td class="text-center">
+                        <span class="fw-semibold" th:text="${item.quantity}">1</span>
+                    </td>
+                    <td class="text-end">
+                        <strong class="text-primary" th:text="|${#numbers.formatDecimal(item.subtotal, 0, 'COMMA', 0, 'POINT')} ₫|">0 ₫</strong>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(order.items)}">
+                    <td colspan="5" class="text-center text-muted py-4">Không có sản phẩm nào trong đơn hàng này.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Tóm tắt thanh toán -->
+        <div class="delivery-order-summary mt-3 pt-3 border-top">
+            <div class="row w-100 justify-content-between align-items-center g-3">
+                <div class="col-md-6">
+                    <div class="mb-2">
+                        <span class="summary-label">Phương thức thanh toán:</span>
+                        <strong class="ms-1" th:text="${order.payment.name}">COD</strong>
+                    </div>
+                    <div>
+                        <span class="summary-label">Tình trạng thanh toán:</span>
+                        <span class="badge ms-1"
+                              th:classappend="${order.isPaidBefore ? 'bg-success' : 'bg-warning text-dark'}"
+                              th:text="${order.isPaidBefore ? 'Đã thanh toán' : 'Chưa thanh toán (Thu hộ COD)'}">Chưa thanh toán</span>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="d-flex justify-content-between py-1">
+                        <span class="text-muted">Tạm tính:</span>
+                        <span class="fw-semibold" th:text="|${#numbers.formatDecimal(order.subtotal, 0, 'COMMA', 0, 'POINT')} ₫|">0 ₫</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-1" th:if="${order.discount != null && order.discount > 0}">
+                        <span class="text-muted">Giảm giá:</span>
+                        <span class="text-success fw-semibold" th:text="|- ${#numbers.formatDecimal(order.discount, 0, 'COMMA', 0, 'POINT')} ₫|">- 0 ₫</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-1">
+                        <span class="text-muted">Phí vận chuyển:</span>
+                        <span class="fw-semibold" th:text="|${#numbers.formatDecimal(order.shippingFee, 0, 'COMMA', 0, 'POINT')} ₫|">0 ₫</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-2 border-top mt-1 align-items-baseline">
+                        <span class="fw-bold fs-6">Tổng thanh toán:</span>
+                        <span class="summary-amount text-danger fs-5 fw-bold" th:text="|${#numbers.formatDecimal(order.total, 0, 'COMMA', 0, 'POINT')} ₫|">0 ₫</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Thao tác: Xác nhận đơn hàng (Khi đơn NOT_PROCESSED) -->
+    <section class="delivery-panel mb-3" th:if="${order.status.name.equalsIgnoreCase('NOT_PROCESSED') and order.ghnOrderCode == null}">
+        <h2 class="delivery-panel-title">
+            <span class="delivery-panel-icon" aria-hidden="true"><i class="fa-solid fa-clipboard-check"></i></span>
+            Xác nhận đơn hàng
+        </h2>
+        <p class="delivery-muted-note mb-2">
+            Vui lòng kiểm tra kỹ danh sách sản phẩm, địa chỉ giao hàng và phương thức thanh toán trước khi xác nhận đơn.
+        </p>
+        <button type="button" class="btn btn-primary" id="openConfirmModalBtn" data-bs-toggle="modal" data-bs-target="#confirmOrderModal">
+            <i class="fa-solid fa-check me-1"></i>Xác nhận đơn hàng
+        </button>
+    </section>
+
+    <!-- Thao tác: Tạo vận đơn GHN (Khi đơn CONFIRMED và chưa có ghnOrderCode) -->
+    <form class="delivery-panel mb-3" id="shipmentForm"
+          th:if="${order.status.name.equalsIgnoreCase('CONFIRMED') and order.ghnOrderCode == null}"
+          th:attr="data-url=@{/api/employee/orders/{id}/ghn-shipment(id=${order.id})}">
+        <h2 class="delivery-panel-title">
+            <span class="delivery-panel-icon" aria-hidden="true"><i class="fa-solid fa-truck-ramp-box"></i></span>
+            Tạo vận đơn giao hàng GHN
+        </h2>
+        <p class="delivery-muted-note mb-3">
+            Đơn hàng đã được xác nhận. Kiểm tra hoặc điều chỉnh thông số kích thước và khối lượng kiện hàng trước khi gửi yêu cầu sang Giao Hàng Nhanh.
+        </p>
+
+        <div class="row g-3">
+            <div class="col-sm-6 col-md-3">
+                <label class="form-label small fw-semibold" for="weight">Khối lượng (gram)</label>
+                <div class="input-group">
+                    <input class="form-control" id="weight" name="weight" type="number" min="1" max="19999" step="1" required th:value="${defaultWeight}">
+                    <span class="input-group-text">g</span>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <label class="form-label small fw-semibold" for="length">Chiều dài (cm)</label>
+                <div class="input-group">
+                    <input class="form-control" id="length" name="length" type="number" min="1" max="200" step="1" required th:value="${defaultLength}">
+                    <span class="input-group-text">cm</span>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <label class="form-label small fw-semibold" for="width">Chiều rộng (cm)</label>
+                <div class="input-group">
+                    <input class="form-control" id="width" name="width" type="number" min="1" max="200" step="1" required th:value="${defaultWidth}">
+                    <span class="input-group-text">cm</span>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <label class="form-label small fw-semibold" for="height">Chiều cao (cm)</label>
+                <div class="input-group">
+                    <input class="form-control" id="height" name="height" type="number" min="1" max="200" step="1" required th:value="${defaultHeight}">
+                    <span class="input-group-text">cm</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="delivery-action-row mt-4">
+            <button class="btn btn-primary" id="createShipmentButton" type="submit">
+                <i class="fa-solid fa-truck-fast me-1"></i>Tạo vận đơn GHN
+            </button>
+            <span class="delivery-muted-note">Sau khi tạo, hệ thống sẽ tự động liên kết mã vận đơn và cập nhật trạng thái đơn hàng.</span>
+        </div>
+    </form>
+
+    <!-- Lịch sử sự kiện vận chuyển từ GHN (Nếu đã có ghnOrderCode) -->
+    <section class="delivery-panel mb-3" th:if="${order.ghnOrderCode != null}">
+        <h2 class="delivery-panel-title">
+            <span class="delivery-panel-icon" aria-hidden="true"><i class="fa-solid fa-clock-rotate-left"></i></span>
+            Lịch sử vận chuyển
+        </h2>
+        <div id="ghnEventHistory">
+            <div class="delivery-status-note mb-2" th:if="${#lists.isEmpty(ghnEvents)}">
+                <span class="delivery-note-dot" aria-hidden="true"></span>
+                <span>Chưa có sự kiện nào từ GHN. Lịch sử sẽ tự động hiển thị khi đơn vị vận chuyển cập nhật trạng thái lấy hàng, trung chuyển hoặc giao hàng.</span>
+            </div>
+            <div class="delivery-recipient-line" th:each="event : ${ghnEvents}">
+                <span class="delivery-recipient-label">
+                    <time class="ghn-event-time" th:text="${#temporals.format(event.eventTime.atZone(T(java.time.ZoneId).of('Asia/Ho_Chi_Minh')), 'dd/MM/yyyy HH:mm:ss')}">Thời gian</time>
+                </span>
+                <span class="delivery-recipient-value">
+                    <span class="badge bg-light text-dark border ghn-event-status" th:text="${event.status}">Đang xử lý</span>
+                </span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal xác nhận đơn hàng -->
+    <div class="modal fade" id="confirmOrderModal" tabindex="-1" aria-labelledby="confirmOrderModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmOrderModalLabel">
+                        <i class="fa-solid fa-circle-question text-primary me-2"></i>Xác nhận đơn hàng
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-2">Bạn có chắc chắn muốn xác nhận đơn hàng <strong th:text="${displayOrderCode}">#ORD001</strong>?</p>
+                    <ul class="list-unstyled bg-light p-3 rounded small mb-2">
+                        <li><strong>Khách hàng:</strong> <span th:text="${order.toName ?: (order.user != null ? order.user.fullName : 'Khách hàng')}">Nguyễn Văn A</span></li>
+                        <li><strong>Số điện thoại:</strong> <span th:text="${order.phone}">0900000000</span></li>
+                        <li><strong>Tổng thanh toán:</strong> <span class="text-danger fw-bold" th:text="|${#numbers.formatDecimal(order.total, 0, 'COMMA', 0, 'POINT')} ₫|">0 ₫</span></li>
+                    </ul>
+                    <p class="text-muted small mb-0">Sau khi xác nhận, đơn hàng sẽ chuyển sang trạng thái <strong>Đã xác nhận</strong> và có thể tạo vận đơn giao hàng GHN.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                    <button type="button" class="btn btn-primary" id="confirmOrderButton"
+                            th:attr="data-url=@{/api/employee/orders/{id}/confirm(id=${order.id})}">
+                        <i class="fa-solid fa-check me-1"></i>Xác nhận đơn
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script tương tác cho trang chi tiết đơn hàng -->
+    <script th:src="@{/js/employee/order-detail.js}" defer></script>
+</section>
+</body>
+</html>

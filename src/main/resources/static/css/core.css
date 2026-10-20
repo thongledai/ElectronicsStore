@@ -1,0 +1,510 @@
+/* ==========================================================================
+   TechNova Electronics — Main Stylesheet
+   --------------------------------------------------------------------------
+   Table of contents
+     01. Design tokens (colours, spacing, shadows) + dark theme overrides
+     02. Base elements & typography
+     03. Reusable utilities (buttons, badges, section headings)
+     04. Header / navigation
+     05. Hero banner
+     06. Product cards
+     07. Category tiles
+     08. Home sections (features, promos, newsletter, testimonials)
+     09. Products listing page (filters, toolbar)
+     10. Product details page (gallery, tabs, reviews)
+     11. Cart & wishlist tables
+     12. Forms (contact, login)
+     13. About page
+     14. Footer
+     15. Floating UI (toasts, back-to-top, loader)
+     16. Animations
+     17. Responsive breakpoints
+     18. Role dashboards (Manager / Employee / Shipper)
+   ========================================================================== */
+
+/* ==========================================================================
+   01. DESIGN TOKENS
+   ========================================================================== */
+:root {
+  /* Brand palette — navy base, blue action, orange accent */
+  --navy: #000000;
+  --navy-700: #12294d;
+  --navy-500: #1c3a66;
+  --blue: #1b6df3;
+  --blue-dark: #0d4fc4;
+  --blue-light: #e8f0ff;
+  --orange: #ff7a18;
+  --orange-dark: #e06400;
+  --orange-light: #fff1e5;
+
+  /* Semantic colours */
+  --success: #12b886;
+  --danger: #e03131;
+  --warning: #f59f00;
+  --star: #ffb400;
+
+  /* Surfaces & text (light theme defaults) */
+  --bg: #f5f7fb;
+  --surface: #ffffff;
+  --surface-2: #f0f3f9;
+  --surface-3: #e6ebf3;
+  --text: #12203a;
+  --text-muted: #64748b;
+  --text-inverse: #ffffff;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+
+  /* Elevation */
+  --shadow-sm: 0 1px 3px rgba(11, 27, 52, .07), 0 1px 2px rgba(11, 27, 52, .04);
+  --shadow-md: 0 6px 18px rgba(11, 27, 52, .09);
+  --shadow-lg: 0 18px 40px rgba(11, 27, 52, .14);
+  --shadow-brand: 0 12px 28px rgba(27, 109, 243, .28);
+
+  /* Shape & motion */
+  --radius-sm: 8px;
+  --radius: 14px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+  --transition: .28s cubic-bezier(.4, 0, .2, 1);
+  --header-height: 74px;
+
+  /* Layout */
+  --container-max: 1280px;
+}
+
+/* Dark theme — activated by data-theme="dark" on <html> (see js/main.js) */
+[data-theme="dark"] {
+  --bg: #0a1220;
+  --surface: #111c2e;
+  --surface-2: #16233a;
+  --surface-3: #1e2d47;
+  --text: #e8eef8;
+  --text-muted: #94a7c0;
+  --border: #223353;
+  --border-strong: #2f4468;
+  --blue-light: #16294d;
+  --orange-light: #33220f;
+  --navy: #000000;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, .4);
+  --shadow-md: 0 6px 18px rgba(0, 0, 0, .45);
+  --shadow-lg: 0 18px 40px rgba(0, 0, 0, .55);
+  --shadow-brand: 0 12px 28px rgba(27, 109, 243, .35);
+}
+
+/* ==========================================================================
+   02. BASE ELEMENTS
+   ========================================================================== */
+* { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;              /* smooth scrolling for anchor links */
+  scroll-padding-top: calc(var(--header-height) + 16px);
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.65;
+  overflow-x: hidden;
+  transition: background-color var(--transition), color var(--transition);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  letter-spacing: -.02em;
+  color: var(--text);
+}
+
+a { text-decoration: none; color: var(--blue); transition: color var(--transition); }
+a:hover { color: var(--blue-dark); }
+
+img { max-width: 100%; height: auto; }
+
+/* Container width cap matching the design grid */
+.container, .container-fluid { max-width: var(--container-max); }
+
+/* --------------------------------------------------------------------------
+   Bootstrap utility overrides
+   Bootstrap hard-codes colours for these helpers against its own light theme,
+   so they stay dark-on-dark once our dark mode is active. Re-point them at our
+   theme tokens instead.
+   -------------------------------------------------------------------------- */
+.text-muted { color: var(--text-muted) !important; }
+.text-body { color: var(--text) !important; }
+.bg-light { background-color: var(--surface-2) !important; }
+.bg-white { background-color: var(--surface) !important; }
+.border { border-color: var(--border) !important; }
+.dropdown-divider { border-color: var(--border); }
+hr { border-color: var(--border); opacity: 1; }
+
+/* Modal + offcanvas surfaces follow the theme too */
+.modal-content { background: var(--surface); color: var(--text); }
+.btn-close { filter: var(--close-filter, none); }
+[data-theme="dark"] .btn-close { filter: invert(1) grayscale(1) brightness(1.8); }
+
+/* Bootstrap pagination */
+.page-link {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text);
+  transition: background-color var(--transition), color var(--transition);
+}
+.page-link:hover { background: var(--blue-light); border-color: var(--blue); color: var(--blue); }
+.page-item.active .page-link { background: var(--blue); border-color: var(--blue); color: #fff; }
+.page-item.disabled .page-link { background: var(--surface-2); border-color: var(--border); color: var(--text-muted); }
+
+/* Inline code samples (coupon codes, demo credentials) */
+code { color: var(--orange); background: var(--orange-light); padding: .08em .38em; border-radius: 5px; }
+
+/* Custom scrollbar for a more finished feel on desktop */
+::-webkit-scrollbar { width: 11px; height: 11px; }
+::-webkit-scrollbar-track { background: var(--surface-2); }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: var(--radius-pill); }
+::-webkit-scrollbar-thumb:hover { background: var(--blue); }
+
+/* Visible focus ring for keyboard users (accessibility) */
+:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+/* ==========================================================================
+   03. REUSABLE UTILITIES
+   ========================================================================== */
+
+/* --- Buttons ------------------------------------------------------------ */
+.btn {
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+  padding: .62rem 1.5rem;
+  transition: transform var(--transition), box-shadow var(--transition),
+              background-color var(--transition), color var(--transition);
+  border: none;
+}
+.btn:active { transform: translateY(1px); }
+
+.btn-brand {
+  background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+  color: #fff;
+  box-shadow: var(--shadow-brand);
+}
+.btn-brand:hover { color: #fff; transform: translateY(-2px); box-shadow: 0 16px 32px rgba(27, 109, 243, .38); }
+
+.btn-accent {
+  background: linear-gradient(135deg, var(--orange), var(--orange-dark));
+  color: #fff;
+  box-shadow: 0 12px 28px rgba(255, 122, 24, .32);
+}
+.btn-accent:hover { color: #fff; transform: translateY(-2px); box-shadow: 0 16px 32px rgba(255, 122, 24, .42); }
+
+.btn-outline-brand {
+  border: 2px solid var(--blue);
+  color: var(--blue);
+  background: transparent;
+}
+.btn-outline-brand:hover { background: var(--blue); color: #fff; transform: translateY(-2px); }
+
+.btn-ghost {
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover { background: var(--surface-3); color: var(--text); }
+
+.btn-lg { padding: .85rem 2rem; font-size: 1.02rem; }
+
+/* --- Section headings --------------------------------------------------- */
+.section { padding: 4.5rem 0; }
+.section-tight { padding: 3rem 0; }
+
+.section-head { margin-bottom: 2.5rem; }
+
+.section-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: .78rem;
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--orange);
+  background: var(--orange-light);
+  padding: .35rem 1rem;
+  border-radius: var(--radius-pill);
+  margin-bottom: .9rem;
+}
+
+.section-title {
+  font-size: clamp(1.7rem, 3.4vw, 2.4rem);
+  margin-bottom: .6rem;
+}
+
+.section-subtitle {
+  color: var(--text-muted);
+  max-width: 620px;
+  margin: 0 auto;
+}
+
+/* Gradient text used on key headings */
+.text-gradient {
+  background: linear-gradient(120deg, var(--blue), var(--orange));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* --- Star ratings ------------------------------------------------------- */
+.stars { color: var(--star); font-size: .86rem; letter-spacing: .5px; }
+.stars i { margin-right: 1px; }
+
+/* --- Price display ------------------------------------------------------ */
+.price { font-weight: 700; color: var(--text); }
+.price-old { color: var(--text-muted); text-decoration: line-through; font-weight: 500; font-size: .88em; }
+.price-off { color: var(--success); font-weight: 600; font-size: .84em; }
+
+/* --- Badges ------------------------------------------------------------- */
+.badge-ribbon {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 3;
+  background: linear-gradient(135deg, var(--orange), var(--orange-dark));
+  color: #fff;
+  font-size: .68rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  padding: .3rem .75rem;
+  border-radius: var(--radius-pill);
+  box-shadow: 0 4px 12px rgba(255, 122, 24, .35);
+}
+
+.badge-discount {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+  background: var(--success);
+  color: #fff;
+  font-size: .7rem;
+  font-weight: 700;
+  padding: .28rem .6rem;
+  border-radius: var(--radius-sm);
+}
+
+.badge-soft {
+  background: var(--blue-light);
+  color: var(--blue);
+  font-weight: 600;
+  padding: .3rem .75rem;
+  border-radius: var(--radius-pill);
+  font-size: .78rem;
+}
+
+/* --- Cards -------------------------------------------------------------- */
+.surface-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ==========================================================================
+   04. HEADER / NAVIGATION
+   ========================================================================== */
+
+/* Thin announcement strip above the navbar */
+.topbar {
+  background: var(--navy);
+  color: rgba(255, 255, 255, .85);
+  font-size: .8rem;
+  padding: .45rem 0;
+}
+.topbar a { color: rgba(255, 255, 255, .85); }
+.topbar a:hover { color: var(--orange); }
+.topbar .topbar-links { display: flex; gap: 1.25rem; }
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  transition: box-shadow var(--transition), background-color var(--transition);
+}
+/* .is-stuck is toggled by JS once the page scrolls past 20px */
+.site-header.is-stuck { box-shadow: var(--shadow-md); }
+
+.navbar { padding: .55rem 0; min-height: var(--header-height); }
+
+.navbar-brand { display: flex; align-items: center; color: var(--text); }
+.navbar-brand img { height: 44px; width: auto; }
+
+.navbar-nav .nav-link {
+  color: var(--text);
+  font-weight: 500;
+  padding: .5rem .95rem !important;
+  border-radius: var(--radius-pill);
+  position: relative;
+  transition: color var(--transition), background-color var(--transition);
+}
+.navbar-nav .nav-link:hover { color: var(--blue); background: var(--blue-light); }
+
+/* Active page indicator */
+.navbar-nav .nav-link.active { color: var(--blue); font-weight: 600; }
+.navbar-nav .nav-link.active::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 2px;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 3px;
+  border-radius: var(--radius-pill);
+  background: var(--orange);
+}
+
+/* Header search box */
+.header-search { position: relative; flex: 1; max-width: 460px; }
+.header-search input {
+  width: 100%;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  border-radius: var(--radius-pill);
+  padding: .58rem 2.8rem .58rem 1.15rem;
+  font-size: .9rem;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.header-search input:focus {
+  outline: none;
+  border-color: var(--blue);
+  box-shadow: 0 0 0 4px rgba(27, 109, 243, .14);
+}
+.header-search button {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: var(--blue);
+  color: #fff;
+  transition: background-color var(--transition);
+}
+.header-search button:hover { background: var(--blue-dark); }
+
+/* Live search suggestions dropdown */
+.search-suggestions {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  max-height: 340px;
+  overflow-y: auto;
+  z-index: 1050;
+  display: none;
+}
+.search-suggestions.show { display: block; animation: fadeInDown .22s ease; }
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  padding: .6rem .9rem;
+  cursor: pointer;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+  transition: background-color var(--transition);
+}
+.suggestion-item:last-child { border-bottom: none; }
+.suggestion-item:hover { background: var(--surface-2); color: var(--text); }
+.suggestion-item img { width: 42px; height: 42px; object-fit: contain; border-radius: var(--radius-sm); background: var(--surface-2); }
+.suggestion-item .s-name { font-size: .87rem; font-weight: 500; line-height: 1.3; }
+.suggestion-item .s-cat { font-size: .74rem; color: var(--text-muted); }
+
+/* Header action icons (theme, wishlist, cart, account) */
+.header-actions { display: flex; align-items: center; gap: .35rem; }
+
+.icon-btn {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  border-radius: 50%;
+  font-size: 1.05rem;
+  transition: background-color var(--transition), color var(--transition), transform var(--transition);
+}
+.icon-btn:hover { background: var(--blue-light); color: var(--blue); transform: translateY(-2px); }
+
+/* Count bubbles on the cart / wishlist icons */
+.icon-badge {
+  position: absolute;
+  top: 3px;
+  right: 1px;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 5px;
+  background: var(--orange);
+  color: #fff;
+  font-size: .68rem;
+  font-weight: 700;
+  line-height: 19px;
+  text-align: center;
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--surface);
+}
+.icon-badge:empty, .icon-badge[data-count="0"] { display: none; }
+/* Pulse animation when the count changes */
+.icon-badge.bump { animation: badgeBump .45s ease; }
+
+/* Category mega-dropdown */
+.dropdown-menu {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  background: var(--surface);
+  padding: .5rem;
+}
+.dropdown-item {
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  padding: .55rem .8rem;
+  font-size: .9rem;
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  transition: background-color var(--transition), color var(--transition);
+}
+.dropdown-item:hover, .dropdown-item:focus { background: var(--blue-light); color: var(--blue); }
+.dropdown-item i { width: 18px; text-align: center; color: var(--orange); }
+
+/* Mobile menu toggle */
+.navbar-toggler { border: 1px solid var(--border); color: var(--text); padding: .35rem .6rem; }
+.navbar-toggler:focus { box-shadow: none; }
+

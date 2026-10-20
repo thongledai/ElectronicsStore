@@ -2,8 +2,8 @@
    TechNova Electronics — Products Listing Page
    --------------------------------------------------------------------------
    Implements search, category / brand / price / rating filtering, sorting,
-   grid-vs-list views and pagination. All filtering runs client-side over the
-   PRODUCTS array from js/data.js.
+   grid-vs-list views and pagination. The PRODUCTS array is loaded from the
+   backend API by js/data.js; no sample product catalogue is embedded here.
 
    URL parameters supported (so links from the home page and nav work):
      ?category=laptops      pre-select a category filter
@@ -518,7 +518,8 @@ function applyUrlParams() {
 /* ==========================================================================
    8. INIT
    ========================================================================== */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  if (window.productCatalogReady) await window.productCatalogReady;
   // Cache DOM nodes once
   Object.assign(els, {
     productGrid: document.getElementById('productGrid'),
@@ -540,8 +541,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Set the slider ceiling to the most expensive product, rounded up
-  const maxProductPrice = Math.max(...PRODUCTS.map(p => p.price));
-  PRICE_CEILING = Math.ceil(maxProductPrice / 10000) * 10000;
+  const maxProductPrice = PRODUCTS.length ? Math.max(...PRODUCTS.map(p => p.price)) : 0;
+  PRICE_CEILING = Math.max(10000, Math.ceil(maxProductPrice / 10000) * 10000);
   els.priceRange.max = PRICE_CEILING;
   els.priceRange.value = PRICE_CEILING;
   state.maxPrice = PRICE_CEILING;

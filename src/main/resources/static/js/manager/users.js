@@ -1,3 +1,4 @@
+
 /* ==========================================================================
    TechNova Electronics — Manager Users Script
    ========================================================================== */
@@ -8,30 +9,78 @@ document.addEventListener('DOMContentLoaded', () => {
   let totalPages = 1;
   const pageSize = 10;
   let rolesList = [];
+  let searchTimeout = null;
 
   const userFormModalEl = document.getElementById('userFormModal');
   const userDetailModalEl = document.getElementById('userDetailModal');
-  const userFormModal = userFormModalEl ? new bootstrap.Modal(userFormModalEl) : null;
-  const userDetailModal = userDetailModalEl ? new bootstrap.Modal(userDetailModalEl) : null;
+
+  const userFormModal = userFormModalEl && window.bootstrap
+    ? new bootstrap.Modal(userFormModalEl)
+    : null;
+
+  const userDetailModal = userDetailModalEl && window.bootstrap
+    ? new bootstrap.Modal(userDetailModalEl)
+    : null;
+
+  const getElement = (id) => document.getElementById(id);
 
   function getJwtToken() {
     let token = localStorage.getItem('technova_jwt');
+
     if (!token) {
-      const match = document.cookie.match(new RegExp('(^| )JWT_TOKEN=([^;]+)'));
-      if (match) token = match[2];
+      const match = document.cookie.match(/(?:^|;\s*)JWT_TOKEN=([^;]+)/);
+      if (match) token = decodeURIComponent(match[1]);
     }
+
     return token;
   }
 
   function authHeaders(isJson = false) {
-    const headers = { 'Accept': 'application/json' };
+    const headers = { Accept: 'application/json' };
     const token = getJwtToken();
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-    if (isJson) headers['Content-Type'] = 'application/json';
+
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    if (isJson) {
+      headers['Content-Type'] = 'application/json';
+    }
+
     return headers;
   }
 
-  function notify(msg, type = 'info') {
+  async function fetchJson(url, options = {}) {
+    const response = await fetch(url, options);
+    const contentType = response.headers.get('content-type') || '';
+
+    let result;
+
+    if (contentType.includes('application/json')) {
+      result = await response.json();
+    } else {
+      const text = await response.text();
+      result = {
+        success: false,
+        message: text || `HTTP ${response.status}`
+      };
+    }
+
+    if (!response.ok && result.success !== false) {
+      result.success = false;
+      result.message ||= `Yêu cầu thất bại (HTTP ${response.status})`;
+    }
+
+    if (!response.ok && !result.message) {
+      result.message = `Yêu cầu thất bại (HTTP ${response.status})`;
+    }
+
+    return result;
+  }
+
+  function notify(message, type = 'info') {
+    const msg = message || 'Đã xảy ra lỗi không xác định.';
+
     if (window.toast) {
       window.toast(msg);
     } else if (window.showToast) {
@@ -41,9 +90,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function escapeHtml(text) {
-    if (!text) return '';
-    return String(text)
+  function escapeHtml(value) {
+    if (value == null) return '';
+
+    return String(value)
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
@@ -52,245 +102,632 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function formatCurrency(amount) {
-    if (amount == null) return '0 ₫';
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+    if (amount == null || amount === '') return '0 ₫';
+
+    const value = Number(amount);
+
+    if (!Number.isFinite(value)) return '0 ₫';
+
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(value);
   }
 
-  function formatDateTime(isoString) {
-    if (!isoString) return '---';
-    try {
-      const d = new Date(isoString);
-      return d.toLocaleString('vi-VN');
-    } catch {
-      return isoString;
+  function formatDateTime(value) {
+    if (!value) return '---';
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return String(value);
+    }
+
+    return date.toLocaleString('vi-VN');
+  }
+
+  function setDisplay(id, display) {
+    const element = getElement(id);
+    if (element) element.style.display = display;
+  }
+
+  function setText(id, value, fallback = '---') {
+    const element = getElement(id);
+
+    if (element) {
+      element.textContent =
+        value == null || value === '' ? fallback : String(value);
     }
   }
 
-  /* ---------- Fetch Roles List ---------- */
+  function setValue(id, value) {
+    const element = getElement(id);
+
+    if (element) {
+      element.value = value == null ? '' : String(value);
+    }
+  }
+
+  function setDisabled(id, disabled) {
+    const element = getElement(id);
+
+    if (element) {
+      element.disabled = disabled;
+    }
+  }
+
+  function setReadOnly(id, readOnly) {
+    const element = getElement(id);
+
+    if (element) {
+      element.readOnly = readOnly;
+    }
+  }
+
+  function setRequired(id, required) {
+    const element = getElement(id);
+
+    if (element) {
+      element.required = required;
+    }
+  }
+
+  function updateIsActiveLabel() {
+    const isActive = Boolean(getElement('userIsActive')?.checked);
+    const label = getElement('userIsActiveLabel');
+
+    if (label) {
+      label.textContent = isActive ? 'Hoạt động' : 'Tạm khóa';
+    }
+  }
+
+  function setAvatarPreview(avatar, fullName = 'User') {
+    const preview = getElement('avatarPreview');
+
+    if (!preview) return;
+
+    const fallbackUrl =
+      `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName || 'User')}` +
+      '&background=6c757d&color=fff';
+
+    preview.onerror = () => {
+      preview.onerror = null;
+      preview.src = fallbackUrl;
+    };
+
+    preview.src = avatar || fallbackUrl;
+  }
+
+  function setDetailAvatar(avatar, fullName) {
+    const image = getElement('detailAvatarImg');
+    const fallback = getElement('detailAvatar');
+
+    if (avatar) {
+      if (image) {
+        image.src = avatar;
+        image.style.display = 'block';
+
+        image.onerror = () => {
+          image.onerror = null;
+          image.style.display = 'none';
+
+          if (fallback) {
+            fallback.style.display = 'flex';
+            fallback.textContent = (fullName || 'U').charAt(0).toUpperCase();
+          }
+        };
+      }
+
+      if (fallback) fallback.style.display = 'none';
+      return;
+    }
+
+    if (image) {
+      image.removeAttribute('src');
+      image.style.display = 'none';
+    }
+
+    if (fallback) {
+      fallback.style.display = 'flex';
+      fallback.textContent = (fullName || 'U').charAt(0).toUpperCase();
+    }
+  }
+
+  /* ---------- API: Roles ---------- */
+
   async function loadRoles() {
     try {
-      const res = await fetch('/api/manager/users/roles', { headers: authHeaders(false) }).then(r => r.json());
-      if (res.success && Array.isArray(res.data)) {
-        rolesList = res.data;
-        const select = document.getElementById('userRole');
-        if (select) {
-          select.innerHTML = '<option value="">-- Chọn vai trò --</option>' +
-            rolesList.map(r => `<option value="${r}">${r}</option>`).join('');
-        }
+      const result = await fetchJson('/api/manager/users/roles', {
+        headers: authHeaders()
+      });
+
+      if (!result.success || !Array.isArray(result.data)) {
+        throw new Error(result.message || 'Không thể tải danh sách vai trò.');
       }
-    } catch (e) {
-      console.warn('Không thể tải danh sách vai trò:', e);
+
+      rolesList = result.data;
+
+      const select = getElement('userRole');
+      if (!select) return;
+
+      const previousValue = select.value;
+
+      select.innerHTML =
+        '<option value="">-- Chọn vai trò --</option>' +
+        rolesList.map(role => {
+          const safeRole = escapeHtml(role);
+
+          return `<option value="${safeRole}">${safeRole}</option>`;
+        }).join('');
+
+      if (rolesList.includes(previousValue)) {
+        select.value = previousValue;
+      }
+    } catch (error) {
+      console.error('Không thể tải danh sách vai trò:', error);
+      notify(error.message || 'Không thể tải danh sách vai trò.', 'error');
     }
   }
 
-  /* ---------- Load Users Table ---------- */
-  async function loadUsers(page = 0) {
-    const search = document.getElementById('searchInput')?.value.trim() || '';
-    let url = `/api/manager/users?page=${page}&size=${pageSize}`;
-    if (search) url += `&search=${encodeURIComponent(search)}`;
+  /* ---------- API: Users Table ---------- */
 
-    const tbody = document.getElementById('userTableBody');
+  async function loadUsers(page = 0) {
+    const search = getElement('searchInput')?.value.trim() || '';
+
+    let url = `/api/manager/users?page=${page}&size=${pageSize}`;
+
+    if (search) {
+      url += `&search=${encodeURIComponent(search)}`;
+    }
+
+    const tbody = getElement('userTableBody');
+
     if (tbody) {
-      tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">Đang tải dữ liệu...</td></tr>`;
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="7" class="text-center py-4 text-muted">
+            Đang tải dữ liệu...
+          </td>
+        </tr>
+      `;
     }
 
     try {
-      const res = await fetch(url, { headers: authHeaders(false) }).then(r => r.json());
-      if (!res.success) throw new Error(res.message);
+      const result = await fetchJson(url, {
+        headers: authHeaders()
+      });
 
-      const data = res.data;
-      currentPage = data.page;
-      totalPages = data.totalPages || 1;
-
-      const totalRecordsText = document.getElementById('totalRecordsText');
-      if (totalRecordsText) {
-        totalRecordsText.textContent = `${data.totalElements} bản ghi`;
+      if (!result.success) {
+        throw new Error(result.message || 'Không thể tải danh sách người dùng.');
       }
 
-      const pageInfoText = document.getElementById('pageInfoText');
+      const data = result.data || {};
+      const content = Array.isArray(data.content) ? data.content : [];
+
+      currentPage = Number(data.page ?? page);
+      totalPages = Math.max(1, Number(data.totalPages) || 1);
+
+      const totalRecordsText = getElement('totalRecordsText');
+
+      if (totalRecordsText) {
+        totalRecordsText.textContent =
+          `${Number(data.totalElements) || 0} bản ghi`;
+      }
+
+      const pageInfoText = getElement('pageInfoText');
+
       if (pageInfoText) {
         pageInfoText.textContent = `Trang ${currentPage + 1}/${totalPages}`;
       }
 
-      const btnCurrentPage = document.getElementById('btnCurrentPage');
-      if (btnCurrentPage) {
-        btnCurrentPage.textContent = `${currentPage + 1}`;
+      const currentPageButton = getElement('btnCurrentPage');
+
+      if (currentPageButton) {
+        currentPageButton.textContent = String(currentPage + 1);
       }
 
-      const btnPrev = document.getElementById('btnPrevPage');
-      const btnNext = document.getElementById('btnNextPage');
-      if (btnPrev) btnPrev.disabled = currentPage <= 0;
-      if (btnNext) btnNext.disabled = currentPage >= totalPages - 1;
+      const previousButton = getElement('btnPrevPage');
+      const nextButton = getElement('btnNextPage');
 
-      if (!data.content || data.content.length === 0) {
-        if (tbody) {
-          tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">Không tìm thấy người dùng nào</td></tr>`;
-        }
+      if (previousButton) {
+        previousButton.disabled = currentPage <= 0;
+      }
+
+      if (nextButton) {
+        nextButton.disabled = currentPage >= totalPages - 1;
+      }
+
+      if (!tbody) return;
+
+      if (content.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="text-center py-4 text-muted">
+              Không tìm thấy người dùng nào
+            </td>
+          </tr>
+        `;
         return;
       }
 
-      if (tbody) {
-        tbody.innerHTML = data.content.map(u => {
-          const statusBadge = u.isEmailActive
-            ? '<span class="status green">Hoạt động</span>'
-            : '<span class="status red">Tạm khóa</span>';
+      tbody.innerHTML = content.map(user => {
+        const id = escapeHtml(user.id);
+        const userCode = escapeHtml(user.userCode || '---');
+        const fullName = escapeHtml(user.fullName || '---');
+        const email = escapeHtml(user.email || '---');
+        const role = escapeHtml(user.role || '---');
+        const isActive = Boolean(user.isEmailActive);
 
-          const avatarHtml = u.avatar
-            ? `<img src="${escapeHtml(u.avatar)}" class="rounded-circle object-fit-cover border shadow-sm" style="width: 36px; height: 36px;" alt="avatar" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(u.fullName || 'U')}&background=random';">`
-            : `<div class="rounded-circle bg-secondary text-white d-inline-flex align-items-center justify-content-center fw-semibold shadow-sm" style="width: 36px; height: 36px; font-size: 13px;">${escapeHtml((u.fullName || 'U').charAt(0).toUpperCase())}</div>`;
+        const statusBadge = isActive
+          ? '<span class="status green">Hoạt động</span>'
+          : '<span class="status red">Tạm khóa</span>';
 
-          return `
-            <tr>
-              <td class="text-center align-middle">${avatarHtml}</td>
-              <td class="align-middle"><strong>${escapeHtml(u.userCode || '---')}</strong></td>
-              <td class="align-middle">${escapeHtml(u.fullName)}</td>
-              <td class="align-middle">${escapeHtml(u.email)}</td>
-              <td class="align-middle">${escapeHtml(u.role)}</td>
-              <td class="align-middle">${statusBadge}</td>
-              <td class="align-middle">
-                <button class="action js-view-user" data-id="${u.id}" title="Xem chi tiết">
-                  <i class="fa-regular fa-eye"></i>
-                </button>
-                <button class="action js-edit-user" data-id="${u.id}" title="Chỉnh sửa">
-                  <i class="fa-solid fa-pen"></i>
-                </button>
-                <button class="action text-danger js-delete-user" data-id="${u.id}" title="Xóa">
-                  <i class="fa-solid fa-trash"></i>
-                </button>
-              </td>
-            </tr>
+        const avatarHtml = user.avatar
+          ? `
+            <img
+              src="${escapeHtml(user.avatar)}"
+              class="rounded-circle object-fit-cover border shadow-sm"
+              style="width: 36px; height: 36px;"
+              alt="avatar"
+              onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='inline-flex';"
+            >
+            <div
+              class="rounded-circle bg-secondary text-white align-items-center justify-content-center fw-semibold shadow-sm"
+              style="display:none;width:36px;height:36px;font-size:13px;"
+            >${escapeHtml((user.fullName || 'U').charAt(0).toUpperCase())}</div>
+          `
+          : `
+            <div
+              class="rounded-circle bg-secondary text-white d-inline-flex align-items-center justify-content-center fw-semibold shadow-sm"
+              style="width:36px;height:36px;font-size:13px;"
+            >${escapeHtml((user.fullName || 'U').charAt(0).toUpperCase())}</div>
           `;
-        }).join('');
-      }
 
+        return `
+          <tr>
+            <td class="text-center align-middle">${avatarHtml}</td>
+            <td class="align-middle"><strong>${userCode}</strong></td>
+            <td class="align-middle">${fullName}</td>
+            <td class="align-middle">${email}</td>
+            <td class="align-middle">${role}</td>
+            <td class="align-middle">${statusBadge}</td>
+            <td class="align-middle">
+              <button
+                type="button"
+                class="action js-view-user"
+                data-id="${id}"
+                title="Xem chi tiết"
+                aria-label="Xem chi tiết"
+              >
+                <i class="fa-regular fa-eye"></i>
+              </button>
+              <button
+                type="button"
+                class="action js-edit-user"
+                data-id="${id}"
+                title="Chỉnh sửa"
+                aria-label="Chỉnh sửa"
+              >
+                <i class="fa-solid fa-pen"></i>
+              </button>
+              <button
+                type="button"
+                class="action text-danger js-delete-user"
+                data-id="${id}"
+                title="Xóa"
+                aria-label="Xóa"
+              >
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      // The action buttons are rebuilt on each page/search render, so bind
+      // their handlers only after the new rows exist.
       attachTableEvents();
-    } catch (e) {
+    } catch (error) {
+      console.error('Lỗi tải danh sách người dùng:', error);
+
       if (tbody) {
-        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-danger">Lỗi: ${escapeHtml(e.message)}</td></tr>`;
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="text-center py-4 text-danger">
+              ${escapeHtml(error.message || 'Không thể tải danh sách người dùng.')}
+            </td>
+          </tr>
+        `;
       }
     }
   }
+
+  /* ---------- Modal Mode: Create / Update ---------- */
+
+  function resetFormForCreate() {
+    const form = getElement('userForm');
+
+    clearAllFormErrors(form);
+
+    if (form) form.reset();
+
+    setText('userModalTitle', 'Thêm mới người dùng');
+    setText('userModalDescription', 'Nhập thông tin người dùng mới.');
+
+    setValue('userId', '');
+    setValue('userCodeInput', '');
+
+    setDisplay('userCodeGroup', 'none');
+
+    // Cho phép nhập thông tin cá nhân khi tạo mới.
+    setReadOnly('userFullName', false);
+    setReadOnly('userEmail', false);
+    setReadOnly('userPhone', false);
+
+    setDisabled('userFullName', false);
+    setDisabled('userEmail', false);
+    setDisabled('userPhone', false);
+    setDisabled('userRole', false);
+
+    // Khôi phục phần chọn avatar.
+    setDisplay('avatarEditControls', '');
+    setDisplay('avatarUploadInfo', '');
+
+    const avatarInput = getElement('userAvatarFile');
+
+    if (avatarInput) {
+      avatarInput.disabled = false;
+      avatarInput.value = '';
+    }
+
+    setAvatarPreview('', 'User');
+
+    // Hiện lại mật khẩu khi tạo mới.
+    setDisplay('userPasswordGroup', '');
+
+    setValue('userPassword', '');
+    setDisabled('userPassword', false);
+    setRequired('userPassword', true);
+    setDisplay('pwdAsterisk', 'inline');
+    setDisplay('pwdHelpText', 'none');
+
+    // Khôi phục trạng thái bắt buộc của số điện thoại.
+    setRequired('userPhone', true);
+    setDisplay('phoneAsterisk', 'inline');
+
+    // Vai trò mặc định.
+    const roleSelect = getElement('userRole');
+
+    if (roleSelect) {
+      roleSelect.value = rolesList.includes('CUSTOMER') ? 'CUSTOMER' : '';
+    }
+
+    const activeSwitch = getElement('userIsActive');
+
+    if (activeSwitch) {
+      activeSwitch.disabled = false;
+      activeSwitch.checked = true;
+    }
+
+    updateIsActiveLabel();
+  }
+
+  function configureFormForUpdate(user) {
+    const form = getElement('userForm');
+
+    clearAllFormErrors(form);
+
+    setText('userModalTitle', 'Chỉnh sửa người dùng');
+    setText(
+      'userModalDescription',
+      'Chỉ có thể thay đổi vai trò và trạng thái tài khoản.'
+    );
+
+    setValue('userId', user.id);
+    setValue('userCodeInput', user.userCode || '');
+
+    setDisplay('userCodeGroup', 'block');
+
+    // Thông tin cá nhân chỉ được xem, không được chỉnh sửa.
+    setValue('userFullName', user.fullName || '');
+    setValue('userEmail', user.email || '');
+    setValue('userPhone', user.phone || '');
+
+    setReadOnly('userFullName', true);
+    setReadOnly('userEmail', true);
+    setReadOnly('userPhone', true);
+
+    // Dùng readOnly thay vì disabled để các trường vẫn hiển thị bình thường.
+    setDisabled('userFullName', false);
+    setDisabled('userEmail', false);
+    setDisabled('userPhone', false);
+
+    // Chỉ vai trò được phép chỉnh sửa.
+    const roleSelect = getElement('userRole');
+
+    if (roleSelect) {
+      roleSelect.value = user.role || '';
+      roleSelect.disabled = false;
+    }
+
+    // Trạng thái tài khoản được phép chỉnh sửa.
+    const activeSwitch = getElement('userIsActive');
+
+    if (activeSwitch) {
+      activeSwitch.checked = Boolean(user.isEmailActive);
+      activeSwitch.disabled = false;
+    }
+
+    updateIsActiveLabel();
+
+    // Avatar chỉ hiển thị, không cho tải ảnh mới.
+    setAvatarPreview(user.avatar, user.fullName || 'User');
+
+    setDisplay('avatarEditControls', 'none');
+    setDisplay('avatarUploadInfo', 'none');
+
+    const avatarInput = getElement('userAvatarFile');
+
+    if (avatarInput) {
+      avatarInput.value = '';
+      avatarInput.disabled = true;
+    }
+
+    // Ẩn toàn bộ khu vực mật khẩu trong chế độ cập nhật.
+    setDisplay('userPasswordGroup', 'none');
+    setValue('userPassword', '');
+    setDisabled('userPassword', true);
+    setRequired('userPassword', false);
+
+    setDisplay('pwdAsterisk', 'none');
+    setDisplay('pwdHelpText', 'none');
+
+    // Số điện thoại không bắt buộc nhập trong chế độ cập nhật.
+    setRequired('userPhone', false);
+    setDisplay('phoneAsterisk', 'none');
+  }
+
+  /* ---------- Table Events ---------- */
 
   function attachTableEvents() {
-    // View detail
-    document.querySelectorAll('.js-view-user').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const id = btn.dataset.id;
-        try {
-          const res = await fetch(`/api/manager/users/${id}`, { headers: authHeaders(false) }).then(r => r.json());
-          if (!res.success) throw new Error(res.message);
-          const u = res.data;
+    document.querySelectorAll('.js-view-user').forEach(button => {
+      button.addEventListener('click', async () => {
+        const id = button.dataset.id;
 
-          const detailAvatarImg = document.getElementById('detailAvatarImg');
-          const detailAvatar = document.getElementById('detailAvatar');
-          if (u.avatar) {
-            if (detailAvatarImg) {
-              detailAvatarImg.src = u.avatar;
-              detailAvatarImg.style.display = 'block';
-            }
-            if (detailAvatar) detailAvatar.style.display = 'none';
-          } else {
-            if (detailAvatarImg) detailAvatarImg.style.display = 'none';
-            if (detailAvatar) {
-              detailAvatar.style.display = 'flex';
-              detailAvatar.textContent = (u.fullName || 'U').charAt(0).toUpperCase();
-            }
+        if (!id) {
+          notify('Không tìm thấy mã người dùng.', 'error');
+          return;
+        }
+
+        button.disabled = true;
+
+        try {
+          const result = await fetchJson(
+            `/api/manager/users/${encodeURIComponent(id)}`,
+            { headers: authHeaders() }
+          );
+
+          if (!result.success) {
+            throw new Error(result.message || 'Không thể tải chi tiết người dùng.');
           }
 
-          document.getElementById('detailFullName').textContent = u.fullName || '---';
-          document.getElementById('detailUserCode').textContent = u.userCode || '---';
-          document.getElementById('detailEmail').textContent = u.email || '---';
-          document.getElementById('detailPhone').textContent = u.phone || '<chưa có>';
-          document.getElementById('detailRole').textContent = u.role || '---';
-          document.getElementById('detailStatus').innerHTML = u.isEmailActive
-            ? '<span class="status green">Hoạt động</span>'
-            : '<span class="status red">Tạm khóa</span>';
-          document.getElementById('detailPoint').textContent = u.point != null ? u.point : 0;
-          document.getElementById('detailEWallet').textContent = formatCurrency(u.eWallet);
-          document.getElementById('detailCreatedAt').textContent = formatDateTime(u.createdAt);
+          const user = result.data || {};
 
-          if (userDetailModal) userDetailModal.show();
-        } catch (e) {
-          notify(e.message, 'error');
+          setDetailAvatar(user.avatar, user.fullName || 'U');
+
+          setText('detailFullName', user.fullName);
+          setText('detailUserCode', user.userCode);
+          setText('detailEmail', user.email);
+          setText('detailPhone', user.phone, '<chưa có>');
+          setText('detailRole', user.role);
+          setText('detailPoint', user.point ?? 0, '0');
+          setText('detailEWallet', formatCurrency(user.eWallet));
+          setText('detailCreatedAt', formatDateTime(user.createdAt));
+
+          const statusElement = getElement('detailStatus');
+
+          if (statusElement) {
+            statusElement.innerHTML = user.isEmailActive
+              ? '<span class="status green">Hoạt động</span>'
+              : '<span class="status red">Tạm khóa</span>';
+          }
+
+          if (userDetailModal) {
+            userDetailModal.show();
+          }
+        } catch (error) {
+          notify(error.message || 'Không thể xem chi tiết người dùng.', 'error');
+        } finally {
+          button.disabled = false;
         }
       });
     });
 
-    // Edit user
-    document.querySelectorAll('.js-edit-user').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const id = btn.dataset.id;
+    document.querySelectorAll('.js-edit-user').forEach(button => {
+      button.addEventListener('click', async () => {
+        const id = button.dataset.id;
+
+        if (!id) {
+          notify('Không tìm thấy mã người dùng.', 'error');
+          return;
+        }
+
+        button.disabled = true;
+
         try {
-          const res = await fetch(`/api/manager/users/${id}`, { headers: authHeaders(false) }).then(r => r.json());
-          if (!res.success) throw new Error(res.message);
-          const u = res.data;
+          const result = await fetchJson(
+            `/api/manager/users/${encodeURIComponent(id)}`,
+            { headers: authHeaders() }
+          );
 
-          clearAllFormErrors(document.getElementById('userForm'));
-
-          document.getElementById('userModalTitle').textContent = 'Chỉnh sửa người dùng';
-          document.getElementById('userId').value = u.id;
-          document.getElementById('userCodeGroup').style.display = 'block';
-          document.getElementById('userCodeInput').value = u.userCode || '---';
-          document.getElementById('userFullName').value = u.fullName || '';
-          document.getElementById('userEmail').value = u.email || '';
-          document.getElementById('userEmail').disabled = false;
-          document.getElementById('userPhone').value = u.phone || '';
-          document.getElementById('userRole').value = u.role || '';
-          document.getElementById('userPassword').value = '';
-          const phoneAsterisk = document.getElementById('phoneAsterisk');
-          if (phoneAsterisk) phoneAsterisk.style.display = 'none';
-          document.getElementById('pwdAsterisk').style.display = 'none';
-          document.getElementById('pwdHelpText').style.display = 'block';
-          document.getElementById('userIsActive').checked = Boolean(u.isEmailActive);
-          updateIsActiveLabel();
-
-          const avatarPreview = document.getElementById('avatarPreview');
-          if (avatarPreview) {
-            avatarPreview.src = u.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.fullName || 'User')}&background=6c757d&color=fff`;
+          if (!result.success) {
+            throw new Error(result.message || 'Không thể tải thông tin người dùng.');
           }
-          const avatarInput = document.getElementById('userAvatarFile');
-          if (avatarInput) avatarInput.value = '';
 
-          if (userFormModal) userFormModal.show();
-        } catch (e) {
-          notify(e.message, 'error');
+          const user = result.data || {};
+
+          configureFormForUpdate(user);
+
+          if (userFormModal) {
+            userFormModal.show();
+          }
+        } catch (error) {
+          notify(error.message || 'Không thể mở biểu mẫu chỉnh sửa.', 'error');
+        } finally {
+          button.disabled = false;
         }
       });
     });
 
-    // Delete user
-    document.querySelectorAll('.js-delete-user').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const id = btn.dataset.id;
-        if (!confirm('Bạn có chắc chắn muốn xóa người dùng này khỏi hệ thống?')) return;
+    document.querySelectorAll('.js-delete-user').forEach(button => {
+      button.addEventListener('click', async () => {
+        const id = button.dataset.id;
+
+        if (!id) {
+          notify('Không tìm thấy mã người dùng.', 'error');
+          return;
+        }
+
+        if (!confirm('Bạn có chắc chắn muốn xóa người dùng này khỏi hệ thống?')) {
+          return;
+        }
+
+        button.disabled = true;
 
         try {
-          const res = await fetch(`/api/manager/users/${id}`, {
-            method: 'DELETE',
-            headers: authHeaders(false)
-          }).then(r => r.json());
+          const result = await fetchJson(
+            `/api/manager/users/${encodeURIComponent(id)}`,
+            {
+              method: 'DELETE',
+              headers: authHeaders()
+            }
+          );
 
-          if (!res.success) throw new Error(res.message);
-          notify(res.message, 'success');
-          loadUsers(currentPage);
-        } catch (e) {
-          notify(e.message, 'error');
+          if (!result.success) {
+            throw new Error(result.message || 'Không thể xóa người dùng.');
+          }
+
+          notify(result.message || 'Xóa người dùng thành công.', 'success');
+
+          const targetPage = currentPage > 0 ? currentPage : 0;
+
+          await loadUsers(targetPage);
+
+          // If deleting the last row removed this page, return to the previous page.
+          if (currentPage > 0 && currentPage >= totalPages) {
+            await loadUsers(currentPage - 1);
+          }
+        } catch (error) {
+          notify(error.message || 'Không thể xóa người dùng.', 'error');
+        } finally {
+          button.disabled = false;
         }
       });
     });
   }
 
-  function updateIsActiveLabel() {
-    const isChecked = document.getElementById('userIsActive')?.checked;
-    const label = document.getElementById('userIsActiveLabel');
-    if (label) {
-      label.textContent = isChecked ? 'Hoạt động' : 'Tạm khóa';
-    }
-  }
+  /* ---------- Validation Helpers ---------- */
 
-  document.getElementById('userIsActive')?.addEventListener('change', updateIsActiveLabel);
-
-  /* ---------- Validation Helpers (Inline beneath inputs) ---------- */
   const fieldMapping = {
     fullName: 'userFullName',
     email: 'userEmail',
@@ -299,29 +736,41 @@ document.addEventListener('DOMContentLoaded', () => {
     password: 'userPassword',
     newPassword: 'userPassword',
     avatar: 'userAvatarFile',
-    avatarFile: 'userAvatarFile'
+    avatarFile: 'userAvatarFile',
+    isActive: 'userIsActive'
   };
 
   function setFieldError(fieldKey, message) {
     const inputId = fieldMapping[fieldKey] || fieldKey;
-    const input = document.getElementById(inputId);
+    const input = getElement(inputId);
+
     if (!input) return false;
 
+    // Không hiển thị lỗi trên trường đang bị ẩn hoặc bị khóa.
+    if (input.disabled || input.readOnly) return false;
+
+    const group = input.closest('.mb-3') || input.parentElement;
+
     input.classList.add('is-invalid');
-    const parent = input.closest('.mb-3') || input.parentElement;
-    const feedback = parent ? parent.querySelector('.invalid-feedback') : null;
+
+    const feedback = group?.querySelector('.invalid-feedback');
+
     if (feedback) {
-      feedback.textContent = message;
+      feedback.textContent = message || 'Dữ liệu không hợp lệ.';
       feedback.style.display = 'block';
     }
+
     return true;
   }
 
   function clearFieldError(input) {
     if (!input) return;
+
     input.classList.remove('is-invalid');
-    const parent = input.closest('.mb-3') || input.parentElement;
-    const feedback = parent ? parent.querySelector('.invalid-feedback') : null;
+
+    const group = input.closest('.mb-3') || input.parentElement;
+    const feedback = group?.querySelector('.invalid-feedback');
+
     if (feedback) {
       feedback.textContent = '';
       feedback.style.display = 'none';
@@ -330,270 +779,338 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function clearAllFormErrors(form) {
     if (!form) return;
-    form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
-    form.querySelectorAll('.invalid-feedback').forEach(el => {
-      el.textContent = '';
-      el.style.display = 'none';
+
+    form.querySelectorAll('.is-invalid').forEach(element => {
+      element.classList.remove('is-invalid');
+    });
+
+    form.querySelectorAll('.invalid-feedback').forEach(element => {
+      element.textContent = '';
+      element.style.display = 'none';
     });
   }
 
-  // Real-time clearing as user types or changes input
-  ['userFullName', 'userEmail', 'userPhone', 'userRole', 'userPassword', 'userAvatarFile'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.addEventListener('input', () => clearFieldError(el));
-      el.addEventListener('change', () => clearFieldError(el));
-    }
+  [
+    'userFullName',
+    'userEmail',
+    'userPhone',
+    'userRole',
+    'userPassword',
+    'userAvatarFile'
+  ].forEach(id => {
+    const element = getElement(id);
+
+    if (!element) return;
+
+    element.addEventListener('input', () => clearFieldError(element));
+    element.addEventListener('change', () => clearFieldError(element));
   });
 
-  // Avatar file preview & instant validation
-  document.getElementById('userAvatarFile')?.addEventListener('change', (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 10 * 1024 * 1024) {
-        setFieldError('avatar', 'File ảnh không được vượt quá 10MB');
-        e.target.value = '';
-        return;
-      }
-      clearFieldError(document.getElementById('userAvatarFile'));
-      const reader = new FileReader();
-      reader.onload = (evt) => {
-        const preview = document.getElementById('avatarPreview');
-        if (preview) preview.src = evt.target.result;
-      };
-      reader.readAsDataURL(file);
+  /* ---------- Avatar Preview ---------- */
+
+  getElement('userAvatarFile')?.addEventListener('change', event => {
+    const input = event.target;
+    const file = input.files?.[0];
+
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      setFieldError('avatar', 'File ảnh không được vượt quá 10MB.');
+      input.value = '';
+      return;
     }
+
+    if (!file.type.startsWith('image/')) {
+      setFieldError('avatar', 'Vui lòng chọn tệp hình ảnh hợp lệ.');
+      input.value = '';
+      return;
+    }
+
+    clearFieldError(input);
+
+    const reader = new FileReader();
+
+    reader.onload = eventResult => {
+      const preview = getElement('avatarPreview');
+
+      if (preview && typeof eventResult.target?.result === 'string') {
+        preview.src = eventResult.target.result;
+      }
+    };
+
+    reader.onerror = () => {
+      notify('Không thể đọc tệp ảnh đã chọn.', 'error');
+    };
+
+    reader.readAsDataURL(file);
   });
+
+  /* ---------- Form Validation ---------- */
 
   function validateUserForm(isUpdate) {
-    const fullName = document.getElementById('userFullName')?.value.trim() || '';
-    const email = document.getElementById('userEmail')?.value.trim() || '';
-    const phone = document.getElementById('userPhone')?.value.trim() || '';
-    const role = document.getElementById('userRole')?.value || '';
-    const password = document.getElementById('userPassword')?.value || '';
+    const fullName = getElement('userFullName')?.value.trim() || '';
+    const email = getElement('userEmail')?.value.trim() || '';
+    const phone = getElement('userPhone')?.value.trim() || '';
+    const role = getElement('userRole')?.value || '';
+    const password = getElement('userPassword')?.value || '';
 
     const phoneRegex = /^(0|\+84)[35789][0-9]{8}$/;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     let isValid = true;
 
-    // Full name
+    // Khi cập nhật, chỉ cần kiểm tra vai trò.
+    if (isUpdate) {
+      if (!role) {
+        setFieldError('role', 'Vui lòng chọn vai trò.');
+        return false;
+      }
+
+      return true;
+    }
+
     if (!fullName) {
-      setFieldError('fullName', 'Full name is required');
+      setFieldError('fullName', 'Vui lòng nhập họ tên.');
       isValid = false;
     } else if (fullName.length > 200) {
-      setFieldError('fullName', 'Full name must not exceed 200 characters');
+      setFieldError('fullName', 'Họ tên không được vượt quá 200 ký tự.');
       isValid = false;
     }
 
-    // Email (validated for both create and update)
     if (!email) {
-      setFieldError('email', 'Email is required');
+      setFieldError('email', 'Vui lòng nhập email.');
       isValid = false;
     } else if (!emailRegex.test(email)) {
-      setFieldError('email', 'Invalid email format');
+      setFieldError('email', 'Định dạng email không hợp lệ.');
       isValid = false;
     }
 
-    // Phone
-    if (!isUpdate) {
-      if (!phone) {
-        setFieldError('phone', 'Phone number is required');
-        isValid = false;
-      } else if (!phoneRegex.test(phone)) {
-        setFieldError('phone', 'Invalid Vietnamese phone number (10 digits starting with 03, 05, 07, 08, 09)');
-        isValid = false;
-      }
-    } else {
-      if (phone && !phoneRegex.test(phone)) {
-        setFieldError('phone', 'Invalid Vietnamese phone number (10 digits starting with 03, 05, 07, 08, 09)');
-        isValid = false;
-      }
+    if (!phone) {
+      setFieldError('phone', 'Vui lòng nhập số điện thoại.');
+      isValid = false;
+    } else if (!phoneRegex.test(phone)) {
+      setFieldError(
+        'phone',
+        'Số điện thoại phải có 10 chữ số và bắt đầu bằng 03, 05, 07, 08 hoặc 09.'
+      );
+      isValid = false;
     }
 
-    // Role
     if (!role) {
-      setFieldError('role', 'Role is required');
+      setFieldError('role', 'Vui lòng chọn vai trò.');
       isValid = false;
     }
 
-    // Password
-    if (!isUpdate) {
-      if (!password) {
-        setFieldError('password', 'Password is required');
-        isValid = false;
-      } else if (password.length < 6) {
-        setFieldError('password', 'Password must be at least 6 characters');
-        isValid = false;
-      }
-    } else {
-      if (password && password.length < 6) {
-        setFieldError('password', 'Password must be at least 6 characters');
-        isValid = false;
-      }
+    if (!password) {
+      setFieldError('password', 'Vui lòng nhập mật khẩu.');
+      isValid = false;
+    } else if (password.length < 6) {
+      setFieldError('password', 'Mật khẩu phải có ít nhất 6 ký tự.');
+      isValid = false;
     }
 
     return isValid;
   }
 
   /* ---------- Open Create Modal ---------- */
-  document.getElementById('btnOpenCreateUserModal')?.addEventListener('click', () => {
-    const userForm = document.getElementById('userForm');
-    clearAllFormErrors(userForm);
 
-    document.getElementById('userModalTitle').textContent = 'Thêm mới người dùng';
-    document.getElementById('userId').value = '';
-    document.getElementById('userCodeGroup').style.display = 'none';
-    document.getElementById('userCodeInput').value = '';
-    document.getElementById('userFullName').value = '';
-    document.getElementById('userEmail').value = '';
-    document.getElementById('userEmail').disabled = false;
-    document.getElementById('userPhone').value = '';
-    document.getElementById('userRole').value = 'CUSTOMER';
-    document.getElementById('userPassword').value = '';
-    const phoneAsterisk = document.getElementById('phoneAsterisk');
-    if (phoneAsterisk) phoneAsterisk.style.display = 'inline';
-    document.getElementById('pwdAsterisk').style.display = 'inline';
-    document.getElementById('pwdHelpText').style.display = 'none';
-    document.getElementById('userIsActive').checked = true;
-    updateIsActiveLabel();
+  getElement('btnOpenCreateUserModal')?.addEventListener('click', () => {
+    resetFormForCreate();
 
-    const avatarPreview = document.getElementById('avatarPreview');
-    if (avatarPreview) {
-      avatarPreview.src = 'https://ui-avatars.com/api/?name=User&background=6c757d&color=fff';
+    if (userFormModal) {
+      userFormModal.show();
     }
-    const avatarInput = document.getElementById('userAvatarFile');
-    if (avatarInput) avatarInput.value = '';
-
-    if (userFormModal) userFormModal.show();
   });
 
-  /* ---------- Form Submit (Create or Update) ---------- */
-  const userForm = document.getElementById('userForm');
-  userForm?.addEventListener('submit', async (e) => {
-    e.preventDefault();
+  /* ---------- Form Submit: Create / Update ---------- */
+
+  const userForm = getElement('userForm');
+
+  userForm?.addEventListener('submit', async event => {
+    event.preventDefault();
+
     clearAllFormErrors(userForm);
 
-    const id = document.getElementById('userId').value;
+    const id = getElement('userId')?.value.trim() || '';
     const isUpdate = Boolean(id);
 
-    // Client-side validation check
     if (!validateUserForm(isUpdate)) {
       return;
     }
 
-    const fullName = document.getElementById('userFullName').value.trim();
-    const email = document.getElementById('userEmail').value.trim();
-    const phone = document.getElementById('userPhone').value.trim();
-    const role = document.getElementById('userRole').value;
-    const password = document.getElementById('userPassword').value;
-    const isActive = document.getElementById('userIsActive').checked;
-    const avatarFile = document.getElementById('userAvatarFile')?.files?.[0];
+    const role = getElement('userRole')?.value || '';
+    const isActive = Boolean(getElement('userIsActive')?.checked);
 
-    const btnSave = document.getElementById('btnSaveUser');
-    if (btnSave) btnSave.disabled = true;
+    const btnSave = getElement('btnSaveUser');
+
+    if (btnSave) {
+      btnSave.disabled = true;
+    }
 
     try {
-      let res;
-      const formData = new FormData();
-      formData.append('fullName', fullName);
-      formData.append('email', email);
-      formData.append('phone', phone);
-      formData.append('role', role);
-      formData.append('isActive', isActive);
-      if (avatarFile) {
-        formData.append('avatarFile', avatarFile);
-      }
+      let result;
 
       if (isUpdate) {
-        if (password.trim()) {
-          formData.append('newPassword', password.trim());
-        }
-        res = await fetch(`/api/manager/users/${id}`, {
-          method: 'PUT',
-          headers: authHeaders(false),
-          body: formData
-        }).then(r => r.json());
+        // Identity fields stay read-only; the API DTO still requires their values.
+        const formData = new FormData();
+
+        formData.append('fullName', getElement('userFullName')?.value.trim() || '');
+        formData.append('email', getElement('userEmail')?.value.trim() || '');
+        formData.append('phone', getElement('userPhone')?.value.trim() || '');
+        formData.append('role', role);
+        formData.append('isActive', String(isActive));
+
+        result = await fetchJson(
+          `/api/manager/users/${encodeURIComponent(id)}`,
+          {
+            method: 'PUT',
+            headers: authHeaders(),
+            body: formData
+          }
+        );
       } else {
+        const fullName = getElement('userFullName')?.value.trim() || '';
+        const email = getElement('userEmail')?.value.trim() || '';
+        const phone = getElement('userPhone')?.value.trim() || '';
+        const password = getElement('userPassword')?.value || '';
+        const avatarFile = getElement('userAvatarFile')?.files?.[0];
+
+        const formData = new FormData();
+
+        formData.append('fullName', fullName);
+        formData.append('email', email);
+        formData.append('phone', phone);
+        formData.append('role', role);
         formData.append('password', password);
-        res = await fetch('/api/manager/users', {
+        formData.append('isActive', String(isActive));
+
+        if (avatarFile) {
+          formData.append('avatarFile', avatarFile);
+        }
+
+        result = await fetchJson('/api/manager/users', {
           method: 'POST',
-          headers: authHeaders(false),
+          headers: authHeaders(),
           body: formData
-        }).then(r => r.json());
+        });
       }
 
-      if (!res.success) {
-        let hasFieldErr = false;
+      if (!result.success) {
+        let hasFieldError = false;
 
-        // Map structured field errors from backend (e.g. DTO validation)
-        if (res.data && typeof res.data === 'object') {
-          for (const [key, msg] of Object.entries(res.data)) {
-            if (setFieldError(key, msg)) {
-              hasFieldErr = true;
+        // Ánh xạ lỗi validation từ backend.
+        if (result.data && typeof result.data === 'object') {
+          for (const [key, message] of Object.entries(result.data)) {
+            if (setFieldError(key, String(message))) {
+              hasFieldError = true;
             }
           }
         }
 
-        // Map backend business exceptions (e.g. USER_EMAIL_EXISTS, USER_PHONE_EXISTS)
-        if (!hasFieldErr && res.message) {
-          const lower = res.message.toLowerCase();
+        // Ánh xạ lỗi nghiệp vụ từ backend.
+        if (!hasFieldError && result.message) {
+          const message = result.message;
+          const lower = message.toLowerCase();
+
           if (lower.includes('email')) {
-            setFieldError('email', res.message);
-            hasFieldErr = true;
-          } else if (lower.includes('phone') || lower.includes('điện thoại') || lower.includes('sdt')) {
-            setFieldError('phone', res.message);
-            hasFieldErr = true;
-          } else if (lower.includes('họ tên') || lower.includes('full name') || lower.includes('fullname')) {
-            setFieldError('fullName', res.message);
-            hasFieldErr = true;
-          } else if (lower.includes('mật khẩu') || lower.includes('password')) {
-            setFieldError('password', res.message);
-            hasFieldErr = true;
-          } else if (lower.includes('vai trò') || lower.includes('role')) {
-            setFieldError('role', res.message);
-            hasFieldErr = true;
-          } else if (lower.includes('ảnh') || lower.includes('avatar') || lower.includes('image')) {
-            setFieldError('avatar', res.message);
-            hasFieldErr = true;
+            hasFieldError = setFieldError('email', message);
+          } else if (
+            lower.includes('phone') ||
+            lower.includes('điện thoại') ||
+            lower.includes('sdt') ||
+            lower.includes('số điện thoại')
+          ) {
+            hasFieldError = setFieldError('phone', message);
+          } else if (
+            lower.includes('họ tên') ||
+            lower.includes('full name') ||
+            lower.includes('fullname')
+          ) {
+            hasFieldError = setFieldError('fullName', message);
+          } else if (
+            lower.includes('mật khẩu') ||
+            lower.includes('password')
+          ) {
+            hasFieldError = setFieldError('password', message);
+          } else if (
+            lower.includes('vai trò') ||
+            lower.includes('role')
+          ) {
+            hasFieldError = setFieldError('role', message);
+          } else if (
+            lower.includes('ảnh') ||
+            lower.includes('avatar') ||
+            lower.includes('image')
+          ) {
+            hasFieldError = setFieldError('avatar', message);
           }
         }
 
-        // Only pop up toast if the error could NOT be displayed under any input
-        if (!hasFieldErr) {
-          notify(res.message || 'Lỗi thao tác, vui lòng kiểm tra lại!', 'error');
+        if (!hasFieldError) {
+          notify(
+            result.message || 'Thao tác thất bại. Vui lòng kiểm tra lại.',
+            'error'
+          );
         }
+
         return;
       }
 
-      notify(res.message, 'success');
-      if (userFormModal) userFormModal.hide();
-      loadUsers(isUpdate ? currentPage : 0);
-    } catch (e) {
-      notify(e.message, 'error');
+      notify(
+        result.message ||
+          (isUpdate
+            ? 'Cập nhật người dùng thành công.'
+            : 'Thêm người dùng thành công.'),
+        'success'
+      );
+
+      if (userFormModal) {
+        userFormModal.hide();
+      }
+
+      await loadUsers(isUpdate ? currentPage : 0);
+    } catch (error) {
+      console.error('Lỗi lưu người dùng:', error);
+
+      notify(error.message || 'Không thể lưu thông tin người dùng.', 'error');
     } finally {
-      if (btnSave) btnSave.disabled = false;
+      if (btnSave) {
+        btnSave.disabled = false;
+      }
     }
   });
 
-  /* ---------- Search & Pagination Events ---------- */
-  let searchTimeout = null;
-  document.getElementById('searchInput')?.addEventListener('input', () => {
+  /* ---------- Search & Pagination ---------- */
+
+  getElement('searchInput')?.addEventListener('input', () => {
     clearTimeout(searchTimeout);
+
     searchTimeout = setTimeout(() => {
       loadUsers(0);
     }, 350);
   });
 
-  document.getElementById('btnPrevPage')?.addEventListener('click', () => {
-    if (currentPage > 0) loadUsers(currentPage - 1);
+  getElement('btnPrevPage')?.addEventListener('click', () => {
+    if (currentPage > 0) {
+      loadUsers(currentPage - 1);
+    }
   });
 
-  document.getElementById('btnNextPage')?.addEventListener('click', () => {
-    if (currentPage < totalPages - 1) loadUsers(currentPage + 1);
+  getElement('btnNextPage')?.addEventListener('click', () => {
+    if (currentPage < totalPages - 1) {
+      loadUsers(currentPage + 1);
+    }
+  });
+
+  getElement('userIsActive')?.addEventListener('change', updateIsActiveLabel);
+
+  // Khi đóng modal, xóa trạng thái lỗi để lần mở tiếp theo sạch sẽ.
+  userFormModalEl?.addEventListener('hidden.bs.modal', () => {
+    clearAllFormErrors(getElement('userForm'));
   });
 
   /* ---------- Initial Load ---------- */
+
   loadRoles();
   loadUsers(0);
 });

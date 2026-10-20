@@ -4,14 +4,26 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 public record CartItemDTO(
-        UUID id,                        // id của CartItem, dùng để cập nhật/xóa dòng
+        UUID id,
         UUID productId,
         UUID productVariantId,
         String productName,
         String productImageUrl,
-        BigDecimal unitPrice,           // giá hiện tại của sản phẩm
+        BigDecimal unitPrice,
         int quantity,
-        BigDecimal subtotal,           // unitPrice × count
+        BigDecimal subtotal,
         String styleValues,
-        Integer availableStock
-) {}
+        boolean isAvailable,        // còn bán
+        Integer availableStock,
+        String productSlug,
+        BigDecimal originalPrice,
+        BigDecimal promotionalPrice
+) {
+    public CartItemDTO(UUID id, UUID productId, UUID productVariantId, String productName,
+                       String productImageUrl, BigDecimal unitPrice, int quantity,
+                       BigDecimal subtotal, String styleValues, boolean isAvailable,
+                       Integer availableStock, String productSlug) {
+        this(id, productId, productVariantId, productName, productImageUrl, unitPrice, quantity,
+                subtotal, styleValues, isAvailable, availableStock, productSlug, unitPrice, null);
+    }
+}

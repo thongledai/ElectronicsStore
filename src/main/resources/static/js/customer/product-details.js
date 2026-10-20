@@ -462,6 +462,58 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    /* =========================================================
+   ADD TO CART
+   ========================================================= */
+    var addingToCart = false;
+
+    function toast(title, message, type) {
+        if (window.showToast) window.showToast(title, message, type);
+        else alert(message);
+    }
+
+    async function addToCart(button) {
+        if (addingToCart) return;
+
+        var variantId = button.dataset.variantId;
+        var count = parseInt(qtyInput ? qtyInput.value : 1, 10) || 1;
+
+        if (!variantId) {
+            toast('Thông báo', 'Vui lòng chọn phiên bản sản phẩm', 'warning');
+            return;
+        }
+
+        addingToCart = true;
+        try {
+            var res = await fetch('/cart/items', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productVariantId: variantId, count: count })
+            });
+
+            if (res.status === 401) {
+                window.location.href = '/login?error=unauthorized';
+                return;
+            }
+
+            var body = null;
+            try { body = await res.json(); } catch (e) {}
+
+            if (!res.ok || !body || body.success === false) {
+                toast('Lỗi', (body && body.message) || 'Không thể thêm vào giỏ hàng', 'danger');
+                return;
+            }
+
+            toast('Đã thêm', body.message || 'Đã thêm vào giỏ hàng', 'success');
+            if (typeof refreshCartBadge === 'function') refreshCartBadge();
+        } catch (e) {
+            console.error(e);
+            toast('Lỗi', 'Không thể kết nối máy chủ', 'danger');
+        } finally {
+            addingToCart = false;
+        }
+    }
 
     /* =========================================================
        CART / WISHLIST — stub handlers
@@ -474,14 +526,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (addCartBtn) {
             event.preventDefault();
             event.stopPropagation();
-
-            if (window.showToast) {
-                window.showToast(UiMessage.NOTICE, UiMessage.CART_FEATURE_UPDATING, 'info');
-            } else if (window.toast) {
-                window.toast(UiMessage.CART_FEATURE_UPDATING);
-            } else {
-                alert(UiMessage.CART_FEATURE_UPDATING);
-            }
+            addToCart(addCartBtn);
             return;
         }
 

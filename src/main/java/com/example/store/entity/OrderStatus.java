@@ -24,7 +24,7 @@ public class OrderStatus {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    // Ví dụ: not processed, confirmed, picked up, shipping, delivered, cancelled, returned
+    // Ví dụ: not processed, confirmed, shipping, delivered, cancelled, returned
     @Column(nullable = false, unique = true, length = 50, columnDefinition = "nvarchar(50)")
     private String name;
 }

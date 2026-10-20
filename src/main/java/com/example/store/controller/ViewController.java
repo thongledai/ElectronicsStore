@@ -56,6 +56,11 @@ public class ViewController {
         return "customer/cart";
     }
 
+    @GetMapping("/customer/checkout")
+    public String customerCheckout() {
+        return "customer/checkout";
+    }
+
     @GetMapping("/customer/wishlist")
     public String customerWishlist() {
         return "customer/wishlist";
@@ -71,7 +76,6 @@ public class ViewController {
     public String customerProfileRedirect() {
         return "redirect:/profile";
     }
-
 
     // Các trang thông tin: /pages/{page}
     @GetMapping("/pages/{page}")
