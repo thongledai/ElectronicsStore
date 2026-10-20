@@ -46,7 +46,7 @@ public class StatisticsServiceImpl implements IStatisticsService {
         LocalDateTime startOfLastMonth = startOfThisMonth.minusMonths(1);
         LocalDateTime endOfLastMonth = startOfThisMonth.minusNanos(1);
 
-        // 1. Doanh thu
+        // 1. Doanh thu tổng quan (Tính đơn DELIVERED)
         BigDecimal totalRevenue = orderRepository.calculateTotalRevenue();
         BigDecimal thisMonthRevenue = orderRepository.calculateRevenueBetween(startOfThisMonth, now);
         BigDecimal lastMonthRevenue = orderRepository.calculateRevenueBetween(startOfLastMonth, endOfLastMonth);
@@ -91,7 +91,7 @@ public class StatisticsServiceImpl implements IStatisticsService {
             }
         }
 
-        // 6. Doanh thu 7 ngày gần nhất
+        // 6. Doanh thu 7 ngày gần nhất (Chỉ tính đơn DELIVERED)
         List<ChartDataPointDTO> last7Days = new ArrayList<>();
         DateTimeFormatter dayFormatter = DateTimeFormatter.ofPattern("dd/MM");
         for (int i = 6; i >= 0; i--) {
@@ -122,7 +122,7 @@ public class StatisticsServiceImpl implements IStatisticsService {
     }
 
     @Override
-    public StatisticsAnalyticsDTO getAnalytics(String period, String type, LocalDate startDate, LocalDate endDate) {
+    public StatisticsAnalyticsDTO getAnalytics(String period, String type, String status, LocalDate startDate, LocalDate endDate) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime rangeStart;
         LocalDateTime rangeEnd = now;
@@ -143,6 +143,11 @@ public class StatisticsServiceImpl implements IStatisticsService {
             default -> rangeStart = now.minusDays(29).with(LocalTime.MIN);
         }
 
+        // Xử lý trạng thái đơn hàng (Nếu ALL hoặc trống thì tính toàn bộ)
+        final String targetStatus = (status == null || status.isBlank() || "ALL".equalsIgnoreCase(status.trim()))
+                ? null
+                : status.trim().toUpperCase();
+
         // 1. Tổng hợp chuỗi dữ liệu biểu đồ
         List<ChartDataPointDTO> chartPoints = new ArrayList<>();
         List<Order> ordersInRange = orderRepository.findOrdersBetween(rangeStart, rangeEnd);
@@ -154,20 +159,22 @@ public class StatisticsServiceImpl implements IStatisticsService {
             // Nhóm theo 12 tháng
             for (int month = 1; month <= 12; month++) {
                 final int m = month;
-                BigDecimal monthRev = BigDecimal.ZERO;
+                BigDecimal monthAmount = BigDecimal.ZERO;
                 long monthOrders = 0;
 
                 for (Order o : ordersInRange) {
                     if (o.getCreatedAt() != null && o.getCreatedAt().getMonthValue() == m) {
                         String st = o.getStatus() != null && o.getStatus().getName() != null ? o.getStatus().getName().toUpperCase() : "";
-                        if (!"CANCELLED".equals(st) && !"RETURNED".equals(st)) {
-                            if (o.getTotal() != null) monthRev = monthRev.add(o.getTotal());
+                        if (matchesStatus(st, targetStatus)) {
                             monthOrders++;
+                            if (o.getTotal() != null) {
+                                monthAmount = monthAmount.add(o.getTotal());
+                            }
                         }
                     }
                 }
 
-                BigDecimal val = "orders".equals(safeType) ? BigDecimal.valueOf(monthOrders) : monthRev;
+                BigDecimal val = "orders".equals(safeType) ? BigDecimal.valueOf(monthOrders) : monthAmount;
                 chartPoints.add(ChartDataPointDTO.builder()
                         .label("Tháng " + (m < 10 ? "0" + m : m))
                         .value(val)
@@ -181,20 +188,22 @@ public class StatisticsServiceImpl implements IStatisticsService {
 
             while (!cur.isAfter(last)) {
                 final LocalDate d = cur;
-                BigDecimal dayRev = BigDecimal.ZERO;
+                BigDecimal dayAmount = BigDecimal.ZERO;
                 long dayOrders = 0;
 
                 for (Order o : ordersInRange) {
                     if (o.getCreatedAt() != null && o.getCreatedAt().toLocalDate().isEqual(d)) {
                         String st = o.getStatus() != null && o.getStatus().getName() != null ? o.getStatus().getName().toUpperCase() : "";
-                        if (!"CANCELLED".equals(st) && !"RETURNED".equals(st)) {
-                            if (o.getTotal() != null) dayRev = dayRev.add(o.getTotal());
+                        if (matchesStatus(st, targetStatus)) {
                             dayOrders++;
+                            if (o.getTotal() != null) {
+                                dayAmount = dayAmount.add(o.getTotal());
+                            }
                         }
                     }
                 }
 
-                BigDecimal val = "orders".equals(safeType) ? BigDecimal.valueOf(dayOrders) : dayRev;
+                BigDecimal val = "orders".equals(safeType) ? BigDecimal.valueOf(dayOrders) : dayAmount;
                 chartPoints.add(ChartDataPointDTO.builder()
                         .label(d.format(formatter))
                         .value(val)
@@ -205,21 +214,23 @@ public class StatisticsServiceImpl implements IStatisticsService {
             }
         }
 
-        // 2. Tổng doanh thu & đơn hàng trong kỳ
+        // 2. Tổng giá trị tiền & số lượng đơn hàng trong kỳ theo trạng thái đã chọn
         BigDecimal totalPeriodRevenue = BigDecimal.ZERO;
         long totalPeriodOrders = 0;
         for (Order o : ordersInRange) {
             String st = o.getStatus() != null && o.getStatus().getName() != null ? o.getStatus().getName().toUpperCase() : "";
-            if (!"CANCELLED".equals(st) && !"RETURNED".equals(st)) {
-                if (o.getTotal() != null) totalPeriodRevenue = totalPeriodRevenue.add(o.getTotal());
+            if (matchesStatus(st, targetStatus)) {
                 totalPeriodOrders++;
+                if (o.getTotal() != null) {
+                    totalPeriodRevenue = totalPeriodRevenue.add(o.getTotal());
+                }
             }
         }
 
         long newUsers = userRepository.countByCreatedAtBetween(rangeStart, rangeEnd);
 
-        // 3. Top 5 sản phẩm bán chạy nhất
-        List<Object[]> rawTop = orderItemRepository.findTopSellingProducts(rangeStart, rangeEnd, PageRequest.of(0, 5));
+        // 3. Top 5 sản phẩm bán chạy nhất: Luôn cố định chỉ tính đơn khách đã nhận hàng thành công (DELIVERED)
+        List<Object[]> rawTop = orderItemRepository.findTopSellingProducts("DELIVERED", rangeStart, rangeEnd, PageRequest.of(0, 5));
         List<TopProductDTO> topProducts = new ArrayList<>();
         if (rawTop != null) {
             for (Object[] r : rawTop) {
@@ -235,8 +246,8 @@ public class StatisticsServiceImpl implements IStatisticsService {
             }
         }
 
-        // 4. Cơ cấu doanh số theo danh mục
-        List<Object[]> rawCat = orderItemRepository.findSalesByCategory(rangeStart, rangeEnd);
+        // 4. Cơ cấu doanh số theo danh mục theo trạng thái đã chọn
+        List<Object[]> rawCat = orderItemRepository.findSalesByCategory(targetStatus, rangeStart, rangeEnd);
         List<CategorySalesDTO> categories = new ArrayList<>();
         BigDecimal totalCatSales = BigDecimal.ZERO;
 
@@ -274,5 +285,12 @@ public class StatisticsServiceImpl implements IStatisticsService {
                 .topProducts(topProducts)
                 .categoryDistribution(categories)
                 .build();
+    }
+
+    private boolean matchesStatus(String orderStatus, String targetStatus) {
+        if (targetStatus == null) {
+            return !"CANCELLED".equals(orderStatus);
+        }
+        return targetStatus.equals(orderStatus);
     }
 }

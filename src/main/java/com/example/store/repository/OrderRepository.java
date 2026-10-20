@@ -71,9 +71,10 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     @Query("SELECT o FROM Order o WHERE o.createdAt >= :startDate AND o.createdAt <= :endDate")
     List<Order> findOrdersBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 
-    @Query("SELECT COALESCE(SUM(o.total), 0) FROM Order o WHERE UPPER(o.status.name) NOT IN ('CANCELLED', 'RETURNED')")
+    // Tính doanh thu: Chuẩn phương án 2 (Chỉ tính đơn giao thành công DELIVERED)
+    @Query("SELECT COALESCE(SUM(o.total), 0) FROM Order o WHERE UPPER(o.status.name) = 'DELIVERED'")
     BigDecimal calculateTotalRevenue();
 
-    @Query("SELECT COALESCE(SUM(o.total), 0) FROM Order o WHERE UPPER(o.status.name) NOT IN ('CANCELLED', 'RETURNED') AND o.createdAt >= :startDate AND o.createdAt <= :endDate")
+    @Query("SELECT COALESCE(SUM(o.total), 0) FROM Order o WHERE UPPER(o.status.name) = 'DELIVERED' AND o.createdAt >= :startDate AND o.createdAt <= :endDate")
     BigDecimal calculateRevenueBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 }

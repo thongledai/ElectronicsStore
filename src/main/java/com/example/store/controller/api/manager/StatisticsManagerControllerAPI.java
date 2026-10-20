@@ -35,9 +35,10 @@ public class StatisticsManagerControllerAPI {
     public ResponseEntity<ApiResponse<StatisticsAnalyticsDTO>> getAnalytics(
             @RequestParam(defaultValue = "30days") String period,
             @RequestParam(defaultValue = "revenue") String type,
+            @RequestParam(defaultValue = "DELIVERED") String status,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-        StatisticsAnalyticsDTO data = statisticsService.getAnalytics(period, type, startDate, endDate);
+        StatisticsAnalyticsDTO data = statisticsService.getAnalytics(period, type, status, startDate, endDate);
         return ResponseEntity.ok(ApiResponse.success("Lấy dữ liệu thống kê thành công", data));
     }
 }

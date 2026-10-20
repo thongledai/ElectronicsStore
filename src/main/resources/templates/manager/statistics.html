@@ -18,11 +18,11 @@
     <div class="col-md-4">
       <div class="stat">
         <div class="d-flex justify-content-between">
-          <span class="statlabel">Doanh thu trong kỳ</span>
+          <span class="statlabel" id="statPeriodRevenueLabel">Doanh thu trong kỳ</span>
           <div class="staticon"><i class="fa-solid fa-wallet"></i></div>
         </div>
         <div class="statvalue text-primary" id="statPeriodRevenue">...</div>
-        <div class="muted">Tổng giá trị đơn hàng thành công</div>
+        <div class="muted" id="statPeriodRevenueNote">Theo trạng thái đã chọn</div>
       </div>
     </div>
     <div class="col-md-4">
@@ -62,6 +62,19 @@
       </div>
 
       <div class="col-sm-6 col-lg-3">
+        <label class="form-label small fw-semibold" for="filterOrderStatus">Trạng thái đơn hàng</label>
+        <select class="form-select form-select-sm" id="filterOrderStatus">
+          <option value="DELIVERED" selected>Đã giao hàng (Thực thu)</option>
+          <option value="NOT_PROCESSED">Chờ xác nhận</option>
+          <option value="CONFIRMED">Đã xác nhận</option>
+          <option value="SHIPPING">Đang giao hàng</option>
+          <option value="CANCELLED">Đã hủy</option>
+          <option value="RETURNED">Trả hàng</option>
+          <option value="ALL">Tất cả trạng thái</option>
+        </select>
+      </div>
+
+      <div class="col-sm-6 col-lg-3">
         <label class="form-label small fw-semibold" for="filterType">Chỉ số thống kê</label>
         <select class="form-select form-select-sm" id="filterType">
           <option value="revenue" selected>Doanh thu (VNĐ)</option>
@@ -88,7 +101,7 @@
             <span class="small text-muted">Đến ngày:</span>
             <input type="date" class="form-control form-control-sm" id="filterEndDate">
           </div>
-          <button class="btn btn-primary btn-sm px-3" type="button" id="btnApplyCustomDate">
+          <button class="btn btn-primary btn-sm" id="btnApplyCustomDate" type="button">
             <i class="fa-solid fa-filter me-1"></i>Áp dụng
           </button>
         </div>
@@ -96,50 +109,63 @@
     </div>
   </div>
 
-  <!-- Biểu đồ chính -->
+  <!-- Biểu đồ phân tích chính -->
   <div class="panel mb-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
-      <h2 class="paneltitle mb-0">Biểu đồ thống kê chi tiết</h2>
-      <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Cập nhật động</span>
+      <h2 class="paneltitle mb-0" id="mainChartTitle">Xu hướng Doanh thu</h2>
+      <span class="muted small" id="chartSubtitle">Đang nạp dữ liệu...</span>
     </div>
-    <div style="height: 330px; position: relative;">
+    <div style="position: relative; height: 320px; width: 100%;">
       <canvas id="analyticsChart"></canvas>
     </div>
   </div>
 
-  <!-- 2 Khung phân tích: Top Sản phẩm & Cơ cấu danh mục -->
+  <!-- Hàng phân tích chi tiết: Top sản phẩm + Cơ cấu danh mục -->
   <div class="row g-4">
+    <!-- Top 5 sản phẩm bán chạy nhất -->
     <div class="col-lg-7">
       <div class="panel h-100">
-        <h2 class="paneltitle mb-3">Top 5 sản phẩm bán chạy nhất</h2>
+        <h2 class="paneltitle mb-3">Top 5 sản phẩm bán chạy nhất <span class="muted small fw-normal">(Đã nhận hàng)</span></h2>
         <div class="table-responsive">
-          <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
+          <table class="table align-middle" id="topProductsTable">
+            <thead>
               <tr>
-                <th class="text-center" style="width: 40px;">#</th>
-                <th>Sản phẩm</th>
-                <th class="text-end">Đã bán</th>
-                <th class="text-end">Doanh thu</th>
+                <th style="width: 50px;">Ảnh</th>
+                <th>Tên sản phẩm</th>
+                <th class="text-center" style="width: 80px;">Đã bán</th>
+                <th class="text-end" style="width: 120px;">Doanh thu</th>
               </tr>
             </thead>
             <tbody id="topProductsBody">
-              <tr><td colspan="4" class="text-center text-muted py-3">Đang tải dữ liệu...</td></tr>
+              <tr>
+                <td colspan="4" class="text-center text-muted py-4">Đang tải danh sách...</td>
+              </tr>
             </tbody>
           </table>
         </div>
       </div>
     </div>
 
+    <!-- Cơ cấu doanh số theo danh mục -->
     <div class="col-lg-5">
       <div class="panel h-100">
-        <h2 class="paneltitle mb-3">Cơ cấu doanh số theo danh mục</h2>
-        <div style="height: 200px; position: relative;" class="mb-3">
+        <h2 class="paneltitle mb-3">Cơ cấu doanh số danh mục</h2>
+        <div style="position: relative; height: 200px; width: 100%; margin-bottom: 1rem;">
           <canvas id="categoryChart"></canvas>
         </div>
         <div class="table-responsive">
           <table class="table table-sm align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Danh mục</th>
+                <th class="text-end">Doanh số</th>
+                <th class="text-end">Tỷ trọng</th>
+              </tr>
+            </thead>
             <tbody id="categoryTableBody">
-              <tr><td colspan="3" class="text-center text-muted py-2">Đang tải...</td></tr>
+              <tr>
+                <td colspan="3" class="text-center text-muted py-3">Đang tải...</td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -147,9 +173,10 @@
     </div>
   </div>
 
-  <!-- Chart.js & Statistics Script -->
+  <!-- Thư viện Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script th:src="@{/js/manager/statistics.js}"></script>
+  <!-- Logic JS Thống kê -->
+  <script th:src="@{/js/manager/statistics.js}" defer></script>
 </section>
 </body>
 </html>
