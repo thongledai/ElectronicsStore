@@ -1,28 +1,266 @@
 <!DOCTYPE html>
 <html lang="vi" th:replace="~{layouts/dashboard-layout :: layout('Đơn hàng', 'manager', 'orders', ~{::section.content})}">
-<head><title>Đơn hàng | TechNova</title></head>
+<head>
+  <title>Đơn hàng | TechNova</title>
+</head>
 <body>
-<section class="content"><div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4"><div><h1 class="title">Đơn hàng</h1>
-<div class="subtitle">Quản lý và theo dõi đơn hàng trong hệ thống.</div>
-</div>
-<button class="btn btn-primary btn-sm" data-demo-action="Thêm mới"><i class="fa-solid fa-plus me-1"></i>Thêm mới</button></div>
-<div class="panel mb-3"><div class="row g-2 align-items-center"><div class="col-md-6"><input class="form-control" placeholder="Tìm kiếm..." data-search-table="#dataTable"></div>
-<div class="col-md-6 text-md-end"><span class="muted">Dữ liệu minh họa · 4 bản ghi</span></div>
-</div>
-</div>
-<div class="panel"><h2 class="paneltitle mb-3">Đơn hàng</h2>
-<div class="table-responsive"><table class="table" id="dataTable"><thead><tr><th>Mã đơn</th><th>Khách hàng</th><th>Ngày đặt</th><th>Tổng tiền</th><th>Trạng thái</th><th>Thao tác</th></tr>
-</thead>
-<tbody><tr><td>TN-2048</td><td>Nguyễn Minh Anh</td><td>04/10/2026</td><td>₫12.490.000</td><td><span class="status blue">Mới</span></td><td><button class="action" data-demo-action="Xem chi tiết"><i class="fa-regular fa-eye"></i></button> <button class="action" data-demo-action="Chỉnh sửa"><i class="fa-solid fa-pen"></i></button></td></tr>
-<tr><td>TN-2047</td><td>Trần Quốc Bảo</td><td>04/10/2026</td><td>₫5.990.000</td><td><span class="status yellow">Đã xác nhận</span></td><td><button class="action" data-demo-action="Xem chi tiết"><i class="fa-regular fa-eye"></i></button> <button class="action" data-demo-action="Chỉnh sửa"><i class="fa-solid fa-pen"></i></button></td></tr>
-<tr><td>TN-2046</td><td>Lê Thu Hà</td><td>03/10/2026</td><td>₫2.490.000</td><td><span class="status purple">Đang giao</span></td><td><button class="action" data-demo-action="Xem chi tiết"><i class="fa-regular fa-eye"></i></button> <button class="action" data-demo-action="Chỉnh sửa"><i class="fa-solid fa-pen"></i></button></td></tr>
-<tr><td>TN-2045</td><td>Đặng Hoài Phương</td><td>03/10/2026</td><td>₫890.000</td><td><span class="status green">Đã giao</span></td><td><button class="action" data-demo-action="Xem chi tiết"><i class="fa-regular fa-eye"></i></button> <button class="action" data-demo-action="Chỉnh sửa"><i class="fa-solid fa-pen"></i></button></td></tr>
-</tbody>
-</table>
-</div>
-<div class="d-flex justify-content-between"><span class="muted">Trang 1/1</span><div class="btn-group btn-group-sm"><button class="btn btn-outline-secondary">Trước</button><button class="btn btn-primary">1</button><button class="btn btn-outline-secondary">Sau</button></div>
-</div>
-</div>
+<section class="content">
+  <!-- Tiêu đề trang -->
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div>
+      <h1 class="title">Đơn hàng</h1>
+      <div class="subtitle">Quản lý và theo dõi đơn hàng trong hệ thống.</div>
+    </div>
+  </div>
+
+  <!-- Thanh lọc đơn giản -->
+  <div class="panel mb-3">
+    <div class="row g-2 align-items-center">
+      <div class="col-md-5">
+        <input class="form-control" id="filterKeyword" placeholder="Tìm theo mã đơn, khách hàng, số điện thoại..." autocomplete="off">
+      </div>
+      <div class="col-md-3">
+        <select class="form-select" id="filterStatus">
+          <option value="">Tất cả trạng thái</option>
+          <option value="NOT_PROCESSED">Chờ xác nhận</option>
+          <option value="CONFIRMED">Đã xác nhận</option>
+          <option value="SHIPPING">Đang giao</option>
+          <option value="DELIVERED">Đã giao</option>
+          <option value="CANCELLED">Đã hủy</option>
+          <option value="RETURNED">Trả hàng</option>
+        </select>
+      </div>
+      <div class="col-md-4 text-md-end">
+        <span class="muted" id="totalRecordsText">Đang tải...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bảng dữ liệu đơn hàng -->
+  <div class="panel">
+    <h2 class="paneltitle mb-3">Danh sách đơn hàng</h2>
+    <div class="table-responsive">
+      <table class="table" id="dataTable">
+        <thead>
+          <tr>
+            <th>Mã đơn</th>
+            <th>Khách hàng</th>
+            <th>Ngày đặt</th>
+            <th>Tổng tiền</th>
+            <th>Trạng thái</th>
+            <th class="text-end">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="ordersTableBody">
+          <tr>
+            <td colspan="6" class="text-center py-4 text-muted">Đang tải dữ liệu...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Phân trang -->
+    <div class="d-flex justify-content-between align-items-center mt-3">
+      <span class="muted" id="pageInfoText">Trang 1/1</span>
+      <div class="btn-group btn-group-sm" id="paginationControls">
+        <button class="btn btn-outline-secondary" id="btnPrevPage" type="button">Trước</button>
+        <button class="btn btn-primary" id="btnCurrentPage" type="button">1</button>
+        <button class="btn btn-outline-secondary" id="btnNextPage" type="button">Sau</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Chi Tiết Đơn Hàng (Đơn giản, gọn gàng) -->
+  <div class="modal fade" id="orderDetailModal" tabindex="-1" aria-labelledby="orderModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="orderModalTitle">Chi tiết đơn hàng <span id="modalShortCode" class="text-primary"></span></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Thông tin giao hàng -->
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <div class="muted small mb-1">Khách hàng</div>
+              <div class="fw-semibold" id="modalCustomerName">--</div>
+              <div class="small text-muted" id="modalCustomerPhone">--</div>
+            </div>
+            <div class="col-md-6">
+              <div class="muted small mb-1">Ngày đặt & Phương thức</div>
+              <div class="fw-semibold" id="modalCreatedAt">--</div>
+              <div class="small text-muted" id="modalPayment">--</div>
+            </div>
+            <div class="col-12">
+              <div class="muted small mb-1">Địa chỉ nhận hàng</div>
+              <div id="modalAddress">--</div>
+            </div>
+            <div class="col-12" id="modalNoteContainer">
+              <div class="muted small mb-1">Ghi chú</div>
+              <div class="text-muted small fst-italic" id="modalNote">--</div>
+            </div>
+          </div>
+
+          <hr class="my-3">
+
+          <!-- Bảng sản phẩm -->
+          <div class="mb-3">
+            <div class="muted small mb-2">Sản phẩm trong đơn</div>
+            <div class="table-responsive">
+              <table class="table table-sm align-middle mb-0">
+                <thead>
+                  <tr class="table-light">
+                    <th>Sản phẩm</th>
+                    <th class="text-end" style="width: 120px;">Đơn giá</th>
+                    <th class="text-center" style="width: 60px;">SL</th>
+                    <th class="text-end" style="width: 120px;">Thành tiền</th>
+                  </tr>
+                </thead>
+                <tbody id="modalItemsBody">
+                  <!-- Rendered via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Chi phí -->
+          <div class="row justify-content-end mb-3">
+            <div class="col-md-6">
+              <div class="d-flex justify-content-between py-1 small">
+                <span class="text-muted">Tạm tính:</span>
+                <span id="modalSubtotal">₫0</span>
+              </div>
+              <div class="d-flex justify-content-between py-1 small">
+                <span class="text-muted">Phí vận chuyển:</span>
+                <span id="modalShipping">₫0</span>
+              </div>
+              <div class="d-flex justify-content-between py-1 small">
+                <span class="text-muted">Giảm giá:</span>
+                <span id="modalDiscount">₫0</span>
+              </div>
+              <div class="d-flex justify-content-between py-1 border-top fw-bold">
+                <span>Tổng tiền:</span>
+                <span class="text-primary" id="modalTotal">₫0</span>
+              </div>
+            </div>
+          </div>
+
+          <hr class="my-3">
+
+          <!-- Cập nhật trạng thái -->
+          <div class="row g-2 align-items-center">
+            <div class="col-sm-4">
+              <label class="form-label small fw-semibold mb-1" for="modalStatusSelect">Trạng thái đơn</label>
+              <select class="form-select form-select-sm" id="modalStatusSelect">
+                <option value="NOT_PROCESSED">Chờ xác nhận</option>
+                <option value="CONFIRMED">Đã xác nhận</option>
+                <option value="SHIPPING">Đang giao</option>
+                <option value="DELIVERED">Đã giao</option>
+                <option value="CANCELLED">Đã hủy</option>
+                <option value="RETURNED">Trả hàng</option>
+              </select>
+            </div>
+            <div class="col-sm-5">
+              <label class="form-label small fw-semibold mb-1" for="modalStatusNote">Ghi chú xử lý</label>
+              <input type="text" class="form-control form-control-sm" id="modalStatusNote" placeholder="Tùy chọn...">
+            </div>
+            <div class="col-sm-3 d-flex align-items-end pt-3">
+              <button class="btn btn-primary btn-sm w-100" id="btnSaveStatus" type="button">Cập nhật</button>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer d-flex justify-content-between">
+          <button type="button" class="btn btn-outline-primary btn-sm" id="btnPrintOrder">
+            <i class="fa-solid fa-print me-1"></i>In đơn hàng
+          </button>
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Template In Phiếu Đơn Hàng (Ẩn) -->
+  <div id="printArea" class="d-none">
+    <div style="font-family: Arial, sans-serif; padding: 20px; color: #111; max-width: 800px; margin: 0 auto;">
+      <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #333; padding-bottom: 15px; margin-bottom: 20px;">
+        <div>
+          <h2 style="margin: 0 0 5px; color: #0d6efd; font-size: 24px;">TECHNOVA STORE</h2>
+          <div style="font-size: 13px; color: #555;">Hệ thống điện máy & công nghệ thông minh</div>
+          <div style="font-size: 13px; color: #555;">Website: technova.vn · Hotline: 1900 8888</div>
+        </div>
+        <div style="text-align: right;">
+          <h3 style="margin: 0 0 5px; font-size: 18px;">PHIẾU GIAO ĐƠN HÀNG</h3>
+          <div style="font-size: 14px; font-weight: bold;" id="printOrderCode">#ORD-0000</div>
+          <div style="font-size: 12px; color: #666;" id="printOrderDate">Ngày đặt: --</div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 13px;">
+        <div style="flex: 1; margin-right: 20px;">
+          <h4 style="margin: 0 0 8px; font-size: 14px; text-transform: uppercase; color: #333;">Người nhận:</h4>
+          <div><strong id="printReceiverName">--</strong></div>
+          <div id="printReceiverPhone">--</div>
+          <div id="printReceiverAddress">--</div>
+          <div style="margin-top: 6px; font-style: italic; color: #666;" id="printNote">--</div>
+        </div>
+        <div style="width: 250px;">
+          <h4 style="margin: 0 0 8px; font-size: 14px; text-transform: uppercase; color: #333;">Vận chuyển & Thanh toán:</h4>
+          <div>Hình thức TT: <strong id="printPaymentMethod">COD</strong></div>
+          <div>Mã vận đơn: <strong id="printGhnCode">Chưa có</strong></div>
+          <div>Trạng thái: <strong id="printStatus">--</strong></div>
+        </div>
+      </div>
+
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px;">
+        <thead>
+          <tr style="background: #f4f4f4; border-bottom: 1px solid #ddd; text-align: left;">
+            <th style="padding: 8px; border: 1px solid #ddd; width: 40px; text-align: center;">STT</th>
+            <th style="padding: 8px; border: 1px solid #ddd;">Sản phẩm</th>
+            <th style="padding: 8px; border: 1px solid #ddd; text-align: right; width: 120px;">Đơn giá</th>
+            <th style="padding: 8px; border: 1px solid #ddd; text-align: center; width: 60px;">SL</th>
+            <th style="padding: 8px; border: 1px solid #ddd; text-align: right; width: 120px;">Thành tiền</th>
+          </tr>
+        </thead>
+        <tbody id="printItemsTableBody">
+          <!-- Rendered via JS -->
+        </tbody>
+      </table>
+
+      <div style="display: flex; justify-content: flex-end; margin-bottom: 30px;">
+        <div style="width: 300px; font-size: 13px;">
+          <div style="display: flex; justify-content: space-between; padding: 4px 0;">
+            <span>Tạm tính hàng:</span><span id="printSubtotal">0 ₫</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 4px 0;">
+            <span>Phí vận chuyển:</span><span id="printShipping">0 ₫</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 4px 0;">
+            <span>Giảm giá:</span><span id="printDiscount">0 ₫</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 6px 0; border-top: 1px solid #333; font-weight: bold; font-size: 15px;">
+            <span>TỔNG THANH TOÁN:</span><span style="color: #0d6efd;" id="printTotal">0 ₫</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; text-align: center; font-size: 13px; margin-top: 40px;">
+        <div>
+          <div style="font-weight: bold;">Người mua hàng</div>
+          <div style="font-size: 11px; color: #888;">(Ký và ghi rõ họ tên)</div>
+        </div>
+        <div>
+          <div style="font-weight: bold;">Nhân viên giao hàng</div>
+          <div style="font-size: 11px; color: #888;">(Ký và ghi rõ họ tên)</div>
+        </div>
+        <div>
+          <div style="font-weight: bold;">Người lập phiếu</div>
+          <div style="font-size: 11px; color: #888;">(Ký và ghi rõ họ tên)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script th:src="@{/js/manager/orders.js}" defer></script>
 </section>
 </body>
 </html>

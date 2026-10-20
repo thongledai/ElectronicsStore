@@ -11,7 +11,6 @@
     <div class="nav-links collapse d-lg-flex" id="roleNavLinks">
 
         <a th:href="@{/manager/index}" th:classappend="${active == 'index'} ? 'active'" th:attr="aria-current=${active == 'index'} ? 'page'"><i class="fa-solid fa-chart-pie"></i><span>Tổng quan</span></a>
-        <a th:href="@{/customer/index}" title="Go to Customer Storefront"><i class="fa-solid fa-store"></i><span>Mua hàng</span></a>
         <a th:href="@{/manager/users}" th:classappend="${active == 'users'} ? 'active'" th:attr="aria-current=${active == 'users'} ? 'page'"><i class="fa-solid fa-users"></i><span>Người dùng</span></a>
         <a th:href="@{/manager/products}" th:classappend="${active == 'products'} ? 'active'" th:attr="aria-current=${active == 'products'} ? 'page'"><i class="fa-solid fa-box"></i><span>Sản phẩm</span></a>
         <a th:href="@{/manager/categories}" th:classappend="${active == 'categories'} ? 'active'" th:attr="aria-current=${active == 'categories'} ? 'page'"><i class="fa-solid fa-layer-group"></i><span>Danh mục</span></a>
@@ -21,17 +20,16 @@
         <a th:href="@{/manager/carriers}" th:classappend="${active == 'carriers'} ? 'active'" th:attr="aria-current=${active == 'carriers'} ? 'page'"><i class="fa-solid fa-truck-fast"></i><span>Vận chuyển</span></a>
         <a th:href="@{/manager/orders}" th:classappend="${active == 'orders'} ? 'active'" th:attr="aria-current=${active == 'orders'} ? 'page'"><i class="fa-solid fa-receipt"></i><span>Đơn hàng</span></a>
         <a th:href="@{/manager/statistics}" th:classappend="${active == 'statistics'} ? 'active'" th:attr="aria-current=${active == 'statistics'} ? 'page'"><i class="fa-solid fa-chart-line"></i><span>Thống kê</span></a>
+        <a th:href="@{/customer/index}" title="Go to Customer Storefront"><i class="fa-solid fa-store"></i><span>Trang người dùng</span></a>
+        <a th:href="@{/manager/reset-password}" th:classappend="${active == 'reset-password'} ? 'active'" th:attr="aria-current=${active == 'reset-password'} ? 'page'"><i class="fa-solid fa-key"></i><span>Đổi mật khẩu</span></a>
+
     </div>
     <div class="nav-actions">
         <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle dark/light theme" title="Chuyển chế độ sáng/tối"><i class="fa-solid fa-moon"></i></button>
-        <div class="dropdown">
-            <button class="role-avatar border-0" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Mở menu tài khoản"><span class="js-role-avatar-fallback">M</span></button>
-            <ul class="dropdown-menu dropdown-menu-end shadow">
-                <li><a class="dropdown-item" th:href="@{/profile}"><i class="fa-solid fa-user me-2"></i>Hồ sơ cá nhân</a></li>
-                <li><a class="dropdown-item" th:href="@{/manager/reset-password}"><i class="fa-solid fa-key me-2"></i>Đổi mật khẩu</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><form th:action="@{/logout}" method="post" class="m-0 js-logout-form"><button class="dropdown-item text-danger" type="submit"><i class="fa-solid fa-right-from-bracket me-2"></i>Đăng xuất</button></form></li>
-            </ul>
-        </div>
+        <!-- Spring Security logout (POST + CSRF token added automatically by th:action) -->
+        <form th:action="@{/logout}" method="post" class="m-0 js-logout-form">
+            <button class="theme-toggle" type="submit" aria-label="Sign Out" title="Đăng xuất"><i class="fa-solid fa-right-from-bracket"></i></button>
+        </form>
+        <div class="role-avatar">M</div>
     </div>
 </nav>

@@ -399,16 +399,17 @@ async function handleGoogleLoginPayload(payload) {
       localStorage.setItem('technova_remember_me', 'true');
       localStorage.setItem('technova_last_active', Date.now().toString());
 
+      const googleUser = {
+        name: data.data?.user?.fullName || 'User',
+        email: data.data?.user?.email || '',
+        role: data.data?.user?.role,
+        avatar: data.data?.user?.avatar || null,
+        hasPassword: data.data?.user?.hasPassword ?? false,
+        loggedInAt: new Date().toISOString()
+      };
+      try { localStorage.setItem('technova_user', JSON.stringify(googleUser)); } catch (_) {}
       if (typeof storageSet === 'function' && typeof STORE !== 'undefined') {
-        storageSet(STORE.user, {
-          name: data.data?.user?.fullName || 'User',
-          email: data.data?.user?.email || '',
-          role: data.data?.user?.role,
-          avatar: data.data?.user?.avatar || null,
-          hasPassword: data.data?.user?.hasPassword ?? false,
-          loggedInAt: new Date().toISOString()
-        });
-
+        storageSet(STORE.user, googleUser);
       }
 
       notify('Sign In Successful!', `Welcome back, ${data.data?.user?.fullName || 'User'}!`, 'success');
@@ -511,15 +512,17 @@ async function handleLogin(e) {
       }
       localStorage.setItem('technova_last_active', Date.now().toString());
 
+      const loginUser = {
+        name: data.data?.user?.fullName || 'User',
+        email: data.data?.user?.email || email,
+        role: data.data?.user?.role,
+        avatar: data.data?.user?.avatar || null,
+        hasPassword: data.data?.user?.hasPassword ?? true,
+        loggedInAt: new Date().toISOString()
+      };
+      try { localStorage.setItem('technova_user', JSON.stringify(loginUser)); } catch (_) {}
       if (typeof storageSet === 'function' && typeof STORE !== 'undefined') {
-        storageSet(STORE.user, {
-          name: data.data?.user?.fullName || 'User',
-          email: data.data?.user?.email || email,
-          role: data.data?.user?.role,
-          avatar: data.data?.user?.avatar || null,
-          hasPassword: data.data?.user?.hasPassword ?? true,
-          loggedInAt: new Date().toISOString()
-        });
+        storageSet(STORE.user, loginUser);
       }
 
       notify(UiMessage.SIGN_IN_SUCCESS_TITLE, UiMessage.WELCOME_BACK(data.data?.user?.fullName || ''), 'success');

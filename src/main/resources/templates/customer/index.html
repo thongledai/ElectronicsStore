@@ -187,13 +187,13 @@
     <!-- ================================================================
        DEAL OF THE DAY
        ================================================================ -->
-    <section class="section pt-0">
+    <section class="section pt-0" id="dealSection" style="display: none;">
       <div class="container">
         <div class="deal-band reveal">
           <div class="row align-items-center g-4">
 
             <div class="col-lg-4 text-center">
-              <img id="dealImage" src="" alt="" style="max-height:230px" width="600" height="600">
+              <img id="dealImage" th:src="@{/images/placeholder.webp}" alt="Deal of the day" style="max-height:230px" width="600" height="600" onerror="this.onerror=null;this.src='/images/placeholder.webp';">
             </div>
 
             <div class="col-lg-5">

@@ -862,7 +862,9 @@ function initYear() {
 
 /** Reflects the demo login state in the header account label. */
 function initAccountLabel() {
-  const user = storageGet(STORE.user, null);
+  const user = storageGet(STORE.user, null) || (function(){
+    try { return JSON.parse(localStorage.getItem('technova_user') || 'null'); } catch(_) { return null; }
+  })();
   const token = localStorage.getItem('technova_jwt');
   const isLoggedIn = !!(token || (user && user.email));
 

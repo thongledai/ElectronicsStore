@@ -186,7 +186,8 @@
 
     document.querySelectorAll('.role-avatar').forEach(el => {
       if (user && user.avatar) {
-        el.innerHTML = `<img src="${user.avatar}" class="w-100 h-100 rounded-circle object-fit-cover" alt="">`;
+        el.innerHTML = `<img src="${user.avatar}" class="w-100 h-100 rounded-circle object-fit-cover" alt="" onerror="this.onerror=null; this.parentElement.textContent='${role.charAt(0)}';">`;
+        el.style.background = 'transparent';
       } else {
         const fallback = el.querySelector('.js-role-avatar-fallback');
         if (fallback) fallback.textContent = role.charAt(0);

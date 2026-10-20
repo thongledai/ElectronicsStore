@@ -2,7 +2,6 @@ package com.example.store.enums.error;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-
 @Getter
 @AllArgsConstructor
 public enum ShippingErrorCode implements ErrorCode {

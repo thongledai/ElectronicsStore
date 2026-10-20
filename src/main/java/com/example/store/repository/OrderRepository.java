@@ -1,5 +1,8 @@
 package com.example.store.repository;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -10,7 +13,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import java.util.List;
 
 import com.example.store.entity.Order;
 
@@ -22,6 +24,25 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
             + "and (:keyword is null or :keyword = '' or lower(o.user.fullName) like lower(concat('%', :keyword, '%')) "
             + "or o.phone like concat('%', :keyword, '%') or lower(o.ghnOrderCode) like lower(concat('%', :keyword, '%'))) ")
     Page<Order> search(@Param("status") String status, @Param("keyword") String keyword, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"user", "status", "payment", "items"})
+    @Query("select o from Order o where "
+            + "(:status is null or :status = '' or upper(o.status.name) = upper(:status)) "
+            + "and (:paymentMethodId is null or o.payment.id = :paymentMethodId) "
+            + "and (:startDate is null or o.createdAt >= :startDate) "
+            + "and (:endDate is null or o.createdAt <= :endDate) "
+            + "and (:keyword is null or :keyword = '' "
+            + "     or lower(o.user.fullName) like lower(concat('%', :keyword, '%')) "
+            + "     or lower(o.toName) like lower(concat('%', :keyword, '%')) "
+            + "     or o.phone like concat('%', :keyword, '%') "
+            + "     or lower(o.ghnOrderCode) like lower(concat('%', :keyword, '%'))) ")
+    Page<Order> searchOrdersForManager(
+            @Param("status") String status,
+            @Param("keyword") String keyword,
+            @Param("paymentMethodId") Integer paymentMethodId,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            Pageable pageable);
 
     @EntityGraph(attributePaths = {"user", "status", "payment", "items", "items.variant", "items.variant.product"})
     @Query("select o from Order o where o.id = :id")
@@ -40,4 +61,19 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
 
     Optional<Order> findByIdAndUserId(UUID id, UUID userId);
     List<Order> findByUserIdOrderByCreatedAtDesc(UUID userId);
+
+    @Query("SELECT COUNT(o) FROM Order o WHERE UPPER(o.status.name) IN ('NOT_PROCESSED', 'CONFIRMED')")
+    long countPendingOrders();
+
+    @Query("SELECT o.status.name, COUNT(o) FROM Order o GROUP BY o.status.name")
+    List<Object[]> countOrdersByStatusGroup();
+
+    @Query("SELECT o FROM Order o WHERE o.createdAt >= :startDate AND o.createdAt <= :endDate")
+    List<Order> findOrdersBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
+    @Query("SELECT COALESCE(SUM(o.total), 0) FROM Order o WHERE UPPER(o.status.name) NOT IN ('CANCELLED', 'RETURNED')")
+    BigDecimal calculateTotalRevenue();
+
+    @Query("SELECT COALESCE(SUM(o.total), 0) FROM Order o WHERE UPPER(o.status.name) NOT IN ('CANCELLED', 'RETURNED') AND o.createdAt >= :startDate AND o.createdAt <= :endDate")
+    BigDecimal calculateRevenueBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 }

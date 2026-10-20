@@ -25,7 +25,7 @@
   <nav th:replace="~{|fragments/${role}-sidebar| :: sidebar(${active})}"></nav>
 
   <main class="main">
-    <th:block th:if="${role == 'shipper'}"><header th:replace="~{fragments/dashboard-topbar :: topbar(${role}, ${title})}"></header></th:block>
+    <header th:replace="~{fragments/dashboard-topbar :: topbar(${role}, ${title})}"></header>
     <section th:replace="${content}"></section>
   </main>
 
