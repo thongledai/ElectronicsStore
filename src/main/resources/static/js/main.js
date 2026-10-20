@@ -862,7 +862,9 @@ function initYear() {
 
 /** Reflects the demo login state in the header account label. */
 function initAccountLabel() {
-  const user = storageGet(STORE.user, null);
+  const user = storageGet(STORE.user, null) || (function(){
+    try { return JSON.parse(localStorage.getItem('technova_user') || 'null'); } catch(_) { return null; }
+  })();
   const token = localStorage.getItem('technova_jwt');
   const isLoggedIn = !!(token || (user && user.email));
 
@@ -1284,16 +1286,15 @@ function initSessionManager() {
   };
 })();
 
-// Chạy kiểm tra timeout ngay khi file nạp vào
+// Chạy kiểm tra timeout và nạp ngay trạng thái tài khoản vào header
 initSessionManager();
+try { initAccountLabel(); } catch (_) {}
 
 /* ==========================================================================
    15. BOOTSTRAP THE PAGE
    ========================================================================== */
 document.addEventListener('DOMContentLoaded', async () => {
-  if (window.productCatalogReady) await window.productCatalogReady;
   initTheme();
-  initCategoryMenu();
   initHeaderSearch();
   initStickyHeader();
   markActiveNav();
@@ -1306,6 +1307,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   initTooltips();
   updateBadges();
   observeReveals();
+
+  // Async load catalog for categories dropdown without blocking topbar UI
+  if (window.productCatalogReady) {
+    try { await window.productCatalogReady; } catch (_) {}
+  }
+  initCategoryMenu();
 });
 
 /* Keep multiple open tabs in sync — storage events fire in the other tabs. */

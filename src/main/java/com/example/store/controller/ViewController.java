@@ -124,9 +124,17 @@ public class ViewController {
         return "manager/reset-password";
     }
 
-    // Dashboard Nhân viên: /employee/{page}
+    // Dashboard Nhân viên: chuyển hướng các route tổng quan về /employee/orders
+    @GetMapping({"/employee", "/employee/index"})
+    public String employeeIndexRedirect() {
+        return "redirect:/employee/orders";
+    }
+
     @GetMapping("/employee/{page}")
     public String employeePages(@PathVariable String page) {
+        if ("index".equalsIgnoreCase(page)) {
+            return "redirect:/employee/orders";
+        }
         return "employee/" + page;
     }
 

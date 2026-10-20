@@ -1,8 +1,6 @@
 package com.example.store.repository;
 
-import com.example.store.entity.User;
-import org.springframework.data.jpa.repository.JpaRepository;
-
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -37,4 +35,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     @Query("SELECT CASE WHEN COUNT(o) > 0 THEN true ELSE false END FROM Order o WHERE o.user.id = :userId")
     boolean existsOrderReference(@Param("userId") UUID userId);
+
+    long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+    long countByCreatedAtAfter(LocalDateTime date);
 }

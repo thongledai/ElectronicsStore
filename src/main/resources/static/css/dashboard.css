@@ -73,10 +73,11 @@
 [data-role] .nav-toggle { display: none; }
 [data-role] .role-avatar, [data-role] .avatar {
   width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; flex: none;
-  background: var(--orange); color: #fff; font-weight: 700;
+  background: var(--orange); color: #fff; font-weight: 700; overflow: hidden; padding: 0; aspect-ratio: 1/1;
 }
 [data-role] .role-avatar { margin-left: auto; }
 [data-role] .avatar { background: var(--blue); }
+[data-role] .role-avatar img, [data-role] .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 50%; }
 
 /* ---- Top bar & content ---- */
 [data-role] .top {

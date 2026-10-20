@@ -220,6 +220,7 @@ async function initDealOfTheDay() {
   }
 
   const deal = deals.sort((a, b) => homeDiscountPercent(b) - homeDiscountPercent(a))[0];
+  if (section) section.style.display = '';
 
   document.getElementById('dealImage').src = deal.thumbnailUrl || HOME_PLACEHOLDER;
   document.getElementById('dealImage').alt = deal.name;

@@ -134,22 +134,32 @@
       const now = Date.now();
       if (now - lastTouch > 5000) {
         lastTouch = now;
-        if (localStorage.getItem('technova_jwt')) {
-          localStorage.setItem('technova_last_active', now.toString());
-        }
+        localStorage.setItem('technova_last_active', now.toString());
       }
     };
-    ['mousedown', 'keydown', 'scroll', 'touchstart'].forEach(evt => {
+    ['mousedown', 'keydown', 'scroll', 'touchstart', 'mousemove'].forEach(evt => {
       window.addEventListener(evt, touchActive, { passive: true });
     });
 
     const onPageUnload = () => {
-      if (localStorage.getItem('technova_jwt')) {
-        localStorage.setItem('technova_last_active', Date.now().toString());
-      }
+      localStorage.setItem('technova_last_active', Date.now().toString());
     };
     window.addEventListener('beforeunload', onPageUnload);
     window.addEventListener('pagehide', onPageUnload);
+
+    // Kiểm tra định kỳ mỗi 60 giây khi tab đang mở mà người dùng không có thao tác
+    setInterval(() => {
+      const isRememberMeNow = localStorage.getItem('technova_remember_me') === 'true';
+      if (!isRememberMeNow) {
+        const lastActiveStr = localStorage.getItem('technova_last_active');
+        const lastActive = lastActiveStr ? parseInt(lastActiveStr, 10) : 0;
+        const now = Date.now();
+        if (lastActive > 0 && (now - lastActive) > TIMEOUT_MS) {
+          clearAllSessionData();
+          window.location.replace('/login?error=session_expired');
+        }
+      }
+    }, 60 * 1000);
   }
 
   /* ---------- User Avatar & Identity in Dashboard Topbar ---------- */
@@ -186,7 +196,8 @@
 
     document.querySelectorAll('.role-avatar').forEach(el => {
       if (user && user.avatar) {
-        el.innerHTML = `<img src="${user.avatar}" class="w-100 h-100 rounded-circle object-fit-cover" alt="">`;
+        el.innerHTML = `<img src="${user.avatar}" class="w-100 h-100 rounded-circle object-fit-cover" alt="" onerror="this.onerror=null; this.parentElement.textContent='${role.charAt(0)}';">`;
+        el.style.background = 'transparent';
       } else {
         const fallback = el.querySelector('.js-role-avatar-fallback');
         if (fallback) fallback.textContent = role.charAt(0);
