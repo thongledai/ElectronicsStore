@@ -163,14 +163,35 @@
   background: var(--surface);
   color: var(--text);
   box-shadow: var(--shadow-md);
-  display: grid;
-  place-items: center;
-  font-size: .9rem;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  line-height: 1 !important;
+  font-size: .95rem;
   transition: background-color var(--transition), color var(--transition), transform var(--transition);
+  cursor: pointer;
+}
+.card-action-btn i {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  text-align: center !important;
+  transform-origin: center center !important;
 }
 .card-action-btn:hover { background: var(--blue); color: #fff; transform: scale(1.12); }
 /* Filled heart state when the item is already in the wishlist */
-.card-action-btn.is-active { background: var(--orange); color: #fff; }
+.card-action-btn.is-active {
+  background: #fee2e2 !important;
+  color: #ef4444 !important;
+}
+.card-action-btn.is-active i {
+  color: #ef4444 !important;
+}
 
 /* Touch devices cannot hover, so keep the actions permanently visible */
 @media (hover: none) {

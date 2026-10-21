@@ -408,7 +408,11 @@ input[type="password"]::-ms-clear {
   45%  { transform: scale(1.4); }
   100% { transform: scale(1); }
 }
-.heart-pop { animation: heartPop .4s ease; }
+.heart-pop {
+  animation: heartPop .4s ease;
+  transform-origin: center center !important;
+  display: inline-flex !important;
+}
 
 /* Scroll-reveal: elements start hidden, JS adds .revealed via IntersectionObserver */
 .reveal { opacity: 0; transform: translateY(26px); transition: opacity .6s ease, transform .6s ease; }

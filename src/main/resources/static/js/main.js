@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    TechNova Electronics — Core Script (loaded on every page)
    --------------------------------------------------------------------------
    Responsibilities:
@@ -343,66 +343,164 @@ function getActiveCoupon() {
 /* ==========================================================================
    6. WISHLIST MANAGER
    --------------------------------------------------------------------------
-   Stored as a plain array of product ids.
+   Stored remotely via /api/wishlist and cached locally.
    ========================================================================== */
 const Wishlist = {
+  _ids: new Set(),
+  _loaded: false,
 
   all() {
+    if (this._loaded) return Array.from(this._ids);
     const ids = storageGet(STORE.wishlist, []);
     return Array.isArray(ids) ? ids : [];
   },
 
-  save(ids) {
-    storageSet(STORE.wishlist, ids);
-    updateBadges();
-    document.dispatchEvent(new CustomEvent('wishlist:changed'));
-  },
-
-  detailed() {
-    return this.all().map(id => getProductById(id)).filter(Boolean);
-  },
-
   has(id) {
-    return this.all().some(savedId => String(savedId) === String(id));
-  },
-
-  add(id) {
-    const product = getProductById(id);
-    if (!product || this.has(id)) return false;
-    this.save([...this.all(), product.id]);
-    showToast(UiMessage.WISHLIST_SAVED_TITLE, UiMessage.WISHLIST_SAVED(product.name), 'success');
-    return true;
-  },
-
-  remove(id, silent = false) {
-    const product = getProductById(id);
-    this.save(this.all().filter(i => String(i) !== String(id)));
-    if (!silent && product) {
-      showToast(UiMessage.WISHLIST_REMOVED_TITLE, UiMessage.WISHLIST_REMOVED(product.name), 'info');
-    }
-  },
-
-  /** Adds if absent, removes if present. Returns the new state. */
-  toggle(id) {
-    if (this.has(id)) {
-      this.remove(id);
-      return false;
-    }
-    this.add(id);
-    return true;
-  },
-
-  /** Moves one wishlist item into the cart. */
-  moveToCart(id) {
-    if (Cart.add(id)) {
-      this.remove(id, true);
-      return true;
-    }
-    return false;
+    if (!id) return false;
+    const strId = String(id);
+    if (this._loaded) return this._ids.has(strId);
+    const ids = storageGet(STORE.wishlist, []);
+    return Array.isArray(ids) && ids.some(savedId => String(savedId) === strId);
   },
 
   count() {
-    return this.all().length;
+    if (this._loaded) return this._ids.size;
+    const ids = storageGet(STORE.wishlist, []);
+    return Array.isArray(ids) ? ids.length : 0;
+  },
+
+  async refreshBadge() {
+    try {
+      const res = await fetch('/api/wishlist/ids', {
+        credentials: 'same-origin',
+        headers: { 'Accept': 'application/json' }
+      });
+      if (!res.ok) {
+        this._ids.clear();
+        this._loaded = false;
+        setBadge('.js-wishlist-count', 0);
+        return;
+      }
+      const json = await res.json();
+      if (json && json.success && Array.isArray(json.data)) {
+        this._ids = new Set(json.data.map(String));
+        this._loaded = true;
+        storageSet(STORE.wishlist, Array.from(this._ids));
+        setBadge('.js-wishlist-count', this._ids.size);
+        this.syncButtons();
+      }
+    } catch (e) {
+      this._ids.clear();
+      this._loaded = false;
+      setBadge('.js-wishlist-count', 0);
+    }
+  },
+
+  syncButtons() {
+    document.querySelectorAll('.js-wishlist[data-id]').forEach(btn => {
+      const id = btn.dataset.id;
+      const active = this.has(id);
+      btn.classList.toggle('is-active', active);
+      const icon = btn.querySelector('i');
+      if (icon) {
+        icon.className = `${active ? 'fas' : 'far'} fa-heart`;
+      }
+      btn.setAttribute('aria-label', `${active ? 'Remove from' : 'Add to'} wishlist`);
+    });
+  },
+
+  async toggle(id) {
+    if (!id) return false;
+    try {
+      const res = await fetch(`/api/wishlist/toggle/${encodeURIComponent(id)}`, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Accept': 'application/json' }
+      });
+
+      if (res.status === 401) {
+        if (typeof showToast === 'function') {
+          showToast('Yêu cầu đăng nhập', 'Vui lòng đăng nhập để lưu sản phẩm yêu thích.', 'warning');
+        } else {
+          alert('Vui lòng đăng nhập để lưu sản phẩm yêu thích.');
+        }
+        setTimeout(() => {
+          window.location.href = '/login?error=unauthorized';
+        }, 1200);
+        return false;
+      }
+
+      if (res.status === 401) {
+        window.location.href = '/login?error=unauthorized';
+        return false;
+      }
+
+      const body = await res.json();
+      if (!res.ok || !body.success) {
+        throw new Error(body?.message || 'Có lỗi xảy ra.');
+      }
+
+      const isWishlisted = Boolean(body.data?.wishlisted);
+      const strId = String(id);
+      if (isWishlisted) {
+        this._ids.add(strId);
+      } else {
+        this._ids.delete(strId);
+      }
+      this._loaded = true;
+      storageSet(STORE.wishlist, Array.from(this._ids));
+
+      const newCount = body.data?.totalCount ?? this._ids.size;
+      setBadge('.js-wishlist-count', newCount);
+
+      document.querySelectorAll(`.js-wishlist[data-id="${id}"]`).forEach(btn => {
+        btn.classList.toggle('is-active', isWishlisted);
+        const icon = btn.querySelector('i');
+        if (icon) {
+          icon.className = `${isWishlisted ? 'fas' : 'far'} fa-heart`;
+          icon.classList.add('heart-pop');
+          setTimeout(() => icon.classList.remove('heart-pop'), 420);
+        }
+        btn.setAttribute('aria-label', `${isWishlisted ? 'Remove from' : 'Add to'} wishlist`);
+      });
+
+      document.dispatchEvent(new CustomEvent('wishlist:changed', {
+        detail: { productId: id, wishlisted: isWishlisted, totalCount: newCount }
+      }));
+
+      if (typeof showToast === 'function') {
+        showToast(
+          isWishlisted ? 'Yêu thích' : 'Đã xóa',
+          body.message || (isWishlisted ? 'Đã thêm vào danh sách yêu thích.' : 'Đã xóa khỏi danh sách yêu thích.'),
+          isWishlisted ? 'success' : 'info'
+        );
+      }
+      return isWishlisted;
+    } catch (err) {
+      if (typeof showToast === 'function') {
+        showToast('Lỗi', err.message || 'Không thể cập nhật danh sách yêu thích.', 'danger');
+      }
+      return false;
+    }
+  },
+
+  async remove(id) {
+    if (!id) return;
+    try {
+      const res = await fetch(`/api/wishlist/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        headers: { 'Accept': 'application/json' }
+      });
+      if (res.ok) {
+        this._ids.delete(String(id));
+        storageSet(STORE.wishlist, Array.from(this._ids));
+        setBadge('.js-wishlist-count', this._ids.size);
+        this.syncButtons();
+        document.dispatchEvent(new CustomEvent('wishlist:changed', { detail: { productId: id, removed: true } }));
+      }
+    } catch (e) {
+      console.warn('Lỗi khi xóa khỏi wishlist:', e);
+    }
   }
 };
 
@@ -538,19 +636,9 @@ function initGlobalActions() {
     if (wishBtn) {
       e.preventDefault();
       const id = wishBtn.dataset.id;
-      const nowSaved = Wishlist.toggle(id);
-
-      // Sync every heart button for this product across the page
-      document.querySelectorAll(`.js-wishlist[data-id="${id}"]`).forEach(btn => {
-        btn.classList.toggle('is-active', nowSaved);
-        const icon = btn.querySelector('i');
-        if (icon) {
-          icon.className = `${nowSaved ? 'fas' : 'far'} fa-heart`;
-          icon.classList.add('heart-pop');
-          setTimeout(() => icon.classList.remove('heart-pop'), 420);
-        }
-        btn.setAttribute('aria-label', `${nowSaved ? 'Remove from' : 'Add to'} wishlist`);
-      });
+      if (id) {
+        Wishlist.toggle(id);
+      }
       return;
     }
 
@@ -599,7 +687,7 @@ async function refreshCartBadge() {
 
 /** Refreshes the cart / wishlist count bubbles in the header. */
 function updateBadges() {
-    setBadge('.js-wishlist-count', Wishlist.count());
+    Wishlist.refreshBadge();
     refreshCartBadge();
 }
 /** Marks the current page's nav link as active. */

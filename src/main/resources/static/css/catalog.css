@@ -419,3 +419,56 @@
 }
 .ship-meter p { font-size: .78rem; color: var(--text-muted); margin: .45rem 0 0; }
 
+
+/* Wishlist active styling & centering */
+.card-action-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  line-height: 1 !important;
+}
+.card-action-btn i {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  text-align: center !important;
+  transform-origin: center center !important;
+}
+.js-wishlist.is-active i.fa-heart,
+.card-action-btn.js-wishlist.is-active i.fa-heart {
+  color: #ef4444 !important;
+}
+.card-action-btn.js-wishlist.is-active {
+  background: #fee2e2 !important;
+  color: #ef4444 !important;
+}
+.btn.js-wishlist.is-active {
+  border-color: #ef4444 !important;
+  color: #ef4444 !important;
+  background-color: #fee2e2 !important;
+}
+.btn.js-wishlist {
+  width: 44px;
+  height: 44px;
+  padding: 0 !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  border-radius: 50%;
+}
+.btn.js-wishlist i {
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1;
+}
+
+/* Trái tim đặc khi đã yêu thích */
+.js-wishlist.is-active i.fa-heart {
+  font-weight: 900;
+}

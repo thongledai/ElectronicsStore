@@ -170,11 +170,24 @@
       ? `<p class="stock-note in">Còn hàng (${stock})</p>`
       : '<p class="stock-note">Hết hàng</p>';
 
+    const inWishlist = typeof Wishlist !== 'undefined' && Wishlist.has(product.id);
+
     return `<div class="col-6 col-md-4 col-lg-3 product-col">
       <article class="product-card ${stock <= 0 ? 'is-out' : ''}" data-id="${escapeHtml(product.id)}">
         <div class="card-media">
           <a href="${href}" aria-label="Xem ${name}">${image}</a>
           ${stock <= 0 ? '<div class="stock-flag"><span>Hết hàng</span></div>' : ''}
+          <div class="card-actions">
+            <button class="card-action-btn js-wishlist ${inWishlist ? 'is-active' : ''}"
+                    data-id="${escapeHtml(product.id)}" type="button"
+                    aria-label="${inWishlist ? 'Bỏ yêu thích' : 'Thêm vào yêu thích'}"
+                    title="${inWishlist ? 'Bỏ yêu thích' : 'Yêu thích'}">
+              <i class="${inWishlist ? 'fas' : 'far'} fa-heart"></i>
+            </button>
+            <a class="card-action-btn" href="${href}" aria-label="Xem chi tiết" title="Xem chi tiết">
+              <i class="fas fa-eye"></i>
+            </a>
+          </div>
         </div>
         <div class="card-body">
           <span class="card-cat">${brand} · ${category}</span>

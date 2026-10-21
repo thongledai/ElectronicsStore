@@ -6,22 +6,37 @@
 -->
 <th:block th:fragment="navbar">
 <style>
-/* Hover trên avatar để mở popup đơn mua & tài khoản */
+/* Hover/click trên avatar để mở popup đơn mua & tài khoản - luôn nằm ngay dưới avatar như combobox */
+.js-account-dropdown {
+  position: relative !important;
+}
+.js-account-dropdown > .js-account-menu {
+  position: absolute !important;
+  top: 100% !important;
+  bottom: auto !important;
+  right: 0 !important;
+  left: auto !important;
+  margin-top: 8px !important;
+  transform: none !important;
+  z-index: 1050 !important;
+}
+.js-account-btn,
+.js-account-btn:hover,
+.js-account-btn:focus,
+.js-account-btn:active,
+.js-account-btn.show {
+  transform: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
 @media (min-width: 576px) {
-  .js-account-dropdown {
-    position: relative;
-  }
   .js-account-dropdown:hover > .js-account-menu,
   .js-account-dropdown:focus-within > .js-account-menu {
     display: block !important;
     opacity: 1 !important;
     visibility: visible !important;
     pointer-events: auto !important;
-    transform: translateY(0);
-  }
-  .js-account-dropdown > .js-account-menu {
-    margin-top: 0.35rem !important;
-    transition: opacity 0.2s ease, transform 0.2s ease;
   }
 }
 </style>
@@ -66,7 +81,7 @@
             <span class="icon-badge js-cart-count" data-count="0">0</span>
           </a>
           <div class="dropdown d-none d-sm-inline-flex js-account-dropdown">
-            <button class="icon-btn js-account-btn p-0 d-inline-flex align-items-center justify-content-center overflow-hidden" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Account" title="Tài khoản">
+            <button class="icon-btn js-account-btn p-0 d-inline-flex align-items-center justify-content-center overflow-hidden" type="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false" aria-label="Account" title="Tài khoản">
               <i class="far fa-user js-user-icon"></i>
               <img class="rounded-circle object-fit-cover js-user-avatar border shadow-sm" style="width: 34px; height: 34px; display: none;" alt="Avatar">
             <script>(function(){try{var u=JSON.parse(localStorage.getItem('technova_user')||'null');var t=localStorage.getItem('technova_jwt');if((t||(u&&u.email))&&u&&u.avatar){var b=document.currentScript.closest('.js-account-btn');if(b){var img=b.querySelector('.js-user-avatar');var ico=b.querySelector('.js-user-icon');if(img){img.src=u.avatar;img.style.display='block';}if(ico){ico.style.display='none';}}}}catch(e){}})();</script>
@@ -86,6 +101,11 @@
               <li class="js-auth-user" style="display: none;">
                 <a class="dropdown-item py-2 fw-semibold" th:href="@{/customer/orders}">
                   <i class="fas fa-box-open me-2 text-info"></i>Đơn mua
+                </a>
+              </li>
+              <li class="js-auth-user" style="display: none;">
+                <a class="dropdown-item py-2 fw-semibold" th:href="@{/customer/wishlist}">
+                  <i class="fas fa-heart me-2 text-danger"></i>Danh sách yêu thích
                 </a>
               </li>
               <li class="js-auth-user js-profile-item" style="display: none;">

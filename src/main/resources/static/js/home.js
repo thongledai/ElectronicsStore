@@ -268,17 +268,25 @@ function homeInterceptCartActions() {
     const el = document.getElementById(id);
     if (!el) return;
     el.addEventListener('click', e => {
-      const btn = e.target.closest('.js-add-cart, .js-wishlist');
-      if (!btn) return;
-      e.preventDefault();
-      e.stopPropagation();
-      const msg = btn.classList.contains('js-add-cart')
-        ? 'Chức năng giỏ hàng đang được cập nhật!'
-        : 'Chức năng danh sách yêu thích đang được cập nhật!';
-      if (window.showToast) window.showToast(UiMessage.NOTICE, msg, 'info');
-      else if (window.toast) window.toast(msg);
-      else alert(msg);
-    }, true); // capture: chạy trước listener của main.js
+      const wishBtn = e.target.closest('.js-wishlist');
+      if (wishBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (typeof Wishlist !== 'undefined' && wishBtn.dataset.id) {
+          Wishlist.toggle(wishBtn.dataset.id);
+        }
+        return;
+      }
+      const cartBtn = e.target.closest('.js-add-cart');
+      if (cartBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const msg = 'Chức năng giỏ hàng đang được cập nhật!';
+        if (window.showToast) window.showToast(UiMessage.NOTICE, msg, 'info');
+        else if (window.toast) window.toast(msg);
+        else alert(msg);
+      }
+    }, true);
   });
 }
 

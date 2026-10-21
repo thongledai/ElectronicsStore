@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/customer-layout :: layout(
-        'My Wishlist — TechNova Electronics',
-        'Your saved products at TechNova Electronics',
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/customer-layout :: layout(
+        'Danh sách yêu thích — TechNova Electronics',
+        'Sản phẩm bạn đã lưu tại TechNova Electronics',
         ~{::main}, ~{}, 'wishlist.js', false)}">
 
 <head>
-  <title>My Wishlist — TechNova Electronics</title>
+  <title>Danh sách yêu thích — TechNova Electronics</title>
 </head>
 
 <body>
@@ -15,11 +15,11 @@
     <!-- PAGE HEAD -->
     <section class="page-head">
       <div class="container">
-        <h1><i class="fas fa-heart me-2"></i>My Wishlist</h1>
+        <h1><i class="fas fa-heart me-2 text-danger"></i>Danh sách yêu thích</h1>
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a th:href="@{/customer/index}">Home</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Wishlist</li>
+            <li class="breadcrumb-item"><a th:href="@{/customer/index}">Trang chủ</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Yêu thích</li>
           </ol>
         </nav>
       </div>
@@ -35,10 +35,10 @@
             <p class="result-count mb-0" id="wishlistCount"></p>
             <div class="d-flex gap-2 flex-wrap">
               <button class="btn btn-brand btn-sm" id="moveAllBtn" type="button">
-                <i class="fas fa-cart-plus me-1"></i>Move All to Cart
+                <i class="fas fa-cart-plus me-1"></i>Chuyển tất cả vào giỏ
               </button>
               <button class="btn btn-ghost btn-sm" id="clearWishlistBtn" type="button">
-                <i class="fas fa-trash-can me-1"></i>Clear Wishlist
+                <i class="fas fa-trash-can me-1"></i>Xóa toàn bộ
               </button>
             </div>
           </div>
@@ -46,10 +46,10 @@
           <!-- Total value strip -->
           <div class="surface-card p-3 mb-4 d-flex flex-wrap justify-content-between align-items-center gap-2">
             <span class="small text-muted">
-              <i class="fas fa-tags me-1 text-primary"></i>Total value of saved items
+              <i class="fas fa-tags me-1 text-primary"></i>Tổng giá trị sản phẩm đã lưu
             </span>
             <span>
-              <span class="h5 mb-0" id="wishlistValue">₹0</span>
+              <span class="h5 mb-0" id="wishlistValue">0 ₫</span>
               <span class="price-old ms-2" id="wishlistMrp"></span>
               <span class="badge bg-success ms-2" id="wishlistSavings"></span>
             </span>
@@ -60,15 +60,13 @@
 
         <!-- Empty state -->
         <div class="empty-state" id="wishlistEmpty" hidden>
-          <img th:src="@{/images/empty-wishlist.svg}" alt="">
-          <h3>Your wishlist is empty</h3>
-          <p>Tap the heart icon on any product to save it here for later. Your list stays in this browser even after you
-            close the tab.</p>
+          <img th:src="@{/images/empty-wishlist.svg}" alt="Danh sách yêu thích trống">
+          <h3>Danh sách yêu thích đang trống</h3>
+          <p>Nhấn vào biểu tượng trái tim trên bất kỳ sản phẩm nào để lưu lại xem sau.</p>
           <div class="d-flex justify-content-center gap-2 flex-wrap">
             <a th:href="@{/customer/products}" class="btn btn-brand btn-lg"><i
-                class="fas fa-bag-shopping me-2"></i>Explore Products</a>
-            <a th:href="@{/customer/cart}" class="btn btn-ghost btn-lg"><i class="fas fa-cart-shopping me-2"></i>View
-              Cart</a>
+                class="fas fa-bag-shopping me-2"></i>Khám phá sản phẩm</a>
+            <a th:href="@{/customer/cart}" class="btn btn-ghost btn-lg"><i class="fas fa-cart-shopping me-2"></i>Xem giỏ hàng</a>
           </div>
         </div>
 
@@ -79,15 +77,14 @@
     <section class="section pt-0" id="recommendSection">
       <div class="container">
         <div class="section-head">
-          <span class="section-eyebrow"><i class="fas fa-thumbs-up"></i>Recommended</span>
-          <h2 class="section-title">Popular right now</h2>
+          <span class="section-eyebrow"><i class="fas fa-thumbs-up"></i>Gợi ý cho bạn</span>
+          <h2 class="section-title">Sản phẩm nổi bật</h2>
         </div>
         <div class="row g-3 g-md-4" id="recommendGrid"></div>
       </div>
     </section>
 
   </main>
-
 
 </body>
 
