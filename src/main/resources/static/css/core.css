@@ -523,3 +523,35 @@ code { color: var(--orange); background: var(--orange-light); padding: .08em .38
     background-color: rgba(0, 0, 0, .05);
 }
 
+
+.js-account-btn, .js-account-btn:focus, .js-account-btn:active, .js-account-btn.show {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Account dropdown: always directly beneath avatar like a combobox */
+.js-account-dropdown {
+  position: relative !important;
+}
+.js-account-dropdown > .js-account-menu,
+.js-account-dropdown > .dropdown-menu {
+  position: absolute !important;
+  top: 100% !important;
+  bottom: auto !important;
+  right: 0 !important;
+  left: auto !important;
+  margin-top: 8px !important;
+  transform: none !important;
+  z-index: 1050 !important;
+}
+.js-account-btn,
+.js-account-btn:hover,
+.js-account-btn:focus,
+.js-account-btn:active,
+.js-account-btn.show {
+  transform: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}

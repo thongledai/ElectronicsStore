@@ -535,13 +535,9 @@ document.addEventListener('DOMContentLoaded', function () {
         if (wishBtn) {
             event.preventDefault();
             event.stopPropagation();
-
-            if (window.showToast) {
-                window.showToast(UiMessage.NOTICE, UiMessage.WISHLIST_FEATURE_UPDATING, 'info');
-            } else if (window.toast) {
-                window.toast(UiMessage.WISHLIST_FEATURE_UPDATING);
-            } else {
-                alert(UiMessage.WISHLIST_FEATURE_UPDATING);
+            var id = wishBtn.dataset.id;
+            if (id && typeof Wishlist !== 'undefined') {
+                Wishlist.toggle(id);
             }
         }
 
