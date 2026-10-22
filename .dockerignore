@@ -1,0 +1,15 @@
+**/.git
+**/.gitignore
+**/.env
+**/.idea
+**/.vscode
+**/.settings
+.classpath
+.project
+.factorypath
+bin/
+target/
+*.cmd
+mvnw
+*.md
+sample-ghn-orders.sql

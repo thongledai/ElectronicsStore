@@ -1,41 +1,42 @@
 # ==========================================
-# Stage 1: Build the application
+# Stage 1: Build application with Maven & JDK 22
 # ==========================================
-FROM maven:3.9.16-eclipse-temurin-25 AS builder
+FROM maven:3.9-eclipse-temurin-22 AS builder
 
 WORKDIR /build
 
-# Cache Maven dependencies
+# Cache dependencies
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
 
-# Copy source code and build JAR package (skip unit tests during image build)
+# Copy source code and package application
 COPY src ./src
 RUN mvn clean package -DskipTests
 
 # ==========================================
-# Stage 2: Minimal Runtime Environment
+# Stage 2: Minimal Runtime Environment (JRE 22)
 # ==========================================
-FROM eclipse-temurin:25-jre
+FROM eclipse-temurin:22-jre
 
 WORKDIR /app
 
 # Create non-root user for security best practice
 RUN groupadd -r spring && useradd -r -g spring spring
 
-# Copy jar from builder stage
+# Copy compiled JAR file from builder stage
 COPY --from=builder /build/target/*.jar app.jar
 
-# Set permissions for non-root user
+# Set ownership
 RUN chown -R spring:spring /app
 
 # Switch to non-root user
 USER spring:spring
 
-# Expose port (default 8080, can be overridden via SERVER_PORT)
+# Expose default application port
 EXPOSE 8080
 
-# Container-aware JVM memory options optimized for 512MB RAM limit
-ENV JAVA_OPTS="-Xms128m -Xmx240m -Xss256k -XX:MetaspaceSize=96m -XX:MaxMetaspaceSize=128m -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -XX:+ExitOnOutOfMemoryError"
+# Environment variables & JVM tuning (adjust if needed)
+ENV SERVER_PORT=8080 \
+    JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError"
 
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
