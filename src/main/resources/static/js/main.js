@@ -830,10 +830,9 @@ function applyTheme(theme) {
 }
 
 function initTheme() {
-  // Saved preference wins; otherwise follow the operating system setting
+  // Saved preference wins; new visitors get the light theme by default.
   const saved = storageGet(STORE.theme, null);
-  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-  applyTheme(saved || (prefersDark ? 'dark' : 'light'));
+  applyTheme(saved || 'light');
 
   document.querySelectorAll('.js-theme-toggle').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -849,10 +848,7 @@ function initTheme() {
 (function preloadTheme() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORE.theme));
-    if (saved) document.documentElement.setAttribute('data-theme', saved);
-    else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      document.documentElement.setAttribute('data-theme', 'dark');
-    }
+    document.documentElement.setAttribute('data-theme', saved || 'light');
   } catch (err) { /* storage unavailable — fall back to the light theme */ }
 })();
 
