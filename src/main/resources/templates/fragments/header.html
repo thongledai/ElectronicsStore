@@ -15,8 +15,8 @@
   <!-- Base URL (context path + "/") for scripts: js/data.js and js/main.js build every link from it -->
   <script th:inline="javascript">window.APP_URL = /*[[@{/}]]*/ '/';</script>
 
-  <!-- Apply saved theme before first paint (no white flash in dark mode) -->
-  <script>(function(){try{var t=localStorage.getItem("technova_theme");if(t)document.documentElement.setAttribute("data-theme",JSON.parse(t));else if(window.matchMedia("(prefers-color-scheme: dark)").matches)document.documentElement.setAttribute("data-theme","dark")}catch(e){}})();</script>
+  <!-- Apply saved theme before first paint; default to the light theme. -->
+  <script>(function(){try{var t=localStorage.getItem("technova_theme");if(t)document.documentElement.setAttribute("data-theme",JSON.parse(t));else document.documentElement.setAttribute("data-theme","light")}catch(e){document.documentElement.setAttribute("data-theme","light")}})();</script>
 
   <!-- Apply logged-in auth state before first paint (no flash of Guest / Sign In in dropdown) -->
   <script>(function(){try{var u=JSON.parse(localStorage.getItem('technova_user')||'null');var t=localStorage.getItem('technova_jwt');if(t||(u&&u.email)){document.documentElement.classList.add('user-logged-in');}}catch(e){}})();</script>
