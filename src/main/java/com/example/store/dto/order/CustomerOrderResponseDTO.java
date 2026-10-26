@@ -24,5 +24,6 @@ public record CustomerOrderResponseDTO(
         String note,
         String ghnOrderCode,
         LocalDateTime expectedDeliveryDate,
-        boolean canCancel
+        boolean canCancel,
+        String paymentStatus   // UNPAID/PAID/EXPIRED/CANCELLED/NEEDS_RECONCILIATION; null với COD
 ) {}

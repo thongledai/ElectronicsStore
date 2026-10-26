@@ -299,6 +299,11 @@ async function onProvinceChange() {
 }
 
 /* ---------- Phương thức thanh toán ---------- */
+const PAYMENT_LABELS = {
+    COD: 'Thanh toán khi nhận hàng (COD)',
+    BANK_QR: 'Chuyển khoản QR (VietQR)'
+};
+
 async function loadPaymentMethods() {
     try {
         const json = await api('GET', '/payment-methods');
@@ -308,7 +313,7 @@ async function loadPaymentMethods() {
               <label class="d-flex align-items-center gap-2">
                 <input type="radio" class="form-check-input mt-0" name="paymentMethod"
                        value="${esc(p.id)}" ${idx === 0 ? 'checked' : ''}>
-                <span>${esc(p.name)}</span>
+                <span>${esc(PAYMENT_LABELS[p.name] || p.name)}</span>
               </label>`).join('')
             : '<p class="text-danger small mb-0">Chưa có phương thức thanh toán.</p>';
     } catch (e) {
@@ -339,8 +344,13 @@ async function placeOrder() {
     try {
         const json = await api('POST', '/orders', buildBody());
         sessionStorage.removeItem('checkoutItemIds');
-        $('orderRef').textContent = json.data.id;
-        new bootstrap.Modal($('orderModal')).show();
+        if (json.data.paymentMethod === 'BANK_QR' && window.PaymentQr) {
+            // Đơn chuyển khoản: hiện QR (dữ liệu do backend cấp), xong thì về trang đơn hàng
+            window.PaymentQr.open(json.data.id, { onClose: () => { location.href = '/customer/orders'; } });
+        } else {
+            $('orderRef').textContent = json.data.id;
+            new bootstrap.Modal($('orderModal')).show();
+        }
     } catch (e) {
         fail(e);
         placing = false;
