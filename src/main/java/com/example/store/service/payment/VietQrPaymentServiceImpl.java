@@ -158,12 +158,16 @@ public class VietQrPaymentServiceImpl implements IVietQrPaymentService {
 
         // 1. Chỉ xử lý tiền vào
         if (!"in".equalsIgnoreCase(p.getTransferType())) {
+            log.warn("Webhook SePay tx={} bị từ chối: giao dịch không phải tiền vào", txId);
             return finish(event, TransferResult.NOT_INCOMING);
         }
 
         // 2. Phải đúng tài khoản nhận tiền đã cấu hình
-        if (!digits(props.getAccountNumber()).equals(digits(p.getAccountNumber()))) {
-            log.warn("Webhook SePay tx={} sai tài khoản nhận", txId);
+        String configuredAccount = normalizeAccount(props.getAccountNumber());
+        if (configuredAccount.isEmpty()
+                || (!configuredAccount.equals(normalizeAccount(p.getAccountNumber()))
+                    && !configuredAccount.equals(normalizeAccount(p.getSubAccount())))) {
+            log.warn("Webhook SePay tx={} sai tài khoản nhận (đã kiểm tra accountNumber và subAccount)", txId);
             return finish(event, TransferResult.ACCOUNT_MISMATCH);
         }
 
@@ -174,7 +178,7 @@ public class VietQrPaymentServiceImpl implements IVietQrPaymentService {
             if (order != null) break;
         }
         if (order == null) {
-            log.warn("Webhook SePay tx={} không khớp đơn nào", txId);
+            log.warn("Webhook SePay tx={} không tìm thấy đơn cho mã thanh toán trong code/content", txId);
             return finish(event, TransferResult.ORDER_NOT_FOUND);
         }
         event.setOrderId(order.getId());
@@ -301,8 +305,8 @@ public class VietQrPaymentServiceImpl implements IVietQrPaymentService {
 
     // ------------------------------------------------------------------ helpers
 
-    private static String digits(String s) {
-        return s == null ? "" : s.replaceAll("\\D", "");
+    private static String normalizeAccount(String s) {
+        return s == null ? "" : s.replaceAll("[^A-Za-z0-9]", "").toUpperCase();
     }
 
     private static String truncate(String s, int max) {

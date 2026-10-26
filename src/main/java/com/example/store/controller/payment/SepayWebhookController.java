@@ -4,7 +4,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Map;
 
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -49,11 +48,12 @@ public class SepayWebhookController {
         try {
             TransferResult result = paymentService.handleSepayTransfer(payload);
             log.info("Webhook SePay id={} -> {}", payload.getId(), result);
-            return ResponseEntity.ok(ACK);
-        } catch (DataIntegrityViolationException dup) {
-            // Hai webhook cùng mã giao dịch chạy song song: bản kia đã ghi nhận, bản này bị unique chặn
-            log.info("Webhook SePay id={} trùng, bỏ qua", payload.getId());
-            return ResponseEntity.ok(ACK);
+            if (result == TransferResult.PAID || result == TransferResult.DUPLICATE_EVENT) {
+                return ResponseEntity.ok(ACK);
+            }
+            // SePay chỉ coi webhook thành công khi nhận 2xx cùng success=true; trả lỗi để retry/hiển thị Failed.
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                    .body(Map.of("success", false, "result", result.name()));
         } catch (IllegalArgumentException bad) {
             return ResponseEntity.badRequest().body(Map.of("success", false));
         } catch (RuntimeException ex) {

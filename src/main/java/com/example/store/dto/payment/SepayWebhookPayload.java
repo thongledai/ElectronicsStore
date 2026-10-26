@@ -18,6 +18,7 @@ public class SepayWebhookPayload {
     private String gateway;
     private String transactionDate;
     private String accountNumber;
+    private String subAccount;
     private String code;
     private String content;
     /** "in" = tiền vào, "out" = tiền ra. */

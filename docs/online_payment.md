@@ -2,7 +2,7 @@
 
 ## Cách hoạt động
 1. Khách chọn **Chuyển khoản QR (VietQR)** ở checkout → backend tạo đơn `NOT_PROCESSED`, `paymentStatus = UNPAID`,
-   mã tham chiếu duy nhất (vd `ESK3M9X2QA`) và hạn thanh toán (mặc định 30 phút, kho được giữ đến hạn này).
+   mã tham chiếu duy nhất (vd `DHK3M9X2QA`) và hạn thanh toán (mặc định 30 phút, kho được giữ đến hạn này).
 2. Backend dựng ảnh QR bằng **VietQR Quick Link** (`img.vietqr.io`) với đúng STK, số tiền **do backend tính** và mã tham chiếu.
    Khách quét QR trong app ngân hàng.
 3. VietQR **chỉ tạo ảnh QR**, không báo tiền vào. Việc xác nhận do **SePay** đảm nhiệm: SePay theo dõi tài khoản MB
@@ -20,20 +20,22 @@
 | Biến | Ví dụ (giá trị giả) | Ghi chú |
 |---|---|---|
 | `SEPAY_API_KEY` | `thay-bang-khoa-tu-sepay` | **Bắt buộc** để nhận webhook. Để trống = từ chối mọi webhook. Không commit lên Git. |
-| `PAYMENT_ACCOUNT_NUMBER` | `0905928100` | STK nhận tiền (mặc định đã là 0905928100) |
-| `PAYMENT_BANK_BIN` | `970422` | MB Bank |
+| `PAYMENT_ACCOUNT_NUMBER` | `<số tài khoản hoặc VA>` | Tài khoản nhận tiền được in lên QR và dùng để xác thực `accountNumber` hoặc `subAccount` trong webhook |
+| `PAYMENT_BANK_BIN` | `<BIN ngân hàng>` | BIN ngân hàng nhận tiền |
 | `PAYMENT_ACCOUNT_NAME` | `NGUYEN VAN A` | Tên chủ TK hiển thị trên QR (tùy chọn, bạn tự điền đúng tên) |
-| `PAYMENT_REFERENCE_PREFIX` | `ES` | Phải khớp "Cấu trúc mã thanh toán" trên SePay |
+| `PAYMENT_REFERENCE_PREFIX` | `DH` | Phải khớp "Cấu trúc mã thanh toán" trên SePay |
 | `PAYMENT_EXPIRE_MINUTES` | `30` | Hạn thanh toán / thời gian giữ hàng |
 | `PAYMENT_AUTO_CONFIRM_AFTER_PAID` | `false` | Xem ghi chú trên |
 
 ## Thiết lập SePay (bắt buộc để xác nhận tiền tự động)
-1. Đăng ký tại `my.sepay.vn`, **liên kết tài khoản MB Bank 0905928100** (làm theo hướng dẫn trong SePay).
-2. *Công ty → Cấu hình chung → Cấu trúc mã thanh toán*: tiền tố `ES`, độ dài 8, ký tự chữ + số.
+1. Đăng ký tại `my.sepay.vn` và liên kết đúng tài khoản/VA ngân hàng đang cấu hình cho QR.
+2. *Công ty → Cấu hình chung → Cấu trúc mã thanh toán*: bật nhận diện mã, đặt tiền tố `DH`, hậu tố đúng 8 ký tự, loại **Số và chữ**. Ứng dụng sinh `DH` + 8 ký tự chữ/số (loại trừ `I`, `O`, `0`, `1`).
 3. *WebHooks → Thêm*: 
    - URL: `https://<domain-https-cong-khai>/api/webhooks/sepay`
    - Kiểu chứng thực: **API Key** → đặt cùng giá trị với `SEPAY_API_KEY`
-   - Content-Type: `application/json`; chọn đúng tài khoản MB; bật "Là WebHooks xác thực thanh toán".
+   - Content-Type: `application/json`; chọn đúng tài khoản/VA và bật sự kiện tiền vào.
+   - Bộ lọc "Chỉ gửi khi có mã thanh toán" chỉ gửi khi SePay đã nhận diện được `code`; bộ lọc tiền tố phải gồm `DH`. Chúng hoạt động dựa trên cấu trúc mã SePay, trước khi request đến backend. Nếu `code` trống mà muốn backend thử dò `content`, tắt bộ lọc "Chỉ gửi khi có mã thanh toán"; backend vẫn chỉ xử lý nếu tìm được mã đơn chính xác trong `code` hoặc `content`.
+   - Bật tự động gửi lại khi server trả mã ngoài 2xx để SePay retry lỗi xử lý. Endpoint chỉ trả `success:true` sau khi đã đánh dấu thanh toán hoặc nhận giao dịch đã xử lý trước đó.
 4. Chạy local: cần URL công khai HTTPS (vd ngrok) trỏ về `localhost:8080`.
 5. Thử thật: tạo đơn QR, chuyển khoản đúng số tiền + nội dung, xem đơn chuyển PAID trong vài giây.
 
