@@ -53,8 +53,14 @@ public class BankTransferEvent {
     @Column(name = "bank_reference_code", length = 100)
     private String bankReferenceCode;
 
+    @Column(name = "event_type", length = 30)
+    private String eventType;
+
     @Column(name = "order_id")
     private UUID orderId;
+
+    @Column(name = "wallet_top_up_request_id")
+    private UUID walletTopUpRequestId;
 
     @Column(name = "payment_reference", length = 30)
     private String paymentReference;

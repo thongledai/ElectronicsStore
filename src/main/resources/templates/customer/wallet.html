@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="vi" th:replace="~{layouts/customer-layout :: layout(
+        'Ví điện tử — TechNova Electronics',
+        'Quản lý số dư và nạp tiền vào ví điện tử',
+        ~{::main}, ~{}, 'wallet.js', false)}">
+<head><title>Ví điện tử</title></head>
+<body>
+<main>
+    <section class="page-head">
+        <div class="container">
+            <h1><i class="fas fa-wallet me-2"></i>Ví điện tử</h1>
+            <p class="text-muted mb-0">Nạp tiền qua VietQR và thanh toán đơn hàng bằng số dư ví.</p>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-5">
+                    <div class="summary-panel mb-4">
+                        <div class="small text-muted mb-1">Số dư hiện tại</div>
+                        <div class="display-6 fw-bold text-primary" id="walletBalance">Đang tải...</div>
+                        <button class="btn btn-ghost btn-sm mt-2" id="refreshWalletBtn" type="button">
+                            <i class="fas fa-rotate me-1"></i>Làm mới số dư
+                        </button>
+                    </div>
+                    <div class="summary-panel">
+                        <h2 class="h5 mb-3">Nạp tiền vào ví</h2>
+                        <label class="form-label" for="topUpAmount">Số tiền muốn nạp (VND)</label>
+                        <input class="form-control" type="number" id="topUpAmount" min="1" step="1000"
+                               inputmode="numeric" placeholder="Ví dụ: 100000">
+                        <p class="small text-muted mt-2 mb-3">
+                            QR sẽ điền sẵn tài khoản nhận và nội dung chuyển khoản, không điền sẵn số tiền.
+                            Hãy tự nhập đúng số tiền yêu cầu khi chuyển.
+                        </p>
+                        <button class="btn btn-accent w-100" id="createTopUpBtn" type="button">
+                            <i class="fas fa-qrcode me-2"></i>Tạo mã QR nạp ví
+                        </button>
+                    </div>
+                </div>
+
+                <div class="col-lg-7">
+                    <div class="summary-panel mb-4">
+                        <h2 class="h5 mb-3">Thanh toán nạp ví</h2>
+                        <div id="topUpPanel" class="text-muted small">
+                            Nhập số tiền và chọn “Tạo mã QR nạp ví” để bắt đầu.
+                        </div>
+                    </div>
+                    <div class="summary-panel">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h2 class="h5 mb-0">Lịch sử ví</h2>
+                            <span class="small text-muted">20 giao dịch gần nhất</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead><tr><th>Thời gian</th><th>Loại</th><th>Mã tham chiếu</th><th class="text-end">Số tiền</th></tr></thead>
+                                <tbody id="walletTransactions">
+                                    <tr><td colspan="4" class="text-muted small">Đang tải...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

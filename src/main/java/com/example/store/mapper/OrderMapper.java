@@ -49,9 +49,10 @@ public class OrderMapper {
         String rawStatus = o.getStatus() != null ? o.getStatus().getName() : "";
         String statusDisplayName = getStatusDisplayName(rawStatus);
         // Đơn chuyển khoản đã nhận tiền / đang đối soát không tự hủy được (cần hoàn tiền thủ công)
-        boolean paymentBlocksCancel = o.usesBankTransfer()
-                && (o.getPaymentStatus() == com.example.store.enums.PaymentStatus.PAID
-                    || o.getPaymentStatus() == com.example.store.enums.PaymentStatus.NEEDS_RECONCILIATION);
+        boolean paymentBlocksCancel = Boolean.TRUE.equals(o.getIsPaidBefore())
+                || (o.usesBankTransfer()
+                    && (o.getPaymentStatus() == com.example.store.enums.PaymentStatus.PAID
+                        || o.getPaymentStatus() == com.example.store.enums.PaymentStatus.NEEDS_RECONCILIATION));
         boolean canCancel = "NOT_PROCESSED".equalsIgnoreCase(rawStatus) && !paymentBlocksCancel;
 
         String orderCode = "#ORD-" + o.getId().toString().substring(0, 8).toUpperCase();

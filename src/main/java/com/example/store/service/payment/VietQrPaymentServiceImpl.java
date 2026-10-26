@@ -26,6 +26,7 @@ import com.example.store.dto.payment.VietQrPaymentDTO;
 import com.example.store.entity.BankTransferEvent;
 import com.example.store.entity.Order;
 import com.example.store.entity.OrderItem;
+import com.example.store.entity.WalletTopUpRequest;
 import com.example.store.entity.OrderStatus;
 import com.example.store.entity.ProductVariant;
 import com.example.store.enums.PaymentStatus;
@@ -35,6 +36,8 @@ import com.example.store.repository.BankTransferEventRepository;
 import com.example.store.repository.OrderRepository;
 import com.example.store.repository.OrderStatusRepository;
 import com.example.store.repository.ProductVariantRepository;
+import com.example.store.repository.WalletTopUpRequestRepository;
+import com.example.store.service.wallet.IWalletService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -56,6 +59,9 @@ public class VietQrPaymentServiceImpl implements IVietQrPaymentService {
     private final OrderStatusRepository orderStatusRepository;
     private final ProductVariantRepository variantRepository;
     private final BankTransferEventRepository eventRepository;
+    private final WalletTopUpRequestRepository walletTopUpRequestRepository;
+    private final IWalletService walletService;
+    private final VietQrUrlBuilder qrUrlBuilder;
 
     // ------------------------------------------------------------------ tạo thông tin thanh toán
 
@@ -74,7 +80,8 @@ public class VietQrPaymentServiceImpl implements IVietQrPaymentService {
                 sb.append(REF_ALPHABET.charAt(RANDOM.nextInt(REF_ALPHABET.length())));
             }
             String ref = sb.toString();
-            if (!orderRepository.existsByPaymentReference(ref)) {
+            if (!orderRepository.existsByPaymentReference(ref)
+                    && !walletTopUpRequestRepository.existsByPaymentReference(ref)) {
                 return ref;
             }
         }
@@ -122,14 +129,7 @@ public class VietQrPaymentServiceImpl implements IVietQrPaymentService {
 
     /** VietQR Quick Link: https://vietqr.io/danh-sach-api/link-tao-ma-nhanh */
     String buildQrImageUrl(BigDecimal amount, String reference) {
-        String path = QR_BASE + props.getBankBin() + "-" + props.getAccountNumber() + "-" + props.getQrTemplate() + ".png";
-        UriComponentsBuilder b = UriComponentsBuilder.fromUriString(path)
-                .queryParam("amount", amount.setScale(0, RoundingMode.HALF_UP).longValue())
-                .queryParam("addInfo", reference);
-        if (StringUtils.hasText(props.getAccountName())) {
-            b.queryParam("accountName", props.getAccountName());
-        }
-        return b.build().encode().toUriString();
+        return qrUrlBuilder.build(reference, amount);
     }
 
     // ------------------------------------------------------------------ webhook tiền vào
@@ -171,16 +171,37 @@ public class VietQrPaymentServiceImpl implements IVietQrPaymentService {
             return finish(event, TransferResult.ACCOUNT_MISMATCH);
         }
 
-        // 3. Tìm đơn theo mã tham chiếu trong nội dung chuyển khoản (khóa dòng để tuần tự hóa các webhook trùng)
+        // 3. Dò mã tham chiếu trước trong đơn hàng; nếu không có thì thử yêu cầu nạp ví.
+        // Cả hai loại tham chiếu dùng cùng cấu trúc SePay, nhưng được lưu và xử lý độc lập.
         Order order = null;
         for (String candidate : extractReferenceCandidates(p)) {
             order = orderRepository.findByPaymentReferenceForUpdate(candidate).orElse(null);
             if (order != null) break;
         }
         if (order == null) {
-            log.warn("Webhook SePay tx={} không tìm thấy đơn cho mã thanh toán trong code/content", txId);
-            return finish(event, TransferResult.ORDER_NOT_FOUND);
+            WalletTopUpRequest topUp = null;
+            for (String candidate : extractReferenceCandidates(p)) {
+                topUp = walletTopUpRequestRepository.findByPaymentReferenceForUpdate(candidate).orElse(null);
+                if (topUp != null) break;
+            }
+            if (topUp == null) {
+                log.warn("Webhook SePay tx={} không tìm thấy đơn hàng hoặc yêu cầu nạp ví", txId);
+                return finish(event, TransferResult.ORDER_NOT_FOUND);
+            }
+
+            event.setEventType("WALLET_TOP_UP");
+            event.setWalletTopUpRequestId(topUp.getId());
+            event.setPaymentReference(topUp.getPaymentReference());
+            IWalletService.TopUpTransferResult topUpResult = walletService.processSepayTopUp(topUp.getId(), p);
+            return finish(event, switch (topUpResult) {
+                case PAID -> TransferResult.PAID;
+                case DUPLICATE_PAYMENT -> TransferResult.DUPLICATE_PAYMENT;
+                case AMOUNT_MISMATCH -> TransferResult.AMOUNT_MISMATCH;
+                case LATE_PAYMENT -> TransferResult.LATE_PAYMENT;
+                case NOT_PAYABLE -> TransferResult.NOT_PAYABLE;
+            });
         }
+        event.setEventType("ORDER_PAYMENT");
         event.setOrderId(order.getId());
         event.setPaymentReference(order.getPaymentReference());
 

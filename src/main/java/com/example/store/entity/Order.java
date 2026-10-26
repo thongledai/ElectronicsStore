@@ -217,6 +217,10 @@ public class Order {
         return payment != null && PaymentMethod.BANK_QR.equalsIgnoreCase(payment.getName());
     }
 
+    public boolean usesEWallet() {
+        return payment != null && PaymentMethod.E_WALLET.equalsIgnoreCase(payment.getName());
+    }
+
     /** Đơn chuyển khoản mà backend CHƯA xác minh được tiền về: không được xác nhận/tạo vận đơn. */
     public boolean awaitingPayment() {
         return usesBankTransfer() && paymentStatus != PaymentStatus.PAID;

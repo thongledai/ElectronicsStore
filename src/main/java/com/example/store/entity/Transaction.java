@@ -45,6 +45,18 @@ public class Transaction {
     @Column(nullable = false, precision = 18, scale = 2)
     private BigDecimal amount;
 
+    public static final String TYPE_WALLET_TOP_UP = "WALLET_TOP_UP";
+    public static final String TYPE_ORDER_PAYMENT = "ORDER_PAYMENT";
+
+    @Column(name = "transaction_type", length = 30)
+    private String type;
+
+    @Column(length = 50)
+    private String reference;
+
+    @Column(name = "order_id")
+    private UUID orderId;
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

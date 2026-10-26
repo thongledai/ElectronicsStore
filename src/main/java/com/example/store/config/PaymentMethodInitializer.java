@@ -21,6 +21,7 @@ public class PaymentMethodInitializer implements ApplicationRunner {
     public void run(ApplicationArguments args) {
         ensure(PaymentMethod.COD);
         ensure(PaymentMethod.BANK_QR);
+        ensure(PaymentMethod.E_WALLET);
     }
 
     private void ensure(String name) {

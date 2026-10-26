@@ -301,7 +301,8 @@ async function onProvinceChange() {
 /* ---------- Phương thức thanh toán ---------- */
 const PAYMENT_LABELS = {
     COD: 'Thanh toán khi nhận hàng (COD)',
-    BANK_QR: 'Chuyển khoản QR (VietQR)'
+    BANK_QR: 'Chuyển khoản QR (VietQR)',
+    E_WALLET: 'Ví điện tử'
 };
 
 async function loadPaymentMethods() {
