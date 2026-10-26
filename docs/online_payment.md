@@ -1,4 +1,4 @@
-# Thanh toán chuyển khoản VietQR (MB Bank 0905928100) + xác nhận tự động
+# Thanh toán chuyển khoản VietQR + xác nhận tự động
 
 ## Cách hoạt động
 1. Khách chọn **Chuyển khoản QR (VietQR)** ở checkout → backend tạo đơn `NOT_PROCESSED`, `paymentStatus = UNPAID`,
