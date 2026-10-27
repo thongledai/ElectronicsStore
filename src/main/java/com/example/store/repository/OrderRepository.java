@@ -17,6 +17,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 import com.example.store.entity.Order;
+import com.example.store.enums.PaymentStatus;
 
 import jakarta.persistence.LockModeType;
 
@@ -91,4 +92,16 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
 
     @EntityGraph(attributePaths = {"status", "payment", "items", "items.variant", "items.variant.product"})
     List<Order> findByUserIdAndStatus_NameInIgnoreCaseOrderByCreatedAtDesc(UUID userId, Collection<String> statusNames);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @EntityGraph(attributePaths = {"user", "status", "payment"})
+    @Query("select o from Order o where o.paymentReference = :reference")
+    Optional<Order> findByPaymentReferenceForUpdate(@Param("reference") String reference);
+
+    boolean existsByPaymentReference(String paymentReference);
+
+    @Query("select o.id from Order o where o.paymentStatus = :paymentStatus "
+            + "and o.paymentExpiresAt < :now and upper(o.status.name) = 'NOT_PROCESSED'")
+    List<UUID> findExpiredPaymentOrderIds(@Param("paymentStatus") PaymentStatus paymentStatus,
+                                          @Param("now") LocalDateTime now);
 }

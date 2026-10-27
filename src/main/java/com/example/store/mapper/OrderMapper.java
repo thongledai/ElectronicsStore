@@ -48,7 +48,11 @@ public class OrderMapper {
 
         String rawStatus = o.getStatus() != null ? o.getStatus().getName() : "";
         String statusDisplayName = getStatusDisplayName(rawStatus);
-        boolean canCancel = "NOT_PROCESSED".equalsIgnoreCase(rawStatus);
+        // Đơn chuyển khoản đã nhận tiền / đang đối soát không tự hủy được (cần hoàn tiền thủ công)
+        boolean paymentBlocksCancel = o.usesBankTransfer()
+                && (o.getPaymentStatus() == com.example.store.enums.PaymentStatus.PAID
+                    || o.getPaymentStatus() == com.example.store.enums.PaymentStatus.NEEDS_RECONCILIATION);
+        boolean canCancel = "NOT_PROCESSED".equalsIgnoreCase(rawStatus) && !paymentBlocksCancel;
 
         String orderCode = "#ORD-" + o.getId().toString().substring(0, 8).toUpperCase();
         String receiverName = o.getToName() != null ? o.getToName() : (o.getUser() != null ? o.getUser().getFullName() : "");
@@ -73,7 +77,8 @@ public class OrderMapper {
                 o.getNote(),
                 o.getGhnOrderCode(),
                 o.getExpectedDeliveryDate(),
-                canCancel
+                canCancel,
+                o.getPaymentStatus() != null ? o.getPaymentStatus().name() : null
         );
     }
 

@@ -59,6 +59,8 @@ public class GhnDeliveryServiceImpl implements IGhnDeliveryService {
         if (currentStatus(order) != OrderStatusName.NOT_PROCESSED)
             throw new BusinessException(DeliveryMessage.ORDER_CONFIRM_STATUS_INVALID.getMessage());
 
+        ensurePaymentVerified(order);
+
         order.setStatus(resolveStatus(OrderStatusName.CONFIRMED));
         orderRepository.save(order);
     }
@@ -73,6 +75,7 @@ public class GhnDeliveryServiceImpl implements IGhnDeliveryService {
             return response(order, true);
 
         ensureConfirmed(order);
+        ensurePaymentVerified(order);
         GhnCreateOrderRequest request = ghnOrderMapper.toCreateOrderRequest(order);
 
         // Áp dụng thông số kiện hàng từ form người dùng nếu có
@@ -125,6 +128,12 @@ public class GhnDeliveryServiceImpl implements IGhnDeliveryService {
         return java.util.stream.Stream.of(detail, ward, province)
                 .filter(StringUtils::hasText)
                 .collect(java.util.stream.Collectors.joining(", "));
+    }
+
+    /** Đơn VietQR chỉ đi tiếp khi backend đã xác minh tiền về (PAID). Ẩn nút trên UI là chưa đủ. */
+    private void ensurePaymentVerified(Order order) {
+        if (order.awaitingPayment())
+            throw new BusinessException(DeliveryMessage.ORDER_PAYMENT_NOT_CONFIRMED.getMessage());
     }
 
     private void ensureConfirmed(Order order) {

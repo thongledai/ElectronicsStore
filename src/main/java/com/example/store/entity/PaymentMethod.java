@@ -20,6 +20,9 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class PaymentMethod {
+    public static final String COD = "COD";
+    public static final String BANK_QR = "BANK_QR";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;

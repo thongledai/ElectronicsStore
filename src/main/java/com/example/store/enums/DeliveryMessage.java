@@ -15,6 +15,7 @@ public enum DeliveryMessage {
     ORDER_HAS_SHIPMENT_ADDRESS_CHANGE("Đơn đã có vận đơn GHN; không thể đổi địa chỉ."),
     ORDER_HAS_SHIPMENT_PREVIEW("Đơn hàng đã có vận đơn GHN, không cần tạo Preview."),
     ORDER_MUST_BE_CONFIRMED("Chỉ thao tác vận đơn khi đơn đã được xác nhận."),
+    ORDER_PAYMENT_NOT_CONFIRMED("Đơn chuyển khoản VietQR chưa được xác minh đã nhận tiền, không thể xác nhận hoặc tạo vận đơn."),
     NEW_ADDRESS_MODEL_REQUIRED("GHN_NEW_ADDRESS_MODEL phải là true để dùng danh mục địa chỉ 2 cấp."),
     ADDRESS_INPUT_REQUIRED("Thiếu thông tin địa chỉ giao hàng."),
     ADDRESS_DETAIL_REQUIRED("Nhập số nhà và tên đường trong địa chỉ chi tiết."),

@@ -10,6 +10,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -22,6 +24,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import com.example.store.enums.PaymentStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -69,6 +72,21 @@ public class Order {
 
     @Column(name = "to_name", length = 100)
     private String toName;
+
+    /** Trạng thái thanh toán chuyển khoản VietQR. null với đơn COD. */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_status", length = 30)
+    private PaymentStatus paymentStatus;
+
+    /** Mã tham chiếu duy nhất đặt trong nội dung chuyển khoản để đối soát. */
+    @Column(name = "payment_reference", length = 30, unique = true)
+    private String paymentReference;
+
+    @Column(name = "payment_expires_at")
+    private LocalDateTime paymentExpiresAt;
+
+    @Column(name = "paid_at")
+    private LocalDateTime paidAt;
 
     @Column(precision = 18, scale = 2)
     private BigDecimal subtotal;
@@ -192,6 +210,16 @@ public class Order {
 
     public BigDecimal getDiscount() {
         return discount != null ? discount : BigDecimal.ZERO;
+    }
+
+    /** Đơn thanh toán bằng chuyển khoản VietQR (không phải COD). */
+    public boolean usesBankTransfer() {
+        return payment != null && PaymentMethod.BANK_QR.equalsIgnoreCase(payment.getName());
+    }
+
+    /** Đơn chuyển khoản mà backend CHƯA xác minh được tiền về: không được xác nhận/tạo vận đơn. */
+    public boolean awaitingPayment() {
+        return usesBankTransfer() && paymentStatus != PaymentStatus.PAID;
     }
 
     private static boolean hasText(String str) {

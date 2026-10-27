@@ -186,7 +186,12 @@
                         <span class="summary-label">Tình trạng thanh toán:</span>
                         <span class="badge ms-1"
                               th:classappend="${order.isPaidBefore ? 'bg-success' : 'bg-warning text-dark'}"
-                              th:text="${order.isPaidBefore ? 'Đã thanh toán' : 'Chưa thanh toán (Thu hộ COD)'}">Chưa thanh toán</span>
+                              th:text="${order.isPaidBefore ? 'Đã thanh toán' : (order.payment.name == 'BANK_QR' ? 'Chưa nhận được tiền chuyển khoản' : 'Chưa thanh toán (Thu hộ COD)')}">Chưa thanh toán</span>
+                        <span class="badge bg-danger ms-1" th:if="${order.paymentStatus != null and order.paymentStatus.name() == 'NEEDS_RECONCILIATION'}">Cần đối soát thanh toán</span>
+                        <span class="badge bg-secondary ms-1" th:if="${order.paymentStatus != null and (order.paymentStatus.name() == 'EXPIRED' or order.paymentStatus.name() == 'CANCELLED')}" th:text="${order.paymentStatus.name() == 'EXPIRED' ? 'Quá hạn thanh toán' : 'Đã hủy khi chưa thanh toán'}">Hết hạn</span>
+                        <div class="small text-muted mt-1" th:if="${order.paymentReference != null}">
+                            Mã đối soát: <span class="font-monospace" th:text="${order.paymentReference}">ES12345678</span>
+                        </div>
                     </div>
                 </div>
                 <div class="col-md-5">
@@ -220,7 +225,13 @@
         <p class="delivery-muted-note mb-2">
             Vui lòng kiểm tra kỹ danh sách sản phẩm, địa chỉ giao hàng và phương thức thanh toán trước khi xác nhận đơn.
         </p>
-        <button type="button" class="btn btn-primary" id="openConfirmModalBtn" data-bs-toggle="modal" data-bs-target="#confirmOrderModal">
+        <div class="alert alert-warning mb-0" th:if="${order.awaitingPayment()}">
+            <i class="fa-solid fa-hourglass-half me-1"></i>
+            Đơn chuyển khoản VietQR này chưa được hệ thống xác minh đã nhận tiền nên chưa thể xác nhận.
+            Trạng thái sẽ tự cập nhật khi ngân hàng báo giao dịch về.
+        </div>
+        <button type="button" class="btn btn-primary" id="openConfirmModalBtn" data-bs-toggle="modal" data-bs-target="#confirmOrderModal"
+                th:unless="${order.awaitingPayment()}">
             <i class="fa-solid fa-check me-1"></i>Xác nhận đơn hàng
         </button>
     </section>
