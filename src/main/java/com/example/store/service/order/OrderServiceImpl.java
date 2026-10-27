@@ -13,6 +13,7 @@ import com.example.store.repository.*;
 import com.example.store.enums.PaymentStatus;
 import com.example.store.service.cart.ICartService;
 import com.example.store.service.payment.IVietQrPaymentService;
+import com.example.store.service.wallet.IWalletService;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -46,6 +47,7 @@ public class OrderServiceImpl implements IOrderService {
     private final OrderMapper orderMapper;
     private final IShipmentService shipmentService;
     private final IVietQrPaymentService vietQrPaymentService;
+    private final IWalletService walletService;
 
     @Override
     @Transactional(readOnly = true)
@@ -70,12 +72,14 @@ public class OrderServiceImpl implements IOrderService {
 
         String fullAddress = String.join(", ", req.detailAddress(), req.wardName(), req.provinceName());
 
+        PaymentMethod payment = paymentMethodRepository.findById(req.paymentMethodId())
+                .orElseThrow(() -> new AppException(OrderErrorCode.PAYMENT_METHOD_NOT_SUPPORTED));
         return new OrderPreviewDTO(
                 null, null, null,
                 req.toName(), req.phone(), fullAddress,
                 null,                                   // items: trang không dùng
                 price.subtotal(), price.shippingFee(), price.discount(), price.total(),
-                "COD", false, req.note(),
+                payment.getName(), false, req.note(),
                 ghn.getExpectedDeliveryTime());
     }
 
@@ -138,6 +142,10 @@ public class OrderServiceImpl implements IOrderService {
         // Đơn chuyển khoản VietQR: sinh mã tham chiếu, trạng thái UNPAID và hạn thanh toán (kho được giữ đến hạn này)
         if (order.usesBankTransfer()) {
             vietQrPaymentService.initPayment(order);
+        } else if (order.usesEWallet()) {
+            order.setPaymentStatus(PaymentStatus.PAID);
+            order.setIsPaidBefore(true);
+            order.setPaidAt(LocalDateTime.now());
         }
 
         for (CartItem ci : items) {
@@ -158,6 +166,12 @@ public class OrderServiceImpl implements IOrderService {
 
         // 8. Lưu (cascade lưu luôn OrderItem)
         orderRepository.save(order);
+
+        // Trừ ví và ghi lịch sử trong cùng transaction với việc tạo Order.
+        // Nếu số dư không đủ, exception sẽ rollback cả Order, tồn kho và giỏ hàng.
+        if (order.usesEWallet()) {
+            walletService.debitForOrder(userId, order);
+        }
 
         // 9. Xóa các dòng đã mua khỏi giỏ
         cartItemRepository.deleteAll(items);
@@ -207,6 +221,10 @@ public class OrderServiceImpl implements IOrderService {
         String currentStatus = order.getStatus() != null ? order.getStatus().getName() : "";
         if (!"NOT_PROCESSED".equalsIgnoreCase(currentStatus)) {
             throw new AppException(OrderErrorCode.ORDER_CANNOT_BE_CANCELLED);
+        }
+
+        if (Boolean.TRUE.equals(order.getIsPaidBefore())) {
+            throw new AppException(OrderErrorCode.PAID_ORDER_CANNOT_BE_CANCELLED);
         }
 
         if (order.usesBankTransfer()) {

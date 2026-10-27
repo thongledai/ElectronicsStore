@@ -175,6 +175,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const summaryRole = document.getElementById('summaryRole');
       if (summaryRole) summaryRole.textContent = roleUpper;
 
+      const summaryEWalletCard = document.getElementById('summaryEWalletCard');
+      const isCustomer = roleUpper === 'CUSTOMER';
+      const summaryStats = document.getElementById('summaryStats');
+      if (summaryEWalletCard) summaryEWalletCard.hidden = !isCustomer;
+      if (summaryStats) summaryStats.hidden = !isCustomer;
+
       const mgmtLink = document.querySelector('.js-mgmt-link');
       if (mgmtLink && roleUpper !== 'CUSTOMER') {
         mgmtLink.style.display = 'flex';
@@ -184,9 +190,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const summaryUserCode = document.getElementById('summaryUserCode');
       if (summaryUserCode) summaryUserCode.textContent = `Mã: ${u.userCode || '---'}`;
-
-      const summaryPoint = document.getElementById('summaryPoint');
-      if (summaryPoint) summaryPoint.textContent = u.point != null ? u.point : 0;
 
       const summaryEWallet = document.getElementById('summaryEWallet');
       if (summaryEWallet) summaryEWallet.textContent = formatCurrency(u.eWallet);

@@ -56,7 +56,8 @@ public class SecurityConfig {
                 // Cart & Order APIs & Pages (chỉ khách hàng)
                 .requestMatchers(
                     "/cart/**", "/api/cart/**", "/checkout/**", "/preview-order/**",
-                    "/orders", "/orders/**", "/customer/orders", "/customer/orders/**"
+                    "/orders", "/orders/**", "/customer/orders", "/customer/orders/**",
+                    "/customer/checkout", "/customer/wallet", "/api/wallet", "/api/wallet/**"
                 ).hasAnyAuthority("CUSTOMER", "ROLE_CUSTOMER")
 
                 // Role-based reset password pages

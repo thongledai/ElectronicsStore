@@ -6,10 +6,12 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import com.example.store.entity.User;
+import jakarta.persistence.LockModeType;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
@@ -17,6 +19,10 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     boolean existsByEmail(String email);
     Optional<User> findByPhone(String phone);
     boolean existsByPhone(String phone);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select u from User u join fetch u.role where u.id = :id")
+    Optional<User> findByIdForUpdate(@Param("id") UUID id);
 
     boolean existsByEmailAndIdNot(String email, UUID id);
     boolean existsByPhoneAndIdNot(String phone, UUID id);
