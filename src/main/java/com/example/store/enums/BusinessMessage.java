@@ -72,7 +72,7 @@ public enum BusinessMessage {
     STYLE_INACTIVE_RESTORE_VALUE("Không thể khôi phục giá trị khi kiểu thuộc tính đang tắt."),
     STYLE_INACTIVE_RESTORE_STYLE_VALUE("Không thể khôi phục giá trị thuộc tính khi kiểu thuộc tính đang bị xóa!"),
 
-    // Authentication & Security (English messages preserved)
+    // Authentication & Security
     AUTH_PASSWORDS_DO_NOT_MATCH("Passwords do not match!"),
     AUTH_EMAIL_ALREADY_EXISTS("This email is already in use! Please sign in."),
     AUTH_PHONE_ALREADY_EXISTS("This phone number is already in use!"),
@@ -93,13 +93,33 @@ public enum BusinessMessage {
     AUTH_GOOGLE_EMAIL_NOT_VERIFIED("Google account email is not verified!"),
     AUTH_GOOGLE_FAILED("Google authentication failed: %s"),
     AUTH_NO_ACCOUNT_FOUND_EMAIL("No account found with this email address!"),
+    AUTH_REFRESH_TOKEN_NOT_FOUND("Không tìm thấy Refresh Token. Vui lòng đăng nhập lại!"),
+    AUTH_REFRESH_TOKEN_REVOKED("Refresh token đã bị vô hiệu hóa hoặc thu hồi. Vui lòng đăng nhập lại!"),
+    AUTH_SESSION_EXPIRED("Phiên đăng nhập đã hết hạn (quá 45 phút không hoạt động). Vui lòng đăng nhập lại!"),
+    AUTH_REFRESH_TOKEN_EMPTY("Refresh token không được để trống!"),
+    AUTH_SESSION_COMPROMISED("Phát hiện bất thường về phiên làm việc. Toàn bộ phiên đã bị thu hồi để đảm bảo an toàn, vui lòng đăng nhập lại!"),
+    AUTH_JWT_GENERATION_FAILED("Could not generate JWT token"),
 
     USER_NOT_FOUND_ID("Không tìm thấy người dùng với ID: %s"),
     USER_EMAIL_EXISTS("Email này đã được sử dụng: %s"),
     USER_PHONE_EXISTS("Số điện thoại này đã được sử dụng: %s"),
     USER_ROLE_NOT_FOUND("Không tìm thấy vai trò: %s"),
     USER_CANNOT_DELETE_SELF("Bạn không thể tự xóa tài khoản của chính mình!"),
-    USER_HAS_ORDERS_DELETE("Không thể xóa người dùng này vì đã có dữ liệu đơn hàng trong hệ thống!");
+    USER_HAS_ORDERS_DELETE("Không thể xóa người dùng này vì đã có dữ liệu đơn hàng trong hệ thống!"),
+
+    // Review
+    ORDER_NOT_FOUND("Không tìm thấy đơn hàng."),
+    REVIEW_NOT_FOUND("Không tìm thấy đánh giá."),
+    REVIEW_NOT_FOUND_ID("Không tìm thấy đánh giá với ID: %s"),
+    REVIEW_ALREADY_EXISTS("Bạn đã gửi đánh giá cho sản phẩm này rồi. Đánh giá đang được duyệt hoặc đã được hiển thị."),
+    REVIEW_ORDER_NOT_FOUND("Không tìm thấy đơn hàng."),
+    REVIEW_ORDER_NOT_BELONG_TO_USER("Đơn hàng này không thuộc về bạn."),
+    REVIEW_ORDER_NOT_DELIVERED("Chỉ có thể đánh giá theo đơn hàng khi đơn đã giao thành công."),
+    REVIEW_PRODUCT_NOT_IN_ORDER("Sản phẩm không thuộc đơn hàng này."),
+
+    // Chat
+    CHAT_ROOM_NOT_FOUND("Không tìm thấy phòng chat"),
+    CHAT_ACCESS_DENIED("Bạn không có quyền truy cập phòng chat này");
 
     private final String message;
 

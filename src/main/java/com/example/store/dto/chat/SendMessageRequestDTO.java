@@ -18,11 +18,11 @@ import lombok.NoArgsConstructor;
 @Builder
 public class SendMessageRequestDTO {
 
-    @NotNull(message = "ID phòng chat không được để trống")
+    @NotNull(message = "CHAT_ROOM_ID_REQUIRED")
     private UUID roomId;
 
-    @NotBlank(message = "Nội dung tin nhắn không được để trống")
-    @Size(max = 1000, message = "Tin nhắn tối đa 1000 ký tự")
+    @NotBlank(message = "CHAT_CONTENT_REQUIRED")
+    @Size(max = 1000, message = "CHAT_CONTENT_MAX_LENGTH")
     private String content;
 
     @Builder.Default

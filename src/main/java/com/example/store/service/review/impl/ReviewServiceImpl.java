@@ -21,7 +21,9 @@ import com.example.store.entity.Product;
 import com.example.store.entity.Review;
 import com.example.store.entity.ReviewImage;
 import com.example.store.entity.User;
+import com.example.store.enums.BusinessMessage;
 import com.example.store.enums.ReviewStatus;
+import com.example.store.exception.BusinessException;
 import com.example.store.exception.ResourceNotFoundException;
 import com.example.store.repository.OrderRepository;
 import com.example.store.repository.ProductRepository;
@@ -49,29 +51,29 @@ public class ReviewServiceImpl implements IReviewService {
     @Transactional
     public ReviewResponseDTO createReview(UUID customerId, ReviewRequestDTO request) {
         User customer = userRepository.findById(customerId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng."));
+                .orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.USER_ACCOUNT_NOT_FOUND));
 
         Product product = productRepository.findById(request.getProductId())
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm."));
+                .orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.PRODUCT_NOT_FOUND_ID, request.getProductId()));
 
         // 1. Kiểm tra tài khoản này đã từng gửi đánh giá cho sản phẩm này chưa
         if (reviewRepository.existsByUserIdAndProductId(customerId, request.getProductId())) {
-            throw new IllegalArgumentException("Bạn đã gửi đánh giá cho sản phẩm này rồi. Đánh giá đang được duyệt hoặc đã được hiển thị.");
+            throw new BusinessException(BusinessMessage.REVIEW_ALREADY_EXISTS);
         }
 
         // 2. Xác định đơn hàng gắn kèm (nếu có)
         Order linkedOrder = null;
         if (request.getOrderId() != null) {
             Order order = orderRepository.findById(request.getOrderId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng."));
+                    .orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.ORDER_NOT_FOUND));
 
             if (!order.getUser().getId().equals(customerId)) {
-                throw new IllegalArgumentException("Đơn hàng này không thuộc về bạn.");
+                throw new BusinessException(BusinessMessage.REVIEW_ORDER_NOT_BELONG_TO_USER);
             }
 
             String statusName = order.getStatus() != null ? order.getStatus().getName() : "";
             if (!"delivered".equalsIgnoreCase(statusName)) {
-                throw new IllegalArgumentException("Chỉ có thể đánh giá theo đơn hàng khi đơn đã giao thành công.");
+                throw new BusinessException(BusinessMessage.REVIEW_ORDER_NOT_DELIVERED);
             }
 
             boolean hasProduct = false;
@@ -84,7 +86,7 @@ public class ReviewServiceImpl implements IReviewService {
                 }
             }
             if (!hasProduct) {
-                throw new IllegalArgumentException("Sản phẩm không thuộc đơn hàng này.");
+                throw new BusinessException(BusinessMessage.REVIEW_PRODUCT_NOT_IN_ORDER);
             }
             linkedOrder = order;
         } else {
@@ -233,7 +235,7 @@ public class ReviewServiceImpl implements IReviewService {
     @Transactional
     public ReviewResponseDTO approveReview(UUID reviewId, String adminReply, UUID employeeId) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đánh giá với ID: " + reviewId));
+                .orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.REVIEW_NOT_FOUND_ID, reviewId));
 
         review.setStatus(ReviewStatus.APPROVED);
         if (adminReply != null && !adminReply.trim().isEmpty()) {
@@ -264,7 +266,7 @@ public class ReviewServiceImpl implements IReviewService {
     @Transactional
     public ReviewResponseDTO rejectReview(UUID reviewId, String reason, UUID employeeId) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đánh giá với ID: " + reviewId));
+                .orElseThrow(() -> new ResourceNotFoundException(BusinessMessage.REVIEW_NOT_FOUND_ID, reviewId));
 
         review.setStatus(ReviewStatus.REJECTED);
         if (reason != null && !reason.trim().isEmpty()) {

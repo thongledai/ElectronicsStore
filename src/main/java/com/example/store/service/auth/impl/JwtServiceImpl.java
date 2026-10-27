@@ -5,6 +5,7 @@ import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import com.example.store.entity.User;
+import com.example.store.enums.BusinessMessage;
 import com.example.store.service.auth.IJwtService;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -50,7 +51,7 @@ public class JwtServiceImpl implements IJwtService {
             return signedJWT.serialize();
         } catch (Exception e) {
             log.error("Error generating JWT token", e);
-            throw new RuntimeException("Could not generate JWT token", e);
+            throw new RuntimeException(BusinessMessage.AUTH_JWT_GENERATION_FAILED.getMessage(), e);
         }
     }
 

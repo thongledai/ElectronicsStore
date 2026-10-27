@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.example.store.enums.CloudinaryMessage;
 import com.example.store.service.common.ICloudinaryUploadService;
 
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,7 @@ public class CloudinaryUploadServiceImpl implements ICloudinaryUploadService {
     @Override
     public String uploadImage(MultipartFile file, String folder) {
         if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("File tải lên không được để trống!");
+            throw new IllegalArgumentException(CloudinaryMessage.IMAGE_FILE_EMPTY.getMessage());
         }
 
         try {
@@ -38,7 +39,7 @@ public class CloudinaryUploadServiceImpl implements ICloudinaryUploadService {
             return (String) uploadResult.get("secure_url");
         } catch (IOException e) {
             log.error("Lỗi khi tải ảnh lên Cloudinary: {}", e.getMessage(), e);
-            throw new RuntimeException("Tải ảnh thất bại: " + e.getMessage());
+            throw new RuntimeException(CloudinaryMessage.UPLOAD_FAILED_MSG.format(e.getMessage()), e);
         }
     }
 }

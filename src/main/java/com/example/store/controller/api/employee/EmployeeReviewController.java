@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.store.dto.common.ApiResponse;
 import com.example.store.dto.review.ReviewApprovalDTO;
 import com.example.store.dto.review.ReviewResponseDTO;
+import com.example.store.enums.ApiMessage;
 import com.example.store.enums.ReviewStatus;
 import com.example.store.security.CustomUserDetails;
 import com.example.store.service.review.IReviewService;
@@ -39,7 +40,7 @@ public class EmployeeReviewController {
     ) {
         Pageable pageable = PageRequest.of(page, size);
         Page<ReviewResponseDTO> reviews = reviewService.getPendingReviews(pageable);
-        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách đánh giá chờ duyệt", reviews));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.REVIEW_PENDING_LIST_SUCCESS, reviews));
     }
 
     @GetMapping("/all")
@@ -50,7 +51,7 @@ public class EmployeeReviewController {
     ) {
         Pageable pageable = PageRequest.of(page, size);
         Page<ReviewResponseDTO> reviews = reviewService.getAllReviews(status, pageable);
-        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách đánh giá", reviews));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.REVIEW_ALL_LIST_SUCCESS, reviews));
     }
 
     @PutMapping("/{id}/approve")
@@ -60,11 +61,11 @@ public class EmployeeReviewController {
             @RequestBody(required = false) ReviewApprovalDTO body
     ) {
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Yêu cầu đăng nhập"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error(ApiMessage.LOGIN_REQUIRED));
         }
         String adminReply = body != null ? body.getAdminReply() : null;
         ReviewResponseDTO approved = reviewService.approveReview(id, adminReply, user.getId());
-        return ResponseEntity.ok(ApiResponse.success("Duyệt đánh giá thành công", approved));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.REVIEW_APPROVED_SUCCESS, approved));
     }
 
     @PutMapping("/{id}/reject")
@@ -74,16 +75,16 @@ public class EmployeeReviewController {
             @RequestBody(required = false) ReviewApprovalDTO body
     ) {
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Yêu cầu đăng nhập"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error(ApiMessage.LOGIN_REQUIRED));
         }
         String reason = body != null ? body.getAdminReply() : "Nội dung không phù hợp chính sách đánh giá";
         ReviewResponseDTO rejected = reviewService.rejectReview(id, reason, user.getId());
-        return ResponseEntity.ok(ApiResponse.success("Từ chối đánh giá thành công", rejected));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.REVIEW_REJECTED_SUCCESS, rejected));
     }
 
     @GetMapping("/count-pending")
     public ResponseEntity<ApiResponse<Long>> getPendingCount() {
         long count = reviewService.getPendingReviewsCount();
-        return ResponseEntity.ok(ApiResponse.success("Số lượng đánh giá chờ duyệt", count));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.REVIEW_PENDING_COUNT_SUCCESS, count));
     }
 }

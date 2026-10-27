@@ -14,6 +14,7 @@ public enum ValidationMessage {
     CURRENT_PASSWORD_REQUIRED("Current password is required"),
     NEW_PASSWORD_REQUIRED("New password is required"),
     CONFIRM_NEW_PASSWORD_REQUIRED("Confirm new password is required"),
+    NEW_PASSWORD_MIN_LENGTH("New password must be at least 6 characters"),
     OTP_REQUIRED("OTP code is required"),
     OTP_SIX_DIGITS("OTP code must be 6 digits"),
 
@@ -52,7 +53,21 @@ public enum ValidationMessage {
     STYLE_VALUE_NAME_MAX_LENGTH("Tên giá trị thuộc tính không được vượt quá 100 ký tự"),
     STYLE_VALUE_STYLE_REQUIRED("Style không được để trống"),
     ADDRESS_MAX_LENGTH("Địa chỉ không được vượt quá 1200 ký tự"),
-    IMAGE_INVALID("File tải lên phải là hình ảnh (JPG, PNG, WEBP) và có dung lượng tối đa 10MB");
+    IMAGE_INVALID("File tải lên phải là hình ảnh (JPG, PNG, WEBP) và có dung lượng tối đa 10MB"),
+
+    // Chat Validation
+    CHAT_ROOM_ID_REQUIRED("ID phòng chat không được để trống"),
+    CHAT_CONTENT_REQUIRED("Nội dung tin nhắn không được để trống"),
+    CHAT_CONTENT_MAX_LENGTH("Tin nhắn tối đa 1000 ký tự"),
+
+    // Review Validation
+    REVIEW_PRODUCT_ID_REQUIRED("ID sản phẩm không được để trống"),
+    REVIEW_RATING_REQUIRED("Số sao đánh giá không được để trống"),
+    REVIEW_RATING_MIN("Đánh giá tối thiểu là 1 sao"),
+    REVIEW_RATING_MAX("Đánh giá tối đa là 5 sao"),
+    REVIEW_CONTENT_REQUIRED("Nội dung nhận xét không được để trống"),
+    REVIEW_CONTENT_MAX_LENGTH("Nội dung nhận xét tối đa 1000 ký tự"),
+    REVIEW_STATUS_REQUIRED("Trạng thái không được để trống");
 
     private final String message;
 

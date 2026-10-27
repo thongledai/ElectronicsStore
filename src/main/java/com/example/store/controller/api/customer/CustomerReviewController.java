@@ -23,6 +23,8 @@ import com.example.store.dto.common.ApiResponse;
 import com.example.store.dto.review.ReviewRequestDTO;
 import com.example.store.dto.review.ReviewResponseDTO;
 import com.example.store.dto.review.ReviewSummaryDTO;
+import com.example.store.enums.ApiMessage;
+import com.example.store.exception.BusinessException;
 import com.example.store.security.CustomUserDetails;
 import com.example.store.service.common.ICloudinaryUploadService;
 import com.example.store.service.review.IReviewService;
@@ -47,13 +49,13 @@ public class CustomerReviewController {
     ) {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.error("Vui lòng đăng nhập để đánh giá."));
+                    .body(ApiResponse.error(ApiMessage.LOGIN_REQUIRED_REVIEW));
         }
 
         try {
             ReviewResponseDTO response = reviewService.createReview(user.getId(), request);
-            return ResponseEntity.ok(ApiResponse.success("Gửi đánh giá thành công! Đánh giá sẽ hiển thị sau khi được duyệt.", response));
-        } catch (IllegalArgumentException e) {
+            return ResponseEntity.ok(ApiResponse.success(ApiMessage.REVIEW_SUBMIT_SUCCESS, response));
+        } catch (BusinessException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
         } catch (Exception e) {
             log.error("Lỗi khi gửi đánh giá: ", e);
@@ -68,14 +70,14 @@ public class CustomerReviewController {
     ) {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.error("Vui lòng đăng nhập."));
+                    .body(ApiResponse.error(ApiMessage.LOGIN_REQUIRED_GENERAL));
         }
 
         try {
             String imageUrl = cloudinaryUploadService.uploadImage(file, "reviews");
-            return ResponseEntity.ok(ApiResponse.success("Tải ảnh thành công", imageUrl));
+            return ResponseEntity.ok(ApiResponse.success(ApiMessage.IMAGE_UPLOAD_SUCCESS, imageUrl));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(ApiResponse.error("Tải ảnh thất bại: " + e.getMessage()));
+            return ResponseEntity.badRequest().body(ApiResponse.error(ApiMessage.IMAGE_UPLOAD_FAILED));
         }
     }
 
@@ -86,10 +88,10 @@ public class CustomerReviewController {
             @RequestParam UUID orderId
     ) {
         if (user == null) {
-            return ResponseEntity.ok(ApiResponse.success("Chưa đăng nhập", false));
+            return ResponseEntity.ok(ApiResponse.success(ApiMessage.NOT_LOGGED_IN, false));
         }
         boolean can = reviewService.canReview(user.getId(), productId, orderId);
-        return ResponseEntity.ok(ApiResponse.success("Kiểm tra quyền đánh giá", can));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.REVIEW_CHECK_PERMISSION, can));
     }
 
     @GetMapping("/product/{productId}")
@@ -102,7 +104,7 @@ public class CustomerReviewController {
     ) {
         Pageable pageable = PageRequest.of(page, size);
         Page<ReviewResponseDTO> reviews = reviewService.getProductApprovedReviews(productId, star, hasImages, pageable);
-        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách đánh giá thành công", reviews));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.REVIEW_LIST_SUCCESS, reviews));
     }
 
     @GetMapping("/product/{productId}/summary")
@@ -110,6 +112,6 @@ public class CustomerReviewController {
             @PathVariable UUID productId
     ) {
         ReviewSummaryDTO summary = reviewService.getProductReviewSummary(productId);
-        return ResponseEntity.ok(ApiResponse.success("Lấy tổng hợp đánh giá thành công", summary));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.REVIEW_SUMMARY_SUCCESS, summary));
     }
 }

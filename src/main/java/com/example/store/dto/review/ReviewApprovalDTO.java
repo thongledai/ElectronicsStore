@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ReviewApprovalDTO {
 
-    @NotNull(message = "Trạng thái không được để trống")
+    @NotNull(message = "REVIEW_STATUS_REQUIRED")
     private ReviewStatus status;
 
     private String adminReply;

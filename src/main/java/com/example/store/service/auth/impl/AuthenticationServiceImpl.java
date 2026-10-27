@@ -395,7 +395,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         }
 
         if (tokenToVerify == null || tokenToVerify.isBlank()) {
-            throw new BusinessException("Không tìm thấy Refresh Token. Vui lòng đăng nhập lại!");
+            throw new BusinessException(BusinessMessage.AUTH_REFRESH_TOKEN_NOT_FOUND);
         }
 
         RefreshToken newRefreshToken = refreshTokenService.rotateRefreshToken(tokenToVerify);

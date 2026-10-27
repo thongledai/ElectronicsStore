@@ -20,6 +20,7 @@ import com.example.store.dto.chat.ChatMessageDTO;
 import com.example.store.dto.chat.ChatRoomDTO;
 import com.example.store.dto.chat.SendMessageRequestDTO;
 import com.example.store.dto.common.ApiResponse;
+import com.example.store.enums.ApiMessage;
 import com.example.store.security.CustomUserDetails;
 import com.example.store.service.chat.IChatService;
 import com.example.store.service.common.ICloudinaryUploadService;
@@ -40,10 +41,10 @@ public class CustomerChatController {
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Yêu cầu đăng nhập"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error(ApiMessage.LOGIN_REQUIRED));
         }
         ChatRoomDTO room = chatService.getOrCreateRoomForCustomer(user.getId());
-        return ResponseEntity.ok(ApiResponse.success("Lấy thông tin phòng chat thành công", room));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.CHAT_CUSTOMER_ROOM_SUCCESS, room));
     }
 
     @GetMapping("/room/{roomId}/messages")
@@ -52,10 +53,10 @@ public class CustomerChatController {
             @PathVariable UUID roomId
     ) {
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Yêu cầu đăng nhập"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error(ApiMessage.LOGIN_REQUIRED));
         }
         List<ChatMessageDTO> messages = chatService.getRoomMessages(roomId, user.getId());
-        return ResponseEntity.ok(ApiResponse.success("Lấy tin nhắn thành công", messages));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.CHAT_MESSAGES_GET_SUCCESS, messages));
     }
 
     @PostMapping("/message")
@@ -64,10 +65,10 @@ public class CustomerChatController {
             @Valid @RequestBody SendMessageRequestDTO request
     ) {
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Yêu cầu đăng nhập"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error(ApiMessage.LOGIN_REQUIRED));
         }
         ChatMessageDTO message = chatService.sendMessage(user.getId(), request);
-        return ResponseEntity.ok(ApiResponse.success("Gửi tin nhắn thành công", message));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.CHAT_MESSAGE_SENT_SUCCESS, message));
     }
 
     @PostMapping(value = "/upload-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -76,13 +77,13 @@ public class CustomerChatController {
             @RequestPart("file") MultipartFile file
     ) {
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Yêu cầu đăng nhập"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error(ApiMessage.LOGIN_REQUIRED));
         }
         try {
             String url = cloudinaryUploadService.uploadImage(file, "chat");
-            return ResponseEntity.ok(ApiResponse.success("Tải ảnh thành công", url));
+            return ResponseEntity.ok(ApiResponse.success(ApiMessage.IMAGE_UPLOAD_SUCCESS, url));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(ApiResponse.error("Tải ảnh thất bại: " + e.getMessage()));
+            return ResponseEntity.badRequest().body(ApiResponse.error(ApiMessage.IMAGE_UPLOAD_FAILED));
         }
     }
 }
