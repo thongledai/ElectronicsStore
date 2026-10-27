@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="vi" th:replace="~{layouts/customer-layout :: layout(
-        'Đơn mua của tôi — TechNova Electronics',
-        'Quản lý và tra cứu trạng thái đơn hàng của bạn tại TechNova Electronics.',
+        'Đơn mua của tôi — UTE Shop',
+        'Quản lý và tra cứu trạng thái đơn hàng của bạn tại UTE Shop.',
         ~{::main}, ~{::#orderModals}, 'orders.js', false)}">
-<head><title>Đơn mua của tôi — TechNova Electronics</title></head>
+<head><title>Đơn mua của tôi — UTE Shop</title></head>
 <body>
 
 <main>
@@ -91,7 +91,7 @@
           <div class="display-3 text-muted mb-3 opacity-50">
             <i class="fas fa-receipt"></i>
           </div>
-          <h4 class="h5 fw-bold text-dark">Chưa có đơn hàng nào</h4>
+              <h2 class="h5 fw-bold text-dark">Chưa có đơn hàng nào</h2>
           <p class="text-muted mb-4" id="ordersEmptyMsg">Bạn chưa có đơn hàng nào trong trạng thái này.</p>
           <a th:href="@{/customer/products}" class="btn btn-primary px-4 py-2 rounded-pill">
             <i class="fas fa-bag-shopping me-2"></i>Mua sắm ngay
@@ -113,12 +113,12 @@
       <div class="modal-content border-0 shadow">
         <div class="modal-header bg-light">
           <div>
-            <h5 class="modal-title fw-bold" id="orderDetailModalLabel">
+            <h2 class="modal-title h5 fw-bold" id="orderDetailModalLabel">
               Chi tiết đơn hàng <span class="text-primary" id="modalOrderCode">#ORD</span>
-            </h5>
+            </h2>
             <small class="text-muted" id="modalOrderDate"></small>
           </div>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
         </div>
         <div class="modal-body p-3 p-md-4">
           <!-- Trạng thái & Vận đơn -->
@@ -142,9 +142,9 @@
             <div class="col-md-7">
               <div class="card h-100 border">
                 <div class="card-body p-3">
-                  <h6 class="card-title fw-bold text-secondary mb-2">
+                  <h3 class="card-title h6 fw-bold text-secondary mb-2">
                     <i class="fas fa-location-dot me-2 text-danger"></i>Địa chỉ nhận hàng
-                  </h6>
+                  </h3>
                   <p class="mb-1 fw-bold text-dark" id="modalReceiverName"></p>
                   <p class="mb-1 text-muted" id="modalReceiverPhone"></p>
                   <p class="mb-0 text-muted small" id="modalReceiverAddress"></p>
@@ -157,9 +157,9 @@
             <div class="col-md-5">
               <div class="card h-100 border">
                 <div class="card-body p-3">
-                  <h6 class="card-title fw-bold text-secondary mb-2">
+                  <h3 class="card-title h6 fw-bold text-secondary mb-2">
                     <i class="fas fa-credit-card me-2 text-primary"></i>Hình thức thanh toán
-                  </h6>
+                  </h3>
                   <p class="mb-1 fw-bold text-dark" id="modalPaymentMethod"></p>
                   <p class="mb-0 small" id="modalPaymentStatus"></p>
                 </div>
@@ -168,7 +168,7 @@
           </div>
 
           <!-- Danh sách sản phẩm -->
-          <h6 class="fw-bold mb-3"><i class="fas fa-list me-2 text-primary"></i>Sản phẩm đã đặt</h6>
+          <h3 class="h6 fw-bold mb-3"><i class="fas fa-list me-2 text-primary"></i>Sản phẩm đã đặt</h3>
           <div class="list-group list-group-flush border rounded mb-3" id="modalOrderItemsList">
             <!-- items render by js -->
           </div>
@@ -209,10 +209,10 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content border-0 shadow">
         <div class="modal-header bg-danger text-white">
-          <h5 class="modal-title" id="cancelOrderModalLabel">
+            <h2 class="modal-title h5" id="cancelOrderModalLabel">
             <i class="fas fa-triangle-exclamation me-2"></i>Xác nhận hủy đơn hàng
-          </h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </h2>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
         </div>
         <div class="modal-body p-4">
           <p class="mb-3">

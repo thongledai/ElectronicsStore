@@ -198,6 +198,22 @@
 .status-cancelled, .status-returned { color: var(--delivery-red); background: var(--delivery-red-soft); }
 .status-neutral { color: var(--text-muted); background: var(--surface-2); border-color: var(--border); }
 
+[data-theme="dark"] .delivery-page {
+  --delivery-accent-soft: #16294d;
+  --delivery-green: #69dbb1;
+  --delivery-amber: #ffd166;
+  --delivery-red: #ff8787;
+  --delivery-green-soft: rgba(18, 184, 134, .16);
+  --delivery-amber-soft: rgba(245, 159, 0, .18);
+  --delivery-red-soft: rgba(224, 49, 49, .16);
+}
+[data-theme="dark"] .status-waiting { color: #ffd166; }
+[data-theme="dark"] .status-confirmed { color: #9fc3ff; background: rgba(27, 109, 243, .18); }
+[data-theme="dark"] .status-shipping { color: #c1a8ff; background: rgba(132, 94, 247, .18); }
+[data-theme="dark"] .status-delivered { color: #69dbb1; }
+[data-theme="dark"] .status-cancelled,
+[data-theme="dark"] .status-returned { color: #ff8787; }
+
 .delivery-ghn-cell {
   min-width: 175px;
 }

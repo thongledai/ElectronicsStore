@@ -1,12 +1,12 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
 th:replace="~{layouts/customer-layout :: layout(
-        ${product.name + ' — TechNova Electronics'},
+        ${product.name + ' — UTE Shop'},
         ${product.description},
         ~{::main}, ~{}, 'customer/product-details.js', false)}">
 
 <head>
-<title th:text="${product.name + ' — TechNova Electronics'}">Chi tiết sản phẩm</title>
+<title th:text="${product.name + ' — UTE Shop'}">Chi tiết sản phẩm</title>
 </head>
 
 <body>
@@ -99,10 +99,10 @@ th:replace="~{layouts/customer-layout :: layout(
 								<div class="d-flex align-items-center gap-2 mb-2">
 									<span class="badge bg-primary text-white"
 										th:if="${product.brand != null}"
-										th:text="${product.brand.name}">Brand</span>
+										th:text="${product.brand.name}">Thương hiệu</span>
 									<span class="badge bg-secondary text-white"
 										th:if="${product.category != null}"
-										th:text="${product.category.name}">Category</span>
+										th:text="${product.category.name}">Danh mục</span>
 								</div>
 
 								<!-- Tên sản phẩm -->
@@ -138,7 +138,7 @@ th:replace="~{layouts/customer-layout :: layout(
 								     th:with tính giá 1 lần, tránh lồng biểu thức phức tạp.
 								     ============================================================ -->
 								<div class="pd-price-box p-3 rounded mb-4"
-									style="background: var(--bg-card-subtle, #f8fafc); border: 1px solid var(--border-color, #e2e8f0);"
+									style="background: var(--surface-2); border: 1px solid var(--border);"
 									th:with="
 										effectivePrice=${firstVariant.promotionalPrice != null and firstVariant.promotionalPrice > 0 ? firstVariant.promotionalPrice : (firstVariant.price != null ? firstVariant.price : 0)},
 										hasDiscount=${firstVariant.promotionalPrice != null and firstVariant.price != null and firstVariant.promotionalPrice < firstVariant.price},
@@ -202,24 +202,6 @@ th:replace="~{layouts/customer-layout :: layout(
 								</div>
 
 								<!-- Highlights / perks -->
-								<div class="pd-perks p-3 rounded"
-									style="background: var(--bg-card, #ffffff); border: 1px solid var(--border-color, #e2e8f0);">
-									<div class="row g-2">
-										<div class="col-6">
-											<i class="fas fa-shield-check text-primary me-2"></i>Bảo hành chính hãng 12 tháng
-										</div>
-										<div class="col-6">
-											<i class="fas fa-truck-fast text-primary me-2"></i>Giao hàng hỏa tốc 2-4 ngày
-										</div>
-										<div class="col-6">
-											<i class="fas fa-rotate-left text-primary me-2"></i>Đổi trả miễn phí 7 ngày
-										</div>
-										<div class="col-6">
-											<i class="fas fa-headset text-primary me-2"></i>Hỗ trợ kỹ thuật 24/7
-										</div>
-									</div>
-								</div>
-
 							</div><!-- /.pd-info -->
 						</div>
 						<!-- ================== END Product Details Column ================== -->
@@ -273,14 +255,14 @@ th:replace="~{layouts/customer-layout :: layout(
 
 					<!-- Tab 1: Mô tả -->
 					<div class="tab-pane fade" id="tab-desc" role="tabpanel">
-						<div class="p-3 bg-white rounded border" style="line-height: 1.8;">
+						<div class="p-3 bg-surface rounded border" style="line-height: 1.8;">
 							<p style="white-space: pre-line;" th:text="${product.description}">Mô tả chi tiết sản phẩm.</p>
 						</div>
 					</div>
 
 					<!-- Tab 2: Thông số kỹ thuật -->
 					<div class="tab-pane fade show active" id="tab-specs" role="tabpanel">
-						<div class="table-responsive bg-white rounded border p-3">
+						<div class="table-responsive bg-surface rounded border p-3">
 							<table class="table table-striped mb-0">
 								<tbody>
 									<tr>
@@ -289,17 +271,17 @@ th:replace="~{layouts/customer-layout :: layout(
 									</tr>
 									<tr>
 										<th>Thương hiệu</th>
-										<td th:text="${product.brand != null ? product.brand.name : 'N/A'}">Brand</td>
+										<td th:text="${product.brand != null ? product.brand.name : 'Chưa cập nhật'}">Thương hiệu</td>
 									</tr>
 									<tr>
 										<th>Danh mục</th>
-										<td th:text="${product.category != null ? product.category.name : 'N/A'}">Category</td>
+										<td th:text="${product.category != null ? product.category.name : 'Chưa cập nhật'}">Danh mục</td>
 									</tr>
 								</tbody>
 							</table>
 						</div>
-						<h3 class="h6 fw-bold mt-4">Cấu hình có sẵn</h3>
-						<div class="table-responsive bg-white rounded border p-3">
+						<h2 class="h6 fw-bold mt-4">Cấu hình có sẵn</h2>
+						<div class="table-responsive bg-surface rounded border p-3">
 							<table class="table table-striped align-middle mb-0">
 								<thead><tr><th>Phiên bản</th><th>Thuộc tính</th><th>Giá</th><th>Tồn kho</th></tr></thead>
 								<tbody id="variantSpecsRows">
@@ -326,26 +308,16 @@ th:replace="~{layouts/customer-layout :: layout(
 					<div class="tab-pane fade" id="tab-shipping" role="tabpanel">
 						<div class="row g-4">
 							<div class="col-md-6">
-								<h4 class="h6 mb-3">
+								<h3 class="h6 mb-3">
 									<i class="fas fa-truck-fast text-primary me-2"></i>Chính sách giao hàng
-								</h4>
-								<ul class="pd-highlights">
-									<li>Miễn phí vận chuyển toàn quốc cho đơn hàng từ 5.000.000 ₫.</li>
-									<li>Đóng gói tiêu chuẩn và xuất kho trong vòng 24 giờ sau khi xác nhận đơn.</li>
-									<li>Giao hàng tận nơi từ 2–4 ngày làm việc trên toàn quốc.</li>
-									<li>Cung cấp mã vận đơn theo dõi trực tiếp trạng thái đơn hàng.</li>
-								</ul>
+								</h3>
+								<p class="text-muted">Phí vận chuyển và thời gian giao dự kiến được tính theo địa chỉ ở bước thanh toán.</p>
 							</div>
 							<div class="col-md-6">
-								<h4 class="h6 mb-3">
+								<h3 class="h6 mb-3">
 									<i class="fas fa-rotate-left text-primary me-2"></i>Đổi trả &amp; Bảo hành
-								</h4>
-								<ul class="pd-highlights">
-									<li>Đổi trả miễn phí trong 7 ngày đầu nếu có lỗi phần cứng từ nhà sản xuất.</li>
-									<li>Sản phẩm phải còn nguyên phụ kiện, hộp đóng gói và tem niêm phong.</li>
-									<li>Bảo hành chính hãng tại tất cả các trung tâm bảo hành ủy quyền.</li>
-									<li>Cam kết 100% sản phẩm chính hãng, xuất hóa đơn VAT đầy đủ.</li>
-								</ul>
+								</h3>
+								<p class="text-muted">Thông tin đổi trả và bảo hành hiện chưa được cung cấp bởi backend.</p>
 							</div>
 						</div>
 					</div>
@@ -394,7 +366,7 @@ th:replace="~{layouts/customer-layout :: layout(
 							</div>
 							<div class="card-body">
 								<span class="card-cat"
-									th:text="${p.brandName != null ? p.brandName : 'TechNova'}">Brand</span>
+									th:text="${p.brandName != null ? p.brandName : 'Chưa cập nhật'}">Thương hiệu</span>
 								<h3 class="card-title">
 									<a th:href="@{'/customer/products/' + ${p.slug}}"
 										th:text="${p.name}">Tên sản phẩm</a>

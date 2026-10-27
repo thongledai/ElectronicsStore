@@ -1,21 +1,21 @@
 <!DOCTYPE html>
 <!--
-  Layout for Manager / Employee / Shipper pages.
+  Layout for Manager / Employee pages.
 
   A page uses it like this:
     <html th:replace="~{layouts/dashboard-layout :: layout('Tổng quan', 'manager', 'index', ~{::section.content})}">
-      <head><title>Tổng quan | TechNova</title></head>
+      <head><title>Tổng quan | UTE Shop</title></head>
       <body><section class="content"> ... </section></body>
     </html>
 
   Parameters
-    title    page title (used for <title>; shipper also shows it in the topbar)
-    role     'manager' | 'employee' | 'shipper'  -> picks fragments/{role}-sidebar
+    title    page title (used for <title> and the topbar)
+    role     'manager' | 'employee' -> picks fragments/{role}-sidebar
     active   key of the highlighted sidebar link (see each *-sidebar.html)
     content  page content                -> ~{::section.content}
 -->
 <html lang="vi" th:fragment="layout(title, role, active, content)" th:with="URL=@{/}" th:attr="data-role=${role}">
-<head th:replace="~{fragments/header :: head(${title + ' | TechNova'}, 'TechNova Electronics — khu vực quản lý')}"></head>
+<head th:replace="~{fragments/header :: head(${title + ' | UTE Shop'}, 'UTE Shop — khu vực quản lý')}"></head>
 <link rel="stylesheet" th:href="@{/css/dashboard.css}">
 <link rel="stylesheet" th:href="@{/css/employee-delivery.css}">
 <body>

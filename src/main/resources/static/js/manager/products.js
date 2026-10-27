@@ -1,5 +1,5 @@
 /* ==========================================================================
-   TechNova Electronics — Manager Products Script
+   UTE Shop — Manager Products Script
    ========================================================================== */
 'use strict';
 

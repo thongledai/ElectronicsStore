@@ -19,7 +19,7 @@
      15. Floating UI (toasts, back-to-top, loader)
      16. Animations
      17. Responsive breakpoints
-     18. Role dashboards (Manager / Employee / Shipper)
+   18. Role dashboards (Manager / Employee)
    ========================================================================== */
 
 /* ==========================================================================
@@ -90,6 +90,8 @@
   --shadow-md: 0 6px 18px rgba(0, 0, 0, .45);
   --shadow-lg: 0 18px 40px rgba(0, 0, 0, .55);
   --shadow-brand: 0 12px 28px rgba(27, 109, 243, .35);
+  --bs-tertiary-bg: var(--surface-2);
+  color-scheme: dark;
 }
 
 /* ==========================================================================
@@ -137,6 +139,9 @@ img { max-width: 100%; height: auto; }
 .text-body { color: var(--text) !important; }
 .bg-light { background-color: var(--surface-2) !important; }
 .bg-white { background-color: var(--surface) !important; }
+.bg-surface { background-color: var(--surface) !important; }
+.bg-body-tertiary { background-color: var(--surface-2) !important; }
+.text-dark { color: var(--text) !important; }
 .border { border-color: var(--border) !important; }
 .dropdown-divider { border-color: var(--border); }
 hr { border-color: var(--border); opacity: 1; }
@@ -145,6 +150,28 @@ hr { border-color: var(--border); opacity: 1; }
 .modal-content { background: var(--surface); color: var(--text); }
 .btn-close { filter: var(--close-filter, none); }
 [data-theme="dark"] .btn-close { filter: invert(1) grayscale(1) brightness(1.8); }
+
+/* Form and table surfaces stay paired with the active theme across storefront pages. */
+.form-control, .form-select {
+  background-color: var(--surface);
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+.form-control::placeholder { color: var(--text-muted); opacity: 1; }
+.form-control:focus, .form-select:focus {
+  background-color: var(--surface);
+  color: var(--text);
+  border-color: var(--blue);
+}
+.table {
+  --bs-table-color: var(--text);
+  --bs-table-bg: transparent;
+  --bs-table-border-color: var(--border);
+  --bs-table-striped-color: var(--text);
+  --bs-table-striped-bg: var(--surface-2);
+}
+.btn-outline-secondary { color: var(--text-muted); border-color: var(--border-strong); }
+.btn-outline-secondary:hover { background-color: var(--surface-3); color: var(--text); border-color: var(--border-strong); }
 
 /* Bootstrap pagination */
 .page-link {

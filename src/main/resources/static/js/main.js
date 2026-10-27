@@ -1,5 +1,5 @@
 /* ==========================================================================
-   TechNova Electronics — Core Script (loaded on every page)
+   UTE Shop — Core Script (loaded on every page)
    --------------------------------------------------------------------------
    Responsibilities:
      • Storage helpers (localStorage read/write with safe fallbacks)
@@ -23,8 +23,7 @@ const STORE = {
   wishlist: 'technova_wishlist',
   theme: 'technova_theme',
   user: 'technova_user',
-  recent: 'technova_recent',
-  coupon: 'technova_coupon'
+  recent: 'technova_recent'
 };
 
 /* Application URLs. APP_URL (= ${URL}, context path + "/") is declared in fragments/header.html.
@@ -46,16 +45,8 @@ const CONFIG = {
   taxRate: 0.18,              // 18% GST
   shippingFee: 99,            // flat shipping charge
   freeShippingAbove: 5000,    // orders above this ship free
-  currency: '₹',
+  currency: '₫',
   maxQtyPerItem: 10
-};
-
-/* Demo coupon codes — validated entirely on the frontend */
-const COUPONS = {
-  TECHNOVA10: { type: 'percent', value: 10, label: '10% off your order' },
-  STUDENT15: { type: 'percent', value: 15, label: '15% student discount' },
-  FLAT500: { type: 'flat', value: 500, label: '₹500 off', minOrder: 5000 },
-  FREESHIP: { type: 'shipping', value: 0, label: 'Free shipping' }
 };
 
 /* ==========================================================================
@@ -91,9 +82,9 @@ function storageSet(key, value) {
    3. FORMATTING HELPERS
    ========================================================================== */
 
-/** Formats a number as Indian rupees, e.g. 184999 -> "₹1,84,999". */
+/** Formats a price in Vietnamese đồng. */
 function formatPrice(amount) {
-  return CONFIG.currency + Math.round(amount).toLocaleString('en-IN');
+  return Math.round(amount).toLocaleString('vi-VN') + ' ' + CONFIG.currency;
 }
 
 /** Builds the Font Awesome star markup for a 0-5 rating. */
@@ -164,7 +155,7 @@ function showToast(title, message = '', type = 'success', timeout = 3200) {
       <div class="t-title">${escapeHtml(title)}</div>
       ${message ? `<div class="t-msg">${escapeHtml(message)}</div>` : ''}
     </div>
-    <button class="t-close" type="button" aria-label="Dismiss notification">
+    <button class="t-close" type="button" aria-label="Đóng thông báo">
       <i class="fas fa-xmark"></i>
     </button>`;
 
@@ -287,10 +278,9 @@ const Cart = {
     }
   },
 
-  /** Empties the cart and clears any applied coupon. */
+  /** Empties the locally cached cart. */
   clear() {
     this.save([]);
-    storageSet(STORE.coupon, null);
   },
 
   /** Total number of units (not lines) in the cart. */
@@ -299,7 +289,7 @@ const Cart = {
   },
 
   /**
-   * Calculates the full money breakdown, applying any stored coupon.
+   * Calculates the locally cached cart breakdown.
    * @returns {{subtotal, discount, taxable, tax, shipping, total, savings}}
    */
   totals() {
@@ -307,15 +297,8 @@ const Cart = {
     const subtotal = items.reduce((sum, p) => sum + p.price * p.qty, 0);
     const mrpTotal = items.reduce((sum, p) => sum + (p.oldPrice || p.price) * p.qty, 0);
 
-    const coupon = getActiveCoupon();
-    let discount = 0;
+    const discount = 0;
     let shipping = subtotal >= CONFIG.freeShippingAbove || subtotal === 0 ? 0 : CONFIG.shippingFee;
-
-    if (coupon) {
-      if (coupon.type === 'percent') discount = subtotal * (coupon.value / 100);
-      else if (coupon.type === 'flat') discount = Math.min(coupon.value, subtotal);
-      else if (coupon.type === 'shipping') shipping = 0;
-    }
 
     const taxable = subtotal - discount;
     const tax = taxable * CONFIG.taxRate;
@@ -332,13 +315,6 @@ const Cart = {
     };
   }
 };
-
-/** Returns the applied coupon object (with its code) or null. */
-function getActiveCoupon() {
-  const code = storageGet(STORE.coupon, null);
-  if (!code || !COUPONS[code]) return null;
-  return { code, ...COUPONS[code] };
-}
 
 /* ==========================================================================
    6. WISHLIST MANAGER
@@ -405,7 +381,7 @@ const Wishlist = {
       if (icon) {
         icon.className = `${active ? 'fas' : 'far'} fa-heart`;
       }
-      btn.setAttribute('aria-label', `${active ? 'Remove from' : 'Add to'} wishlist`);
+      btn.setAttribute('aria-label', `${active ? 'Xóa khỏi' : 'Thêm vào'} danh sách yêu thích`);
     });
   },
 
@@ -461,7 +437,7 @@ const Wishlist = {
           icon.classList.add('heart-pop');
           setTimeout(() => icon.classList.remove('heart-pop'), 420);
         }
-        btn.setAttribute('aria-label', `${isWishlisted ? 'Remove from' : 'Add to'} wishlist`);
+        btn.setAttribute('aria-label', `${isWishlisted ? 'Xóa khỏi' : 'Thêm vào'} danh sách yêu thích`);
       });
 
       document.dispatchEvent(new CustomEvent('wishlist:changed', {
@@ -541,9 +517,9 @@ function renderProductCard(product, delay = 0) {
   // Low stock nudge — a light urgency cue like real stores use
   let stockNote = '';
   if (outOfStock) {
-    stockNote = '<p class="stock-note">Currently unavailable</p>';
+    stockNote = '<p class="stock-note">Hiện không có sẵn</p>';
   } else if (product.stock <= 10) {
-    stockNote = `<p class="stock-note">Only ${product.stock} left in stock</p>`;
+    stockNote = `<p class="stock-note">Chỉ còn ${product.stock} sản phẩm</p>`;
   }
 
   return `
@@ -552,18 +528,18 @@ function renderProductCard(product, delay = 0) {
       <div class="card-media">
         ${product.badge ? `<span class="badge-ribbon">${escapeHtml(product.badge)}</span>` : ''}
         ${discount > 0 ? `<span class="badge-discount">-${discount}%</span>` : ''}
-        <a href="${href}" aria-label="View ${escapeHtml(product.name)}">
+        <a href="${href}" aria-label="Xem ${escapeHtml(product.name)}">
           <img src="${product.images[0]}" alt="${escapeHtml(product.name)}" loading="lazy" width="600" height="600">
         </a>
-        ${outOfStock ? '<div class="stock-flag"><span>Out of Stock</span></div>' : ''}
+        ${outOfStock ? '<div class="stock-flag"><span>Hết hàng</span></div>' : ''}
         <div class="card-actions">
           <button class="card-action-btn js-wishlist ${inWishlist ? 'is-active' : ''}"
                   data-id="${product.id}" type="button"
-                  aria-label="${inWishlist ? 'Remove from' : 'Add to'} wishlist"
-                  title="Add to wishlist">
+                  aria-label="${inWishlist ? 'Xóa khỏi' : 'Thêm vào'} danh sách yêu thích"
+                  title="Thêm vào danh sách yêu thích">
             <i class="${inWishlist ? 'fas' : 'far'} fa-heart"></i>
           </button>
-          <a class="card-action-btn" href="${href}" aria-label="View details" title="View details">
+          <a class="card-action-btn" href="${href}" aria-label="Xem chi tiết" title="Xem chi tiết">
             <i class="fas fa-eye"></i>
           </a>
         </div>
@@ -575,20 +551,20 @@ function renderProductCard(product, delay = 0) {
 
         <div class="card-rating">
           <span class="stars">${renderStars(product.rating)}</span>
-          <span class="count">${product.rating} (${product.reviewCount.toLocaleString('en-IN')})</span>
+          <span class="count">${product.rating} (${product.reviewCount.toLocaleString('vi-VN')})</span>
         </div>
 
         <div class="card-price">
           <span class="price">${formatPrice(product.price)}</span>
           ${product.oldPrice ? `<span class="price-old">${formatPrice(product.oldPrice)}</span>` : ''}
-          ${discount > 0 ? `<span class="price-off">${discount}% off</span>` : ''}
+          ${discount > 0 ? `<span class="price-off">Giảm ${discount}%</span>` : ''}
         </div>
 
         ${stockNote}
 
         <button class="btn btn-brand btn-sm btn-cart js-add-cart" data-id="${product.id}"
                 type="button" ${outOfStock ? 'disabled' : ''}>
-          <i class="fas fa-cart-plus me-1"></i>${outOfStock ? 'Notify Me' : 'Add to Cart'}
+          <i class="fas fa-cart-plus me-1"></i>${outOfStock ? 'Báo khi có hàng' : 'Thêm vào giỏ hàng'}
         </button>
       </div>
     </article>
@@ -838,7 +814,7 @@ function initTheme() {
     btn.addEventListener('click', () => {
       const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
       applyTheme(next);
-      showToast(next === 'dark' ? 'Dark mode on' : 'Light mode on', 'Your preference has been saved.', 'info', 2000);
+      showToast(next === 'dark' ? 'Đã bật chế độ tối' : 'Đã bật chế độ sáng', 'Tùy chọn của bạn đã được lưu.', 'info', 2000);
     });
   });
 }
@@ -953,14 +929,14 @@ function initAccountLabel() {
   const isLoggedIn = !!(token || (user && user.email));
 
   document.querySelectorAll('.js-account-label').forEach(el => {
-    el.textContent = isLoggedIn && user && user.name ? user.name.split(' ')[0] : 'Sign In';
+    el.textContent = isLoggedIn && user && user.name ? user.name.split(' ')[0] : 'Đăng nhập';
   });
 
   document.querySelectorAll('.js-account-greeting').forEach(el => {
     if (isLoggedIn && user && user.name) {
-      el.textContent = 'Hello, ' + user.name.split(' ')[0];
+      el.textContent = 'Xin chào, ' + user.name.split(' ')[0];
     } else {
-      el.textContent = 'My Account';
+      el.textContent = 'Tài khoản';
     }
   });
 
@@ -1005,7 +981,7 @@ function initAccountLabel() {
     applyAvatar(avatarUrl);
     if (fullName) {
       document.querySelectorAll('.js-account-greeting').forEach(el => {
-        el.textContent = 'Hello, ' + fullName.split(' ')[0];
+        el.textContent = 'Xin chào, ' + fullName.split(' ')[0];
       });
     }
   };
@@ -1040,19 +1016,19 @@ function initAccountLabel() {
     });
 
     let resetUrl = '/customer/reset-password';
-    let linkText = 'Change Password';
+    let linkText = 'Đổi mật khẩu';
 
     if (role === 'MANAGER' || role === 'ADMIN') {
       resetUrl = '/manager/reset-password';
     } else if (role === 'EMPLOYEE') {
       resetUrl = '/employee/reset-password';
     } else if (role === 'SHIPPER') {
-      resetUrl = '/shipper/reset-password';
+      resetUrl = '/customer/reset-password';
     } else {
       // CUSTOMER hoặc mặc định
       if (isLoggedIn && hasPass === false) {
         resetUrl = '/customer/set-password';
-        linkText = 'Set Password';
+        linkText = 'Tạo mật khẩu';
       }
     }
 
@@ -1084,7 +1060,7 @@ function initAccountLabel() {
           applyAvatar(u.avatar);
           if (u.fullName) {
             document.querySelectorAll('.js-account-greeting').forEach(el => {
-              el.textContent = 'Hello, ' + u.fullName.split(' ')[0];
+              el.textContent = 'Xin chào, ' + u.fullName.split(' ')[0];
             });
           }
           syncRoleUI(user?.hasPassword);

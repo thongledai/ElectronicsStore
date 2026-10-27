@@ -108,7 +108,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<?>> handleRuntimeException(RuntimeException ex) {
 //        log.warn("Lỗi runtime: {}", ex.getMessage());
         log.error("Lỗi runtime", ex);
-        return ResponseEntity.badRequest().body(ApiResponse.error(ex.getMessage()));
+        return ResponseEntity.badRequest().body(ApiResponse.error(ApiMessage.REQUEST_FAILED));
     }
 
     @ExceptionHandler(Exception.class)
@@ -132,7 +132,7 @@ public class GlobalExceptionHandler {
         try {
             return ValidationMessage.valueOf(key).getMessage();
         } catch (IllegalArgumentException ex) {
-            return key;
+            return ApiMessage.INVALID_DATA.getMessage();
         }
     }
 }

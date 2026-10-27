@@ -1,5 +1,5 @@
 /* ==========================================================================
-   TechNova Electronics — Manager Styles & Style Values Script
+   UTE Shop — Manager Styles & Style Values Script
    ========================================================================== */
 'use strict';
 

@@ -13,10 +13,10 @@ import lombok.NoArgsConstructor;
 @Builder
 public class SetPasswordDTO {
 
-    @NotBlank(message = "New password is required")
-    @Size(min = 6, message = "New password must be at least 6 characters")
+    @NotBlank(message = "NEW_PASSWORD_REQUIRED")
+    @Size(min = 6, message = "PASSWORD_MIN_LENGTH")
     private String newPassword;
 
-    @NotBlank(message = "Confirm new password is required")
+    @NotBlank(message = "SET_PASSWORD_CONFIRM_REQUIRED")
     private String confirmNewPassword;
 }

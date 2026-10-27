@@ -1,5 +1,5 @@
 /* ==========================================================================
-   TechNova Electronics — Manager Dashboard (Tổng quan)
+   UTE Shop — Manager Dashboard (Tổng quan)
    ========================================================================== */
 
 'use strict';

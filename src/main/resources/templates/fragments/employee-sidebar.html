@@ -7,7 +7,7 @@
     </div>
     <div class="nav-caption">Nhân viên</div>
     <div class="nav-links collapse d-lg-flex" id="roleNavLinks">
-        <a th:href="@{/customer/index}" title="Go to Customer Storefront"><i class="fa-solid fa-store"></i><span>Mua hàng</span></a>
+        <a th:href="@{/customer/index}" title="Đến cửa hàng"><i class="fa-solid fa-store"></i><span>Mua hàng</span></a>
         <a th:href="@{/employee/orders}"
            th:classappend="${active == 'orders' and (statusFilter == null or statusFilter == '')} ? 'active'"
            th:attr="aria-current=${active == 'orders' and (statusFilter == null or statusFilter == '')} ? 'page'"><i class="fa-solid fa-receipt"></i><span>Quản lý đơn hàng</span></a>

@@ -1,5 +1,5 @@
 /* ==========================================================================
-   TechNova Electronics — Products Listing Page
+   UTE Shop — Products Listing Page
    --------------------------------------------------------------------------
    Implements search, category / brand / price / rating filtering, sorting,
    grid-vs-list views and pagination. The PRODUCTS array is loaded from the
@@ -344,15 +344,15 @@ function updatePageTitle() {
     const name = getCategoryName(state.categories[0]);
     title.textContent = name;
     crumb.textContent = name;
-    document.title = `${name} — TechNova Electronics`;
+    document.title = `${name} — UTE Shop`;
   } else if (state.search) {
     title.textContent = `Results for "${state.search}"`;
     crumb.textContent = 'Search';
-    document.title = `Search: ${state.search} — TechNova Electronics`;
+    document.title = `Search: ${state.search} — UTE Shop`;
   } else {
     title.textContent = 'All Products';
     crumb.textContent = 'Products';
-    document.title = 'All Products — TechNova Electronics';
+    document.title = 'All Products — UTE Shop';
   }
 }
 

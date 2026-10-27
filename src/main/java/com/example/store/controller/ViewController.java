@@ -135,12 +135,21 @@ public class ViewController {
         if ("index".equalsIgnoreCase(page)) {
             return "redirect:/employee/orders";
         }
+        if (page.startsWith("orders-")) {
+            String status = switch (page) {
+                case "orders-new" -> "NOT_PROCESSED";
+                case "orders-confirmed" -> "CONFIRMED";
+                case "orders-delivering" -> "SHIPPING";
+                case "orders-delivered" -> "DELIVERED";
+                case "orders-cancelled" -> "CANCELLED";
+                case "orders-returns" -> "RETURNED";
+                default -> null;
+            };
+            return status == null
+                    ? "redirect:/employee/orders"
+                    : "redirect:/employee/orders?status=" + status;
+        }
         return "employee/" + page;
     }
 
-    // Dashboard Shipper: /shipper/{page}
-    @GetMapping("/shipper/{page}")
-    public String shipperPages(@PathVariable String page) {
-        return "shipper/" + page;
-    }
 }
