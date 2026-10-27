@@ -17,6 +17,20 @@
         <a th:href="@{/employee/orders(status='DELIVERED')}" th:classappend="${statusFilter == 'DELIVERED'} ? 'active'" th:attr="aria-current=${statusFilter == 'DELIVERED'} ? 'page'"><i class="fa-solid fa-circle-check"></i><span>Đã giao</span></a>
         <a th:href="@{/employee/orders(status='CANCELLED')}" th:classappend="${statusFilter == 'CANCELLED'} ? 'active'" th:attr="aria-current=${statusFilter == 'CANCELLED'} ? 'page'"><i class="fa-solid fa-ban"></i><span>Đã hủy</span></a>
         <a th:href="@{/employee/orders(status='RETURNED')}" th:classappend="${statusFilter == 'RETURNED'} ? 'active'" th:attr="aria-current=${statusFilter == 'RETURNED'} ? 'page'"><i class="fa-solid fa-arrow-rotate-left"></i><span>Đã hoàn</span></a>
+        <a th:href="@{/employee/reviews}"
+           th:classappend="${active == 'reviews'} ? 'active'"
+           th:attr="aria-current=${active == 'reviews'} ? 'page'">
+            <i class="fa-solid fa-star"></i>
+            <span>Duyệt đánh giá</span>
+            <span class="badge bg-danger rounded-pill ms-auto d-none" id="sidebarPendingReviewsBadge">0</span>
+        </a>
+        <a th:href="@{/employee/chat}"
+           th:classappend="${active == 'chat'} ? 'active'"
+           th:attr="aria-current=${active == 'chat'} ? 'page'">
+            <i class="fa-solid fa-comments"></i>
+            <span>Hỗ trợ trực tuyến</span>
+            <span class="badge bg-danger rounded-pill ms-auto d-none" id="sidebarOpenChatBadge">0</span>
+        </a>
     </div>
     <div class="nav-actions">
         <button class="theme-toggle" type="button" data-theme-toggle aria-label="Đổi giao diện sáng/tối" title="Đổi giao diện">

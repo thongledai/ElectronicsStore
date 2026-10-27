@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
 th:replace="~{layouts/customer-layout :: layout(
         ${product.name + ' — TechNova Electronics'},
@@ -35,7 +35,7 @@ th:replace="~{layouts/customer-layout :: layout(
 		     PRODUCT DETAIL SECTION
 		     ============================================================== -->
 		<section class="section pb-4">
-			<div class="container" id="productDetail">
+			<div class="container" id="productDetail" th:attr="data-product-id=${product.id}">
 
 				<!--
 					Bảo vệ toàn bộ phần chi tiết: chỉ render khi variants không rỗng.
@@ -124,8 +124,6 @@ th:replace="~{layouts/customer-layout :: layout(
                                     </span>
 								</div>
 
-
-
 								<!-- Variant Selection Options -->
 								<div class="mb-3" id="variantSelectorGroup">
 									<label class="fw-semibold mb-2 d-block">Cấu hình</label>
@@ -133,10 +131,8 @@ th:replace="~{layouts/customer-layout :: layout(
 										<span class="text-muted small">Đang tải cấu hình...</span>
 									</div>
 								</div>
-<!-- ============================================================
-								     Pricing Box
-								     th:with tính giá 1 lần, tránh lồng biểu thức phức tạp.
-								     ============================================================ -->
+
+								<!-- Pricing Box -->
 								<div class="pd-price-box p-3 rounded mb-4"
 									style="background: var(--bg-card-subtle, #f8fafc); border: 1px solid var(--border-color, #e2e8f0);"
 									th:with="
@@ -241,7 +237,7 @@ th:replace="~{layouts/customer-layout :: layout(
 		</section>
 
 		<!-- ==============================================================
-		     TABS: Mô tả / Thông số kỹ thuật / Vận chuyển & Đổi trả
+		     TABS: Mô tả / Thông số kỹ thuật / Vận chuyển & Đổi trả / Đánh giá
 		     ============================================================== -->
 		<section class="section pt-0" id="detailTabsSection">
 			<div class="container">
@@ -265,6 +261,13 @@ th:replace="~{layouts/customer-layout :: layout(
 							data-bs-target="#tab-shipping" type="button" role="tab"
 							aria-controls="tab-shipping" aria-selected="false">
 							<i class="fas fa-truck me-2"></i>Vận chuyển &amp; Bảo hành
+						</button>
+					</li>
+					<li class="nav-item" role="presentation">
+						<button class="nav-link" data-bs-toggle="tab"
+							data-bs-target="#tab-reviews" type="button" role="tab"
+							aria-controls="tab-reviews" aria-selected="false">
+							<i class="fas fa-star text-warning me-2"></i>Đánh giá (<span id="tabReviewCount">0</span>)
 						</button>
 					</li>
 				</ul>
@@ -350,6 +353,91 @@ th:replace="~{layouts/customer-layout :: layout(
 						</div>
 					</div>
 
+					<!-- Tab 4: Đánh giá sản phẩm (Thegioididong style) -->
+					<div class="tab-pane fade" id="tab-reviews" role="tabpanel">
+						<div class="tgdd-rating-box mb-4">
+							<h3 class="h5 fw-bold mb-3 text-dark">
+								<i class="fas fa-star text-warning me-2"></i>Đánh giá &amp; Nhận xét: <span th:text="${product.name}">Tên sản phẩm</span>
+							</h3>
+							<div class="row align-items-center g-4">
+								<!-- Điểm trung bình -->
+								<div class="col-md-4 text-center border-end">
+									<div class="tgdd-rating-score" id="tgddAvgScore" th:text="${#numbers.formatDecimal(product.rating != null ? product.rating : 5.0, 1, 1)}">5.0</div>
+									<div class="star-rating-stars fs-5 my-1" id="tgddAvgStars">
+										<i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+									</div>
+									<div class="text-muted small mb-3">
+										<span class="fw-bold text-dark" id="tgddTotalReviews">0</span> đánh giá
+									</div>
+									<button type="button" class="btn btn-warning text-dark fw-bold px-4 py-2 rounded-pill shadow-sm" id="btnOpenProductReviewModal">
+										<i class="fas fa-edit me-1"></i>Viết đánh giá
+									</button>
+								</div>
+								<!-- Biểu đồ thanh 5 sao -->
+								<div class="col-md-8">
+									<div class="tgdd-bar-row">
+										<span class="tgdd-bar-label">5 <i class="fas fa-star text-warning small"></i></span>
+										<div class="tgdd-bar-bg"><div class="tgdd-bar-fill" id="bar5Star" style="width: 0%;"></div></div>
+										<span class="tgdd-bar-count" id="count5Star">0</span>
+									</div>
+									<div class="tgdd-bar-row">
+										<span class="tgdd-bar-label">4 <i class="fas fa-star text-warning small"></i></span>
+										<div class="tgdd-bar-bg"><div class="tgdd-bar-fill" id="bar4Star" style="width: 0%;"></div></div>
+										<span class="tgdd-bar-count" id="count4Star">0</span>
+									</div>
+									<div class="tgdd-bar-row">
+										<span class="tgdd-bar-label">3 <i class="fas fa-star text-warning small"></i></span>
+										<div class="tgdd-bar-bg"><div class="tgdd-bar-fill" id="bar3Star" style="width: 0%;"></div></div>
+										<span class="tgdd-bar-count" id="count3Star">0</span>
+									</div>
+									<div class="tgdd-bar-row">
+										<span class="tgdd-bar-label">2 <i class="fas fa-star text-warning small"></i></span>
+										<div class="tgdd-bar-bg"><div class="tgdd-bar-fill" id="bar2Star" style="width: 0%;"></div></div>
+										<span class="tgdd-bar-count" id="count2Star">0</span>
+									</div>
+									<div class="tgdd-bar-row">
+										<span class="tgdd-bar-label">1 <i class="fas fa-star text-warning small"></i></span>
+										<div class="tgdd-bar-bg"><div class="tgdd-bar-fill" id="bar1Star" style="width: 0%;"></div></div>
+										<span class="tgdd-bar-count" id="count1Star">0</span>
+									</div>
+								</div>
+							</div>
+
+							<!-- Bộ lọc đánh giá kiểu TGDĐ -->
+							<div class="d-flex flex-wrap gap-2 pt-3 mt-3 border-top" id="reviewFilterPills">
+								<button type="button" class="tgdd-filter-pill active" data-star="ALL">Tất cả (<span id="filterAllCount">0</span>)</button>
+								<button type="button" class="tgdd-filter-pill" data-star="5">5 ★ (<span id="filter5Count">0</span>)</button>
+								<button type="button" class="tgdd-filter-pill" data-star="4">4 ★ (<span id="filter4Count">0</span>)</button>
+								<button type="button" class="tgdd-filter-pill" data-star="3">3 ★ (<span id="filter3Count">0</span>)</button>
+								<button type="button" class="tgdd-filter-pill" data-star="2">2 ★ (<span id="filter2Count">0</span>)</button>
+								<button type="button" class="tgdd-filter-pill" data-star="1">1 ★ (<span id="filter1Count">0</span>)</button>
+								<button type="button" class="tgdd-filter-pill" data-images="true">📷 Có hình ảnh (<span id="filterImgCount">0</span>)</button>
+							</div>
+						</div>
+
+						<!-- Danh sách reviews -->
+						<div class="bg-white rounded border p-3 p-md-4">
+							<div id="productReviewsLoading" class="text-center py-4">
+								<div class="spinner-border text-primary spinner-border-sm" role="status"></div>
+								<span class="text-muted ms-2 small">Đang tải đánh giá...</span>
+							</div>
+
+							<div id="productReviewsEmpty" class="text-center py-4 d-none">
+								<i class="far fa-comment-dots fs-1 text-muted opacity-50 mb-2"></i>
+								<p class="text-muted mb-0">Chưa có đánh giá nào cho sản phẩm này.</p>
+							</div>
+
+							<div id="productReviewsList" class="d-none"></div>
+
+							<!-- Nút xem thêm -->
+							<div class="text-center mt-3 pt-3 border-top d-none" id="reviewLoadMoreContainer">
+								<button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-4" id="btnLoadMoreReviews">
+									Xem thêm đánh giá <i class="fas fa-chevron-down ms-1"></i>
+								</button>
+							</div>
+						</div>
+					</div>
+
 				</div><!-- /.tab-content -->
 			</div><!-- /.container -->
 		</section>
@@ -413,6 +501,84 @@ th:replace="~{layouts/customer-layout :: layout(
 			</div>
 		</section>
 
+		<!-- MODAL VIẾT ĐÁNH GIÁ (THEGIOIDIDONG STYLE) -->
+		<div class="modal fade" id="productReviewModal" tabindex="-1" aria-labelledby="productReviewModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered modal-lg">
+				<div class="modal-content border-0 shadow">
+					<div class="modal-header bg-light border-bottom">
+						<h5 class="modal-title fw-bold" id="productReviewModalLabel">
+							<i class="fas fa-star text-warning me-2"></i>Đánh giá &amp; nhận xét sản phẩm
+						</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body p-4">
+						<!-- Thông tin sản phẩm -->
+						<div class="d-flex align-items-center gap-3 p-3 bg-light rounded border mb-4">
+							<img th:src="${product.variants != null and !product.variants.isEmpty() and product.variants[0].imageUrls != null and !product.variants[0].imageUrls.isEmpty() ? product.variants[0].imageUrls[0] : '/images/placeholder.webp'}"
+							     src="/images/placeholder.webp" alt="" class="rounded border object-fit-cover" style="width: 60px; height: 60px;" onerror="this.onerror=null;this.src='/images/placeholder.webp';">
+							<div>
+								<h6 class="mb-1 fw-bold text-dark" th:text="${product.name}">Tên sản phẩm</h6>
+								<div class="text-muted small">Chia sẻ trải nghiệm thực tế để giúp cộng đồng mua sắm tốt hơn</div>
+							</div>
+						</div>
+
+						<form id="productReviewForm">
+							<input type="hidden" id="pReviewStars" value="5">
+
+							<!-- Star rating picker -->
+							<div class="text-center py-2 mb-3">
+								<div class="text-muted small mb-1">Bạn cảm thấy sản phẩm này như thế nào?</div>
+								<div class="star-picker mb-1" id="pReviewStarPicker">
+									<i class="fas fa-star active" data-star="1"></i>
+									<i class="fas fa-star active" data-star="2"></i>
+									<i class="fas fa-star active" data-star="3"></i>
+									<i class="fas fa-star active" data-star="4"></i>
+									<i class="fas fa-star active" data-star="5"></i>
+								</div>
+								<div class="star-picker-label text-warning" id="pReviewStarLabel">Tuyệt vời</div>
+							</div>
+
+							<!-- Review content textarea -->
+							<div class="mb-3">
+								<label for="pReviewContentInput" class="form-label fw-semibold">Cảm nhận của bạn (tối thiểu 10 ký tự):</label>
+								<textarea class="form-control" id="pReviewContentInput" rows="4" maxlength="1000"
+								          placeholder="Hãy chia sẻ về trải nghiệm, tính năng, điểm ưng ý hoặc chưa hài lòng về sản phẩm này..."></textarea>
+								<div class="d-flex justify-content-between text-muted small mt-1">
+									<span>Nội dung chân thực giúp người khác chọn mua chuẩn xác.</span>
+									<span id="pReviewCharCount">0/1000</span>
+								</div>
+							</div>
+
+							<!-- Upload photos -->
+							<div class="mb-3">
+								<label class="form-label fw-semibold">Gửi hình ảnh thực tế (tối đa 5 ảnh):</label>
+								<div class="d-flex align-items-center gap-2">
+									<input type="file" id="pReviewPhotoInput" accept="image/*" class="d-none" multiple>
+									<button type="button" class="btn btn-outline-primary btn-sm rounded-pill" id="btnSelectPReviewPhotos">
+										<i class="fas fa-camera me-1"></i>Thêm ảnh chụp
+									</button>
+									<span class="text-muted small">Chụp ảnh mở hộp hoặc sản phẩm khi sử dụng</span>
+								</div>
+								<div class="review-upload-preview-list" id="pReviewPhotoPreviewList"></div>
+							</div>
+
+							<div class="alert alert-info py-2 small mb-0 d-flex align-items-center gap-2">
+								<i class="fas fa-shield-halved text-primary fs-5"></i>
+								<div>Đánh giá sẽ được nhân viên TechNova kiểm tra và phê duyệt trước khi hiển thị công khai trên website.</div>
+							</div>
+						</form>
+					</div>
+					<div class="modal-footer bg-light">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+						<button type="button" class="btn btn-warning text-dark fw-bold px-4" id="btnSubmitProductReview">
+							<i class="fas fa-paper-plane me-1"></i>Gửi đánh giá
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<script th:src="@{/js/customer/product-review.js}"></script>
 	</main>
 
 </body>

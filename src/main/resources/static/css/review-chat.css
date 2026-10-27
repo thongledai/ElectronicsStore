@@ -1,0 +1,464 @@
+/* ==============================================================
+   REVIEW & CHAT STYLES (THEGIOIDIDONG STYLE)
+   ============================================================== */
+
+/* --- 1. Star Rating Display & Picker --- */
+.star-rating-stars {
+  color: #ffb800;
+  display: inline-flex;
+  gap: 2px;
+  align-items: center;
+}
+.star-rating-stars .star-empty {
+  color: #e2e8f0;
+}
+
+.star-picker {
+  display: inline-flex;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 2rem;
+  color: #cbd5e1;
+}
+.star-picker i {
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+.star-picker i:hover,
+.star-picker i.active {
+  color: #ffb800;
+  transform: scale(1.15);
+}
+
+.star-picker-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #ff9800;
+  min-height: 24px;
+}
+
+/* --- 2. TGDĐ Rating Summary Box --- */
+.tgdd-rating-box {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.tgdd-rating-score {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: #d97706;
+  line-height: 1;
+}
+
+.tgdd-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+  font-size: 0.85rem;
+}
+.tgdd-bar-label {
+  width: 48px;
+  text-align: right;
+  font-weight: 600;
+  color: #475569;
+}
+.tgdd-bar-bg {
+  flex: 1;
+  height: 10px;
+  background-color: #f1f5f9;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.tgdd-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #fbbf24, #f59e0b);
+  border-radius: 999px;
+  transition: width 0.6s ease;
+}
+.tgdd-bar-count {
+  width: 42px;
+  font-weight: 600;
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+/* --- 3. Filter Pills --- */
+.tgdd-filter-pill {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+  border-radius: 999px;
+  padding: 0.35rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.tgdd-filter-pill:hover {
+  border-color: #f59e0b;
+  color: #d97706;
+}
+.tgdd-filter-pill.active {
+  background-color: #fffbeb;
+  border-color: #f59e0b;
+  color: #b45309;
+  font-weight: 700;
+}
+
+/* --- 4. Review Cards --- */
+.tgdd-review-card {
+  border-bottom: 1px solid #f1f5f9;
+  padding: 1.25rem 0;
+}
+.tgdd-review-card:last-child {
+  border-bottom: none;
+}
+.tgdd-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1rem;
+  color: #ffffff;
+  background: #3b82f6;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.tgdd-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tgdd-badge-verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background-color: #ecfdf5;
+  color: #059669;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid #a7f3d0;
+}
+
+.tgdd-review-content {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #1e293b;
+  margin-top: 0.5rem;
+}
+
+.tgdd-review-images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 0.75rem;
+}
+.tgdd-review-img-thumb {
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.tgdd-review-img-thumb:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.tgdd-store-reply {
+  background-color: #f8fafc;
+  border-left: 3px solid #3b82f6;
+  border-radius: 0 8px 8px 0;
+  padding: 0.85rem 1rem;
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+}
+
+/* --- 5. Image Upload Preview in Modal --- */
+.review-upload-preview-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+.review-upload-preview-item {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid #e2e8f0;
+}
+.review-upload-preview-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.review-upload-preview-item .btn-remove-img {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: rgba(239, 68, 68, 0.9);
+  color: #ffffff;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* --- 6. Floating Live Chat Widget (Customer) --- */
+.chat-widget-bubble {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+  cursor: pointer;
+  z-index: 1050;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.chat-widget-bubble:hover {
+  transform: scale(1.08);
+  box-shadow: 0 8px 25px rgba(37, 99, 235, 0.55);
+}
+.chat-widget-bubble .badge-unread {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 6px;
+  border-radius: 999px;
+  border: 2px solid #ffffff;
+}
+
+.chat-widget-box {
+  position: fixed;
+  bottom: 92px;
+  right: 24px;
+  width: 380px;
+  max-width: calc(100vw - 32px);
+  height: 520px;
+  max-height: calc(100vh - 120px);
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.16);
+  border: 1px solid #e2e8f0;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 1050;
+  animation: chatSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.chat-widget-box.open {
+  display: flex;
+}
+
+@keyframes chatSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.chat-header {
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  color: #ffffff;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.chat-header .chat-status-dot {
+  width: 8px;
+  height: 8px;
+  background: #10b981;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.chat-body {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chat-msg {
+  max-width: 80%;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  word-break: break-word;
+}
+.chat-msg-sent {
+  align-self: flex-end;
+  background: #2563eb;
+  color: #ffffff;
+  border-bottom-right-radius: 2px;
+}
+.chat-msg-received {
+  align-self: flex-start;
+  background: #ffffff;
+  color: #1e293b;
+  border-bottom-left-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e2e8f0;
+}
+.chat-msg-system {
+  align-self: center;
+  background: #e2e8f0;
+  color: #475569;
+  font-size: 0.78rem;
+  padding: 4px 12px;
+  border-radius: 999px;
+  text-align: center;
+}
+.chat-msg-time {
+  font-size: 0.7rem;
+  opacity: 0.75;
+  margin-top: 4px;
+  text-align: right;
+}
+.chat-msg-img {
+  max-width: 100%;
+  max-height: 220px;
+  border-radius: 10px;
+  margin-top: 2px;
+  cursor: pointer;
+  display: block;
+}
+
+/* Tin nhắn chỉ chứa hình ảnh: bỏ viền/nền xanh thô, bo góc ảnh mềm mại chuẩn Messenger/Zalo */
+.chat-msg.chat-msg-image {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 2px !important;
+}
+.chat-msg.chat-msg-image .chat-msg-img {
+  max-width: 240px;
+  max-height: 240px;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.chat-msg.chat-msg-image .chat-msg-img:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+}
+.chat-msg.chat-msg-image .chat-msg-time {
+  font-size: 0.68rem;
+  color: #64748b;
+  margin-top: 4px;
+  text-align: right;
+  padding-right: 4px;
+}
+
+.chat-footer {
+  padding: 12px 14px;
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.chat-footer input {
+  flex: 1;
+  border: 1px solid #cbd5e1;
+  border-radius: 20px;
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  outline: none;
+}
+.chat-footer input:focus {
+  border-color: #2563eb;
+}
+
+/* --- Employee Review Minimalist Tabs --- */
+#reviewStatusTabs .nav-link {
+  color: #64748b;
+  background: transparent;
+  border-radius: 8px;
+  transition: all 0.15s ease-in-out;
+  border: 1px solid transparent;
+}
+#reviewStatusTabs .nav-link:hover {
+  color: #1e293b;
+  background-color: #f1f5f9;
+}
+#reviewStatusTabs .nav-link.active {
+  color: #0f172a;
+  background-color: #e2e8f0;
+  font-weight: 600;
+  box-shadow: none;
+}
+#reviewStatusTabs .nav-link.active #tabPendingBadge {
+  background-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+/* --- Employee Chat Send Button Precision Styling --- */
+#btnEmpSendMsg {
+  width: 40px !important;
+  height: 40px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  border-radius: 50% !important;
+  border: none !important;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+  box-shadow: 0 3px 8px rgba(37, 99, 235, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+#btnEmpSendMsg:hover {
+  transform: scale(1.06);
+  box-shadow: 0 5px 14px rgba(37, 99, 235, 0.45);
+}
+#btnEmpSendMsg:active {
+  transform: scale(0.95);
+}
+#btnEmpSendMsg i {
+  display: block;
+  font-size: 0.95rem;
+  margin-left: -2px; /* optical center adjustment for paper plane slant */
+  margin-top: 1px;
+}

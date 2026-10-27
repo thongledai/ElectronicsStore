@@ -1,5 +1,5 @@
 /**
- * orders.js - Xử lý hiển thị, lọc và hủy đơn hàng cho khách hàng
+ * orders.js - Xử lý hiển thị, lọc, hủy đơn hàng và đánh giá sản phẩm cho khách hàng
  */
 document.addEventListener('DOMContentLoaded', () => {
   let currentStatus = 'ALL';
@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentCancellingOrderId = null;
   let orderDetailModalInstance = null;
   let cancelOrderModalInstance = null;
+  let customerReviewModalInstance = null;
 
   // DOM Elements
   const tabsContainer = document.getElementById('orderStatusTabs');
@@ -24,6 +25,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const cancelOrderModalEl = document.getElementById('cancelOrderModal');
   if (cancelOrderModalEl && window.bootstrap) {
     cancelOrderModalInstance = new bootstrap.Modal(cancelOrderModalEl);
+  }
+  const customerReviewModalEl = document.getElementById('customerReviewModal');
+  if (customerReviewModalEl && window.bootstrap) {
+    customerReviewModalInstance = new bootstrap.Modal(customerReviewModalEl);
   }
 
   const cancelReasonSelect = document.getElementById('cancelReasonSelect');
@@ -238,6 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
     `).join('');
 
     const isCancelable = order.canCancel === true || order.status === 'NOT_PROCESSED';
+    const isDelivered = (order.status || '').toUpperCase() === 'DELIVERED';
 
     return `
       <div class="card border-0 shadow-sm rounded-3 overflow-hidden order-card" data-order-id="${order.id}">
@@ -283,7 +289,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span class="small text-muted d-block">Tổng thanh toán:</span>
                 <span class="fw-bold text-danger fs-5">${formatMoney(order.total)}</span>
               </div>
-              
+
+              <!-- Nút Đánh giá (chỉ hiện khi đơn đã hoàn thành DELIVERED) -->
+              ${isDelivered ? `
+                <button type="button" class="btn btn-sm btn-warning text-dark fw-bold js-review-order-btn" data-order-id="${order.id}">
+                  <i class="fas fa-star me-1"></i>Đánh giá
+                </button>
+              ` : ''}
+
               <button type="button" class="btn btn-sm btn-outline-secondary js-view-detail-btn" data-order-id="${order.id}">
                 <i class="fas fa-eye me-1"></i>Chi tiết
               </button>
@@ -322,6 +335,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const orderId = e.currentTarget.getAttribute('data-order-id');
         const orderCode = e.currentTarget.getAttribute('data-order-code');
         openCancelModal(orderId, orderCode);
+      });
+    });
+
+    // Nút đánh giá sản phẩm
+    document.querySelectorAll('.js-review-order-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const orderId = e.currentTarget.getAttribute('data-order-id');
+        openReviewModal(orderId);
       });
     });
   }
@@ -501,7 +522,273 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 6. Xử lý click chuyển Tabs trạng thái
+  // ==============================================================
+  // 6. Xử lý Đánh giá sản phẩm (Thegioididong style)
+  // ==============================================================
+  const starPicker = document.getElementById('reviewStarPicker');
+  const starLabel = document.getElementById('reviewStarLabel');
+  const contentInput = document.getElementById('reviewContentInput');
+  const charCountEl = document.getElementById('reviewCharCount');
+  const photoInput = document.getElementById('reviewPhotoInput');
+  const btnSelectPhotos = document.getElementById('btnSelectReviewPhotos');
+  const previewList = document.getElementById('reviewPhotoPreviewList');
+  const btnSubmitReview = document.getElementById('btnSubmitCustomerReview');
+
+  const starDescriptions = {
+    1: 'Rất tệ',
+    2: 'Tệ',
+    3: 'Bình thường',
+    4: 'Hài lòng',
+    5: 'Tuyệt vời'
+  };
+
+  let currentSelectedStars = 5;
+  let uploadedImageUrls = [];
+
+  // Tương tác chọn sao
+  if (starPicker) {
+    const starIcons = starPicker.querySelectorAll('i');
+    starIcons.forEach(icon => {
+      icon.addEventListener('mouseenter', () => {
+        const star = parseInt(icon.getAttribute('data-star'));
+        updateStarDisplay(star);
+      });
+      icon.addEventListener('mouseleave', () => {
+        updateStarDisplay(currentSelectedStars);
+      });
+      icon.addEventListener('click', () => {
+        currentSelectedStars = parseInt(icon.getAttribute('data-star'));
+        document.getElementById('reviewStars').value = currentSelectedStars;
+        updateStarDisplay(currentSelectedStars);
+      });
+    });
+  }
+
+  function updateStarDisplay(starValue) {
+    if (!starPicker) return;
+    const starIcons = starPicker.querySelectorAll('i');
+    starIcons.forEach(icon => {
+      const s = parseInt(icon.getAttribute('data-star'));
+      if (s <= starValue) {
+        icon.classList.add('active');
+        icon.classList.replace('far', 'fas');
+      } else {
+        icon.classList.remove('active');
+        icon.classList.replace('fas', 'far');
+      }
+    });
+    if (starLabel) {
+      starLabel.textContent = starDescriptions[starValue] || '';
+    }
+  }
+
+  if (contentInput && charCountEl) {
+    contentInput.addEventListener('input', () => {
+      charCountEl.textContent = `${contentInput.value.length}/1000`;
+    });
+  }
+
+  // Tải ảnh thực tế
+  if (btnSelectPhotos && photoInput) {
+    btnSelectPhotos.addEventListener('click', () => photoInput.click());
+    photoInput.addEventListener('change', async () => {
+      const files = Array.from(photoInput.files || []);
+      if (!files.length) return;
+
+      if (uploadedImageUrls.length + files.length > 5) {
+        alert('Tối đa chỉ được tải lên 5 ảnh.');
+        return;
+      }
+
+      for (const file of files) {
+        if (!file.type.startsWith('image/')) continue;
+        if (file.size > 5 * 1024 * 1024) {
+          alert('Kích thước ảnh không được vượt quá 5MB.');
+          continue;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+        try {
+          btnSelectPhotos.disabled = true;
+          btnSelectPhotos.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Đang tải ảnh...';
+
+          const res = await fetch('/api/customer/reviews/upload-image', {
+            method: 'POST',
+            body: formData
+          });
+          const resData = await res.json();
+          if (resData.success && resData.data) {
+            uploadedImageUrls.push(resData.data);
+            renderUploadedPhotos();
+          } else {
+            alert(resData.message || 'Lỗi khi tải ảnh');
+          }
+        } catch (err) {
+          console.error('Upload review image error:', err);
+          alert('Lỗi kết nối khi tải ảnh.');
+        } finally {
+          btnSelectPhotos.disabled = false;
+          btnSelectPhotos.innerHTML = '<i class="fas fa-camera me-1"></i>Thêm ảnh chụp';
+        }
+      }
+      photoInput.value = '';
+    });
+  }
+
+  function renderUploadedPhotos() {
+    if (!previewList) return;
+    previewList.innerHTML = uploadedImageUrls.map((url, idx) => `
+      <div class="review-upload-preview-item">
+        <img src="${escapeHtml(url)}" alt="Review image">
+        <button type="button" class="btn-remove-img" data-idx="${idx}" title="Xóa ảnh">&times;</button>
+      </div>
+    `).join('');
+
+    previewList.querySelectorAll('.btn-remove-img').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const idx = parseInt(e.currentTarget.getAttribute('data-idx'));
+        uploadedImageUrls.splice(idx, 1);
+        renderUploadedPhotos();
+      });
+    });
+  }
+
+  function openReviewModal(orderId) {
+    const order = allOrders.find(o => String(o.id) === String(orderId));
+    if (!order) return;
+
+    const items = order.items || [];
+    if (!items.length) {
+      alert('Đơn hàng không có sản phẩm.');
+      return;
+    }
+
+    document.getElementById('reviewOrderId').value = order.id;
+    uploadedImageUrls = [];
+    renderUploadedPhotos();
+    if (contentInput) {
+      contentInput.value = '';
+      if (charCountEl) charCountEl.textContent = '0/1000';
+    }
+    currentSelectedStars = 5;
+    updateStarDisplay(5);
+
+    const selectContainer = document.getElementById('reviewProductSelectContainer');
+    const productListEl = document.getElementById('reviewProductList');
+
+    if (items.length > 1) {
+      selectContainer.style.display = 'block';
+      productListEl.innerHTML = items.map(item => `
+        <div class="p-2 border rounded d-flex align-items-center justify-content-between js-select-review-item"
+             data-product-id="${item.productId}"
+             data-name="${escapeHtml(item.productName)}"
+             data-variant="${escapeHtml(item.variantDescription || '')}"
+             data-img="${escapeHtml(item.imageUrl || '/images/placeholder.webp')}"
+             style="cursor: pointer; transition: background 0.2s ease;">
+          <div class="d-flex align-items-center gap-2">
+            <img src="${escapeHtml(item.imageUrl || '/images/placeholder.webp')}" style="width: 44px; height: 44px;" class="rounded border object-fit-cover">
+            <div>
+              <div class="fw-semibold small">${escapeHtml(item.productName)}</div>
+              <div class="text-muted small">${escapeHtml(item.variantDescription || '')}</div>
+            </div>
+          </div>
+          <button type="button" class="btn btn-sm btn-outline-primary">Chọn</button>
+        </div>
+      `).join('');
+
+      productListEl.querySelectorAll('.js-select-review-item').forEach(el => {
+        el.addEventListener('click', () => {
+          productListEl.querySelectorAll('.js-select-review-item').forEach(i => i.classList.remove('bg-primary-subtle', 'border-primary'));
+          el.classList.add('bg-primary-subtle', 'border-primary');
+          const pId = el.getAttribute('data-product-id');
+          const name = el.getAttribute('data-name');
+          const variant = el.getAttribute('data-variant');
+          const img = el.getAttribute('data-img');
+          selectProductForReview(pId, name, variant, img);
+        });
+      });
+
+      // Mặc định chọn món đầu tiên
+      const firstItem = productListEl.querySelector('.js-select-review-item');
+      if (firstItem) firstItem.classList.add('bg-primary-subtle', 'border-primary');
+      selectProductForReview(items[0].productId, items[0].productName, items[0].variantDescription, items[0].imageUrl);
+    } else {
+      selectContainer.style.display = 'none';
+      selectProductForReview(items[0].productId, items[0].productName, items[0].variantDescription, items[0].imageUrl);
+    }
+
+    if (customerReviewModalInstance) customerReviewModalInstance.show();
+  }
+
+  function selectProductForReview(productId, name, variant, imageUrl) {
+    document.getElementById('reviewProductId').value = productId;
+    document.getElementById('reviewProductName').textContent = name;
+    document.getElementById('reviewProductVariant').textContent = variant || '';
+    const imgEl = document.getElementById('reviewProductImage');
+    if (imgEl) imgEl.src = imageUrl || '/images/placeholder.webp';
+  }
+
+  if (btnSubmitReview) {
+    btnSubmitReview.addEventListener('click', async () => {
+      const productId = document.getElementById('reviewProductId').value;
+      const orderId = document.getElementById('reviewOrderId').value;
+      const stars = parseInt(document.getElementById('reviewStars').value || '5');
+      const content = contentInput ? contentInput.value.trim() : '';
+
+      if (!productId || !orderId) {
+        alert('Vui lòng chọn sản phẩm cần đánh giá.');
+        return;
+      }
+      if (!content || content.length < 10) {
+        alert('Vui lòng nhập nội dung đánh giá ít nhất 10 ký tự.');
+        if (contentInput) contentInput.focus();
+        return;
+      }
+
+      btnSubmitReview.disabled = true;
+      btnSubmitReview.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Đang gửi...';
+
+      try {
+        const payload = {
+          productId: productId,
+          orderId: orderId,
+          stars: stars,
+          content: content,
+          imageUrls: uploadedImageUrls
+        };
+
+        const res = await fetch('/api/customer/reviews', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const resData = await res.json();
+        if (res.ok && resData.success !== false) {
+          if (customerReviewModalInstance) customerReviewModalInstance.hide();
+          if (typeof showToast === 'function') {
+            showToast('Đã gửi đánh giá', 'Đánh giá của bạn đã được gửi và đang chờ nhân viên kiểm duyệt!', 'success');
+          } else {
+            alert('Đánh giá của bạn đã được gửi thành công và đang chờ nhân viên kiểm duyệt!');
+          }
+        } else {
+          alert(resData.message || 'Không thể gửi đánh giá.');
+        }
+      } catch (err) {
+        console.error('Submit review error:', err);
+        alert('Lỗi kết nối khi gửi đánh giá.');
+      } finally {
+        btnSubmitReview.disabled = false;
+        btnSubmitReview.innerHTML = '<i class="fas fa-paper-plane me-1"></i>Gửi đánh giá';
+      }
+    });
+  }
+
+  // 7. Xử lý click chuyển Tabs trạng thái
   if (tabsContainer) {
     tabsContainer.querySelectorAll('button[data-status]').forEach(tabBtn => {
       tabBtn.addEventListener('click', (e) => {

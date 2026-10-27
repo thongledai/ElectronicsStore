@@ -244,6 +244,90 @@
     </div>
   </div>
 
+  <!-- MODAL ĐÁNH GIÁ SẢN PHẨM (THEGIOIDIDONG STYLE) -->
+  <div class="modal fade" id="customerReviewModal" tabindex="-1" aria-labelledby="customerReviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-light border-bottom">
+          <h5 class="modal-title fw-bold" id="customerReviewModalLabel">
+            <i class="fas fa-star text-warning me-2"></i>Đánh giá sản phẩm đã mua
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <!-- Chọn sản phẩm để đánh giá nếu đơn hàng có nhiều món -->
+          <div class="mb-3" id="reviewProductSelectContainer" style="display: none;">
+            <label class="form-label fw-semibold">Chọn sản phẩm cần đánh giá:</label>
+            <div id="reviewProductList" class="d-flex flex-column gap-2 mb-3"></div>
+          </div>
+
+          <!-- Thông tin sản phẩm được chọn -->
+          <div class="d-flex align-items-center gap-3 p-3 bg-light rounded border mb-4" id="reviewSelectedProductCard">
+            <img id="reviewProductImage" src="/images/placeholder.webp" alt="" class="rounded border object-fit-cover" style="width: 60px; height: 60px;" onerror="this.src='/images/placeholder.webp'">
+            <div>
+              <h6 class="mb-1 fw-bold text-dark" id="reviewProductName">Tên sản phẩm</h6>
+              <div class="text-muted small" id="reviewProductVariant">Phiên bản</div>
+            </div>
+          </div>
+
+          <form id="customerReviewForm">
+            <input type="hidden" id="reviewProductId">
+            <input type="hidden" id="reviewOrderId">
+            <input type="hidden" id="reviewStars" value="5">
+
+            <!-- Star rating picker -->
+            <div class="text-center py-2 mb-3">
+              <div class="text-muted small mb-1">Bạn cảm thấy sản phẩm như thế nào?</div>
+              <div class="star-picker mb-1" id="reviewStarPicker">
+                <i class="fas fa-star active" data-star="1"></i>
+                <i class="fas fa-star active" data-star="2"></i>
+                <i class="fas fa-star active" data-star="3"></i>
+                <i class="fas fa-star active" data-star="4"></i>
+                <i class="fas fa-star active" data-star="5"></i>
+              </div>
+              <div class="star-picker-label text-warning" id="reviewStarLabel">Tuyệt vời</div>
+            </div>
+
+            <!-- Review content textarea -->
+            <div class="mb-3">
+              <label for="reviewContentInput" class="form-label fw-semibold">Chia sẻ trải nghiệm của bạn (tối thiểu 10 ký tự):</label>
+              <textarea class="form-control" id="reviewContentInput" rows="4" maxlength="1000"
+                        placeholder="Hãy chia sẻ về độ bền, kiểu dáng, tính năng hoặc điều bạn ưng ý nhất về sản phẩm..."></textarea>
+              <div class="d-flex justify-content-between text-muted small mt-1">
+                <span>Đánh giá thực tế giúp khách hàng khác chọn mua dễ hơn.</span>
+                <span id="reviewCharCount">0/1000</span>
+              </div>
+            </div>
+
+            <!-- Upload photos -->
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Gửi hình ảnh thực tế (tối đa 5 ảnh):</label>
+              <div class="d-flex align-items-center gap-2">
+                <input type="file" id="reviewPhotoInput" accept="image/*" class="d-none" multiple>
+                <button type="button" class="btn btn-outline-primary btn-sm rounded-pill" id="btnSelectReviewPhotos">
+                  <i class="fas fa-camera me-1"></i>Thêm ảnh chụp
+                </button>
+                <span class="text-muted small" id="reviewPhotoHelp">Chụp ảnh mở hộp hoặc sản phẩm khi sử dụng</span>
+              </div>
+              <div class="review-upload-preview-list" id="reviewPhotoPreviewList"></div>
+            </div>
+
+            <div class="alert alert-info py-2 small mb-0 d-flex align-items-center gap-2">
+              <i class="fas fa-shield-halved text-primary fs-5"></i>
+              <div>Đánh giá sẽ được gửi về nhân viên TechNova kiểm tra và phê duyệt trước khi hiển thị công khai trên website.</div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+          <button type="button" class="btn btn-warning text-dark fw-bold px-4" id="btnSubmitCustomerReview">
+            <i class="fas fa-paper-plane me-1"></i>Gửi đánh giá
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 </body>
