@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,8 +21,8 @@ public class UserResponseDTO {
     private Boolean isEmailActive;
     private Boolean hasPassword;
     private Integer point;
-    private java.math.BigDecimal eWallet;
-    private String addresses;
+    @JsonProperty("eWallet")
+    private java.math.BigDecimal eWallet;    private String addresses;
     private java.time.LocalDateTime createdAt;
 }
 
