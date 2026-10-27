@@ -1,6 +1,7 @@
 package com.example.store.dto.user;
 
 import java.util.UUID;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,9 +22,10 @@ public class UserResponseDTO {
     private Boolean isEmailActive;
     private Boolean hasPassword;
     private Integer point;
+
+    @JsonProperty("eWallet")
     private java.math.BigDecimal eWallet;
+
     private String addresses;
     private java.time.LocalDateTime createdAt;
 }
-
-
