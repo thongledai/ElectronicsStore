@@ -46,18 +46,11 @@
           <hr class="my-3 opacity-10">
 
           <!-- Thống kê tài khoản -->
-          <div class="row g-2 text-center">
-            <div class="col-6" id="summaryPointCard">
-              <div class="p-2 rounded-3 bg-light">
-                <span class="text-muted small d-block">Điểm tích lũy</span>
-                <span class="fw-bold fs-5 text-primary" id="summaryPoint">0</span>
-              </div>
-            </div>
-            <div class="col-6" id="summaryEWalletCard" hidden>
-              <div class="p-2 rounded-3 bg-light">
-                <span class="text-muted small d-block">Số dư ví</span>
-                <span class="fw-bold fs-5 text-success d-block" id="summaryEWallet">0 ₫</span>
-                <a class="small text-decoration-none" th:href="@{/customer/wallet}">Mở ví điện tử</a>
+          <div class="row g-2" id="summaryStats" hidden>
+            <div class="col-12" id="summaryEWalletCard">
+              <div class="p-3 rounded-3 bg-light">
+                <span class="fw-semibold">Số dư ví:</span>
+                <span class="fw-bold fs-5 text-success ms-1" id="summaryEWallet">0 ₫</span>
               </div>
             </div>
           </div>
