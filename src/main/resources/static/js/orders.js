@@ -242,7 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     `).join('');
 
-    const isCancelable = order.canCancel === true || order.status === 'NOT_PROCESSED';
+    const isCancelable = order.canCancel === true;
     const isDelivered = (order.status || '').toUpperCase() === 'DELIVERED';
 
     return `
@@ -301,6 +301,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 <i class="fas fa-eye me-1"></i>Chi tiết
               </button>
 
+              ${(order.paymentStatus === 'UNPAID' && order.status === 'NOT_PROCESSED') ? `
+                <button type="button" class="btn btn-sm btn-primary js-pay-qr-btn" data-order-id="${order.id}">
+                  <i class="fas fa-qrcode me-1"></i>Thanh toán QR
+                </button>
+              ` : ''}
+
               ${isCancelable ? `
                 <button type="button" class="btn btn-sm btn-outline-danger js-cancel-order-btn" 
                         data-order-id="${order.id}" 
@@ -326,6 +332,14 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.addEventListener('click', (e) => {
         const orderId = e.currentTarget.getAttribute('data-order-id');
         openOrderDetail(orderId);
+      });
+    });
+
+    // Nút thanh toán QR (đơn chuyển khoản chưa thanh toán): mở lại mã QR do backend cấp
+    document.querySelectorAll('.js-pay-qr-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const orderId = e.currentTarget.getAttribute('data-order-id');
+        if (window.PaymentQr) window.PaymentQr.open(orderId, { onClose: () => window.location.reload() });
       });
     });
 
@@ -390,9 +404,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Payment info
     document.getElementById('modalPaymentMethod').textContent = order.paymentMethod || 'COD';
+    const isBankQr = order.paymentMethod === 'BANK_QR';
     document.getElementById('modalPaymentStatus').innerHTML = order.isPaid
       ? '<span class="text-success"><i class="fas fa-check me-1"></i>Đã thanh toán</span>'
-      : '<span class="text-warning-emphasis"><i class="fas fa-clock me-1"></i>Thanh toán khi nhận hàng (COD)</span>';
+      : (isBankQr
+          ? (order.paymentStatus === 'NEEDS_RECONCILIATION'
+              ? '<span class="text-danger"><i class="fas fa-triangle-exclamation me-1"></i>Đang đối soát thanh toán</span>'
+              : '<span class="text-warning-emphasis"><i class="fas fa-clock me-1"></i>Chờ chuyển khoản</span>')
+          : '<span class="text-warning-emphasis"><i class="fas fa-clock me-1"></i>Thanh toán khi nhận hàng (COD)</span>');
 
     // Items list
     const itemsContainer = document.getElementById('modalOrderItemsList');
@@ -426,7 +445,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Cancel button in modal
     const modalCancelBtn = document.getElementById('modalCancelBtn');
-    if (order.canCancel === true || order.status === 'NOT_PROCESSED') {
+    if (order.canCancel === true) {
       modalCancelBtn.style.display = 'inline-block';
       modalCancelBtn.onclick = () => {
         if (orderDetailModalInstance) orderDetailModalInstance.hide();

@@ -18,6 +18,9 @@ import com.example.store.entity.Order;
 import com.example.store.entity.OrderItem;
 import com.example.store.entity.OrderStatus;
 import com.example.store.entity.ProductVariant;
+import com.example.store.enums.DeliveryMessage;
+import com.example.store.enums.PaymentStatus;
+import com.example.store.exception.BusinessException;
 import com.example.store.exception.ResourceNotFoundException;
 import com.example.store.repository.OrderRepository;
 import com.example.store.repository.OrderStatusRepository;
@@ -121,9 +124,18 @@ public class ManagerOrderServiceImpl implements IManagerOrderService {
         OrderStatus targetStatus = orderStatusRepository.findByNameIgnoreCase(newStatusName)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy trạng thái đơn hàng: " + dto.getNewStatus()));
 
+        // Đơn VietQR chưa được xác minh đã nhận tiền thì không được đẩy sang các bước xử lý/giao hàng
+        if (order.awaitingPayment() && java.util.Set.of("CONFIRMED", "SHIPPING", "DELIVERED").contains(newStatusName)) {
+            throw new BusinessException(DeliveryMessage.ORDER_PAYMENT_NOT_CONFIRMED.getMessage());
+        }
+
         // Nghiệp vụ hoàn trả tồn kho nếu hủy đơn
         if ("CANCELLED".equals(newStatusName) && !"CANCELLED".equals(oldStatusName)) {
             restoreStockForOrder(order);
+            // Hủy đơn VietQR chưa thanh toán: đóng luôn trạng thái thanh toán (đơn PAID giữ nguyên để hoàn tiền thủ công)
+            if (order.usesBankTransfer() && order.getPaymentStatus() == PaymentStatus.UNPAID) {
+                order.setPaymentStatus(PaymentStatus.CANCELLED);
+            }
         }
 
         order.setStatus(targetStatus);

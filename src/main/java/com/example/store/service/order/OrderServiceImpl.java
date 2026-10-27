@@ -10,7 +10,10 @@ import com.example.store.exception.AppException;
 import com.example.store.mapper.CartItemMapper;
 import com.example.store.mapper.OrderMapper;
 import com.example.store.repository.*;
+import com.example.store.enums.PaymentStatus;
 import com.example.store.service.cart.ICartService;
+import com.example.store.service.payment.IVietQrPaymentService;
+import com.example.store.service.wallet.IWalletService;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -43,6 +46,8 @@ public class OrderServiceImpl implements IOrderService {
     private final CartItemRepository cartItemRepository;
     private final OrderMapper orderMapper;
     private final IShipmentService shipmentService;
+    private final IVietQrPaymentService vietQrPaymentService;
+    private final IWalletService walletService;
 
     @Override
     @Transactional(readOnly = true)
@@ -67,12 +72,14 @@ public class OrderServiceImpl implements IOrderService {
 
         String fullAddress = String.join(", ", req.detailAddress(), req.wardName(), req.provinceName());
 
+        PaymentMethod payment = paymentMethodRepository.findById(req.paymentMethodId())
+                .orElseThrow(() -> new AppException(OrderErrorCode.PAYMENT_METHOD_NOT_SUPPORTED));
         return new OrderPreviewDTO(
                 null, null, null,
                 req.toName(), req.phone(), fullAddress,
                 null,                                   // items: trang không dùng
                 price.subtotal(), price.shippingFee(), price.discount(), price.total(),
-                "COD", false, req.note(),
+                payment.getName(), false, req.note(),
                 ghn.getExpectedDeliveryTime());
     }
 
@@ -132,6 +139,15 @@ public class OrderServiceImpl implements IOrderService {
                 .expectedDeliveryDate(expectedDiliveryDate)
                 .build();
 
+        // Đơn chuyển khoản VietQR: sinh mã tham chiếu, trạng thái UNPAID và hạn thanh toán (kho được giữ đến hạn này)
+        if (order.usesBankTransfer()) {
+            vietQrPaymentService.initPayment(order);
+        } else if (order.usesEWallet()) {
+            order.setPaymentStatus(PaymentStatus.PAID);
+            order.setIsPaidBefore(true);
+            order.setPaidAt(LocalDateTime.now());
+        }
+
         for (CartItem ci : items) {
             ProductVariant v = variants.get(ci.getVariant().getId());
             order.addItem(OrderItem.builder()
@@ -150,6 +166,12 @@ public class OrderServiceImpl implements IOrderService {
 
         // 8. Lưu (cascade lưu luôn OrderItem)
         orderRepository.save(order);
+
+        // Trừ ví và ghi lịch sử trong cùng transaction với việc tạo Order.
+        // Nếu số dư không đủ, exception sẽ rollback cả Order, tồn kho và giỏ hàng.
+        if (order.usesEWallet()) {
+            walletService.debitForOrder(userId, order);
+        }
 
         // 9. Xóa các dòng đã mua khỏi giỏ
         cartItemRepository.deleteAll(items);
@@ -191,12 +213,31 @@ public class OrderServiceImpl implements IOrderService {
     @Override
     @Transactional
     public void cancelCustomerOrder(UUID userId, UUID orderId, CancelOrderRequest req) {
-        Order order = orderRepository.findDetailedByIdAndUserId(orderId, userId)
+        // Khóa dòng đơn để không chạy đua với webhook thanh toán đến cùng lúc
+        Order order = orderRepository.findByIdForUpdate(orderId)
+                .filter(o -> o.getUser() != null && userId.equals(o.getUser().getId()))
                 .orElseThrow(() -> new AppException(OrderErrorCode.ORDER_NOT_FOUND));
 
         String currentStatus = order.getStatus() != null ? order.getStatus().getName() : "";
         if (!"NOT_PROCESSED".equalsIgnoreCase(currentStatus)) {
             throw new AppException(OrderErrorCode.ORDER_CANNOT_BE_CANCELLED);
+        }
+
+        if (Boolean.TRUE.equals(order.getIsPaidBefore())) {
+            throw new AppException(OrderErrorCode.PAID_ORDER_CANNOT_BE_CANCELLED);
+        }
+
+        if (order.usesBankTransfer()) {
+            PaymentStatus ps = order.getPaymentStatus();
+            if (ps == PaymentStatus.PAID) {
+                throw new AppException(OrderErrorCode.PAID_ORDER_CANNOT_BE_CANCELLED);
+            }
+            if (ps == PaymentStatus.NEEDS_RECONCILIATION) {
+                throw new AppException(OrderErrorCode.PAYMENT_UNDER_RECONCILIATION);
+            }
+            if (ps == PaymentStatus.UNPAID) {
+                order.setPaymentStatus(PaymentStatus.CANCELLED);
+            }
         }
 
         OrderStatus cancelled = orderStatusRepository.findByNameIgnoreCase("CANCELLED")

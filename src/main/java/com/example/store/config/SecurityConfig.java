@@ -52,6 +52,9 @@ public class SecurityConfig {
                     "/auth/google", "/auth/google/**", "/auth/refresh-token", "/auth/logout"
                 ).permitAll()
 
+                // Webhook thanh toán: không dùng session/JWT, controller tự xác thực bằng API key
+                .requestMatchers("/api/webhooks/**").permitAll()
+
                 // Reset & Set Password & Status APIs (must be authenticated)
                 .requestMatchers("/auth/reset-password", "/auth/set-password", "/auth/has-password").authenticated()
 
@@ -59,7 +62,11 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/cart/**", "/api/cart/**", "/checkout/**", "/preview-order/**",
                     "/orders", "/orders/**", "/customer/orders", "/customer/orders/**",
-                    "/api/customer/reviews/**", "/api/customer/chat/**"
+
+                    "/api/customer/reviews/**", "/api/customer/chat/**",
+
+                    "/customer/checkout", "/customer/wallet", "/api/wallet", "/api/wallet/**"
+
                 ).hasAnyAuthority("CUSTOMER", "ROLE_CUSTOMER")
 
                 // Role-based reset password pages

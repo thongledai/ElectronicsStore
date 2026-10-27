@@ -24,6 +24,7 @@ import com.example.store.entity.Order;
 import com.example.store.entity.OrderStatus;
 import com.example.store.enums.OrderStatusName;
 import com.example.store.enums.DeliveryMessage;
+import com.example.store.enums.PaymentStatus;
 import com.example.store.exception.BusinessException;
 import com.example.store.exception.ResourceNotFoundException;
 import com.example.store.mapper.GhnOrderMapper;
@@ -33,6 +34,7 @@ import com.example.store.repository.GhnWebhookEventRepository;
 import com.example.store.service.delivery.GhnApiClient;
 import com.example.store.service.delivery.IGhnAddressService;
 import com.example.store.service.delivery.IGhnDeliveryService;
+import com.example.store.service.wallet.IWalletService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -46,6 +48,7 @@ public class GhnDeliveryServiceImpl implements IGhnDeliveryService {
     private final GhnOrderMapper ghnOrderMapper;
     private final GhnApiClient apiClient;
     private final IGhnAddressService addressService;
+    private final IWalletService walletService;
 
     @Override
     @Transactional
@@ -58,6 +61,8 @@ public class GhnDeliveryServiceImpl implements IGhnDeliveryService {
 
         if (currentStatus(order) != OrderStatusName.NOT_PROCESSED)
             throw new BusinessException(DeliveryMessage.ORDER_CONFIRM_STATUS_INVALID.getMessage());
+
+        ensurePaymentVerified(order);
 
         order.setStatus(resolveStatus(OrderStatusName.CONFIRMED));
         orderRepository.save(order);
@@ -73,6 +78,7 @@ public class GhnDeliveryServiceImpl implements IGhnDeliveryService {
             return response(order, true);
 
         ensureConfirmed(order);
+        ensurePaymentVerified(order);
         GhnCreateOrderRequest request = ghnOrderMapper.toCreateOrderRequest(order);
 
         // Áp dụng thông số kiện hàng từ form người dùng nếu có
@@ -125,6 +131,22 @@ public class GhnDeliveryServiceImpl implements IGhnDeliveryService {
         return java.util.stream.Stream.of(detail, ward, province)
                 .filter(StringUtils::hasText)
                 .collect(java.util.stream.Collectors.joining(", "));
+    }
+
+    /** Chỉ cho xác nhận/tạo vận đơn sau khi backend đã xác thực nguồn thanh toán. */
+    private void ensurePaymentVerified(Order order) {
+        if (order.usesBankTransfer()
+                && (order.getPaymentStatus() != PaymentStatus.PAID
+                        || !Boolean.TRUE.equals(order.getIsPaidBefore()))) {
+            throw new BusinessException(DeliveryMessage.ORDER_PAYMENT_NOT_CONFIRMED.getMessage());
+        }
+
+        if (order.usesEWallet()
+                && (order.getPaymentStatus() != PaymentStatus.PAID
+                        || !Boolean.TRUE.equals(order.getIsPaidBefore())
+                        || !walletService.hasOrderPaymentDebit(order.getId(), order.getTotal()))) {
+            throw new BusinessException(DeliveryMessage.ORDER_WALLET_PAYMENT_NOT_CONFIRMED.getMessage());
+        }
     }
 
     private void ensureConfirmed(Order order) {
