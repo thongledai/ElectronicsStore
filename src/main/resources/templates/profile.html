@@ -45,39 +45,6 @@
 
           <hr class="my-3 opacity-10">
 
-          <!-- Thống kê tài khoản -->
-          <div class="row g-2" id="summaryStats" hidden>
-            <div class="col-12" id="summaryEWalletCard">
-              <div class="p-3 rounded-3 bg-light">
-                <span class="fw-semibold">Số dư ví:</span>
-                <span class="fw-bold fs-5 text-success ms-1" id="summaryEWallet">0 ₫</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Liên kết nhanh -->
-          <div class="list-group list-group-flush text-start mt-4 pt-2 border-top">
-            <!-- Dành cho role Quản trị quay lại Dashboard -->
-            <a th:href="@{/manager/index}" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between px-2 py-3 border-0 rounded-3 mb-1 js-mgmt-link" style="display: none;">
-              <span class="text-primary fw-semibold"><i class="fas fa-gauge-high me-2"></i>Bảng điều khiển quản lý</span>
-              <i class="fas fa-chevron-right fa-xs text-muted"></i>
-            </a>
-            <a th:href="@{/customer/reset-password}" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between px-2 py-3 border-0 rounded-3 mb-1">
-              <span><i class="fas fa-key me-2 text-warning"></i>Đổi mật khẩu</span>
-              <i class="fas fa-chevron-right fa-xs text-muted"></i>
-            </a>
-            <a th:href="@{/customer/cart}" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between px-2 py-3 border-0 rounded-3 mb-1">
-              <span><i class="fas fa-shopping-cart me-2 text-primary"></i>Giỏ hàng của tôi</span>
-              <i class="fas fa-chevron-right fa-xs text-muted"></i>
-            </a>
-            <a th:href="@{/customer/wishlist}" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between px-2 py-3 border-0 rounded-3">
-              <span><i class="far fa-heart me-2 text-danger"></i>Danh sách yêu thích</span>
-              <i class="fas fa-chevron-right fa-xs text-muted"></i>
-            </a>
-          </div>
-        </div>
-      </div>
-
       <!-- Cột phải: Form cập nhật thông tin -->
       <div class="col-lg-8">
         <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-surface">
