@@ -76,18 +76,19 @@ class WalletServiceImplTest {
     }
 
     @Test
-    void mismatchedTopUpAmountIsNotCredited() {
+    void topUpCreditsReceivedAmountEvenWhenItDiffersFromFormerRequestedAmount() {
         User user = customerWithBalance("0.00");
         UUID topUpId = UUID.randomUUID();
         WalletTopUpRequest request = pendingTopUp(topUpId, user, "20000.00");
         when(topUpRepository.findByIdForUpdate(topUpId)).thenReturn(Optional.of(request));
 
-        assertEquals(IWalletService.TopUpTransferResult.AMOUNT_MISMATCH,
+        when(userRepository.findByIdForUpdate(user.getId())).thenReturn(Optional.of(user));
+
+        assertEquals(IWalletService.TopUpTransferResult.PAID,
                 walletService.processSepayTopUp(topUpId, transfer(77003L, "15000")));
-        assertEquals(WalletTopUpRequest.Status.AMOUNT_MISMATCH, request.getStatus());
-        assertEquals(0, BigDecimal.ZERO.compareTo(user.getEWallet()));
-        verify(transactionRepository, never()).save(any(Transaction.class));
-        verify(userRepository, never()).findByIdForUpdate(user.getId());
+        assertEquals(WalletTopUpRequest.Status.PAID, request.getStatus());
+        assertEquals(0, new BigDecimal("15000.00").compareTo(user.getEWallet()));
+        verify(transactionRepository).save(any(Transaction.class));
     }
 
     @Test

@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.store.config.PaymentProperties;
 import com.example.store.dto.payment.SepayWebhookPayload;
 import com.example.store.dto.wallet.WalletSummaryDTO;
-import com.example.store.dto.wallet.WalletTopUpCreateRequest;
 import com.example.store.dto.wallet.WalletTopUpDTO;
 import com.example.store.dto.wallet.WalletTransactionDTO;
 import com.example.store.entity.Order;
@@ -67,20 +66,13 @@ public class WalletServiceImpl implements IWalletService {
 
     @Override
     @Transactional
-    public WalletTopUpDTO createTopUp(UUID userId, WalletTopUpCreateRequest request) {
+    public WalletTopUpDTO createTopUp(UUID userId) {
         User user = userRepository.findByIdForUpdate(userId)
                 .orElseThrow(() -> new BusinessException("Không tìm thấy tài khoản ví"));
         assertCustomer(user);
-        BigDecimal amount = request.amount();
-        if (amount == null || amount.signum() <= 0 || amount.stripTrailingZeros().scale() > 0
-                || amount.precision() > 18 || amount.compareTo(new BigDecimal("9999999999999999")) > 0) {
-            throw new BusinessException("Số tiền nạp phải là số nguyên VND hợp lệ");
-        }
-
         WalletTopUpRequest topUp = WalletTopUpRequest.builder()
                 .user(user)
                 .paymentReference(generateReference())
-                .requestedAmount(amount.setScale(2))
                 .status(WalletTopUpRequest.Status.PENDING)
                 .expiresAt(LocalDateTime.now().plusMinutes(Math.max(1, paymentProperties.getExpireMinutes())))
                 .build();
@@ -124,15 +116,10 @@ public class WalletServiceImpl implements IWalletService {
         }
 
         BigDecimal received = payload == null ? null : payload.getTransferAmount();
-        topUp.setReceivedAmount(received);
-        if (received == null || received.compareTo(topUp.getRequestedAmount()) != 0) {
-            topUp.setStatus(WalletTopUpRequest.Status.AMOUNT_MISMATCH);
-            topUpRepository.save(topUp);
-            return TopUpTransferResult.AMOUNT_MISMATCH;
-        }
-        if (payload.getId() == null) {
+        if (payload == null || payload.getId() == null || received == null || received.signum() <= 0) {
             return TopUpTransferResult.NOT_PAYABLE;
         }
+        topUp.setReceivedAmount(received);
 
         UUID ownerId = topUp.getUser().getId();
         User user = userRepository.findByIdForUpdate(ownerId).orElse(null);

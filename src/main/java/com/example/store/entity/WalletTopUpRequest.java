@@ -58,7 +58,7 @@ public class WalletTopUpRequest {
     @Column(name = "payment_reference", nullable = false, length = 30)
     private String paymentReference;
 
-    @Column(name = "requested_amount", nullable = false, precision = 18, scale = 2)
+    @Column(name = "requested_amount", precision = 18, scale = 2)
     private BigDecimal requestedAmount;
 
     @Column(name = "received_amount", precision = 18, scale = 2)

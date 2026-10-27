@@ -55,10 +55,9 @@
     function renderTopUp(data) {
         const status = data.status;
         let statusText = status === 'PAID' ? 'Đã nạp tiền thành công'
-            : status === 'AMOUNT_MISMATCH' ? 'Số tiền nhận được chưa khớp'
-                : status === 'EXPIRED' ? 'Yêu cầu nạp tiền đã hết hạn' : 'Đang chờ nhận tiền';
+            : status === 'EXPIRED' ? 'Yêu cầu nạp tiền đã hết hạn' : 'Đang chờ nhận tiền';
         const statusClass = status === 'PAID' ? 'text-success'
-            : (status === 'AMOUNT_MISMATCH' || status === 'EXPIRED' ? 'text-danger' : 'text-primary');
+            : (status === 'EXPIRED' ? 'text-danger' : 'text-primary');
         let qr = '';
         if (data.qrImageUrl) {
             qr = '<div class="text-center mb-3"><img src="' + esc(data.qrImageUrl) +
@@ -69,15 +68,12 @@
         if (data.accountName) account += '<div class="summary-row"><span>Chủ tài khoản</span><strong>' + esc(data.accountName) + '</strong></div>';
         const statusNote = status === 'PAID'
             ? '<div class="alert alert-success small mt-3 mb-0">Đã cộng ' + money(data.receivedAmount) + ' vào ví.</div>'
-            : status === 'AMOUNT_MISMATCH'
-                ? '<div class="alert alert-warning small mt-3 mb-0">Hệ thống chưa cộng tiền vì số tiền chuyển chưa đúng yêu cầu. Yêu cầu vẫn có thể nhận giao dịch đúng trước khi hết hạn.</div>'
-                : status === 'EXPIRED'
-                    ? '<div class="alert alert-danger small mt-3 mb-0">Không chuyển tiền theo mã này nữa. Nếu đã chuyển, vui lòng liên hệ cửa hàng để đối soát.</div>'
-                    : '<div class="alert alert-warning small mt-3 mb-0">Tự nhập đúng ' + money(data.requestedAmount) +
-                        ' trên ứng dụng ngân hàng. Không được sửa nội dung chuyển khoản.</div>';
+            : status === 'EXPIRED'
+                ? '<div class="alert alert-danger small mt-3 mb-0">Yêu cầu nạp đã hết hạn. Nếu đã chuyển tiền, vui lòng liên hệ cửa hàng để đối soát.</div>'
+                : '<div class="alert alert-warning small mt-3 mb-0">Chuyển số tiền bạn muốn nạp. Không sửa nội dung chuyển khoản.</div>';
         $('topUpPanel').innerHTML = qr +
             '<div class="d-flex justify-content-between align-items-center mb-2"><span>Trạng thái</span><strong class="' + statusClass + '">' + esc(statusText) + '</strong></div>' +
-            '<div class="summary-row"><span>Số tiền yêu cầu</span><strong>' + money(data.requestedAmount) + '</strong></div>' +
+            (status === 'PAID' ? '<div class="summary-row"><span>Số tiền đã nhận</span><strong>' + money(data.receivedAmount) + '</strong></div>' : '') +
             '<div class="summary-row"><span>Nội dung chuyển khoản</span><strong class="font-monospace">' + esc(data.transferContent) + '</strong></div>' +
             account + statusNote;
         if (status === 'PAID' || status === 'EXPIRED') stopPolling();
@@ -95,18 +91,13 @@
     }
 
     async function createTopUp() {
-        const amount = Number($('topUpAmount').value);
-        if (!Number.isFinite(amount) || amount <= 0 || !Number.isInteger(amount)) {
-            notify('Vui lòng nhập số tiền VND là số nguyên lớn hơn 0.', 'warning');
-            return;
-        }
         $('createTopUpBtn').disabled = true;
         try {
-            const data = await api('POST', '/api/wallet/top-ups', { amount });
+            const data = await api('POST', '/api/wallet/top-ups');
             currentTopUpId = data.id;
             stopPolling();
             renderTopUp(data);
-            if (data.status === 'PENDING' || data.status === 'AMOUNT_MISMATCH') {
+            if (data.status === 'PENDING') {
                 pollTimer = setInterval(refreshTopUp, 4000);
             }
         } catch (e) {

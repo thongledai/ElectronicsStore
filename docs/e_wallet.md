@@ -11,12 +11,12 @@
 
 ## Luồng nạp ví
 
-1. Customer nhập số tiền nguyên VND và gọi `POST /api/wallet/top-ups`.
+1. Customer gọi `POST /api/wallet/top-ups` để tạo mã tham chiếu nạp ví; không cần nhập số tiền.
 2. Backend tạo yêu cầu PENDING và mã tham chiếu duy nhất. QR sử dụng tài khoản nhận đã cấu hình trong `PAYMENT_*` và không có query parameter `amount`.
-3. Customer tự nhập số tiền nạp trong ứng dụng ngân hàng; phải giữ nguyên nội dung chuyển khoản.
+3. Customer quét QR, tự chọn số tiền chuyển trong ứng dụng ngân hàng và giữ nguyên nội dung chuyển khoản.
 4. SePay gọi `POST /api/webhooks/sepay`. Backend xác thực API key, loại giao dịch tiền vào và tài khoản nhận; sau đó dò mã tham chiếu trong `code/content`.
-5. Chỉ khi số tiền thực nhận khớp chính xác với yêu cầu, yêu cầu còn hạn và chưa PAID, backend mới cộng **số tiền thực nhận từ webhook** vào ví và ghi ledger trong cùng transaction.
-6. Giao dịch sai số tiền được ghi nhận để đối soát, không cộng vào ví. Một yêu cầu đã PAID không được cộng lại bởi giao dịch khác. Webhook gửi lặp có cùng mã giao dịch được chặn qua unique key `provider + provider_transaction_id`.
+5. Nếu yêu cầu còn hạn và chưa PAID, backend cộng **toàn bộ số tiền thực nhận từ webhook** vào ví và ghi ledger trong cùng transaction.
+6. Một yêu cầu đã PAID không được cộng lại bởi giao dịch khác. Webhook gửi lặp có cùng mã giao dịch được chặn qua unique key `provider + provider_transaction_id`.
 
 ## Thanh toán đơn bằng ví
 
@@ -31,7 +31,7 @@
 | Method | Endpoint | Mô tả |
 |---|---|---|
 | GET | `/api/wallet` | Số dư và 20 giao dịch ví gần nhất |
-| POST | `/api/wallet/top-ups` | Tạo yêu cầu nạp: JSON `{"amount": 100000}` |
+| POST | `/api/wallet/top-ups` | Tạo yêu cầu nạp và mã QR; không cần request body |
 | GET | `/api/wallet/top-ups/{id}` | Trạng thái và QR của yêu cầu thuộc Customer đang đăng nhập |
 | POST | `/api/webhooks/sepay` | Webhook SePay; cần `Authorization: Apikey <SEPAY_API_KEY>` |
 | POST | `/orders` | Đặt hàng bằng COD, BANK_QR hoặc E_WALLET |
@@ -39,7 +39,7 @@
 
 ## Cấu hình và triển khai
 
-1. Nếu database chưa có bảng `bank_transfer_events`, chạy `migration_vietqr_payment.sql` trước. Sau đó chạy `migration_e_wallet.sql` một lần trên DB hiện có khi Hibernate không dùng `ddl-auto=update`. Cột `users.e_wallet` đã tồn tại trong schema của nhánh hiện tại.
+1. Nếu database chưa có bảng `bank_transfer_events`, chạy `migration_vietqr_payment.sql` trước. Sau đó chạy `migration_e_wallet.sql` một lần trên DB hiện có khi Hibernate không dùng `ddl-auto=update`. Với database đã có bảng `wallet_top_up_requests`, chạy thêm `migration_e_wallet_amount_optional.sql` để cho phép cột `requested_amount` rỗng. Cột `users.e_wallet` đã tồn tại trong schema của nhánh hiện tại.
 2. Cấu hình cùng một tài khoản nhận, BIN, template QR và `SEPAY_API_KEY` như luồng VietQR trước đây. Không commit secret.
 3. Cấu trúc mã thanh toán trên SePay phải chấp nhận tiền tố `PAYMENT_REFERENCE_PREFIX` và hậu tố 8 ký tự chữ/số; cả đơn hàng và yêu cầu nạp ví dùng chung cấu trúc để tương thích bộ lọc SePay.
 4. URL webhook vẫn là `https://<domain-https-cong-khai>/api/webhooks/sepay`.

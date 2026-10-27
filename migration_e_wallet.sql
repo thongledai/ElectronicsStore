@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS wallet_top_up_requests (
   id                      binary(16)    NOT NULL,
   user_id                 binary(16)    NOT NULL,
   payment_reference       varchar(30)   NOT NULL,
-  requested_amount        decimal(18,2) NOT NULL,
+  requested_amount        decimal(18,2) DEFAULT NULL,
   received_amount         decimal(18,2) DEFAULT NULL,
   status                  varchar(30)   NOT NULL,
   provider_transaction_id varchar(100)  DEFAULT NULL,

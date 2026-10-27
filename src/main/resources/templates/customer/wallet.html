@@ -26,15 +26,12 @@
                     </div>
                     <div class="summary-panel">
                         <h2 class="h5 mb-3">Nạp tiền vào ví</h2>
-                        <label class="form-label" for="topUpAmount">Số tiền muốn nạp (VND)</label>
-                        <input class="form-control" type="number" id="topUpAmount" min="1" step="1000"
-                               inputmode="numeric" placeholder="Ví dụ: 100000">
                         <p class="small text-muted mt-2 mb-3">
-                            QR sẽ điền sẵn tài khoản nhận và nội dung chuyển khoản, không điền sẵn số tiền.
-                            Hãy tự nhập đúng số tiền yêu cầu khi chuyển.
+                            Quét mã QR và chuyển số tiền bạn muốn nạp. Ví sẽ được cộng theo số tiền thực nhận.
+                            Giữ nguyên nội dung chuyển khoản để hệ thống xác định đúng tài khoản ví.
                         </p>
                         <button class="btn btn-accent w-100" id="createTopUpBtn" type="button">
-                            <i class="fas fa-qrcode me-2"></i>Tạo mã QR nạp ví
+                            <i class="fas fa-qrcode me-2"></i>Hiển thị mã QR nạp ví
                         </button>
                     </div>
                 </div>
@@ -43,7 +40,7 @@
                     <div class="summary-panel mb-4">
                         <h2 class="h5 mb-3">Thanh toán nạp ví</h2>
                         <div id="topUpPanel" class="text-muted small">
-                            Nhập số tiền và chọn “Tạo mã QR nạp ví” để bắt đầu.
+                            Chọn “Hiển thị mã QR nạp ví” để bắt đầu.
                         </div>
                     </div>
                     <div class="summary-panel">

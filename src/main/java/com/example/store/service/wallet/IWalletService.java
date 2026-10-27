@@ -4,7 +4,6 @@ import java.util.UUID;
 
 import com.example.store.dto.payment.SepayWebhookPayload;
 import com.example.store.dto.wallet.WalletSummaryDTO;
-import com.example.store.dto.wallet.WalletTopUpCreateRequest;
 import com.example.store.dto.wallet.WalletTopUpDTO;
 import com.example.store.entity.Order;
 
@@ -19,7 +18,7 @@ public interface IWalletService {
 
     WalletSummaryDTO getSummary(UUID userId);
 
-    WalletTopUpDTO createTopUp(UUID userId, WalletTopUpCreateRequest request);
+    WalletTopUpDTO createTopUp(UUID userId);
 
     WalletTopUpDTO getTopUp(UUID userId, UUID topUpId);
 
