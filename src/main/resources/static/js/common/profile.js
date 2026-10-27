@@ -175,6 +175,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const summaryRole = document.getElementById('summaryRole');
       if (summaryRole) summaryRole.textContent = roleUpper;
 
+      const summaryEWalletCard = document.getElementById('summaryEWalletCard');
+      const isCustomer = roleUpper === 'CUSTOMER';
+      if (summaryEWalletCard) summaryEWalletCard.hidden = !isCustomer;
+      const summaryPointCard = document.getElementById('summaryPointCard');
+      if (summaryPointCard) {
+        summaryPointCard.classList.toggle('col-6', isCustomer);
+        summaryPointCard.classList.toggle('col-12', !isCustomer);
+      }
+
       const mgmtLink = document.querySelector('.js-mgmt-link');
       if (mgmtLink && roleUpper !== 'CUSTOMER') {
         mgmtLink.style.display = 'flex';
