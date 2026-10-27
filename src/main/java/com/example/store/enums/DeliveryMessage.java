@@ -53,7 +53,8 @@ public enum DeliveryMessage {
     INVALID_PROVINCE("tỉnh/thành"),
     INVALID_ORDER_ITEMS("sản phẩm trong đơn"),
     GHN_BODY_UNREADABLE("Không đọc được body phản hồi GHN"),
-    GHN_UNKNOWN_REASON("không rõ nguyên nhân");
+    GHN_UNKNOWN_REASON("không rõ nguyên nhân"),
+    ORDER_WALLET_PAYMENT_NOT_CONFIRMED("Đơn thanh toán bằng ví chưa được xác nhận đã trừ đủ tiền, không thể xác nhận hoặc tạo vận đơn.");
 
     private final String message;
 

@@ -24,6 +24,7 @@
 - Backend tạo đơn và trừ ví cùng transaction database; trước khi trừ, backend khóa dòng User bằng `PESSIMISTIC_WRITE` rồi kiểm tra số dư mới nhất.
 - Khi số dư không đủ hoặc người dùng không thuộc CUSTOMER, toàn bộ transaction bị rollback: không giữ đơn, không trừ tồn kho, không xóa giỏ hàng và không ghi ledger.
 - Thành công ghi `orders.payment_status = PAID`, `orders.is_paid_before = true`, `orders.paid_at`; GHN tiếp tục nhận `cod_amount = 0` theo logic đã có.
+- Nhân viên xác nhận đơn rồi tạo vận đơn GHN như luồng VietQR. Backend chỉ cho xác nhận/tạo vận đơn khi trạng thái đơn đã PAID và ledger có giao dịch trừ ví đúng bằng tổng đơn; GHN nhận `cod_amount = 0`.
 - Đơn đã trả trước không cho Customer tự hủy để tránh mất tiền; chưa có cơ chế hoàn tiền tự động.
 
 ## Endpoint

@@ -9,4 +9,6 @@ import com.example.store.entity.Transaction;
 
 public interface TransactionRepository extends JpaRepository<Transaction, UUID> {
     List<Transaction> findTop20ByUserIdOrderByCreatedAtDesc(UUID userId);
+
+    boolean existsByOrderIdAndTypeAndIsUpFalseAndAmount(UUID orderId, String type, java.math.BigDecimal amount);
 }

@@ -173,6 +173,14 @@ public class WalletServiceImpl implements IWalletService {
                 .build());
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public boolean hasOrderPaymentDebit(UUID orderId, BigDecimal amount) {
+        return orderId != null && amount != null
+                && transactionRepository.existsByOrderIdAndTypeAndIsUpFalseAndAmount(
+                        orderId, Transaction.TYPE_ORDER_PAYMENT, amount);
+    }
+
     private String generateReference() {
         String prefix = paymentProperties.getReferencePrefix() == null
                 ? "" : paymentProperties.getReferencePrefix().replaceAll("[^A-Za-z0-9]", "").toUpperCase();

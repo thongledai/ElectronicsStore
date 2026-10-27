@@ -1,5 +1,6 @@
 package com.example.store.service.wallet;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 import com.example.store.dto.payment.SepayWebhookPayload;
@@ -27,4 +28,7 @@ public interface IWalletService {
 
     /** Trừ số dư và ghi ledger trong cùng transaction với việc tạo đơn hàng. */
     void debitForOrder(UUID userId, Order order);
+
+    /** Xác nhận ledger đã ghi nhận khoản trừ ví đúng bằng tổng tiền đơn hàng. */
+    boolean hasOrderPaymentDebit(UUID orderId, BigDecimal amount);
 }
