@@ -2,6 +2,8 @@ package com.example.store.enums;
 
 public enum CloudinaryMessage {
     UPLOAD_FAILED("Tải ảnh lên máy chủ thất bại."),
+    UPLOAD_FAILED_MSG("Tải ảnh thất bại: %s"),
+    IMAGE_FILE_EMPTY("File tải lên không được để trống!"),
     IMAGE_FILE_LIST_EMPTY("Danh sách file tải lên không được rỗng!"),
     PRODUCT_NOT_FOUND("Không tìm thấy sản phẩm với ID: %s"),
     VARIANT_NOT_FOUND("Không tìm thấy biến thể với ID: %s"),

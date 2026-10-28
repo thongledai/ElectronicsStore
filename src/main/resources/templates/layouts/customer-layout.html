@@ -45,7 +45,15 @@
 <script th:src="@{/js/payment-qr.js?v=1}"></script>
 <script th:if="${pageScript != null and !pageScript.isEmpty()}" th:src="@{'/js/' + ${pageScript} + '?v=3'}"></script>
 
+<!-- SockJS & STOMP for Realtime WebSocket -->
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
 
+<!-- Live Chat Widget: Chỉ hiển thị cho role CUSTOMER -->
+<th:block sec:authorize="hasAnyAuthority('CUSTOMER', 'ROLE_CUSTOMER')">
+  <div th:replace="~{fragments/chat-widget :: chatWidget}"></div>
+  <script th:src="@{/js/customer/chat-widget.js}"></script>
+</th:block>
 
 </body>
 </html>

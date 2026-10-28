@@ -14,9 +14,9 @@ import lombok.NoArgsConstructor;
 public class SetPasswordDTO {
 
     @NotBlank(message = "NEW_PASSWORD_REQUIRED")
-    @Size(min = 6, message = "PASSWORD_MIN_LENGTH")
+    @Size(min = 6, message = "NEW_PASSWORD_MIN_LENGTH")
     private String newPassword;
 
-    @NotBlank(message = "SET_PASSWORD_CONFIRM_REQUIRED")
+    @NotBlank(message = "CONFIRM_NEW_PASSWORD_REQUIRED")
     private String confirmNewPassword;
 }

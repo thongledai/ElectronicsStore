@@ -18,6 +18,7 @@
 <head th:replace="~{fragments/header :: head(${title + ' | UTE Shop'}, 'UTE Shop — khu vực quản lý')}"></head>
 <link rel="stylesheet" th:href="@{/css/dashboard.css}">
 <link rel="stylesheet" th:href="@{/css/employee-delivery.css}">
+<link rel="stylesheet" th:href="@{/css/review-chat.css}">
 <body>
 <script th:src="@{/js/ui-messages.js}"></script>
 <div class="layout">
@@ -32,6 +33,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- SockJS & STOMP for Realtime Notifications & Chat -->
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+
 <script th:src="@{/js/auth-interceptor.js}"></script>
 <script th:src="@{/js/roles.js}"></script>
 <script th:src="@{/js/auth.js}"></script>

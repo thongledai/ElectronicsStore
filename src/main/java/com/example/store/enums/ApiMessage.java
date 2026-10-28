@@ -71,7 +71,48 @@ public enum ApiMessage {
     INVALID_CREDENTIALS("Email hoặc mật khẩu không chính xác."),
     ACCESS_DENIED("Bạn không có quyền thực hiện thao tác này."),
     REQUEST_FAILED("Không thể hoàn tất yêu cầu. Vui lòng thử lại."),
-    INTERNAL_ERROR("Hệ thống đang gặp sự cố. Vui lòng thử lại sau.");
+    INTERNAL_ERROR("Hệ thống đang gặp sự cố. Vui lòng thử lại sau."),
+
+    // Wishlist
+    WISHLIST_GET_SUCCESS("Lấy danh sách yêu thích thành công."),
+    WISHLIST_IDS_SUCCESS("Lấy danh sách ID yêu thích thành công."),
+    WISHLIST_ITEM_REMOVED("Đã xóa sản phẩm khỏi danh sách yêu thích."),
+    WISHLIST_CLEARED("Đã xóa toàn bộ sản phẩm khỏi danh sách yêu thích."),
+    WISHLIST_COUNT_SUCCESS("Số lượng sản phẩm yêu thích."),
+
+    // Statistics
+    STATISTICS_SUMMARY_SUCCESS("Lấy thông tin tổng quan thành công"),
+    STATISTICS_ANALYTICS_SUCCESS("Lấy dữ liệu thống kê thành công"),
+
+    // Chat
+    CHAT_CUSTOMER_ROOM_SUCCESS("Lấy thông tin phòng chat thành công"),
+    CHAT_EMPLOYEE_ROOMS_SUCCESS("Lấy danh sách phòng chat thành công"),
+    CHAT_ROOM_BY_CUSTOMER_SUCCESS("Lấy phòng chat của khách hàng thành công"),
+    CHAT_MESSAGES_GET_SUCCESS("Lấy tin nhắn thành công"),
+    CHAT_MESSAGE_SENT_SUCCESS("Gửi tin nhắn thành công"),
+    CHAT_ROOM_ASSIGN_SUCCESS("Tiếp nhận phòng chat thành công"),
+    CHAT_ROOM_CLOSED_SUCCESS("Đóng phòng chat thành công"),
+    CHAT_OPEN_ROOMS_COUNT_SUCCESS("Số phòng chat đang mở"),
+
+    // Review
+    REVIEW_SUBMIT_SUCCESS("Gửi đánh giá thành công! Đánh giá sẽ hiển thị sau khi được duyệt."),
+    REVIEW_CHECK_PERMISSION("Kiểm tra quyền đánh giá"),
+    REVIEW_LIST_SUCCESS("Lấy danh sách đánh giá thành công"),
+    REVIEW_SUMMARY_SUCCESS("Lấy tổng hợp đánh giá thành công"),
+    REVIEW_PENDING_LIST_SUCCESS("Lấy danh sách đánh giá chờ duyệt"),
+    REVIEW_ALL_LIST_SUCCESS("Lấy danh sách đánh giá"),
+    REVIEW_APPROVED_SUCCESS("Duyệt đánh giá thành công"),
+    REVIEW_REJECTED_SUCCESS("Từ chối đánh giá thành công"),
+    REVIEW_PENDING_COUNT_SUCCESS("Số lượng đánh giá chờ duyệt"),
+
+    // Common / Upload
+    LOGIN_REQUIRED("Yêu cầu đăng nhập"),
+    LOGIN_REQUIRED_REVIEW("Vui lòng đăng nhập để đánh giá."),
+    LOGIN_REQUIRED_GENERAL("Vui lòng đăng nhập."),
+    NOT_LOGGED_IN("Chưa đăng nhập"),
+    NOT_LOGGED_IN_DOT("Chưa đăng nhập."),
+    IMAGE_UPLOAD_SUCCESS("Tải ảnh thành công"),
+    IMAGE_UPLOAD_FAILED("Tải ảnh thất bại");
 
     private final String message;
 

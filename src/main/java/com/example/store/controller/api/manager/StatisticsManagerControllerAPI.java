@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.store.dto.common.ApiResponse;
 import com.example.store.dto.manager.statistics.DashboardSummaryDTO;
 import com.example.store.dto.manager.statistics.StatisticsAnalyticsDTO;
+import com.example.store.enums.ApiMessage;
 import com.example.store.service.manager.statistics.IStatisticsService;
 
 import lombok.RequiredArgsConstructor;
@@ -28,7 +29,7 @@ public class StatisticsManagerControllerAPI {
     @GetMapping("/summary")
     public ResponseEntity<ApiResponse<DashboardSummaryDTO>> getDashboardSummary() {
         DashboardSummaryDTO data = statisticsService.getDashboardSummary();
-        return ResponseEntity.ok(ApiResponse.success("Lấy thông tin tổng quan thành công", data));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.STATISTICS_SUMMARY_SUCCESS, data));
     }
 
     @GetMapping("/analytics")
@@ -39,6 +40,6 @@ public class StatisticsManagerControllerAPI {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
         StatisticsAnalyticsDTO data = statisticsService.getAnalytics(period, type, status, startDate, endDate);
-        return ResponseEntity.ok(ApiResponse.success("Lấy dữ liệu thống kê thành công", data));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.STATISTICS_ANALYTICS_SUCCESS, data));
     }
 }

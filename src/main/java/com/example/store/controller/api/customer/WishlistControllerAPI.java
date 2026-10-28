@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.store.dto.common.ApiResponse;
 import com.example.store.dto.wishlist.WishlistItemDTO;
 import com.example.store.dto.wishlist.WishlistToggleResponseDTO;
+import com.example.store.enums.ApiMessage;
 import com.example.store.security.CustomUserDetails;
 import com.example.store.service.wishlist.IWishlistService;
 
@@ -33,20 +34,20 @@ public class WishlistControllerAPI {
             @AuthenticationPrincipal CustomUserDetails user) {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.error("Yêu cầu đăng nhập."));
+                    .body(ApiResponse.error(ApiMessage.LOGIN_REQUIRED));
         }
         List<WishlistItemDTO> items = wishlistService.getWishlist(user.getId());
-        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách yêu thích thành công.", items));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.WISHLIST_GET_SUCCESS, items));
     }
 
     @GetMapping("/ids")
     public ResponseEntity<ApiResponse<List<UUID>>> getWishlistProductIds(
             @AuthenticationPrincipal CustomUserDetails user) {
         if (user == null) {
-            return ResponseEntity.ok(ApiResponse.success("Chưa đăng nhập.", List.of()));
+            return ResponseEntity.ok(ApiResponse.success(ApiMessage.NOT_LOGGED_IN_DOT, List.of()));
         }
         List<UUID> productIds = wishlistService.getWishlistProductIds(user.getId());
-        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách ID yêu thích thành công.", productIds));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.WISHLIST_IDS_SUCCESS, productIds));
     }
 
     @PostMapping("/toggle/{productId}")
@@ -55,7 +56,7 @@ public class WishlistControllerAPI {
             @PathVariable UUID productId) {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.error("Yêu cầu đăng nhập."));
+                    .body(ApiResponse.error(ApiMessage.LOGIN_REQUIRED));
         }
         WishlistToggleResponseDTO response = wishlistService.toggleWishlist(user.getId(), productId);
         return ResponseEntity.ok(ApiResponse.success(response.getMessage(), response));
@@ -67,10 +68,10 @@ public class WishlistControllerAPI {
             @PathVariable UUID productId) {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.error("Yêu cầu đăng nhập."));
+                    .body(ApiResponse.error(ApiMessage.LOGIN_REQUIRED));
         }
         wishlistService.removeFromWishlist(user.getId(), productId);
-        return ResponseEntity.ok(ApiResponse.success("Đã xóa sản phẩm khỏi danh sách yêu thích."));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.WISHLIST_ITEM_REMOVED));
     }
 
     @DeleteMapping
@@ -78,19 +79,19 @@ public class WishlistControllerAPI {
             @AuthenticationPrincipal CustomUserDetails user) {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.error("Yêu cầu đăng nhập."));
+                    .body(ApiResponse.error(ApiMessage.LOGIN_REQUIRED));
         }
         wishlistService.clearWishlist(user.getId());
-        return ResponseEntity.ok(ApiResponse.success("Đã xóa toàn bộ sản phẩm khỏi danh sách yêu thích."));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.WISHLIST_CLEARED));
     }
 
     @GetMapping("/count")
     public ResponseEntity<ApiResponse<Long>> getWishlistCount(
             @AuthenticationPrincipal CustomUserDetails user) {
         if (user == null) {
-            return ResponseEntity.ok(ApiResponse.success("Số lượng sản phẩm yêu thích.", 0L));
+            return ResponseEntity.ok(ApiResponse.success(ApiMessage.WISHLIST_COUNT_SUCCESS, 0L));
         }
         long count = wishlistService.getWishlistCount(user.getId());
-        return ResponseEntity.ok(ApiResponse.success("Số lượng sản phẩm yêu thích.", count));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.WISHLIST_COUNT_SUCCESS, count));
     }
 }

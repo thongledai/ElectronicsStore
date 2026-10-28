@@ -28,18 +28,23 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Static resources
+                // Static resources & WebSocket
                 .requestMatchers(
                     "/css/**", "/js/**", "/images/**", "/fonts/**", 
-                    "/webjars/**", "/favicon.ico", "/error"
+                    "/webjars/**", "/favicon.ico", "/error",
+                    "/ws/**", "/ws-direct/**"
                 ).permitAll()
 
                 // Public HTML pages
                 .requestMatchers(
                     "/", "/login", "/register", "/forgot-password", "/verify-otp",
                     "/customer/index", "/customer/products", "/customer/product-details",
+                    "/customer/products/**",
                     "/pages/**"
                 ).permitAll()
+
+                // Public Review viewing API
+                .requestMatchers("/api/customer/reviews/product/**").permitAll()
 
                 // Public Authentication REST APIs
                 .requestMatchers(
@@ -53,11 +58,15 @@ public class SecurityConfig {
                 // Reset & Set Password & Status APIs (must be authenticated)
                 .requestMatchers("/auth/reset-password", "/auth/set-password", "/auth/has-password").authenticated()
 
-                // Cart & Order APIs & Pages (chỉ khách hàng)
+                // Cart, Order, Review & Chat APIs & Pages (chỉ khách hàng)
                 .requestMatchers(
                     "/cart/**", "/api/cart/**", "/checkout/**", "/preview-order/**",
                     "/orders", "/orders/**", "/customer/orders", "/customer/orders/**",
+
+                    "/api/customer/reviews/**", "/api/customer/chat/**",
+
                     "/customer/checkout", "/customer/wallet", "/api/wallet", "/api/wallet/**"
+
                 ).hasAnyAuthority("CUSTOMER", "ROLE_CUSTOMER")
 
                 // Role-based reset password pages
@@ -66,9 +75,9 @@ public class SecurityConfig {
                 .requestMatchers("/shipper/reset-password").hasAnyAuthority("SHIPPER", "ROLE_SHIPPER")
                 .requestMatchers("/customer/reset-password", "/customer/set-password").hasAnyAuthority("CUSTOMER", "ROLE_CUSTOMER")
 
-                // Role-based dashboards
+                // Role-based dashboards & APIs
                 .requestMatchers("/manager/**", "/api/manager/**").hasAnyAuthority("MANAGER", "ROLE_MANAGER")
-                .requestMatchers("/employee/**").hasAnyAuthority("EMPLOYEE", "ROLE_EMPLOYEE")
+                .requestMatchers("/employee/**", "/api/employee/**").hasAnyAuthority("EMPLOYEE", "ROLE_EMPLOYEE", "MANAGER", "ROLE_MANAGER", "ADMIN", "ROLE_ADMIN")
                 .requestMatchers("/shipper/**").hasAnyAuthority("SHIPPER", "ROLE_SHIPPER")
                 // Authenticated user pages & APIs (shared across all roles)
                 .requestMatchers("/customer/wishlist", "/api/wishlist", "/api/wishlist/**").authenticated()

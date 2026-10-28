@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.store.entity.RefreshToken;
 import com.example.store.entity.User;
+import com.example.store.enums.BusinessMessage;
 import com.example.store.exception.BusinessException;
 import com.example.store.repository.RefreshTokenRepository;
 import com.example.store.repository.UserRepository;
@@ -53,13 +54,13 @@ public class RefreshTokenServiceImpl implements IRefreshTokenService {
     @Override
     public RefreshToken verifyExpiration(RefreshToken token) {
         if (token.isRevoked()) {
-            throw new BusinessException("Refresh token đã bị vô hiệu hóa hoặc thu hồi. Vui lòng đăng nhập lại!");
+            throw new BusinessException(BusinessMessage.AUTH_REFRESH_TOKEN_REVOKED);
         }
 
         if (token.getExpiryDate().isBefore(Instant.now())) {
             token.setRevoked(true);
             refreshTokenRepository.save(token);
-            throw new BusinessException("Phiên đăng nhập đã hết hạn (quá 45 phút không hoạt động). Vui lòng đăng nhập lại!");
+            throw new BusinessException(BusinessMessage.AUTH_SESSION_EXPIRED);
         }
 
         return token;
@@ -69,17 +70,17 @@ public class RefreshTokenServiceImpl implements IRefreshTokenService {
     @Transactional
     public RefreshToken rotateRefreshToken(String tokenStr) {
         if (tokenStr == null || tokenStr.trim().isEmpty()) {
-            throw new BusinessException("Refresh token không được để trống!");
+            throw new BusinessException(BusinessMessage.AUTH_REFRESH_TOKEN_EMPTY);
         }
 
         RefreshToken oldToken = refreshTokenRepository.findByToken(tokenStr.trim())
-                .orElseThrow(() -> new BusinessException("Refresh token không tồn tại hoặc đã bị xóa. Vui lòng đăng nhập lại!"));
+                .orElseThrow(() -> new BusinessException(BusinessMessage.AUTH_REFRESH_TOKEN_NOT_FOUND));
 
         // Chống tấn công Replay Attack: Nếu token đã từng bị thu hồi/dùng rồi mà lại được gửi lại
         if (oldToken.isRevoked()) {
             log.warn("CẢNH BÁO BẢO MẬT: Phát hiện tái sử dụng Refresh Token đã bị thu hồi của user {}", oldToken.getUser().getEmail());
             refreshTokenRepository.revokeAllByUser(oldToken.getUser());
-            throw new BusinessException("Phát hiện bất thường về phiên làm việc. Toàn bộ phiên đã bị thu hồi để đảm bảo an toàn, vui lòng đăng nhập lại!");
+            throw new BusinessException(BusinessMessage.AUTH_SESSION_COMPROMISED);
         }
 
         // Kiểm tra thời hạn
