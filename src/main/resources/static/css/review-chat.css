@@ -602,3 +602,115 @@
 [data-theme="dark"] #rejectModal .text-dark {
   color: var(--text) !important;
 }
+
+
+/* Dark mode polish: review status filters and employee conversation history. */
+[data-theme="dark"] #reviewStatusTabs .nav-link {
+  background-color: var(--surface-2) !important;
+  color: var(--text-muted) !important;
+  border-color: var(--border) !important;
+}
+
+[data-theme="dark"] #reviewStatusTabs .nav-link:hover {
+  background-color: var(--surface-3) !important;
+  color: var(--text) !important;
+}
+
+[data-theme="dark"] #reviewStatusTabs .nav-link.active {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border-color: #444444 !important;
+}
+
+[data-theme="dark"] #reviewStatusTabs .nav-link.active #tabPendingBadge {
+  background-color: #333333 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] #reviewStatusTabs .nav-link:not(.active) #tabPendingBadge {
+  background-color: var(--surface-3) !important;
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .employee-chat-conversation,
+[data-theme="dark"] #chatActiveArea,
+[data-theme="dark"] #chatRoomsListContainer,
+[data-theme="dark"] #chatRoomsList,
+[data-theme="dark"] #chatNoSelectedPlaceholder,
+[data-theme="dark"] #roomsLoading,
+[data-theme="dark"] #roomsEmpty {
+  background-color: var(--bg) !important;
+  color: var(--text);
+}
+
+[data-theme="dark"] #chatRoomsList .js-room-item {
+  background-color: var(--surface) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+
+[data-theme="dark"] #chatRoomsList .js-room-item:hover,
+[data-theme="dark"] #chatRoomsList .js-room-item:focus {
+  background-color: var(--surface-2) !important;
+  color: var(--text) !important;
+}
+
+[data-theme="dark"] #chatRoomsList .js-room-item.bg-primary-subtle,
+[data-theme="dark"] #chatRoomsList .js-room-item.active {
+  background-color: var(--surface-3) !important;
+  color: var(--text) !important;
+}
+
+[data-theme="dark"] #chatRoomsList .js-room-item .text-dark,
+[data-theme="dark"] #chatNoSelectedPlaceholder .text-dark,
+[data-theme="dark"] #chatConversationWrapper .text-dark {
+  color: var(--text) !important;
+}
+
+[data-theme="dark"] #chatRoomsList .js-room-item .text-muted,
+[data-theme="dark"] #chatNoSelectedPlaceholder .text-muted {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] #searchCustomerChat,
+[data-theme="dark"] #searchCustomerChat + .form-control,
+[data-theme="dark"] .employee-chat-conversation .form-control,
+[data-theme="dark"] #chatRoomsListContainer .input-group-text {
+  background-color: var(--surface-2) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+
+[data-theme="dark"] #searchCustomerChat::placeholder,
+[data-theme="dark"] .employee-chat-conversation .form-control::placeholder {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] #employeeMessagesStream {
+  background-color: var(--bg) !important;
+}
+
+[data-theme="dark"] #employeeMessagesStream .chat-msg-received {
+  background-color: var(--surface-2) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+
+[data-theme="dark"] #employeeMessagesStream .chat-msg-received .text-primary {
+  color: #93baff !important;
+}
+
+[data-theme="dark"] #employeeMessagesStream .chat-msg-image {
+  background: transparent !important;
+}
+
+[data-theme="dark"] #chatConversationWrapper > .bg-white,
+[data-theme="dark"] #chatRoomsListContainer .bg-white,
+[data-theme="dark"] #chatActiveArea.bg-white,
+[data-theme="dark"] #chatRoomsListContainer .bg-light,
+[data-theme="dark"] #chatRoomsListContainer .bg-light-subtle,
+[data-theme="dark"] #employeeMessagesStream.bg-light,
+[data-theme="dark"] #chatNoSelectedPlaceholder .bg-light {
+  background-color: var(--surface) !important;
+  color: var(--text) !important;
+}
