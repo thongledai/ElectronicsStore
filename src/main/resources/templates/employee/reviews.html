@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="vi" th:replace="~{layouts/dashboard-layout :: layout('Kiểm duyệt đánh giá', 'employee', 'reviews', ~{::section.content})}">
+<head>
+  <title>Kiểm duyệt đánh giá | TechNova</title>
+</head>
+<body>
+
+<section class="content p-3 p-md-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+      <h1 class="h4 fw-bold mb-1 text-dark">Kiểm duyệt đánh giá</h1>
+      <p class="text-muted small mb-0">Quản lý và kiểm duyệt đánh giá từ khách hàng trước khi hiển thị trên hệ thống.</p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <button type="button" class="btn btn-outline-secondary btn-sm" id="btnRefreshReviews">
+        <i class="fa-solid fa-rotate-right me-1"></i>Làm mới
+      </button>
+    </div>
+  </div>
+
+  <!-- Tabs Filter -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-2 p-md-3">
+      <ul class="nav nav-pills gap-2" id="reviewStatusTabs">
+        <li class="nav-item">
+          <button class="nav-link active px-3 py-2 fw-medium small" data-status="PENDING" type="button">
+            Chờ duyệt <span class="badge bg-secondary-subtle text-secondary rounded-pill ms-1" id="tabPendingBadge">0</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link px-3 py-2 fw-medium small" data-status="APPROVED" type="button">
+            Đã duyệt
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link px-3 py-2 fw-medium small" data-status="REJECTED" type="button">
+            Từ chối
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link px-3 py-2 fw-medium small" data-status="ALL" type="button">
+            Tất cả
+          </button>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Reviews List Container -->
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+
+      <div id="employeeReviewsLoading" class="text-center py-5">
+        <div class="spinner-border spinner-border-sm text-secondary" role="status"></div>
+        <p class="text-muted mt-2 small">Đang tải danh sách đánh giá...</p>
+      </div>
+
+      <div id="employeeReviewsEmpty" class="text-center py-5 d-none">
+        <i class="fa-regular fa-folder-open fs-2 text-muted opacity-50 mb-2"></i>
+        <h6 class="fw-semibold text-dark">Không có đánh giá nào</h6>
+        <p class="text-muted small" id="employeeReviewsEmptyText">Hiện không có đánh giá nào trong mục này.</p>
+      </div>
+
+      <div class="table-responsive d-none" id="employeeReviewsTableContainer">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th style="min-width: 200px;">Sản phẩm</th>
+              <th style="min-width: 160px;">Khách hàng</th>
+              <th style="min-width: 90px;">Số sao</th>
+              <th style="min-width: 260px;">Nội dung đánh giá</th>
+              <th style="min-width: 110px;">Trạng thái</th>
+              <th style="min-width: 120px;">Thời gian</th>
+              <th style="min-width: 180px;" class="text-end">Hành động</th>
+            </tr>
+          </thead>
+          <tbody id="employeeReviewsTableBody">
+            <!-- Render by reviews.js -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="p-3 border-top d-flex justify-content-between align-items-center d-none" id="reviewsPaginationContainer">
+        <span class="text-muted small" id="reviewsPageInfo">Trang 1 / 1</span>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-outline-secondary btn-sm" id="btnPrevReviewsPage" disabled>Trang trước</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm" id="btnNextReviewsPage" disabled>Trang sau</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal Duyệt đánh giá -->
+  <div class="modal fade" id="approveModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header border-bottom">
+          <h5 class="modal-title fw-bold text-dark">Duyệt đánh giá</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <p class="mb-3 text-secondary">Bạn có chắc chắn muốn duyệt đánh giá này để hiển thị công khai trên website?</p>
+          <div class="mb-3">
+            <label for="adminReplyInput" class="form-label fw-semibold">Phản hồi từ cửa hàng (tùy chọn):</label>
+            <textarea class="form-control" id="adminReplyInput" rows="3"
+                      placeholder="Ví dụ: Cảm ơn quý khách đã tin tưởng và ủng hộ TechNova! Chúc quý khách trải nghiệm sản phẩm vui vẻ ạ."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer bg-light border-top">
+          <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Hủy</button>
+          <button type="button" class="btn btn-primary fw-medium px-4" id="btnConfirmApprove">
+            <i class="fa-solid fa-check me-1"></i>Xác nhận duyệt
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Từ chối đánh giá -->
+  <div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header border-bottom">
+          <h5 class="modal-title fw-bold text-dark">Từ chối đánh giá</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <p class="mb-3 text-secondary">Đánh giá này sẽ bị ẩn và gắn trạng thái "Từ chối".</p>
+          <div class="mb-3">
+            <label for="rejectReasonInput" class="form-label fw-semibold">Lý do từ chối (bắt buộc):</label>
+            <textarea class="form-control" id="rejectReasonInput" rows="3"
+                      placeholder="Ví dụ: Nội dung chứa từ ngữ không phù hợp hoặc không liên quan đến sản phẩm."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer bg-light border-top">
+          <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Hủy</button>
+          <button type="button" class="btn btn-danger fw-medium px-4" id="btnConfirmReject">
+            <i class="fa-solid fa-ban me-1"></i>Xác nhận từ chối
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script th:src="@{/js/employee/reviews.js}"></script>
+</section>
+
+</body>
+</html>

@@ -1,0 +1,51 @@
+<div th:fragment="chatWidget" id="chatWidgetRoot">
+  <!-- Bubble Button -->
+  <div id="customerChatBubble" class="chat-widget-bubble" title="Chat trực tuyến với nhân viên TechNova">
+    <i class="fas fa-comment-dots"></i>
+    <span class="badge-unread d-none" id="chatUnreadBadge">0</span>
+  </div>
+
+  <!-- Chat Box Window -->
+  <div id="customerChatBox" class="chat-widget-box">
+    <!-- Header -->
+    <div class="chat-header">
+      <div class="d-flex align-items-center gap-2">
+        <div class="position-relative">
+          <div class="tgdd-avatar" style="width: 36px; height: 36px; background: #ffffff; color: #2563eb; font-size: 1.1rem;">
+            <i class="fas fa-headset"></i>
+          </div>
+        </div>
+        <div>
+          <div class="fw-bold text-white small leading-tight">Nhân Viên CSKH</div>
+          <div class="text-white-50" style="font-size: 0.72rem;">
+            <span class="chat-status-dot"></span><span id="chatSupportStatusText">Đang trực tuyến</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <button type="button" class="btn btn-sm text-white p-1" id="btnMinimizeChat" title="Thu nhỏ">
+          <i class="fas fa-minus"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Body / Messages -->
+    <div class="chat-body" id="customerChatBody">
+      <div class="chat-msg chat-msg-system">
+        👋 Chào mừng bạn! Nhân Viên CSKH TechNova luôn sẵn sàng hỗ trợ bạn.
+      </div>
+    </div>
+
+    <!-- Footer / Input -->
+    <div class="chat-footer">
+      <input type="file" id="chatFileInput" accept="image/*" class="d-none">
+      <button type="button" class="btn btn-sm btn-outline-secondary rounded-circle" id="btnUploadChatImg" title="Gửi ảnh" style="width: 34px; height: 34px; padding: 0;">
+        <i class="fas fa-image"></i>
+      </button>
+      <input type="text" id="chatInputMessage" placeholder="Nhập tin nhắn..." maxlength="1000">
+      <button type="button" class="btn btn-sm btn-primary rounded-circle" id="btnSendChatMessage" title="Gửi" style="width: 34px; height: 34px; padding: 0;">
+        <i class="fas fa-paper-plane"></i>
+      </button>
+    </div>
+  </div>
+</div>

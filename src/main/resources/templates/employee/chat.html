@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="vi" th:replace="~{layouts/dashboard-layout :: layout('Hỗ trợ trực tuyến', 'employee', 'chat', ~{::section.content})}">
+<head>
+  <title>Hỗ trợ trực tuyến | TechNova</title>
+</head>
+<body>
+
+<section class="content p-3 p-md-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+    <div>
+      <h1 class="h4 fw-bold mb-1 text-dark">
+        <i class="fa-solid fa-comments text-info me-2"></i>Hỗ trợ trực tuyến (Live Chat)
+      </h1>
+      <p class="text-muted small mb-0">Tư vấn, giải đáp thắc mắc và hỗ trợ khách hàng theo thời gian thực.</p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <span class="badge bg-success-subtle text-success border border-success px-3 py-2">
+        <i class="fa-solid fa-circle text-success me-1 small"></i>Hệ thống Realtime sẵn sàng
+      </span>
+      <button type="button" class="btn btn-outline-secondary btn-sm" id="btnRefreshRooms">
+        <i class="fa-solid fa-rotate-right me-1"></i>Làm mới
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Chat Container -->
+  <div class="card border-0 shadow-sm overflow-hidden" style="height: calc(100vh - 210px); min-height: 540px;">
+    <div class="row g-0 h-100">
+
+      <!-- LEFT COLUMN: Rooms List -->
+      <div class="col-lg-4 border-end d-flex flex-column h-100 bg-light-subtle">
+        <div class="p-3 border-bottom bg-white">
+          <div class="input-group">
+            <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+            <input type="text" class="form-control border-start-0 bg-light" id="searchCustomerChat" placeholder="Tìm khách hàng...">
+          </div>
+        </div>
+
+        <div class="flex-grow-1 overflow-y-auto" id="chatRoomsListContainer">
+          <div id="roomsLoading" class="text-center py-4">
+            <div class="spinner-border text-primary spinner-border-sm" role="status"></div>
+            <p class="text-muted mt-2 small">Đang tải cuộc hội thoại...</p>
+          </div>
+
+          <div id="roomsEmpty" class="text-center py-5 d-none">
+            <i class="fa-regular fa-comment-dots fs-1 text-muted opacity-50 mb-2"></i>
+            <p class="text-muted small mb-0">Không có cuộc trò chuyện nào đang mở.</p>
+          </div>
+
+          <div class="list-group list-group-flush" id="chatRoomsList">
+            <!-- Render by chat.js -->
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: Message Box -->
+      <div class="col-lg-8 d-flex flex-column h-100 bg-white" id="chatActiveArea">
+
+        <!-- Initial Placeholder when no room is selected -->
+        <div class="d-flex flex-column align-items-center justify-content-center h-100 text-center p-4" id="chatNoSelectedPlaceholder">
+          <div class="p-4 rounded-circle bg-light text-muted mb-3" style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; font-size: 2rem;">
+            <i class="fa-solid fa-headset"></i>
+          </div>
+          <h5 class="fw-bold text-dark">Chọn cuộc trò chuyện</h5>
+          <p class="text-muted small" style="max-width: 320px;">Vui lòng chọn khách hàng ở danh sách bên trái để bắt đầu hỗ trợ tư vấn trực tuyến.</p>
+        </div>
+
+        <!-- Chat Conversation Stream (Hidden by default until a room is clicked) -->
+        <div class="d-none flex-column h-100" id="chatConversationWrapper">
+          <!-- Conversation Header -->
+          <div class="p-3 border-bottom d-flex align-items-center justify-content-between bg-white">
+            <div class="d-flex align-items-center gap-3">
+              <div class="tgdd-avatar" id="activeCustomerAvatar" style="width: 44px; height: 44px;">K</div>
+              <div>
+                <h6 class="mb-0 fw-bold text-dark" id="activeCustomerName">Tên khách hàng</h6>
+                <div class="text-muted small" id="activeCustomerEmail">email@example.com</div>
+              </div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <button type="button" class="btn btn-sm btn-outline-primary d-none" id="btnAssignMe">
+                <i class="fa-solid fa-user-check me-1"></i>Tiếp nhận hỗ trợ
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-danger" id="btnCloseRoom" title="Đóng cuộc chat">
+                <i class="fa-solid fa-phone-slash me-1"></i>Kết thúc hỗ trợ
+              </button>
+            </div>
+          </div>
+
+          <!-- Messages Stream -->
+          <div class="flex-grow-1 p-3 overflow-y-auto bg-light" id="employeeMessagesStream" style="display: flex; flex-direction: column; gap: 10px;">
+            <!-- Render by chat.js -->
+          </div>
+
+          <!-- Input Footer -->
+          <div class="p-3 border-top bg-white d-flex align-items-center gap-2">
+            <input type="file" id="empChatFileInput" accept="image/*" class="d-none">
+            <button type="button" class="btn btn-light rounded-circle d-inline-flex align-items-center justify-content-center p-0 flex-shrink-0" id="btnEmpUploadImg" title="Gửi ảnh" style="width: 40px; height: 40px;">
+              <i class="fa-solid fa-image text-muted"></i>
+            </button>
+            <input type="text" class="form-control rounded-pill" id="empChatInput" placeholder="Nhập câu trả lời tư vấn cho khách hàng..." maxlength="1000">
+            <button type="button" class="btn btn-primary rounded-circle d-inline-flex align-items-center justify-content-center p-0 flex-shrink-0" id="btnEmpSendMsg" title="Gửi" style="width: 40px; height: 40px;">
+              <i class="fa-solid fa-paper-plane" style="font-size: 0.95rem; margin-left: -2px; margin-top: 1px;"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <script th:src="@{/js/employee/chat.js}"></script>
+</section>
+
+</body>
+</html>

@@ -38,7 +38,7 @@ public class AuthenticationControllerAPI {
             HttpServletResponse httpResponse) {
         String tokenStr = requestDTO != null ? requestDTO.getRefreshToken() : null;
         AuthResponseDTO authResponse = authenticationService.refreshToken(tokenStr, httpRequest, httpResponse);
-        return ResponseEntity.ok(ApiResponse.success("Làm mới phiên làm việc thành công!", authResponse));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.AUTH_REFRESH_TOKEN_SUCCESS, authResponse));
     }
 
     /**
@@ -49,7 +49,7 @@ public class AuthenticationControllerAPI {
             jakarta.servlet.http.HttpServletRequest httpRequest,
             HttpServletResponse httpResponse) {
         authenticationService.logout(httpRequest, httpResponse);
-        return ResponseEntity.ok(ApiResponse.success("Đăng xuất thành công!", "OK"));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.AUTH_LOGOUT_SUCCESS, "OK"));
     }
 
 
@@ -89,7 +89,7 @@ public class AuthenticationControllerAPI {
             @Valid @RequestBody GoogleLoginDTO googleLoginDTO,
             HttpServletResponse httpResponse) {
         AuthResponseDTO authResponse = authenticationService.loginWithGoogle(googleLoginDTO, httpResponse);
-        return ResponseEntity.ok(ApiResponse.success("Google login successful!", authResponse));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.AUTH_GOOGLE_LOGIN_SUCCESS, authResponse));
     }
 
     /**
@@ -97,7 +97,7 @@ public class AuthenticationControllerAPI {
      */
     @GetMapping("/google/client-id")
     public ResponseEntity<ApiResponse<String>> getGoogleClientId() {
-        return ResponseEntity.ok(ApiResponse.success("Google Client ID", googleAuthService.getGoogleClientId()));
+        return ResponseEntity.ok(ApiResponse.success(ApiMessage.AUTH_GOOGLE_CLIENT_ID_SUCCESS, googleAuthService.getGoogleClientId()));
     }
 
 
