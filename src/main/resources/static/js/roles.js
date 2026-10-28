@@ -1,12 +1,9 @@
 /* ==========================================================================
-   TechNova Electronics — Dashboard Script (Manager / Employee / Shipper)
+   UTE Shop — Dashboard Script (Manager / Employee)
    --------------------------------------------------------------------------
-   Loaded by layouts/dashboard-layout.html. Static demo behaviour only:
+   Loaded by layouts/dashboard-layout.html.
      • Dark / light theme toggle (same "technova_theme" key as the storefront)
      • Table search            [data-search-table="#tableId"]
-     • Demo buttons            [data-demo-action="Label"]
-     • Demo status selects     [data-demo-status]
-   Remove the demo helpers once the real controllers/endpoints exist.
    ========================================================================== */
 'use strict';
 
@@ -59,19 +56,6 @@
         table.querySelectorAll('tbody tr').forEach(row => {
           row.hidden = q !== '' && !row.textContent.toLowerCase().includes(q);
         });
-      });
-    });
-  }
-
-  /* ---------- Demo actions ---------- */
-  function initDemoActions() {
-    document.addEventListener('click', e => {
-      const btn = e.target.closest('[data-demo-action]');
-      if (btn) toast(btn.getAttribute('data-demo-action') + ': demo feature — not connected to backend.');
-    });
-    document.querySelectorAll('[data-demo-status]').forEach(sel => {
-      sel.addEventListener('change', () => {
-        toast(UiMessage.SELECTED_DEMO(sel.options[sel.selectedIndex].text));
       });
     });
   }
@@ -183,7 +167,9 @@
       el.textContent = 'Xin chào, ' + fullName;
     });
     document.querySelectorAll('.js-topbar-role').forEach(el => {
-      el.textContent = role.replace('ROLE_', '');
+      const roleCode = role.replace('ROLE_', '');
+      const roleLabels = { MANAGER: 'Quản lý', EMPLOYEE: 'Nhân viên', CUSTOMER: 'Khách hàng', ADMIN: 'Quản trị viên' };
+      el.textContent = roleLabels[roleCode] || roleCode;
     });
 
     document.querySelectorAll('.js-topbar-avatar').forEach(img => {
@@ -241,7 +227,6 @@
   document.addEventListener('DOMContentLoaded', () => {
     initTheme();
     initTableSearch();
-    initDemoActions();
     initLogoutHandler();
     initUserAvatar();
   });

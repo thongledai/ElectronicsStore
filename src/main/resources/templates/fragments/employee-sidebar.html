@@ -1,13 +1,13 @@
 <!-- Shared Employee dashboard navigation. -->
 <nav th:fragment="sidebar(active)" class="role-navbar" aria-label="Điều hướng nhân viên">
     <div class="role-brand-row">
-        <a class="brand" th:href="@{/employee/orders}"><i class="fa-solid fa-bolt me-2"></i>Tech<span>Nova</span></a>
+        <a class="brand" th:href="@{/employee/orders}"><i class="fa-solid fa-bolt me-2"></i>Shop<span>UTE</span></a>
         <button class="nav-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#roleNavLinks"
                 aria-controls="roleNavLinks" aria-expanded="false" aria-label="Mở menu"><i class="fa-solid fa-bars"></i></button>
     </div>
     <div class="nav-caption">Nhân viên</div>
     <div class="nav-links collapse d-lg-flex" id="roleNavLinks">
-        <a th:href="@{/customer/index}" title="Go to Customer Storefront"><i class="fa-solid fa-store"></i><span>Mua hàng</span></a>
+        <a th:href="@{/customer/index}" title="Đến cửa hàng"><i class="fa-solid fa-store"></i><span>Trang người dùng</span></a>
         <a th:href="@{/employee/orders}"
            th:classappend="${active == 'orders' and (statusFilter == null or statusFilter == '')} ? 'active'"
            th:attr="aria-current=${active == 'orders' and (statusFilter == null or statusFilter == '')} ? 'page'"><i class="fa-solid fa-receipt"></i><span>Quản lý đơn hàng</span></a>
@@ -36,14 +36,5 @@
         <button class="theme-toggle" type="button" data-theme-toggle aria-label="Đổi giao diện sáng/tối" title="Đổi giao diện">
             <i class="fa-solid fa-moon"></i>
         </button>
-        <div class="dropdown">
-            <button class="role-avatar border-0" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Mở menu tài khoản"><span class="js-role-avatar-fallback">E</span></button>
-            <ul class="dropdown-menu dropdown-menu-end shadow">
-                <li><a class="dropdown-item" th:href="@{/profile}"><i class="fa-solid fa-user me-2"></i>Hồ sơ cá nhân</a></li>
-                <li><a class="dropdown-item" th:href="@{/employee/reset-password}"><i class="fa-solid fa-key me-2"></i>Đổi mật khẩu</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><form th:action="@{/logout}" method="post" class="m-0 js-logout-form"><button class="dropdown-item text-danger" type="submit"><i class="fa-solid fa-right-from-bracket me-2"></i>Đăng xuất</button></form></li>
-            </ul>
-        </div>
     </div>
 </nav>

@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en" th:replace="~{layouts/customer-layout :: layout(
-        'TechNova Electronics — Premium Gadgets, Honest Prices',
-        'TechNova Electronics — shop laptops, smartphones, headphones, smartwatches and gaming accessories with fast delivery and genuine warranty.',
+<html lang="vi" th:replace="~{layouts/customer-layout :: layout(
+        'UTE Shop — Thiết bị công nghệ, giá hợp lý',
+        'Mua laptop, điện thoại, tai nghe, đồng hồ thông minh và phụ kiện tại UTE Shop.',
         ~{::main}, ~{}, 'home.js', false)}">
 
 <head>
-  <title>Electronics Store</title>
+  <title>Cửa hàng điện tử</title>
 </head>
 
 <body>
@@ -20,54 +20,32 @@
         <div class="row align-items-center g-5">
 
           <div class="col-lg-6">
-            <span class="hero-pill">
-              <i class="fas fa-bolt"></i> Register for an account to use the service
-            </span>
 
-            <h1>Premium Tech<br><span class="text-gradient">Reasonable Prices</span></h1>
-
-            <p class="lead mb-4">
-              Developed by Thong, Thien, and Trung as the final project for the Software Engineering course. 
-              This e-commerce website applies our knowledge and skills to a practical application.
-            </p>
+            <h1>Công nghệ hiện đại<br><span class="text-gradient">Giá cả hợp lý</span></h1>
 
             <div class="d-flex flex-wrap gap-3">
               <a th:href="@{/customer/products}" class="btn btn-accent btn-lg">
-                <i class="fas fa-bag-shopping me-2"></i>Shop Now
+                <i class="fas fa-bag-shopping me-2"></i>Mua sắm ngay
               </a>
               <a href="#categories" class="btn btn-lg btn-outline-light rounded-pill px-4">
-                Browse Categories
+                Xem danh mục
               </a>
             </div>
 
-            <div class="hero-stats">
-              <div class="hero-stat">
-                <div class="num">50+</div>
-                <div class="lbl">Curated products</div>
-              </div>
-              <div class="hero-stat">
-                <div class="num">15+</div>
-                <div class="lbl">Happy customers</div>
-              </div>
-              <div class="hero-stat">
-                <div class="num">4.8<i class="fas fa-star ms-1" style="font-size:1rem;color:var(--star)"></i></div>
-                <div class="lbl">Average rating</div>
-              </div>
-            </div>
           </div>
 
           <div class="col-lg-6">
             <div class="hero-visual">
-              <img th:src="@{/images/hero-device.svg}" alt="Laptop, smartphone and smartwatch from TechNova" width="720"
-                height="560">
+              <img th:src="@{/images/hero-device.svg}"
+                alt="Máy tính xách tay, điện thoại và đồng hồ thông minh tại UTE Shop" width="720" height="560">
 
               <div class="hero-chip chip-1">
                 <span class="chip-icon"><i class="fas fa-shield-halved"></i></span>
-                <span>Information<br>Security</span>
+                <span>Bảo mật<br>thông tin</span>
               </div>
               <div class="hero-chip chip-2">
                 <span class="chip-icon"><i class="fas fa-truck-fast"></i></span>
-                <span>GHN<br>Delivery</span>
+                <span>Giao hàng<br>GHN</span>
               </div>
             </div>
           </div>
@@ -76,86 +54,52 @@
       </div>
     </section>
 
-    <!-- Scrolling brand marquee -->
-    <div class="brand-strip" aria-hidden="true">
-      <div class="brand-strip-track">
-        <span class="brand-strip-item">THONG</span><span class="brand-strip-item">24110344</span>
-        <span class="brand-strip-item">TRUNG</span><span class="brand-strip-item">24110366</span>
-        <span class="brand-strip-item">THIEN</span><span class="brand-strip-item">24110336</span>
-        <span class="brand-strip-item">THONG</span><span class="brand-strip-item">24110344</span>
-        <span class="brand-strip-item">TRUNG</span><span class="brand-strip-item">24110366</span>
-        <span class="brand-strip-item">THIEN</span><span class="brand-strip-item">24110336</span>
-        <!-- duplicated so the marquee loops seamlessly -->
-        <span class="brand-strip-item">THONG</span><span class="brand-strip-item">24110344</span>
-        <span class="brand-strip-item">TRUNG</span><span class="brand-strip-item">24110366</span>
-        <span class="brand-strip-item">THIEN</span><span class="brand-strip-item">24110336</span>
-        <span class="brand-strip-item">THONG</span><span class="brand-strip-item">24110344</span>
-        <span class="brand-strip-item">TRUNG</span><span class="brand-strip-item">24110366</span>
-        <span class="brand-strip-item">THIEN</span><span class="brand-strip-item">24110336</span>
-      </div>
-    </div>
 
-        <!-- ================================================================
+    <!-- ================================================================
        CATEGORIES
        ================================================================ -->
     <section class="section pt-0" id="categories">
       <div class="container">
         <div class="section-head text-center">
-          <h3 class="mb-1">&nbsp;</h3>
-          <span class="section-eyebrow"><i class="fas fa-layer-group"></i>Category</span>
-          <h2 class="section-title">Featured Products</h2>
-          <p class="section-subtitle mb-4">Our editors' current favourites across every category.</p>
+          <h2 class="section-title"> </h2>
+          <h2 class="section-title">Danh mục sản phẩm</h2>
         </div>
         <!-- Tiles injected by js/home.js -->
         <div class="row g-3 g-md-4" id="categoryGrid"></div>
       </div>
     </section>
+
     <!-- ================================================================
-       USP STRIP
+       DEAL OF THE DAY
        ================================================================ -->
-    <section class="section-tight">
+    <section class="section pt-0" id="dealSection" style="display: none;">
       <div class="container">
-        <div class="row g-3">
-          <div class="col-6 col-lg-3 reveal">
-            <div class="usp-card">
-              <div class="usp-icon"><i class="fas fa-truck-fast"></i></div>
-              <div>
-                <h5>Free Fast Delivery</h5>
-                <p>On every order above ₹5,000</p>
-              </div>
+        <div class="deal-band reveal">
+          <div class="row align-items-center g-4">
+
+            <div class="col-lg-4 text-center">
+              <img id="dealImage" class="img-fluid" th:src="@{/images/placeholder.webp}" alt="Ưu đãi sản phẩm"
+                style="max-height: 230px; width: auto; height: auto; object-fit: contain;"
+                onerror="this.onerror=null;this.src='/images/placeholder.webp';">
             </div>
-          </div>
-          <div class="col-6 col-lg-3 reveal" data-delay="1">
-            <div class="usp-card">
-              <div class="usp-icon"><i class="fas fa-rotate-left"></i></div>
-              <div>
-                <h5>7-Day Returns</h5>
-                <p>No-questions-asked refunds</p>
+
+            <div class="col-lg-5">
+              <span class="section-eyebrow"><i class="fas fa-fire"></i>Ưu đãi</span>
+              <h3 class="h4 text-white mb-2" id="dealName">—</h3>
+              <p class="mb-3" style="color:rgba(255,255,255,.75)" id="dealTagline"></p>
+              <div class="d-flex align-items-baseline gap-3 mb-3">
+                <span class="h3 mb-0 text-white" id="dealPrice"></span>
+                <span class="price-old text-white-50" id="dealOldPrice"></span>
+                <span class="badge bg-warning text-dark" id="dealOff"></span>
               </div>
-            </div>
-          </div>
-          <div class="col-6 col-lg-3 reveal" data-delay="2">
-            <div class="usp-card">
-              <div class="usp-icon"><i class="fas fa-shield-halved"></i></div>
-              <div>
-                <h5>Genuine Warranty</h5>
-                <p>Brand-authorised service</p>
-              </div>
-            </div>
-          </div>
-          <div class="col-6 col-lg-3 reveal" data-delay="3">
-            <div class="usp-card">
-              <div class="usp-icon"><i class="fas fa-headset"></i></div>
-              <div>
-                <h5>24×7 Support</h5>
-                <p>Real humans, real answers</p>
-              </div>
+              <a href="#" class="btn btn-accent" id="dealLink">
+                <i class="fas fa-bolt me-2"></i>Xem chi tiết
+              </a>
             </div>
           </div>
         </div>
       </div>
     </section>
-
 
 
     <!-- ================================================================
@@ -164,12 +108,9 @@
     <section class="section pt-0">
       <div class="container">
         <div class="section-head text-center">
-          <span class="section-eyebrow"><i class="fas fa-star"></i>Handpicked</span>
-          <h2 class="section-title">Featured Products</h2>
-          <p class="section-subtitle mb-4">Our editors' current favourites across every category.</p>
-
+          <h2 class="section-title">Sản phẩm nổi bật</h2>
           <div class="pill-tabs" id="featuredTabs">
-            <button class="pill-tab active" data-filter="all" type="button">All</button>
+            <button class="pill-tab active" data-filter="all" type="button">Tất cả</button>
             <!-- category pills appended by js/home.js -->
           </div>
         </div>
@@ -191,13 +132,13 @@
       <div class="container">
         <div class="deal-band reveal">
           <div class="row align-items-center g-4">
-
             <div class="col-lg-4 text-center">
-              <img id="dealImage" th:src="@{/images/placeholder.webp}" alt="Deal of the day" style="max-height:230px" width="600" height="600" onerror="this.onerror=null;this.src='/images/placeholder.webp';">
+              <img id="dealImage" class="img-fluid" th:src="@{/images/placeholder.webp}" alt="Ưu đãi sản phẩm"
+                style="max-height: 230px; width: auto; height: auto; object-fit: contain;"
+                onerror="this.onerror=null;this.src='/images/placeholder.webp';">
             </div>
-
             <div class="col-lg-5">
-              <span class="section-eyebrow"><i class="fas fa-fire"></i>Deal of the day</span>
+              <span class="section-eyebrow"><i class="fas fa-fire"></i>Ưu đãi sản phẩm</span>
               <h3 class="h4 text-white mb-2" id="dealName">—</h3>
               <p class="mb-3" style="color:rgba(255,255,255,.75)" id="dealTagline"></p>
               <div class="d-flex align-items-baseline gap-3 mb-3">
@@ -206,22 +147,9 @@
                 <span class="badge bg-warning text-dark" id="dealOff"></span>
               </div>
               <a href="#" class="btn btn-accent" id="dealLink">
-                <i class="fas fa-bolt me-2"></i>Grab This Deal
+                <i class="fas fa-bolt me-2"></i>Xem sản phẩm
               </a>
             </div>
-
-            <div class="col-lg-3">
-              <p class="small mb-2" style="color:rgba(255,255,255,.7)">Offer ends in</p>
-              <div class="countdown" id="countdown">
-                <div class="countdown-box"><span class="cd-num" data-cd="h">00</span><span class="cd-lbl">Hours</span>
-                </div>
-                <div class="countdown-box"><span class="cd-num" data-cd="m">00</span><span class="cd-lbl">Mins</span>
-                </div>
-                <div class="countdown-box"><span class="cd-num" data-cd="s">00</span><span class="cd-lbl">Secs</span>
-                </div>
-              </div>
-            </div>
-
           </div>
         </div>
       </div>
@@ -234,11 +162,10 @@
       <div class="container">
         <div class="section-head d-flex justify-content-between align-items-end flex-wrap gap-3">
           <div>
-            <span class="section-eyebrow"><i class="fas fa-trophy"></i>Most loved</span>
-            <h2 class="section-title mb-0">Best Sellers</h2>
+            <h2 class="section-title mb-0">Sản phẩm bán chạy</h2>
           </div>
           <a th:href="@{/customer/products(sort='popular')}" class="btn btn-ghost">
-            See all <i class="fas fa-arrow-right ms-1"></i>
+            Xem tất cả <i class="fas fa-arrow-right ms-1"></i>
           </a>
         </div>
 
@@ -253,22 +180,22 @@
       <div class="container">
         <div class="row g-4">
           <div class="col-lg-4 reveal">
-            <a th:href="@{/customer/products(category='headphones')}" class="promo-card d-block">
+            <a th:href="@{/customer/products(category='tai-nghe')}" class="promo-card d-block">
               <img th:src="@{/images/promo-audio.svg}" alt="">
               <div class="promo-body">
-                <h3>Audio that disappears</h3>
-                <p>Flagship ANC headphones from ₹2,999</p>
-                <span class="btn btn-accent btn-sm">Shop Audio</span>
+                <h3>Thiết bị âm thanh</h3>
+                <p>Khám phá các tai nghe hiện nay </p>
+                <span class="btn btn-accent btn-sm">Xem sản phẩm</span>
               </div>
             </a>
           </div>
           <div class="col-lg-4 reveal" data-delay="1">
-            <a th:href="@{/customer/products(category='gaming')}" class="promo-card d-block">
-              <img th:src="@{/images/promo-gaming.svg}" alt="">
+            <a th:href="@{/customer/products(category='laptop')}" class="promo-card d-block">
+              <img th:src="@{/images/promo-laptop.svg}" alt="">
               <div class="promo-body">
-                <h3>Level up your setup</h3>
-                <p>Mechanical keys, 8K polling mice & more</p>
-                <span class="btn btn-accent btn-sm">Shop Gaming</span>
+                <h3>Laptop</h3>
+                <p>Khám phá laptop hiện đại đang có </p>
+                <span class="btn btn-accent btn-sm">Xem sản phẩm</span>
               </div>
             </a>
           </div>
@@ -276,115 +203,16 @@
             <a th:href="@{/customer/products(category='smartphones')}" class="promo-card d-block">
               <img th:src="@{/images/promo-mobile.svg}" alt="">
               <div class="promo-body">
-                <h3>5G for everyone</h3>
-                <p>Flagship cameras from ₹18,999</p>
-                <span class="btn btn-accent btn-sm">Shop Phones</span>
+                <h3>Điện thoại</h3>
+                <p>Khám phá các mẫu điện thoại mới ra mắt</p>
+                <span class="btn btn-accent btn-sm">Xem sản phẩm</span>
               </div>
             </a>
           </div>
         </div>
       </div>
     </section>
-
-    <!-- ================================================================
-       TESTIMONIALS
-       ================================================================ -->
-    <section class="section pt-0">
-      <div class="container">
-        <div class="section-head text-center">
-          <span class="section-eyebrow"><i class="fas fa-comment-dots"></i>Customer stories</span>
-          <h2 class="section-title">Trusted by 50,000+ shoppers</h2>
-        </div>
-
-        <div class="row g-4">
-          <div class="col-md-4 reveal">
-            <div class="testimonial-card">
-              <span class="quote-mark"><i class="fas fa-quote-right"></i></span>
-              <div class="stars mb-2">
-                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
-                  class="fas fa-star"></i><i class="fas fa-star"></i>
-              </div>
-              <p>"Ordered the NovaBook Pro on a Tuesday evening and it arrived Thursday morning, sealed and with a
-                proper invoice. The price beat every other store I checked."</p>
-              <div class="testimonial-author">
-                <div class="avatar-initials">AM</div>
-                <div>
-                  <div class="fw-semibold small">Arjun Mehta</div>
-                  <div class="small text-muted">Video Editor, Pune</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-4 reveal" data-delay="1">
-            <div class="testimonial-card">
-              <span class="quote-mark"><i class="fas fa-quote-right"></i></span>
-              <div class="stars mb-2">
-                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
-                  class="fas fa-star"></i><i class="fas fa-star"></i>
-              </div>
-              <p>"Support actually answered on the first ring when my headphone case had a fault. Replacement shipped
-                the same day, no arguments. That is why I keep coming back."</p>
-              <div class="testimonial-author">
-                <div class="avatar-initials">RS</div>
-                <div>
-                  <div class="fw-semibold small">Riya Sen</div>
-                  <div class="small text-muted">Student, Patiala</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-4 reveal" data-delay="2">
-            <div class="testimonial-card">
-              <span class="quote-mark"><i class="fas fa-quote-right"></i></span>
-              <div class="stars mb-2">
-                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
-                  class="fas fa-star"></i><i class="fas fa-star-half-stroke"></i>
-              </div>
-              <p>"I have bought a keyboard, a mouse and a monitor arm here over two years. Everything genuine,
-                everything warrantied. The student discount is a nice touch too."</p>
-              <div class="testimonial-author">
-                <div class="avatar-initials">SN</div>
-                <div>
-                  <div class="fw-semibold small">Shaurya Nanda</div>
-                  <div class="small text-muted">Software Engineer, Bengaluru</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ================================================================
-       NEWSLETTER
-       ================================================================ -->
-    <section class="section pt-0">
-      <div class="container">
-        <div class="newsletter text-center reveal">
-          <span class="section-eyebrow"><i class="fas fa-envelope-open-text"></i>Stay in the loop</span>
-          <h2 class="section-title text-white">Get ₹500 off your first order</h2>
-          <p class="mb-4">Join 20,000+ subscribers for launch alerts, price-drop notifications and members-only sale
-            access.</p>
-
-          <form class="newsletter-form js-newsletter" novalidate>
-            <div class="input-group">
-              <input type="email" class="form-control" placeholder="Enter your email address" aria-label="Email address"
-                required>
-              <button class="btn btn-accent px-4" type="submit">Subscribe</button>
-            </div>
-            <p class="small mt-3 mb-0" style="color:rgba(255,255,255,.6)">
-              <i class="fas fa-lock me-1"></i>We never share your email. Unsubscribe anytime.
-            </p>
-          </form>
-        </div>
-      </div>
-    </section>
-
   </main>
-
-
 </body>
 
 </html>

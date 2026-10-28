@@ -31,7 +31,7 @@
     <circle cx="300" cy="286" r="46" fill="#ff7a18" opacity=".14"/>
     <path d="M308 254l-30 44h22l-8 34 32-48h-22z" fill="#ff7a18"/>
     <text x="300" y="358" font-family="Poppins,Arial" font-size="17" letter-spacing="3"
-          fill="#8c99ad" text-anchor="middle">TECHNOVA</text>
+          fill="#8c99ad" text-anchor="middle">UTE SHOP</text>
   </g>
   <ellipse cx="300" cy="536" rx="168" ry="17" fill="#0b1b34" opacity=".16"/>
 </svg>

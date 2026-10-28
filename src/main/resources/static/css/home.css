@@ -391,6 +391,13 @@
   overflow: hidden;
   position: relative;
 }
+.deal-band img {
+  max-width: 100%;
+  max-height: 230px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
 .countdown { display: flex; gap: .65rem; }
 .countdown-box {
   background: rgba(255, 255, 255, .12);

@@ -1,5 +1,5 @@
 /* ==========================================================================
-   TechNova Electronics — Common Profile Script
+   UTE Shop — Common Profile Script
    --------------------------------------------------------------------------
    Shared profile script located in common directory.
    ========================================================================== */
@@ -130,12 +130,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (cached.role) {
           const summaryRole = document.getElementById('summaryRole');
           const roleUpper = cached.role.replace('ROLE_', '').toUpperCase();
-          if (summaryRole) summaryRole.textContent = roleUpper;
+          const roleLabels = { CUSTOMER: 'Khách hàng', EMPLOYEE: 'Nhân viên', MANAGER: 'Quản lý', ADMIN: 'Quản trị viên' };
+          if (summaryRole) summaryRole.textContent = roleLabels[roleUpper] || roleUpper;
 
           const mgmtLink = document.querySelector('.js-mgmt-link');
           if (mgmtLink && roleUpper !== 'CUSTOMER') {
             mgmtLink.style.display = 'flex';
-            const rolePath = roleUpper === 'MANAGER' ? '/manager/index' : (roleUpper === 'EMPLOYEE' ? '/employee/orders' : '/shipper/index');
+            const rolePath = roleUpper === 'MANAGER' ? '/manager/index' : (roleUpper === 'EMPLOYEE' ? '/employee/orders' : '/profile');
             mgmtLink.setAttribute('href', rolePath);
           }
         }
@@ -173,7 +174,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const roleUpper = (u.role || 'CUSTOMER').replace('ROLE_', '').toUpperCase();
       const summaryRole = document.getElementById('summaryRole');
-      if (summaryRole) summaryRole.textContent = roleUpper;
+      const roleLabels = { CUSTOMER: 'Khách hàng', EMPLOYEE: 'Nhân viên', MANAGER: 'Quản lý', ADMIN: 'Quản trị viên' };
+      if (summaryRole) summaryRole.textContent = roleLabels[roleUpper] || roleUpper;
 
       const summaryEWalletCard = document.getElementById('summaryEWalletCard');
       const isCustomer = roleUpper === 'CUSTOMER';
@@ -184,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const mgmtLink = document.querySelector('.js-mgmt-link');
       if (mgmtLink && roleUpper !== 'CUSTOMER') {
         mgmtLink.style.display = 'flex';
-        const rolePath = roleUpper === 'MANAGER' ? '/manager/index' : (roleUpper === 'EMPLOYEE' ? '/employee/orders' : '/shipper/index');
+        const rolePath = roleUpper === 'MANAGER' ? '/manager/index' : (roleUpper === 'EMPLOYEE' ? '/employee/orders' : '/profile');
         mgmtLink.setAttribute('href', rolePath);
       }
 

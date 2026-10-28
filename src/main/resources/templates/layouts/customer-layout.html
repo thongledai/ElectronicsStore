@@ -4,8 +4,8 @@
 
   A page uses it like this:
     <html th:replace="~{layouts/customer-layout :: layout(
-            'Page title', 'Meta description', ~{::main}, ~{}, 'page-script.js', false)}">
-      <head><title>Page title</title></head>
+            'Trang title', 'Meta description', ~{::main}, ~{}, 'page-script.js', false)}">
+      <head><title>Trang title</title></head>
       <body><main> ... page content ... </main></body>
     </html>
 
@@ -34,8 +34,8 @@
 
 <th:block th:unless="${minimal}"><div th:replace="~{fragments/footer :: footer}"></div></th:block>
 
-<!-- Back to top -->
-<button class="back-to-top" type="button" aria-label="Back to top"><i class="fas fa-arrow-up"></i></button>
+<!-- Lên đầu trang -->
+<button class="back-to-top" type="button" aria-label="Lên đầu trang"><i class="fas fa-arrow-up"></i></button>
 
 <!-- Scripts: Bootstrap → data → core → page script -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

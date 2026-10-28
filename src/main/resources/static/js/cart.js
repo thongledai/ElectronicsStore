@@ -1,5 +1,5 @@
 /* ==========================================================================
-   TechNova Electronics — Shopping Cart Page (nối backend /cart)
+   UTE Shop — Shopping Cart Page (nối backend /cart)
    ========================================================================== */
 
 'use strict';
@@ -119,7 +119,7 @@ function renderCart() {
 
     const unitCount = cartItems.reduce((s, i) => s + i.qty, 0);
     document.getElementById('cartHeading').textContent =
-        `Your items (${cartItems.length} product${cartItems.length === 1 ? '' : 's'}, ${unitCount} unit${unitCount === 1 ? '' : 's'})`;
+        `${cartItems.length} sản phẩm, ${unitCount} đơn vị`;
 
     document.getElementById('cartItems').innerHTML = cartItems.map(item => {
         const maxQty = Math.max(1, Math.min(item.stock, MAX_QTY));
@@ -128,10 +128,10 @@ function renderCart() {
         const disabledSelect = item.canBuy ? '' : 'disabled';
 
         let note = '';
-        if (item.stock <= 0) note = '<p class="stock-note mt-1 mb-0 text-danger">Out of stock</p>';
-        else if (item.qty > item.stock) note = `<p class="stock-note mt-1 mb-0 text-danger">Only ${item.stock} left, please reduce quantity</p>`;
-        else if (!item.canBuy) note = '<p class="stock-note mt-1 mb-0 text-danger">No longer available</p>';
-        else if (item.stock <= 10) note = `<p class="stock-note mt-1 mb-0">Only ${item.stock} left</p>`;
+        if (item.stock <= 0) note = '<p class="stock-note mt-1 mb-0 text-danger">Hết hàng</p>';
+        else if (item.qty > item.stock) note = `<p class="stock-note mt-1 mb-0 text-danger">Chỉ còn ${item.stock} sản phẩm, vui lòng giảm số lượng</p>`;
+        else if (!item.canBuy) note = '<p class="stock-note mt-1 mb-0 text-danger">Sản phẩm không còn kinh doanh</p>';
+        else if (item.stock <= 10) note = `<p class="stock-note mt-1 mb-0">Chỉ còn ${item.stock} sản phẩm</p>`;
 
         return `
       <article class="cart-item ${item.canBuy ? '' : 'opacity-75'}" data-id="${esc(item.id)}">
@@ -144,7 +144,7 @@ function renderCart() {
         <div>
           <label class="small d-flex align-items-center gap-2 mb-1">
             <input type="checkbox" class="form-check-input mt-0 js-select" data-id="${esc(item.id)}" ${checked} ${disabledSelect}>
-            Select
+            Chọn
           </label>
 
           <h3 class="ci-name">
@@ -160,27 +160,27 @@ function renderCart() {
           ${note}
 
           <div class="ci-controls">
-            <div class="qty-stepper" role="group" aria-label="Quantity for ${esc(item.name)}">
+            <div class="qty-stepper" role="group" aria-label="Số lượng ${esc(item.name)}">
               <button type="button" class="js-qty-minus" data-id="${esc(item.id)}"
-                      aria-label="Decrease quantity" ${item.qty <= 1 ? 'disabled' : ''}>
+                      aria-label="Giảm số lượng" ${item.qty <= 1 ? 'disabled' : ''}>
                 <i class="fas fa-minus"></i>
               </button>
               <input type="number" class="js-qty-input" data-id="${esc(item.id)}"
-                     value="${item.qty}" min="1" max="${maxQty}" aria-label="Quantity">
+                     value="${item.qty}" min="1" max="${maxQty}" aria-label="Số lượng">
               <button type="button" class="js-qty-plus" data-id="${esc(item.id)}"
-                      aria-label="Increase quantity" ${item.qty >= maxQty ? 'disabled' : ''}>
+                      aria-label="Tăng số lượng" ${item.qty >= maxQty ? 'disabled' : ''}>
                 <i class="fas fa-plus"></i>
               </button>
             </div>
 
             <button class="btn-link-danger js-remove" data-id="${esc(item.id)}" type="button">
-              <i class="fas fa-trash-can"></i> Remove
+              <i class="fas fa-trash-can"></i> Xóa
             </button>
           </div>
         </div>
 
         <div class="ci-total">
-          <span class="small text-muted d-block d-md-none">Line total</span>
+          <span class="small text-muted d-block d-md-none">Thành tiền</span>
           <span class="amount">${fmtMoney(lineTotal)}</span>
           ${item.qty > 1 ? `<div class="small text-muted">${item.qty} × ${fmtMoney(item.price)}</div>` : ''}
         </div>
@@ -201,7 +201,7 @@ function renderSummary() {
         const el = document.getElementById(id);
         if (el) el.textContent = text;
     };
-    setText('subtotalLabel', `Subtotal (${qty} item${qty === 1 ? '' : 's'})`);
+    setText('subtotalLabel', `Tạm tính (${qty} sản phẩm)`);
     setText('subtotal', fmtMoney(subtotal));
     setText('shipping', 'Tính ở bước thanh toán');
     setText('total', fmtMoney(subtotal));
@@ -310,7 +310,7 @@ function bindCartEvents() {
     const clearBtn = document.getElementById('clearCartBtn');
     if (clearBtn) {
         clearBtn.addEventListener('click', () => {
-            if (cartItems.length && confirm('Remove all items from your cart?')) clearCart();
+            if (cartItems.length && confirm('Xóa tất cả sản phẩm khỏi giỏ hàng?')) clearCart();
         });
     }
 
