@@ -72,6 +72,13 @@ public enum ApiMessage {
     ACCESS_DENIED("Bạn không có quyền thực hiện thao tác này."),
     REQUEST_FAILED("Không thể hoàn tất yêu cầu. Vui lòng thử lại."),
     INTERNAL_ERROR("Hệ thống đang gặp sự cố. Vui lòng thử lại sau."),
+    AUTH_REFRESH_TOKEN_SUCCESS("Làm mới Token thành công."),
+    AUTH_LOGOUT_SUCCESS("Đăng xuất thành công."),
+    AUTH_GOOGLE_LOGIN_SUCCESS("Đăng nhập Google thành công."),
+    AUTH_GOOGLE_CLIENT_ID_SUCCESS("Lấy Google Client ID thành công."),
+    AUTH_FORGOT_PASSWORD_SUCCESS("Quên mật khẩu thành công."),
+    AUTH_RESEND_OTP_SUCCESS("Gửi lại mã OTP thành công."),
+    AUTH_VERIFY_OTP_SUCCESS("Xác thực OTP thành công."),
 
     // Wishlist
     WISHLIST_GET_SUCCESS("Lấy danh sách yêu thích thành công."),
@@ -116,7 +123,11 @@ public enum ApiMessage {
 
     private final String message;
 
-    ApiMessage(String message) { this.message = message; }
+    ApiMessage(String message) {
+        this.message = message;
+    }
 
-    public String getMessage() { return message; }
+    public String getMessage() {
+        return message;
+    }
 }

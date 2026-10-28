@@ -3,7 +3,7 @@
         'Hồ sơ cá nhân — UTE Shop',
         'Quản lý và cập nhật thông tin cá nhân tài khoản của bạn.',
         ~{::main}, ~{}, 'common/profile.js', false)}">
-<head><title>Hồ sơ cá nhân — UTE Shop</title></head>
+<head><title>Hồ sơ cá nhân</title></head>
 <body>
 
 <main class="profile-page py-4 py-md-5">
@@ -32,7 +32,6 @@
             </label>
             <input type="file" id="profileAvatarFile" class="d-none" accept="image/png, image/jpeg, image/webp">
           </div>
-          <div class="small text-muted mb-2">Định dạng JPG, PNG, WEBP (tối đa 10MB)</div>
           <div class="invalid-feedback d-block text-danger mb-2" id="avatarError" style="display:none;"></div>
 
           <h5 class="fw-bold mb-1" id="summaryFullName">---</h5>
@@ -53,7 +52,6 @@
           <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4 pb-2 border-bottom">
             <div>
               <h4 class="fw-bold mb-1">Thông tin cá nhân</h4>
-              <p class="text-muted small mb-0">Quản lý hồ sơ để bảo vệ tài khoản và nhận ưu đãi từ UTE Shop.</p>
             </div>
             <span class="badge bg-light text-secondary border px-3 py-2 text-break" id="summaryUserCode">
               Mã: ---
@@ -76,12 +74,11 @@
 
             <!-- Email (Read-only) -->
             <div class="col-12">
-              <label class="form-label fw-semibold" for="profileEmail">Email đăng nhập</label>
+              <label class="form-label fw-semibold" for="profileEmail">Email</label>
               <div class="input-group">
                 <span class="input-group-text bg-light text-muted"><i class="fas fa-envelope"></i></span>
                 <input type="email" class="form-control bg-light" id="profileEmail" disabled readonly>
               </div>
-              <small class="text-muted">Email định danh tài khoản không thể tự chỉnh sửa.</small>
             </div>
 
             <!-- Số điện thoại -->
@@ -89,26 +86,25 @@
               <label class="form-label fw-semibold" for="profilePhone">Số điện thoại</label>
               <div class="input-group">
                 <span class="input-group-text bg-light text-muted"><i class="fas fa-phone"></i></span>
-                <input type="tel" class="form-control" id="profilePhone" placeholder="Ví dụ: 0912345678">
+                <input type="tel" class="form-control" id="profilePhone" placeholder="Nhập số điện thoại" pattern="^(\+84|0)\d{9,10}$">
               </div>
               <div class="invalid-feedback" id="errPhone"></div>
             </div>
 
             <!-- Địa chỉ giao hàng -->
             <div class="col-12">
-              <label class="form-label fw-semibold" for="profileAddresses">Địa chỉ giao hàng</label>
+              <label class="form-label fw-semibold" for="profileAddresses">Địa chỉ</label>
               <div class="input-group">
                 <span class="input-group-text bg-light text-muted"><i class="fas fa-location-dot"></i></span>
-                <textarea class="form-control" id="profileAddresses" rows="2" placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố..."></textarea>
+                <textarea class="form-control" id="profileAddresses" rows="1" placeholder="Nhập số nhà, tên đường, phường/xã, tỉnh/thành phố"></textarea>
               </div>
               <div class="invalid-feedback" id="errAddresses"></div>
-              <small class="text-muted">Địa chỉ mặc định dùng để giao hàng khi đặt đơn.</small>
             </div>
 
             <!-- Nút Lưu -->
             <div class="col-12 d-flex justify-content-end gap-2 pt-2">
               <button type="submit" class="btn btn-primary px-4 py-2 fw-semibold" id="btnSaveProfile">
-                <i class="fas fa-floppy-disk me-2"></i>Lưu thay đổi
+                <i class="fas fa-floppy-disk me-2"></i>Lưu
               </button>
             </div>
             </div>

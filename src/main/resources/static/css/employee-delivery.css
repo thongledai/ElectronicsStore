@@ -539,7 +539,14 @@
   margin-bottom: .85rem;
 }
 .delivery-page .delivery-panel {
+  height: auto;
   padding: 1rem;
+}
+.delivery-page > .delivery-panel,
+.delivery-page > #shipmentForm.delivery-panel {
+  height: auto;
+  min-height: 0;
+  align-self: start;
 }
 .delivery-page .delivery-panel-title {
   margin-bottom: .7rem;

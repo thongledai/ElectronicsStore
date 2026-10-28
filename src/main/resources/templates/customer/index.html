@@ -20,15 +20,8 @@
         <div class="row align-items-center g-5">
 
           <div class="col-lg-6">
-            <span class="hero-pill">
-              <i class="fas fa-bolt"></i> Đăng ký tài khoản để sử dụng dịch vụ
-            </span>
 
             <h1>Công nghệ hiện đại<br><span class="text-gradient">Giá cả hợp lý</span></h1>
-
-            <p class="lead mb-4">
-              Khám phá và mua sắm các sản phẩm điện tử trên UTE Shop.
-            </p>
 
             <div class="d-flex flex-wrap gap-3">
               <a th:href="@{/customer/products}" class="btn btn-accent btn-lg">
@@ -43,8 +36,8 @@
 
           <div class="col-lg-6">
             <div class="hero-visual">
-              <img th:src="@{/images/hero-device.svg}" alt="Máy tính xách tay, điện thoại và đồng hồ thông minh tại UTE Shop" width="720"
-                height="560">
+              <img th:src="@{/images/hero-device.svg}"
+                alt="Máy tính xách tay, điện thoại và đồng hồ thông minh tại UTE Shop" width="720" height="560">
 
               <div class="hero-chip chip-1">
                 <span class="chip-icon"><i class="fas fa-shield-halved"></i></span>
@@ -62,66 +55,51 @@
     </section>
 
 
-        <!-- ================================================================
+    <!-- ================================================================
        CATEGORIES
        ================================================================ -->
     <section class="section pt-0" id="categories">
       <div class="container">
         <div class="section-head text-center">
-          <span class="section-eyebrow"><i class="fas fa-layer-group"></i>Danh mục</span>
+          <h2 class="section-title"> </h2>
           <h2 class="section-title">Danh mục sản phẩm</h2>
-          <p class="section-subtitle mb-4">Khám phá các danh mục sản phẩm hiện có.</p>
         </div>
         <!-- Tiles injected by js/home.js -->
         <div class="row g-3 g-md-4" id="categoryGrid"></div>
       </div>
     </section>
+
     <!-- ================================================================
-       USP STRIP
+       DEAL OF THE DAY
        ================================================================ -->
-    <section class="section-tight">
+    <section class="section pt-0" id="dealSection" style="display: none;">
       <div class="container">
-        <div class="row g-3">
-          <div class="col-6 col-lg-3 reveal">
-            <div class="usp-card">
-              <div class="usp-icon"><i class="fas fa-truck-fast"></i></div>
-              <div>
-                <h3 class="h5">Giao hàng theo địa chỉ</h3>
-                <p>Phí vận chuyển hiển thị khi thanh toán</p>
-              </div>
+        <div class="deal-band reveal">
+          <div class="row align-items-center g-4">
+
+            <div class="col-lg-4 text-center">
+              <img id="dealImage" class="img-fluid" th:src="@{/images/placeholder.webp}" alt="Ưu đãi sản phẩm"
+                style="max-height: 230px; width: auto; height: auto; object-fit: contain;"
+                onerror="this.onerror=null;this.src='/images/placeholder.webp';">
             </div>
-          </div>
-          <div class="col-6 col-lg-3 reveal" data-delay="1">
-            <div class="usp-card">
-              <div class="usp-icon"><i class="fas fa-rotate-left"></i></div>
-              <div>
-                <h3 class="h5">Quản lý đơn hàng</h3>
-                <p>Theo dõi trạng thái đơn hàng</p>
+
+            <div class="col-lg-5">
+              <span class="section-eyebrow"><i class="fas fa-fire"></i>Ưu đãi</span>
+              <h3 class="h4 text-white mb-2" id="dealName">—</h3>
+              <p class="mb-3" style="color:rgba(255,255,255,.75)" id="dealTagline"></p>
+              <div class="d-flex align-items-baseline gap-3 mb-3">
+                <span class="h3 mb-0 text-white" id="dealPrice"></span>
+                <span class="price-old text-white-50" id="dealOldPrice"></span>
+                <span class="badge bg-warning text-dark" id="dealOff"></span>
               </div>
-            </div>
-          </div>
-          <div class="col-6 col-lg-3 reveal" data-delay="2">
-            <div class="usp-card">
-              <div class="usp-icon"><i class="fas fa-shield-halved"></i></div>
-              <div>
-                <h3 class="h5">Thanh toán trực tuyến</h3>
-                <p>Hỗ trợ ví điện tử và chuyển khoản</p>
-              </div>
-            </div>
-          </div>
-          <div class="col-6 col-lg-3 reveal" data-delay="3">
-            <div class="usp-card">
-              <div class="usp-icon"><i class="fas fa-headset"></i></div>
-              <div>
-                <h3 class="h5">Giao hàng GHN</h3>
-                <p>Cập nhật trạng thái vận chuyển</p>
-              </div>
+              <a href="#" class="btn btn-accent" id="dealLink">
+                <i class="fas fa-bolt me-2"></i>Xem chi tiết
+              </a>
             </div>
           </div>
         </div>
       </div>
     </section>
-
 
 
     <!-- ================================================================
@@ -130,10 +108,7 @@
     <section class="section pt-0">
       <div class="container">
         <div class="section-head text-center">
-          <span class="section-eyebrow"><i class="fas fa-star"></i>Nổi bật</span>
           <h2 class="section-title">Sản phẩm nổi bật</h2>
-          <p class="section-subtitle mb-4">Danh sách sản phẩm được tải từ cửa hàng.</p>
-
           <div class="pill-tabs" id="featuredTabs">
             <button class="pill-tab active" data-filter="all" type="button">Tất cả</button>
             <!-- category pills appended by js/home.js -->
@@ -157,11 +132,11 @@
       <div class="container">
         <div class="deal-band reveal">
           <div class="row align-items-center g-4">
-
             <div class="col-lg-4 text-center">
-              <img id="dealImage" th:src="@{/images/placeholder.webp}" alt="Ưu đãi sản phẩm" style="max-height:230px" width="600" height="600" onerror="this.onerror=null;this.src='/images/placeholder.webp';">
+              <img id="dealImage" class="img-fluid" th:src="@{/images/placeholder.webp}" alt="Ưu đãi sản phẩm"
+                style="max-height: 230px; width: auto; height: auto; object-fit: contain;"
+                onerror="this.onerror=null;this.src='/images/placeholder.webp';">
             </div>
-
             <div class="col-lg-5">
               <span class="section-eyebrow"><i class="fas fa-fire"></i>Ưu đãi sản phẩm</span>
               <h3 class="h4 text-white mb-2" id="dealName">—</h3>
@@ -175,9 +150,6 @@
                 <i class="fas fa-bolt me-2"></i>Xem sản phẩm
               </a>
             </div>
-
-
-
           </div>
         </div>
       </div>
@@ -190,7 +162,6 @@
       <div class="container">
         <div class="section-head d-flex justify-content-between align-items-end flex-wrap gap-3">
           <div>
-            <span class="section-eyebrow"><i class="fas fa-trophy"></i>Được quan tâm</span>
             <h2 class="section-title mb-0">Sản phẩm bán chạy</h2>
           </div>
           <a th:href="@{/customer/products(sort='popular')}" class="btn btn-ghost">
@@ -209,21 +180,21 @@
       <div class="container">
         <div class="row g-4">
           <div class="col-lg-4 reveal">
-            <a th:href="@{/customer/products(category='headphones')}" class="promo-card d-block">
+            <a th:href="@{/customer/products(category='tai-nghe')}" class="promo-card d-block">
               <img th:src="@{/images/promo-audio.svg}" alt="">
               <div class="promo-body">
                 <h3>Thiết bị âm thanh</h3>
-                <p>Khám phá tai nghe và loa</p>
+                <p>Khám phá các tai nghe hiện nay </p>
                 <span class="btn btn-accent btn-sm">Xem sản phẩm</span>
               </div>
             </a>
           </div>
           <div class="col-lg-4 reveal" data-delay="1">
-            <a th:href="@{/customer/products(category='gaming')}" class="promo-card d-block">
-              <img th:src="@{/images/promo-gaming.svg}" alt="">
+            <a th:href="@{/customer/products(category='laptop')}" class="promo-card d-block">
+              <img th:src="@{/images/promo-laptop.svg}" alt="">
               <div class="promo-body">
-                <h3>Thiết bị chơi game</h3>
-                <p>Khám phá phụ kiện chơi game</p>
+                <h3>Laptop</h3>
+                <p>Khám phá laptop hiện đại đang có </p>
                 <span class="btn btn-accent btn-sm">Xem sản phẩm</span>
               </div>
             </a>
@@ -232,8 +203,8 @@
             <a th:href="@{/customer/products(category='smartphones')}" class="promo-card d-block">
               <img th:src="@{/images/promo-mobile.svg}" alt="">
               <div class="promo-body">
-                <h3>Điện thoại thông minh</h3>
-                <p>Xem các mẫu điện thoại hiện có</p>
+                <h3>Điện thoại</h3>
+                <p>Khám phá các mẫu điện thoại mới ra mắt</p>
                 <span class="btn btn-accent btn-sm">Xem sản phẩm</span>
               </div>
             </a>
@@ -241,39 +212,7 @@
         </div>
       </div>
     </section>
-
-    <!-- ================================================================
-       CUSTOMER REVIEWS
-       ================================================================ -->
-    <!-- Testimonials are omitted until customer reviews are available from the backend. -->
-
-    <!-- ================================================================
-       NEWSLETTER
-       ================================================================ -->
-    <section class="section pt-0">
-      <div class="container">
-        <div class="newsletter text-center reveal">
-          <span class="section-eyebrow"><i class="fas fa-envelope-open-text"></i>Cập nhật thông tin</span>
-          <h2 class="section-title text-white">Nhận ưu đãi cho đơn hàng đầu tiên</h2>
-          <p class="mb-4">Đăng ký nhận thông tin về sản phẩm và ưu đãi mới.</p>
-
-          <form class="newsletter-form js-newsletter" novalidate>
-            <div class="input-group">
-              <input type="email" class="form-control" placeholder="Nhập địa chỉ email" aria-label="Địa chỉ email"
-                required>
-              <button class="btn btn-accent px-4" type="submit">Đăng ký</button>
-            </div>
-            <p class="small mt-3 mb-0" style="color:rgba(255,255,255,.6)">
-              <i class="fas fa-lock me-1"></i>Email của bạn chỉ được dùng để gửi thông tin đã đăng ký.
-            </p>
-          </form>
-        </div>
-      </div>
-    </section>
-
   </main>
-
-
 </body>
 
 </html>
