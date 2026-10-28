@@ -52,34 +52,35 @@ public class ShipmentService implements IShipmentService {
                 .content("Hang de vo")
                 .build();
 
-        GhnApiResponse<GhnCreateOrderResponse> response;
+        GhnApiResponse<GhnCreateOrderResponse> response = null;
 
         try {
-            response = ghnRestClient.post()
-                    .uri("/v2/shipping-order/preview")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(createOrderBody)
-                    .retrieve()
-                    .body(new ParameterizedTypeReference<>() {
-                    });
-
+            response = executePreview(createOrderBody);
         } catch (HttpClientErrorException e) {
-            // GHN trả 4xx: dữ liệu địa chỉ/dịch vụ không hợp lệ
-            log.warn("GHN từ chối địa chỉ: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
-            if (e.getStatusCode().value() == 401 || e.getStatusCode().value() == 403) {
-                // sai token/shopId là lỗi cấu hình của mình, không phải lỗi user
-                log.error("Token hoặc ShopId GHN không hợp lệ");
-                throw new AppException(ShippingErrorCode.GHN_SERVICE_ERROR);
+            log.warn("GHN từ chối địa chỉ lần 1: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
+            String responseBody = e.getResponseBodyAsString();
+            if (responseBody.contains("TO_ADDRESS_CONFLICT") || responseBody.contains("address conflict")) {
+                // GHN geocoder phát hiện mâu thuẫn giữa tên đường chi tiết và phường/xã.
+                // Thử lại với địa chỉ chuẩn hóa cấp phường/xã để lấy cước phí và ngày giao chuẩn xác.
+                log.info("Thử lại GHN preview với địa chỉ cấp phường/xã: {}, {}", req.wardName(), req.provinceName());
+                try {
+                    GhnCreateOrderRequest fallbackBody = createOrderBody.toBuilder()
+                            .toAddress(String.join(", ", req.wardName(), req.provinceName()))
+                            .build();
+                    response = executePreview(fallbackBody);
+                } catch (Exception retryEx) {
+                    log.warn("GHN preview fallback cũng thất bại", retryEx);
+                    handleClientError(e);
+                }
+            } else {
+                handleClientError(e);
             }
-            throw new AppException(ShippingErrorCode.ADDRESS_INVALID);
-
         } catch (RestClientException e) {
-            // 5xx, timeout, mất kết nối
             log.error("Lỗi khi gọi GHN", e);
             throw new AppException(ShippingErrorCode.GHN_SERVICE_ERROR);
         }
 
-        if (response == null) {
+        if (response == null || response.getData() == null) {
             log.error("GHN trả dữ liệu không đọc được: {}", response);
             throw new AppException(ShippingErrorCode.GHN_SERVICE_ERROR);
         }
@@ -110,28 +111,28 @@ public class ShipmentService implements IShipmentService {
                 .items(this.createOrderItems(order))
                 .build();
 
-        GhnCreateOrderResponse response;
+        GhnCreateOrderResponse response = null;
 
         try {
-            response = ghnRestClient.post()
-                    .uri("/v2/shipping-order/create")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(createOrderBody)
-                    .retrieve()
-                    .body(GhnCreateOrderResponse.class);
-
+            response = executeCreate(createOrderBody);
         } catch (HttpClientErrorException e) {
-            // GHN trả 4xx: dữ liệu địa chỉ/dịch vụ không hợp lệ
-            log.warn("GHN từ chối địa chỉ: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
-            if (e.getStatusCode().value() == 401 || e.getStatusCode().value() == 403) {
-                // sai token/shopId là lỗi cấu hình của mình, không phải lỗi user
-                log.error("Token hoặc ShopId GHN không hợp lệ");
-                throw new AppException(ShippingErrorCode.GHN_SERVICE_ERROR);
+            log.warn("GHN từ chối địa chỉ khi tạo đơn: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
+            String responseBody = e.getResponseBodyAsString();
+            if (responseBody.contains("TO_ADDRESS_CONFLICT") || responseBody.contains("address conflict")) {
+                log.info("Thử lại GHN tạo đơn với địa chỉ cấp phường/xã: {}, {}", req.wardName(), req.provinceName());
+                try {
+                    GhnCreateOrderRequest fallbackBody = createOrderBody.toBuilder()
+                            .toAddress(String.join(", ", req.wardName(), req.provinceName()))
+                            .build();
+                    response = executeCreate(fallbackBody);
+                } catch (Exception retryEx) {
+                    log.warn("GHN tạo đơn fallback cũng thất bại", retryEx);
+                    handleClientError(e);
+                }
+            } else {
+                handleClientError(e);
             }
-            throw new AppException(ShippingErrorCode.ADDRESS_INVALID);
-
         } catch (RestClientException e) {
-            // 5xx, timeout, mất kết nối
             log.error("Lỗi khi gọi GHN", e);
             throw new AppException(ShippingErrorCode.GHN_SERVICE_ERROR);
         }
@@ -142,6 +143,32 @@ public class ShipmentService implements IShipmentService {
         }
 
         return response;
+    }
+
+    private GhnApiResponse<GhnCreateOrderResponse> executePreview(GhnCreateOrderRequest body) {
+        return ghnRestClient.post()
+                .uri("/v2/shipping-order/preview")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(body)
+                .retrieve()
+                .body(new ParameterizedTypeReference<>() {});
+    }
+
+    private GhnCreateOrderResponse executeCreate(GhnCreateOrderRequest body) {
+        return ghnRestClient.post()
+                .uri("/v2/shipping-order/create")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(body)
+                .retrieve()
+                .body(GhnCreateOrderResponse.class);
+    }
+
+    private void handleClientError(HttpClientErrorException e) {
+        if (e.getStatusCode().value() == 401 || e.getStatusCode().value() == 403) {
+            log.error("Token hoặc ShopId GHN không hợp lệ");
+            throw new AppException(ShippingErrorCode.GHN_SERVICE_ERROR);
+        }
+        throw new AppException(ShippingErrorCode.ADDRESS_INVALID);
     }
 
     private List<GhnCreateOrderRequest.Item> createOrderItems(Order order) {

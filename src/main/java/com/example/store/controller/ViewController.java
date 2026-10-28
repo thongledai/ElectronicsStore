@@ -130,6 +130,11 @@ public class ViewController {
         return "redirect:/employee/orders";
     }
 
+    @GetMapping("/employee/promotions")
+    public String employeePromotions() {
+        return "employee/promotions";
+    }
+
     @GetMapping("/employee/{page}")
     public String employeePages(@PathVariable String page) {
         if ("index".equalsIgnoreCase(page)) {

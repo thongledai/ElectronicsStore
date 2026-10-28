@@ -31,6 +31,12 @@
             <span>Hỗ trợ trực tuyến</span>
             <span class="badge bg-danger rounded-pill ms-auto d-none" id="sidebarOpenChatBadge">0</span>
         </a>
+        <a th:href="@{/employee/promotions}"
+           th:classappend="${active == 'promotions'} ? 'active'"
+           th:attr="aria-current=${active == 'promotions'} ? 'page'">
+            <i class="fa-solid fa-ticket"></i>
+            <span>Mã giảm giá</span>
+        </a>
     </div>
     <div class="nav-actions">
         <button class="theme-toggle" type="button" data-theme-toggle aria-label="Đổi giao diện sáng/tối" title="Đổi giao diện">

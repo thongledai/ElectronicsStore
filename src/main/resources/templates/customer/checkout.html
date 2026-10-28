@@ -78,9 +78,45 @@
                     <div class="summary-panel checkout-sticky">
                         <h2 class="h6 mb-3"><i class="fas fa-receipt me-2 text-primary"></i>Tóm tắt đơn hàng</h2>
 
+                        <!-- Voucher / Mã giảm giá -->
+                        <div class="mb-3" id="voucherSection">
+                            <label class="form-label small fw-semibold text-muted mb-1" for="voucherInput">
+                                <i class="fas fa-ticket-alt text-primary me-1"></i>Mã giảm giá / Voucher
+                            </label>
+                            <div class="input-group input-group-sm" id="voucherInputGroup">
+                                <input type="text" class="form-control text-uppercase" id="voucherInput"
+                                       placeholder="Vui lòng nhập địa chỉ nhận hàng trước..." maxlength="50" autocomplete="off" disabled>
+                                <button class="btn btn-outline-primary" id="applyVoucherBtn" type="button" disabled>
+                                    Áp dụng
+                                </button>
+                            </div>
+
+                            <!-- Gợi ý khi chưa nhập đủ địa chỉ -->
+                            <div class="small text-muted mt-1" id="voucherAddressHint">
+                                <i class="fas fa-info-circle me-1 text-primary"></i>Vui lòng nhập đầy đủ địa chỉ giao hàng để sử dụng mã giảm giá.
+                            </div>
+
+                            <!-- Box khi đã áp dụng voucher -->
+                            <div class="coupon-applied d-none" id="voucherAppliedBox">
+                                <div class="d-flex align-items-center gap-2 text-truncate">
+                                    <i class="fas fa-check-circle"></i>
+                                    <div class="text-truncate">
+                                        <div class="fw-bold" id="appliedVoucherCode"></div>
+                                        <div class="small text-muted fw-normal text-truncate" id="appliedVoucherDesc"></div>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-link text-danger p-0 ms-2 text-decoration-none" id="removeVoucherBtn" title="Bỏ áp dụng">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+
+                            <p class="small text-danger mt-1 mb-0 d-none" id="voucherMsg"></p>
+                        </div>
+
                         <div class="summary-row"><span>Tổng tiền hàng</span><span id="subtotal">—</span></div>
                         <div class="summary-row"><span>Phí vận chuyển</span><span id="shipping">—</span></div>
-                        <div class="summary-row"><span>Giảm giá</span><span id="discount" class="text-success">—</span></div>
+                        <div class="summary-row"><span>Giảm giá sản phẩm</span><span id="discount" class="text-success">—</span></div>
+                        <div class="summary-row d-none" id="voucherDiscountRow"><span>Voucher giảm giá</span><span id="voucherDiscount" class="text-success">—</span></div>
                         <div class="summary-row"><span>Ngày giao dự kiến</span><span id="eta">—</span></div>
 
                         <div class="summary-total">

@@ -119,7 +119,15 @@ public enum ApiMessage {
     NOT_LOGGED_IN("Chưa đăng nhập"),
     NOT_LOGGED_IN_DOT("Chưa đăng nhập."),
     IMAGE_UPLOAD_SUCCESS("Tải ảnh thành công"),
-    IMAGE_UPLOAD_FAILED("Tải ảnh thất bại");
+    IMAGE_UPLOAD_FAILED("Tải ảnh thất bại"),
+
+    // Promotion
+    PROMOTION_LIST_SUCCESS("Lấy danh sách mã giảm giá thành công"),
+    PROMOTION_DETAIL_SUCCESS("Lấy thông tin mã giảm giá thành công"),
+    PROMOTION_CREATE_SUCCESS("Tạo mã giảm giá thành công"),
+    PROMOTION_UPDATE_SUCCESS("Cập nhật mã giảm giá thành công"),
+    PROMOTION_TOGGLE_SUCCESS("Cập nhật trạng thái mã giảm giá thành công"),
+    PROMOTION_DELETE_SUCCESS("Xóa mã giảm giá thành công");
 
     private final String message;
 

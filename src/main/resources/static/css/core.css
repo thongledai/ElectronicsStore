@@ -54,6 +54,15 @@
   --border: #e2e8f0;
   --border-strong: #cbd5e1;
 
+  /* Bootstrap component variables mapped to the storefront theme tokens. */
+  --bs-body-bg: var(--bg);
+  --bs-body-color: var(--text);
+  --bs-secondary-bg: var(--surface-2);
+  --bs-tertiary-bg: var(--surface-2);
+  --bs-secondary-color: var(--text-muted);
+  --bs-emphasis-color: var(--text);
+  --bs-border-color: var(--border);
+
   /* Elevation */
   --shadow-sm: 0 1px 3px rgba(11, 27, 52, .07), 0 1px 2px rgba(11, 27, 52, .04);
   --shadow-md: 0 6px 18px rgba(11, 27, 52, .09);
@@ -86,6 +95,13 @@
   --blue-light: #2b2b2b;
   --orange-light: #332719;
   --navy: #000000;
+  --bs-body-bg: var(--bg);
+  --bs-body-color: var(--text);
+  --bs-secondary-bg: var(--surface-2);
+  --bs-tertiary-bg: var(--surface-2);
+  --bs-secondary-color: var(--text-muted);
+  --bs-emphasis-color: var(--text);
+  --bs-border-color: var(--border);
 
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, .35);
   --shadow-md: 0 6px 18px rgba(0, 0, 0, .4);
@@ -138,6 +154,7 @@ img { max-width: 100%; height: auto; }
    -------------------------------------------------------------------------- */
 .text-muted { color: var(--text-muted) !important; }
 .text-body { color: var(--text) !important; }
+.text-secondary { color: var(--text-muted) !important; }
 .bg-light { background-color: var(--surface-2) !important; }
 .bg-white { background-color: var(--surface) !important; }
 .bg-surface { background-color: var(--surface) !important; }
@@ -164,12 +181,48 @@ hr { border-color: var(--border); opacity: 1; }
   color: var(--text);
   border-color: var(--blue);
 }
+.card {
+  --bs-card-color: var(--text);
+  --bs-card-bg: var(--surface);
+  --bs-card-border-color: var(--border);
+}
 .table {
   --bs-table-color: var(--text);
   --bs-table-bg: transparent;
   --bs-table-border-color: var(--border);
   --bs-table-striped-color: var(--text);
   --bs-table-striped-bg: var(--surface-2);
+  --bs-table-hover-color: var(--text);
+  --bs-table-hover-bg: var(--surface-2);
+}
+[data-theme="dark"] .table-light,
+[data-theme="dark"] .table-secondary {
+  --bs-table-color: var(--text);
+  --bs-table-bg: var(--surface-2);
+  --bs-table-border-color: var(--border);
+  --bs-table-striped-color: var(--text);
+  --bs-table-striped-bg: var(--surface-3);
+  --bs-table-hover-color: var(--text);
+  --bs-table-hover-bg: var(--surface-3);
+}
+[data-theme="dark"] .table-hover > tbody > tr:hover > * {
+  --bs-table-bg-state: var(--surface-2);
+}
+.input-group-text {
+  background-color: var(--surface-2);
+  color: var(--text-muted);
+  border-color: var(--border-strong);
+}
+[data-theme="dark"] .btn-light {
+  --bs-btn-color: var(--text);
+  --bs-btn-bg: var(--surface-2);
+  --bs-btn-border-color: var(--border-strong);
+  --bs-btn-hover-color: var(--text);
+  --bs-btn-hover-bg: var(--surface-3);
+  --bs-btn-hover-border-color: var(--border-strong);
+  --bs-btn-active-color: var(--text);
+  --bs-btn-active-bg: var(--surface-3);
+  --bs-btn-active-border-color: var(--border-strong);
 }
 .btn-outline-secondary { color: var(--text-muted); border-color: var(--border-strong); }
 .btn-outline-secondary:hover { background-color: var(--surface-3); color: var(--text); border-color: var(--border-strong); }

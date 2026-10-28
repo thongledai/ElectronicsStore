@@ -2,7 +2,6 @@ package com.example.store.dto.order;
 
 import jakarta.validation.constraints.*;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,5 +32,7 @@ public record OrderPreviewRequest(
         Integer paymentMethodId,
 
         @Size(max = 500, message = "Ghi chú tối đa 500 ký tự")
-        String note
+        String note,
+
+        String voucherCode
 ) {}
