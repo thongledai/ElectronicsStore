@@ -339,13 +339,13 @@
 
     const priority = (attribute) => {
       const normalized = attribute.trim().toLocaleLowerCase('vi-VN');
-      if (/^màu sắc\\s*:/.test(normalized)) return 0;
-      if (/^dung lượng\\s*:/.test(normalized)) return 1;
+      if (/^màu sắc\s*:/.test(normalized)) return 0;
+      if (/^dung lượng\s*:/.test(normalized)) return 1;
       return 2;
     };
 
     return String(description)
-      .split(/\\s*[·|]\\s*/)
+      .split(/\s*[·|]\s*/)
       .map((attribute, index) => ({ attribute: attribute.trim(), index }))
       .filter(item => item.attribute)
       .sort((a, b) => priority(a.attribute) - priority(b.attribute) || a.index - b.index)
