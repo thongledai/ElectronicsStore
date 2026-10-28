@@ -214,7 +214,7 @@
         <tr>
           <td>
             <div class="fw-medium">${escapeHtml(item.productName)}</div>
-            ${item.variantDescription ? `<div class="muted small">${escapeHtml(item.variantDescription)}</div>` : ''}
+            ${item.variantDescription ? `<div class="muted small">${escapeHtml(formatVariantDescription(item.variantDescription))}</div>` : ''}
           </td>
           <td class="text-end">${formatCurrency(item.unitPrice)}</td>
           <td class="text-center">${item.quantity}</td>
@@ -303,7 +303,7 @@
         <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${idx + 1}</td>
         <td style="padding: 8px; border: 1px solid #ddd;">
           <strong>${escapeHtml(item.productName)}</strong>
-          <div style="font-size: 11px; color: #666;">${escapeHtml(item.variantDescription || '')}</div>
+          <div style="font-size: 11px; color: #666;">${escapeHtml(formatVariantDescription(item.variantDescription || ''))}</div>
         </td>
         <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${formatCurrency(item.unitPrice)}</td>
         <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${item.quantity}</td>
@@ -330,6 +330,27 @@
       </html>
     `);
     win.document.close();
+  }
+
+  // Chuẩn hóa thứ tự thuộc tính phiên bản khi hiển thị trong chi tiết đơn hàng.
+  // Màu sắc luôn đứng trước dung lượng; các thuộc tính khác giữ thứ tự tương đối.
+  function formatVariantDescription(description) {
+    if (!description) return '';
+
+    const priority = (attribute) => {
+      const normalized = attribute.trim().toLocaleLowerCase('vi-VN');
+      if (/^màu sắc\\s*:/.test(normalized)) return 0;
+      if (/^dung lượng\\s*:/.test(normalized)) return 1;
+      return 2;
+    };
+
+    return String(description)
+      .split(/\\s*[·|]\\s*/)
+      .map((attribute, index) => ({ attribute: attribute.trim(), index }))
+      .filter(item => item.attribute)
+      .sort((a, b) => priority(a.attribute) - priority(b.attribute) || a.index - b.index)
+      .map(item => item.attribute)
+      .join(' · ');
   }
 
   function escapeHtml(str) {
