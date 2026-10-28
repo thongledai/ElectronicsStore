@@ -65,7 +65,8 @@ public class SecurityConfig {
 
                     "/api/customer/reviews/**", "/api/customer/chat/**",
 
-                    "/customer/checkout", "/customer/wallet", "/api/wallet", "/api/wallet/**"
+                    "/customer/checkout", "/customer/wallet", "/api/wallet", "/api/wallet/**",
+                    "/api/promotions/**"
 
                 ).hasAnyAuthority("CUSTOMER", "ROLE_CUSTOMER")
 
