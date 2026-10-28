@@ -85,10 +85,15 @@
                             </label>
                             <div class="input-group input-group-sm" id="voucherInputGroup">
                                 <input type="text" class="form-control text-uppercase" id="voucherInput"
-                                       placeholder="Nhập mã voucher" maxlength="50" autocomplete="off">
-                                <button class="btn btn-outline-primary" id="applyVoucherBtn" type="button">
+                                       placeholder="Vui lòng nhập địa chỉ nhận hàng trước..." maxlength="50" autocomplete="off" disabled>
+                                <button class="btn btn-outline-primary" id="applyVoucherBtn" type="button" disabled>
                                     Áp dụng
                                 </button>
+                            </div>
+
+                            <!-- Gợi ý khi chưa nhập đủ địa chỉ -->
+                            <div class="small text-muted mt-1" id="voucherAddressHint">
+                                <i class="fas fa-info-circle me-1 text-primary"></i>Vui lòng nhập đầy đủ địa chỉ giao hàng để sử dụng mã giảm giá.
                             </div>
 
                             <!-- Box khi đã áp dụng voucher -->
