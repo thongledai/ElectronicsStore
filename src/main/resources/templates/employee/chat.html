@@ -86,8 +86,13 @@
             </div>
           </div>
 
-          <!-- Input Footer -->
-          <div class="p-3 border-bottom bg-white d-flex align-items-center gap-2 employee-chat-composer">
+          <!-- Messages Stream -->
+          <div class="flex-grow-1 p-3 overflow-y-auto bg-light" id="employeeMessagesStream" style="display: flex; flex-direction: column; gap: 10px;">
+            <!-- Render by chat.js -->
+          </div>
+
+          <!-- Input Footer: cố định dưới vùng tin nhắn -->
+          <div class="p-3 border-top d-flex align-items-center gap-2 employee-chat-composer">
             <input type="file" id="empChatFileInput" accept="image/*" class="d-none">
             <button type="button" class="btn btn-light rounded-circle d-inline-flex align-items-center justify-content-center p-0 flex-shrink-0" id="btnEmpUploadImg" title="Gửi ảnh" style="width: 40px; height: 40px;">
               <i class="fa-solid fa-image text-muted"></i>
@@ -96,11 +101,6 @@
             <button type="button" class="btn btn-primary rounded-circle d-inline-flex align-items-center justify-content-center p-0 flex-shrink-0" id="btnEmpSendMsg" title="Gửi" style="width: 40px; height: 40px;">
               <i class="fa-solid fa-paper-plane" style="font-size: 0.95rem; margin-left: -2px; margin-top: 1px;"></i>
             </button>
-          </div>
-
-          <!-- Messages Stream -->
-          <div class="flex-grow-1 p-3 overflow-y-auto bg-light" id="employeeMessagesStream" style="display: flex; flex-direction: column; gap: 10px;">
-            <!-- Render by chat.js -->
           </div>
         </div>
 
