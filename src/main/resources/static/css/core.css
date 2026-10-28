@@ -74,22 +74,23 @@
 
 /* Dark theme — activated by data-theme="dark" on <html> (see js/main.js) */
 [data-theme="dark"] {
-  --bg: #0a1220;
-  --surface: #111c2e;
-  --surface-2: #16233a;
-  --surface-3: #1e2d47;
-  --text: #e8eef8;
-  --text-muted: #94a7c0;
-  --border: #223353;
-  --border-strong: #2f4468;
-  --blue-light: #16294d;
-  --orange-light: #33220f;
+  /* Giao diện dark trung tính: đen/xám than, không phủ xanh navy */
+  --bg: #121212;
+  --surface: #1e1e1e;
+  --surface-2: #252525;
+  --surface-3: #303030;
+  --text: #f2f2f2;
+  --text-muted: #b0b0b0;
+  --border: #383838;
+  --border-strong: #4a4a4a;
+  --blue-light: #2b2b2b;
+  --orange-light: #332719;
   --navy: #000000;
 
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, .4);
-  --shadow-md: 0 6px 18px rgba(0, 0, 0, .45);
-  --shadow-lg: 0 18px 40px rgba(0, 0, 0, .55);
-  --shadow-brand: 0 12px 28px rgba(27, 109, 243, .35);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, .35);
+  --shadow-md: 0 6px 18px rgba(0, 0, 0, .4);
+  --shadow-lg: 0 18px 40px rgba(0, 0, 0, .5);
+  --shadow-brand: 0 12px 28px rgba(27, 109, 243, .22);
   --bs-tertiary-bg: var(--surface-2);
   color-scheme: dark;
 }
