@@ -7,8 +7,19 @@ import lombok.Data;
 
 @Data
 public class GhnShipmentCreateRequestDTO {
-    @Min(1) @Max(19999) private Integer weight;
-    @Min(1) @Max(200) private Integer length;
-    @Min(1) @Max(200) private Integer width;
-    @Min(1) @Max(200) private Integer height;
+    @Min(value = 1, message = "SHIPMENT_WEIGHT_MIN")
+    @Max(value = 19999, message = "SHIPMENT_WEIGHT_MAX")
+    private Integer weight;
+
+    @Min(value = 1, message = "SHIPMENT_LENGTH_MIN")
+    @Max(value = 200, message = "SHIPMENT_LENGTH_MAX")
+    private Integer length;
+
+    @Min(value = 1, message = "SHIPMENT_WIDTH_MIN")
+    @Max(value = 200, message = "SHIPMENT_WIDTH_MAX")
+    private Integer width;
+
+    @Min(value = 1, message = "SHIPMENT_HEIGHT_MIN")
+    @Max(value = 200, message = "SHIPMENT_HEIGHT_MAX")
+    private Integer height;
 }

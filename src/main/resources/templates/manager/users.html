@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="vi" th:replace="~{layouts/dashboard-layout :: layout('Người dùng', 'manager', 'users', ~{::section.content})}">
 <head>
-  <title>Người dùng | TechNova</title>
+  <title>Người dùng | UTE Shop</title>
 </head>
 <body>
 <section class="content">
@@ -35,7 +35,7 @@
       <table class="table" id="dataTable">
         <thead>
           <tr>
-            <th style="width: 50px;">Avatar</th>
+            <th style="width: 50px;">Ảnh đại diện</th>
             <th>Mã người dùng</th>
             <th>Họ tên</th>
             <th>Email</th>
@@ -77,7 +77,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <div>
-            <h5 class="modal-title" id="userModalTitle">Thêm mới người dùng</h5>
+            <h3 class="modal-title h5" id="userModalTitle">Thêm mới người dùng</h3>
             <div class="text-muted small mt-1" id="userModalDescription">
               Nhập thông tin người dùng mới.
             </div>
@@ -261,9 +261,9 @@
       <div class="modal-content">
         <div class="modal-header">
           <div>
-            <h5 class="modal-title" id="userDetailModalTitle">
+        <h3 class="modal-title h5" id="userDetailModalTitle">
               Chi tiết người dùng
-            </h5>
+        </h3>
             <div class="text-muted small mt-1">
               Thông tin tài khoản và trạng thái người dùng.
             </div>

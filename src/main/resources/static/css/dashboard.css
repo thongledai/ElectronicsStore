@@ -1,5 +1,5 @@
 /* ==========================================================================
-   18. ROLE DASHBOARDS — Manager / Employee / Shipper
+   18. ROLE DASHBOARDS — Manager / Employee
    --------------------------------------------------------------------------
    Used by layouts/dashboard-layout.html (<html data-role="...">).
    Everything is scoped under [data-role] so the storefront is not affected,
@@ -199,8 +199,9 @@
     margin: 0;
     border: 1px solid var(--bs-border-color, #dee2e6);
     border-radius: 0.5rem;
-    background: var(--bs-tertiary-bg, #f8f9fa);
-    color: var(--bs-body-color, #212529);
+    background: var(--surface-2);
+    color: var(--text);
+    border-color: var(--border);
     font-size: 0.875rem;
     line-height: 1.6;
     white-space: pre;

@@ -1,0 +1,103 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "gradient-text",
+        "value": "*",
+        "files": [
+          "src/main/resources/static/css/core.css"
+        ],
+        "createdAt": "2026-10-27T16:49:21.977Z",
+        "reason": "Existing gradient styling is part of the storefront design; this task preserves the current visual style."
+      },
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "src/main/resources/templates/customer/cart.html"
+        ],
+        "createdAt": "2026-10-27T16:49:34.446Z",
+        "reason": "Thymeleaf th:src is resolved from the backend model at render time; this detector only sees the source template."
+      },
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "src/main/resources/templates/customer/index.html"
+        ],
+        "createdAt": "2026-10-27T16:49:34.483Z",
+        "reason": "Thymeleaf th:src is resolved from the backend model at render time; this detector only sees the source template."
+      },
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "src/main/resources/templates/customer/product-details.html"
+        ],
+        "createdAt": "2026-10-27T16:49:34.516Z",
+        "reason": "Thymeleaf th:src is resolved from the backend model at render time; this detector only sees the source template."
+      },
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "src/main/resources/templates/pages/about.html"
+        ],
+        "createdAt": "2026-10-27T16:49:34.549Z",
+        "reason": "Thymeleaf th:src is resolved from the backend model at render time; this detector only sees the source template."
+      },
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "src/main/resources/templates/employee/order-detail.html"
+        ],
+        "createdAt": "2026-10-27T16:49:34.579Z",
+        "reason": "Thymeleaf th:src is resolved from the backend model at render time; this detector only sees the source template."
+      },
+      {
+        "rule": "flat-type-hierarchy",
+        "value": "*",
+        "files": [
+          "src/main/resources/templates/auth/login.html",
+          "src/main/resources/templates/customer/cart.html",
+          "src/main/resources/templates/customer/index.html",
+          "src/main/resources/templates/customer/orders.html",
+          "src/main/resources/templates/customer/product-details.html",
+          "src/main/resources/templates/employee/order-detail.html",
+          "src/main/resources/templates/manager/statistics.html",
+          "src/main/resources/templates/manager/users.html",
+          "src/main/resources/templates/pages/about.html"
+        ],
+        "createdAt": "2026-10-27T17:03:38.762Z",
+        "reason": "Agent: detector reports every heading as 16px because it does not resolve Bootstrap CSS; these pages load Bootstrap and use its heading size classes."
+      },
+      {
+        "rule": "overused-font",
+        "value": "plus jakarta sans",
+        "createdAt": "2026-10-27T17:03:38.945Z",
+        "reason": "Agent: this is the existing site-wide font stack, and the requested scope preserves the established visual identity."
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "src/main/resources/static/js/auth.js"
+        ],
+        "createdAt": "2026-10-27T17:03:39.118Z",
+        "reason": "Agent: the existing authentication toast uses a severity-colored edge to distinguish status messages; preserve this established feedback treatment."
+      },
+      {
+        "rule": "flat-type-hierarchy",
+        "value": "*",
+        "files": [
+          "src/main/resources/templates/profile.html"
+        ],
+        "createdAt": "2026-10-27T17:40:58.932Z",
+        "reason": "Agent: profile headings use Bootstrap h4/h5 sizing from the shared stylesheet; the source detector does not resolve the loaded Bootstrap CSS and reports every heading as 16px."
+      }
+    ]
+  }
+}

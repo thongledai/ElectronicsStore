@@ -66,7 +66,7 @@
         </div>
 
         <!-- Chat Conversation Stream (Hidden by default until a room is clicked) -->
-        <div class="d-none flex-column h-100" id="chatConversationWrapper">
+        <div class="d-none flex-column h-100 employee-chat-conversation" id="chatConversationWrapper">
           <!-- Conversation Header -->
           <div class="p-3 border-bottom d-flex align-items-center justify-content-between bg-white">
             <div class="d-flex align-items-center gap-3">
@@ -91,8 +91,8 @@
             <!-- Render by chat.js -->
           </div>
 
-          <!-- Input Footer -->
-          <div class="p-3 border-top bg-white d-flex align-items-center gap-2">
+          <!-- Input Footer: cố định dưới vùng tin nhắn -->
+          <div class="p-3 border-top d-flex align-items-center gap-2 employee-chat-composer">
             <input type="file" id="empChatFileInput" accept="image/*" class="d-none">
             <button type="button" class="btn btn-light rounded-circle d-inline-flex align-items-center justify-content-center p-0 flex-shrink-0" id="btnEmpUploadImg" title="Gửi ảnh" style="width: 40px; height: 40px;">
               <i class="fa-solid fa-image text-muted"></i>

@@ -19,7 +19,7 @@
      15. Floating UI (toasts, back-to-top, loader)
      16. Animations
      17. Responsive breakpoints
-     18. Role dashboards (Manager / Employee / Shipper)
+   18. Role dashboards (Manager / Employee)
    ========================================================================== */
 
 /* ==========================================================================
@@ -44,7 +44,7 @@
   --star: #ffb400;
 
   /* Surfaces & text (light theme defaults) */
-  --bg: #f5f7fb;
+  --bg: #ffffff;
   --surface: #ffffff;
   --surface-2: #f0f3f9;
   --surface-3: #e6ebf3;
@@ -53,6 +53,15 @@
   --text-inverse: #ffffff;
   --border: #e2e8f0;
   --border-strong: #cbd5e1;
+
+  /* Bootstrap component variables mapped to the storefront theme tokens. */
+  --bs-body-bg: var(--bg);
+  --bs-body-color: var(--text);
+  --bs-secondary-bg: var(--surface-2);
+  --bs-tertiary-bg: var(--surface-2);
+  --bs-secondary-color: var(--text-muted);
+  --bs-emphasis-color: var(--text);
+  --bs-border-color: var(--border);
 
   /* Elevation */
   --shadow-sm: 0 1px 3px rgba(11, 27, 52, .07), 0 1px 2px rgba(11, 27, 52, .04);
@@ -74,22 +83,32 @@
 
 /* Dark theme — activated by data-theme="dark" on <html> (see js/main.js) */
 [data-theme="dark"] {
-  --bg: #0a1220;
-  --surface: #111c2e;
-  --surface-2: #16233a;
-  --surface-3: #1e2d47;
-  --text: #e8eef8;
-  --text-muted: #94a7c0;
-  --border: #223353;
-  --border-strong: #2f4468;
-  --blue-light: #16294d;
-  --orange-light: #33220f;
+  /* Giao diện dark trung tính: đen/xám than, không phủ xanh navy */
+  --bg: #121212;
+  --surface: #1e1e1e;
+  --surface-2: #252525;
+  --surface-3: #303030;
+  --text: #f2f2f2;
+  --text-muted: #b0b0b0;
+  --border: #383838;
+  --border-strong: #4a4a4a;
+  --blue-light: #2b2b2b;
+  --orange-light: #332719;
   --navy: #000000;
+  --bs-body-bg: var(--bg);
+  --bs-body-color: var(--text);
+  --bs-secondary-bg: var(--surface-2);
+  --bs-tertiary-bg: var(--surface-2);
+  --bs-secondary-color: var(--text-muted);
+  --bs-emphasis-color: var(--text);
+  --bs-border-color: var(--border);
 
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, .4);
-  --shadow-md: 0 6px 18px rgba(0, 0, 0, .45);
-  --shadow-lg: 0 18px 40px rgba(0, 0, 0, .55);
-  --shadow-brand: 0 12px 28px rgba(27, 109, 243, .35);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, .35);
+  --shadow-md: 0 6px 18px rgba(0, 0, 0, .4);
+  --shadow-lg: 0 18px 40px rgba(0, 0, 0, .5);
+  --shadow-brand: 0 12px 28px rgba(27, 109, 243, .22);
+  --bs-tertiary-bg: var(--surface-2);
+  color-scheme: dark;
 }
 
 /* ==========================================================================
@@ -135,8 +154,12 @@ img { max-width: 100%; height: auto; }
    -------------------------------------------------------------------------- */
 .text-muted { color: var(--text-muted) !important; }
 .text-body { color: var(--text) !important; }
+.text-secondary { color: var(--text-muted) !important; }
 .bg-light { background-color: var(--surface-2) !important; }
 .bg-white { background-color: var(--surface) !important; }
+.bg-surface { background-color: var(--surface) !important; }
+.bg-body-tertiary { background-color: var(--surface-2) !important; }
+.text-dark { color: var(--text) !important; }
 .border { border-color: var(--border) !important; }
 .dropdown-divider { border-color: var(--border); }
 hr { border-color: var(--border); opacity: 1; }
@@ -145,6 +168,64 @@ hr { border-color: var(--border); opacity: 1; }
 .modal-content { background: var(--surface); color: var(--text); }
 .btn-close { filter: var(--close-filter, none); }
 [data-theme="dark"] .btn-close { filter: invert(1) grayscale(1) brightness(1.8); }
+
+/* Form and table surfaces stay paired with the active theme across storefront pages. */
+.form-control, .form-select {
+  background-color: var(--surface);
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+.form-control::placeholder { color: var(--text-muted); opacity: 1; }
+.form-control:focus, .form-select:focus {
+  background-color: var(--surface);
+  color: var(--text);
+  border-color: var(--blue);
+}
+.card {
+  --bs-card-color: var(--text);
+  --bs-card-bg: var(--surface);
+  --bs-card-border-color: var(--border);
+}
+.table {
+  --bs-table-color: var(--text);
+  --bs-table-bg: transparent;
+  --bs-table-border-color: var(--border);
+  --bs-table-striped-color: var(--text);
+  --bs-table-striped-bg: var(--surface-2);
+  --bs-table-hover-color: var(--text);
+  --bs-table-hover-bg: var(--surface-2);
+}
+[data-theme="dark"] .table-light,
+[data-theme="dark"] .table-secondary {
+  --bs-table-color: var(--text);
+  --bs-table-bg: var(--surface-2);
+  --bs-table-border-color: var(--border);
+  --bs-table-striped-color: var(--text);
+  --bs-table-striped-bg: var(--surface-3);
+  --bs-table-hover-color: var(--text);
+  --bs-table-hover-bg: var(--surface-3);
+}
+[data-theme="dark"] .table-hover > tbody > tr:hover > * {
+  --bs-table-bg-state: var(--surface-2);
+}
+.input-group-text {
+  background-color: var(--surface-2);
+  color: var(--text-muted);
+  border-color: var(--border-strong);
+}
+[data-theme="dark"] .btn-light {
+  --bs-btn-color: var(--text);
+  --bs-btn-bg: var(--surface-2);
+  --bs-btn-border-color: var(--border-strong);
+  --bs-btn-hover-color: var(--text);
+  --bs-btn-hover-bg: var(--surface-3);
+  --bs-btn-hover-border-color: var(--border-strong);
+  --bs-btn-active-color: var(--text);
+  --bs-btn-active-bg: var(--surface-3);
+  --bs-btn-active-border-color: var(--border-strong);
+}
+.btn-outline-secondary { color: var(--text-muted); border-color: var(--border-strong); }
+.btn-outline-secondary:hover { background-color: var(--surface-3); color: var(--text); border-color: var(--border-strong); }
 
 /* Bootstrap pagination */
 .page-link {

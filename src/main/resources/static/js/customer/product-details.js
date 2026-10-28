@@ -1,5 +1,5 @@
-﻿/* ==========================================================================
-   TechNova Electronics — Customer Product Detail
+/* ==========================================================================
+   UTE Shop — Customer Product Detail
    ==========================================================================
    Chức năng chính:
      1. Thumbnail gallery: click đổi ảnh lớn (event delegation)

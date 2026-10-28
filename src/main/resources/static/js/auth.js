@@ -1,5 +1,5 @@
 /* ==========================================================================
-   TechNova Electronics — Unified Authentication & AJAX Client (auth.js)
+   UTE Shop — Unified Authentication & AJAX Client (auth.js)
    --------------------------------------------------------------------------
    • DTO-Driven Server Validation (Binding directly from Spring Boot @Valid)
    • AJAX endpoints at /auth/**
@@ -14,11 +14,6 @@
    1. UTILITIES & HELPERS
    ========================================================================== */
 
-const DEMO_USER = {
-  email: 'demo@technova.com',
-  password: 'Demo@123',
-  name: 'Demo Customer'
-};
 
 /**
  * Modern Floating Toast Notification
@@ -99,7 +94,7 @@ function showAppToast(title, message = '', type = 'info', duration = 3500) {
       ${mainTitle}
       ${bodyText}
     </div>
-    <button type="button" aria-label="Close" style="
+    <button type="button" aria-label="Đóng" style="
       background: none;
       border: none;
       padding: 0 4px;
@@ -238,7 +233,7 @@ function bindServerErrors(form, errorData, defaultMsg) {
   }
 
   // Smart resolution for backend business exceptions (e.g. RuntimeException("Current password is incorrect!"))
-  const rawMsg = defaultMsg || 'Invalid input data. Please check your fields!';
+  const rawMsg = defaultMsg || 'Dữ liệu chưa hợp lệ. Vui lòng kiểm tra lại thông tin.';
   const lowerMsg = rawMsg.toLowerCase();
 
   if (!hasFieldError) {
@@ -276,7 +271,7 @@ function bindServerErrors(form, errorData, defaultMsg) {
     // Single field invalid -> Report that specific field's error
     notify(UiMessage.VALIDATION_ERROR_TITLE, singleFieldErrorMessage, 'danger');
   } else {
-    // Specific business error (e.g. "Current password is incorrect!", "Invalid email or password.")
+    // Specific business error (e.g. "Current password is incorrect!", "Email hoặc mật khẩu không hợp lệ.")
     notify(UiMessage.NOTICE_TITLE, rawMsg, 'danger');
   }
 }
@@ -284,7 +279,7 @@ function bindServerErrors(form, errorData, defaultMsg) {
 /** Password strength calculator for UI indicator. */
 function scorePassword(password) {
   let score = 0;
-  if (!password) return { score: 0, label: 'Very weak', colour: '#e03131', width: '0%' };
+  if (!password) return { score: 0, label: 'Rất yếu', colour: '#e03131', width: '0%' };
   if (password.length >= 6) score++;
   if (password.length >= 8) score++;
   if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score++;
@@ -293,11 +288,11 @@ function scorePassword(password) {
   if (score > 4) score = 4;
 
   const levels = [
-    { label: 'Very weak', colour: '#e03131', width: '20%' },
-    { label: 'Weak', colour: '#f76707', width: '40%' },
-    { label: 'Medium', colour: '#f59f00', width: '60%' },
-    { label: 'Strong', colour: '#40c057', width: '80%' },
-    { label: 'Very strong', colour: '#12b886', width: '100%' }
+    { label: 'Rất yếu', colour: '#e03131', width: '20%' },
+    { label: 'Yếu', colour: '#f76707', width: '40%' },
+    { label: 'Trung bình', colour: '#f59f00', width: '60%' },
+    { label: 'Mạnh', colour: '#40c057', width: '80%' },
+    { label: 'Rất mạnh', colour: '#12b886', width: '100%' }
   ];
   return { score, ...levels[score] };
 }
@@ -323,7 +318,7 @@ async function handleModalVerifyNow() {
   const originalHtml = btn ? btn.innerHTML : '';
   if (btn) {
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Sending OTP…';
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Đang gửi mã OTP…';
   }
 
   try {
@@ -341,14 +336,14 @@ async function handleModalVerifyNow() {
         location.href = '/verify-otp?email=' + encodeURIComponent(pendingActivationEmail) + '&type=REGISTER';
       }, 700);
     } else {
-      notify('Failed', data.message || 'Cannot send verification code.', 'danger');
+      notify('Thất bại', data.message || 'Không thể gửi mã xác minh.', 'danger');
       if (btn) {
         btn.disabled = false;
         btn.innerHTML = originalHtml;
       }
     }
   } catch (err) {
-    notify('Connection Error', 'Cannot connect to server.', 'danger');
+    notify('Lỗi kết nối', 'Không thể kết nối máy chủ.', 'danger');
     if (btn) {
       btn.disabled = false;
       btn.innerHTML = originalHtml;
@@ -378,7 +373,7 @@ async function fetchGoogleClientId() {
 }
 
 async function handleGoogleLoginPayload(payload) {
-  notify('Verifying with Google...', 'Please wait a moment while we authenticate your account.', 'info', 2500);
+  notify('Đang xác minh với Google...', 'Vui lòng chờ trong khi xác thực tài khoản.', 'info', 2500);
 
   try {
     const res = await fetch('/auth/google', {
@@ -412,15 +407,15 @@ async function handleGoogleLoginPayload(payload) {
         storageSet(STORE.user, googleUser);
       }
 
-      notify('Sign In Successful!', `Welcome back, ${data.data?.user?.fullName || 'User'}!`, 'success');
+      notify('Đăng nhập thành công', `Chào mừng ${data.data?.user?.fullName || 'bạn'} quay lại!`, 'success');
       setTimeout(() => {
         location.href = data.data?.redirectUrl || '/customer/index';
       }, 900);
     } else {
-      notify('Google Sign-In Failed', data.message || 'Cannot complete authentication with Google.', 'danger');
+      notify('Đăng nhập Google thất bại', data.message || 'Không thể hoàn tất xác thực bằng Google.', 'danger');
     }
   } catch (err) {
-    notify('Connection Error', 'Cannot connect to server. Please check your network connection.', 'danger');
+    notify('Lỗi kết nối', 'Không thể kết nối máy chủ. Vui lòng kiểm tra kết nối mạng.', 'danger');
   }
 }
 
@@ -437,12 +432,12 @@ async function initGoogleAuth() {
 
     const clientId = window.__GOOGLE_CLIENT_ID__ || await fetchGoogleClientId();
     if (!clientId || clientId === 'your_google_client_id_here') {
-      notify('Google Sign-In Notice', 'Google Client ID is not configured yet. Please set GOOGLE_CLIENT_ID in your environment (.env).', 'warning', 5000);
+      notify('Thông báo đăng nhập Google', 'Google Client ID chưa được cấu hình. Vui lòng thêm GOOGLE_CLIENT_ID vào biến môi trường (.env).', 'warning', 5000);
       return;
     }
 
     if (typeof window.google === 'undefined' || !window.google.accounts || !window.google.accounts.oauth2) {
-      notify('Initializing Google SDK', 'Google authentication service is initializing. Please try again in a moment.', 'warning', 4000);
+      notify('Đang khởi tạo Google SDK', 'Dịch vụ xác thực Google đang khởi tạo. Vui lòng thử lại sau ít phút.', 'warning', 4000);
       return;
     }
 
@@ -487,7 +482,7 @@ async function handleLogin(e) {
   const originalHtml = btn.innerHTML;
 
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Signing in…';
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang đăng nhập…';
 
   try {
     const res = await fetch('/auth/login', {
@@ -534,7 +529,7 @@ async function handleLogin(e) {
         openActivationModal(data.data?.email || email);
         return;
       }
-      bindServerErrors(form, data.data, data.message || 'Invalid email or password.');
+      bindServerErrors(form, data.data, data.message || 'Email hoặc mật khẩu không hợp lệ.');
     }
   } catch (err) {
     notify(UiMessage.CONNECTION_ERROR_TITLE, UiMessage.CONNECTION_ERROR, 'danger');
@@ -562,7 +557,7 @@ async function handleRegister(e) {
   if (document.getElementById('rgTerms') && !terms) {
     const feedback = document.getElementById('errRgTerms');
     if (feedback) {
-      feedback.textContent = 'You must agree to the Terms of Service to continue.';
+      feedback.textContent = 'Bạn cần đồng ý với Điều khoản dịch vụ để tiếp tục.';
       feedback.style.display = 'block';
     }
     return;
@@ -572,7 +567,7 @@ async function handleRegister(e) {
   const originalHtml = btn.innerHTML;
 
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Creating account…';
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang tạo tài khoản…';
 
   try {
     const res = await fetch('/auth/register', {
@@ -593,7 +588,7 @@ async function handleRegister(e) {
         openActivationModal(data.data?.email || email);
         return;
       }
-      bindServerErrors(form, data.data, data.message || 'Registration failed.');
+      bindServerErrors(form, data.data, data.message || 'Đăng ký không thành công.');
     }
   } catch (err) {
     notify(UiMessage.CONNECTION_ERROR_TITLE, UiMessage.CONNECTION_ERROR, 'danger');
@@ -616,7 +611,7 @@ async function handleForgotPassword(e) {
   const originalHtml = btn.innerHTML;
 
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Sending OTP code…';
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang gửi mã OTP…';
 
   try {
     const res = await fetch('/auth/forgot-password', {
@@ -633,7 +628,7 @@ async function handleForgotPassword(e) {
         location.href = '/verify-otp?email=' + encodeURIComponent(email) + '&type=FORGOT_PASSWORD';
       }, 1200);
     } else {
-      bindServerErrors(form, data.data, data.message || 'No account found with this email.');
+      bindServerErrors(form, data.data, data.message || 'Không tìm thấy tài khoản với email này.');
     }
   } catch (err) {
     notify(UiMessage.CONNECTION_ERROR_TITLE, UiMessage.CONNECTION_ERROR_RETRY, 'danger');
@@ -668,7 +663,7 @@ function startOtpCountdown(durationSeconds = 300) {
 
     if (remaining <= 0) {
       clearInterval(otpTimerInterval);
-      timerText.textContent = 'Expired';
+      timerText.textContent = 'Đã hết hạn';
       if (resendBtn) {
         resendBtn.disabled = false;
       }
@@ -695,7 +690,7 @@ async function handleResendOtp() {
   const originalText = resendBtn ? resendBtn.innerHTML : '';
   if (resendBtn) {
     resendBtn.disabled = true;
-    resendBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Sending…';
+    resendBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Đang gửi…';
   }
 
   try {
@@ -746,7 +741,7 @@ async function handleVerifyOtp(e) {
   }
 
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Verifying…';
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang xác minh…';
 
   try {
     const res = await fetch('/auth/verify-otp', {
@@ -764,7 +759,7 @@ async function handleVerifyOtp(e) {
         location.href = '/login';
       }, 1400);
     } else {
-      bindServerErrors(form, data.data, data.message || 'Invalid or expired OTP code!');
+      bindServerErrors(form, data.data, data.message || 'Mã OTP không hợp lệ hoặc đã hết hạn.');
     }
   } catch (err) {
     notify(UiMessage.CONNECTION_ERROR_TITLE, UiMessage.CONNECTION_ERROR, 'danger');
@@ -790,7 +785,7 @@ async function handleChangePassword(e) {
 
   if (btn) {
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving changes…';
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang lưu thay đổi…';
   }
 
   try {
@@ -810,7 +805,7 @@ async function handleChangePassword(e) {
       notify(UiMessage.SUCCESS_TITLE, data.message || UiMessage.PASSWORD_CHANGED, 'success');
       form.reset();
     } else {
-      bindServerErrors(form, data.data, data.message || 'Failed to change password!');
+      bindServerErrors(form, data.data, data.message || 'Không thể đổi mật khẩu.');
     }
   } catch (err) {
     notify(UiMessage.CONNECTION_ERROR_TITLE, UiMessage.CONNECTION_ERROR, 'danger');
@@ -834,7 +829,7 @@ async function handleSetPassword(e) {
 
   if (btn) {
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Setting password…';
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang tạo mật khẩu…';
   }
 
   try {
@@ -851,7 +846,7 @@ async function handleSetPassword(e) {
     const data = await res.json();
 
     if (res.ok && data.success) {
-      notify('Success', data.message || 'Password set successfully! Redirecting...', 'success');
+      notify('Thành công', data.message || 'Tạo mật khẩu thành công. Đang chuyển trang...', 'success');
       form.reset();
 
       // Update cached user state
@@ -873,10 +868,10 @@ async function handleSetPassword(e) {
         location.href = '/customer/index';
       }, 1000);
     } else {
-      bindServerErrors(form, data.data, data.message || 'Failed to set password!');
+      bindServerErrors(form, data.data, data.message || 'Không thể tạo mật khẩu.');
     }
   } catch (err) {
-    notify('Connection Error', 'Cannot connect to server.', 'danger');
+    notify('Lỗi kết nối', 'Không thể kết nối máy chủ.', 'danger');
   } finally {
     if (btn) {
       btn.disabled = false;
@@ -915,7 +910,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
           registerTabBtn.click();
         }
-        document.title = 'Create Account — TechNova Electronics';
+        document.title = 'Tạo tài khoản — UTE Shop';
       }
     } else if (window.location.pathname === '/login') {
       if (loginTabBtn) {
@@ -924,7 +919,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
           loginTabBtn.click();
         }
-        document.title = 'Sign In — TechNova Electronics';
+        document.title = 'Đăng nhập — UTE Shop';
       }
     }
   }
@@ -934,14 +929,14 @@ document.addEventListener('DOMContentLoaded', () => {
   registerTabBtn?.addEventListener('shown.bs.tab', () => {
     if (window.location.pathname !== '/register') {
       history.pushState(null, '', '/register');
-      document.title = 'Create Account — TechNova Electronics';
+      document.title = 'Tạo tài khoản — UTE Shop';
     }
   });
 
   loginTabBtn?.addEventListener('shown.bs.tab', () => {
     if (window.location.pathname !== '/login') {
       history.pushState(null, '', '/login');
-      document.title = 'Sign In — TechNova Electronics';
+      document.title = 'Đăng nhập — UTE Shop';
     }
   });
 
@@ -984,14 +979,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const val = rgPass.value;
       if (!val) {
         strengthBar.style.width = '0';
-        strengthText.textContent = 'Password must be at least 6 characters with letters and numbers.';
+        strengthText.textContent = 'Mật khẩu cần có ít nhất 6 ký tự, bao gồm chữ và số.';
         strengthText.style.color = '';
         return;
       }
       const { label, colour, width } = scorePassword(val);
       strengthBar.style.width = width;
       strengthBar.style.background = colour;
-      strengthText.textContent = `Password strength: ${label}`;
+      strengthText.textContent = `Độ mạnh mật khẩu: ${label}`;
       strengthText.style.color = colour;
     });
   }
@@ -1009,18 +1004,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // --- Auto-fill Demo Credentials ---
-  document.getElementById('fillDemoBtn')?.addEventListener('click', () => {
-    const emailField = document.getElementById('liEmail');
-    const passField = document.getElementById('liPassword');
-    if (emailField && passField) {
-      emailField.value = DEMO_USER.email;
-      passField.value = DEMO_USER.password;
-      clearAllErrors(document.getElementById('loginForm'));
-      notify(UiMessage.DEMO_CREDENTIALS_FILLED_TITLE, UiMessage.DEMO_CREDENTIALS_FILLED, 'info', 2200);
-    }
-  });
-
   // --- Initialize verify-otp page view if present ---
   const otpForm = document.getElementById('otpForm');
   if (otpForm) {
@@ -1035,19 +1018,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const forgotFields = document.getElementById('forgotPasswordFields');
 
     if (typeParam === 'FORGOT_PASSWORD') {
-      if (title) title.textContent = 'Reset Your Password';
+      if (title) title.textContent = 'Đặt lại mật khẩu';
       if (subtitle) {
         subtitle.innerHTML = emailParam
-          ? `An OTP code has been sent to: <strong class="text-dark">${emailParam}</strong>. Enter the OTP code and new password to recover your account.`
-          : 'Enter the OTP code and new password to recover your account.';
+          ? `Mã OTP đã được gửi đến: <strong class="text-dark">${emailParam}</strong>. Nhập mã OTP và mật khẩu mới để khôi phục tài khoản.`
+          : 'Nhập mã OTP và mật khẩu mới để khôi phục tài khoản.';
       }
       if (forgotFields) forgotFields.style.display = 'block';
     } else {
-      if (title) title.textContent = 'Activate Account';
+      if (title) title.textContent = 'Kích hoạt tài khoản';
       if (subtitle) {
         subtitle.innerHTML = emailParam
-          ? `An OTP code has been sent to: <strong class="text-dark">${emailParam}</strong>. Enter the OTP code to activate your account.`
-          : 'Enter the OTP code to activate your account.';
+          ? `Mã OTP đã được gửi đến: <strong class="text-dark">${emailParam}</strong>. Nhập mã OTP để kích hoạt tài khoản.`
+          : 'Nhập mã OTP để kích hoạt tài khoản.';
       }
       if (forgotFields) forgotFields.style.display = 'none';
     }

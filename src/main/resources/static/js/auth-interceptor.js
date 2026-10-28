@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- * TechNova Electronics — Global Auth Fetch Interceptor & Session Sync
+ * UTE Shop — Global Auth Fetch Interceptor & Session Sync
  * ============================================================================
  * Loaded across Customer, Manager, Employee, and Shipper interfaces.
  * Functions:

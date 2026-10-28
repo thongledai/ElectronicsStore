@@ -1,5 +1,5 @@
 /* ==========================================================================
-   TechNova Electronics — Product Details Page
+   UTE Shop — Product Details Page
    --------------------------------------------------------------------------
    Reads ?id= from the URL, renders the image gallery, buy box, tab content
    (description / specifications / reviews), related products and the
@@ -379,7 +379,7 @@ function renderNotFound() {
         <i class="fas fa-arrow-left me-2"></i>Back to All Products
       </a>
     </div>`;
-  document.title = 'Product Not Found — TechNova Electronics';
+  document.title = 'Product Not Found — UTE Shop';
 }
 
 /* ==========================================================================
@@ -397,7 +397,7 @@ document.addEventListener('DOMContentLoaded', () => {
   currentProduct = product;
 
   // Page metadata
-  document.title = `${product.name} — TechNova Electronics`;
+  document.title = `${product.name} — UTE Shop`;
   const metaDesc = document.querySelector('meta[name="description"]');
   if (metaDesc) metaDesc.setAttribute('content', product.tagline);
 

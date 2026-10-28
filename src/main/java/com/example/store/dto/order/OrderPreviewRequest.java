@@ -22,8 +22,8 @@ public record OrderPreviewRequest(
         @NotBlank(message = "Vui lòng chọn phường/xã")
         String wardCode,
 
-        @NotBlank String provinceName,
-        @NotBlank String wardName,
+        @NotBlank(message = "Vui lòng nhập tên tỉnh/thành phố") String provinceName,
+        @NotBlank(message = "Vui lòng nhập tên phường/xã") String wardName,
 
         @NotBlank(message = "Vui lòng nhập địa chỉ cụ thể")
         String detailAddress,

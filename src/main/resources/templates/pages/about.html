@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="vi" th:replace="~{layouts/customer-layout :: layout(
-        'Về Chúng Tôi — TechNova Electronics',
-        'Tìm hiểu về TechNova Electronics — câu chuyện của chúng tôi, đội ngũ phát triển và sứ mệnh mang đến sản phẩm công nghệ chính hãng cho mọi khách hàng.',
+        'Về Chúng Tôi — UTE Shop',
+        'Tìm hiểu về UTE Shop — câu chuyện của chúng tôi, đội ngũ phát triển và sứ mệnh mang đến sản phẩm công nghệ chính hãng cho mọi khách hàng.',
         ~{::main}, ~{}, 'about.js', false)}">
-<head><title>Về Chúng Tôi — TechNova Electronics</title></head>
+<head><title>Về Chúng Tôi — UTE Shop</title></head>
 <body>
 
 <main>
@@ -11,7 +11,7 @@
   <!-- PAGE HEAD -->
   <section class="page-head">
     <div class="container">
-      <h1>Về TechNova Electronics</h1>
+      <h1>Về UTE Shop</h1>
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><a th:href="@{/customer/index}">Trang chủ</a></li>
@@ -32,8 +32,8 @@
           <span class="section-eyebrow"><i class="fas fa-book-open"></i>Câu chuyện của chúng tôi</span>
           <h2 class="section-title">Cửa hàng công nghệ được xây dựng bởi những người đam mê công nghệ</h2>
           <p class="text-muted">
-            TechNova Electronics được sáng lập và phát triển bởi nhóm kỹ sư công nghệ tại TP. Hồ Chí Minh.
-            Xuất phát từ câu hỏi mà mọi người tiêu dùng đều băn khoăn — "Mua thiết bị điện tử ở đâu để luôn an tâm về chất lượng và không lo hàng giả?" — chúng tôi đã quyết định xây dựng TechNova để trở thành câu trả lời đáng tin cậy nhất.
+            UTE Shop được sáng lập và phát triển bởi nhóm kỹ sư công nghệ tại TP. Hồ Chí Minh.
+            Xuất phát từ câu hỏi mà mọi người tiêu dùng đều băn khoăn — "Mua thiết bị điện tử ở đâu để luôn an tâm về chất lượng và không lo hàng giả?" — chúng tôi đã quyết định xây dựng UTE Shop để trở thành câu trả lời đáng tin cậy nhất.
           </p>
           <p class="text-muted">
             Chúng tôi tập trung vào các dòng sản phẩm chọn lọc chất lượng cao thuộc các danh mục điện thoại, laptop, phụ kiện và thiết bị thông minh. Mỗi sản phẩm có mặt trên nền tảng đều trải qua quá trình kiểm thử nghiêm ngặt, đảm bảo nguồn gốc rõ ràng và chế độ bảo hành uy tín.
@@ -43,25 +43,25 @@
             <div class="col-6">
               <div class="d-flex align-items-center gap-2">
                 <i class="fas fa-circle-check text-success"></i>
-                <span class="small">100% chính hãng từ các thương hiệu uy tín</span>
+                <span class="small">Danh mục sản phẩm được tải từ dữ liệu hệ thống</span>
               </div>
             </div>
             <div class="col-6">
               <div class="d-flex align-items-center gap-2">
                 <i class="fas fa-circle-check text-success"></i>
-                <span class="small">Giá cả minh bạch, không phí ẩn</span>
+                <span class="small">Giá sản phẩm hiển thị theo dữ liệu hiện có</span>
               </div>
             </div>
             <div class="col-6">
               <div class="d-flex align-items-center gap-2">
                 <i class="fas fa-circle-check text-success"></i>
-                <span class="small">Hỗ trợ kỹ thuật bởi đội ngũ chuyên môn</span>
+                <span class="small">Theo dõi đơn hàng từ tài khoản khách hàng</span>
               </div>
             </div>
             <div class="col-6">
               <div class="d-flex align-items-center gap-2">
                 <i class="fas fa-circle-check text-success"></i>
-                <span class="small">Đổi trả nhanh chóng, giao hàng tận nơi</span>
+                <span class="small">Tích hợp GHN trong quy trình giao hàng</span>
               </div>
             </div>
           </div>
@@ -72,81 +72,8 @@
         </div>
 
         <div class="col-lg-6 reveal" data-delay="1">
-          <img th:src="@{/images/about-store.svg}" alt="Giao diện cửa hàng TechNova Electronics"
+          <img th:src="@{/images/about-store.svg}" alt="Giao diện cửa hàng UTE Shop"
                class="w-100 rounded" style="box-shadow:var(--shadow-lg)" width="640" height="460">
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- ================================================================
-       STATS
-       ================================================================ -->
-  <section class="section pt-0">
-    <div class="container">
-      <div class="row g-3 g-md-4">
-        <div class="col-6 col-lg-3 reveal">
-          <div class="stat-card">
-            <div class="stat-num" data-count-to="100" data-suffix="%">0</div>
-            <div class="stat-lbl">Sản phẩm chính hãng</div>
-          </div>
-        </div>
-        <div class="col-6 col-lg-3 reveal" data-delay="1">
-          <div class="stat-card">
-            <div class="stat-num" data-count-to="99" data-suffix="%">0</div>
-            <div class="stat-lbl">Khách hàng hài lòng</div>
-          </div>
-        </div>
-        <div class="col-6 col-lg-3 reveal" data-delay="2">
-          <div class="stat-card">
-            <div class="stat-num" data-count-to="24" data-suffix="/7">0</div>
-            <div class="stat-lbl">Hỗ trợ trực tuyến</div>
-          </div>
-        </div>
-        <div class="col-6 col-lg-3 reveal" data-delay="3">
-          <div class="stat-card">
-            <div class="stat-num" data-count-to="7" data-suffix=" ngày">0</div>
-            <div class="stat-lbl">Chính sách đổi trả</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ================================================================
-       JOURNEY / TIMELINE
-       ================================================================ -->
-  <section class="section pt-0">
-    <div class="container">
-      <div class="row g-5">
-
-        <div class="col-lg-5">
-          <span class="section-eyebrow"><i class="fas fa-timeline"></i>Hành trình phát triển</span>
-          <h2 class="section-title">Từ đề tài công nghệ đến nền tảng thương mại hiện đại</h2>
-          <p class="text-muted">
-            TechNova được xây dựng với mục tiêu ứng dụng công nghệ hiện đại nhất (Spring Boot 3, JWT Authentication, Microservices, tích hợp API vận chuyển GHN) để tạo nên một hệ thống mua sắm an toàn, tốc độ và trải nghiệm mượt mà.
-          </p>
-        </div>
-
-        <div class="col-lg-7">
-          <div class="timeline">
-            <div class="timeline-item reveal">
-              <div class="year">2024</div>
-              <h5>Khởi đầu &amp; Nghiên cứu kiến trúc</h5>
-              <p>Phân tích nghiệp vụ thương mại điện tử, thiết kế cơ sở dữ liệu quan hệ và mô hình xác thực đa tầng với Access Token &amp; Refresh Token.</p>
-            </div>
-            <div class="timeline-item reveal">
-              <div class="year">2025</div>
-              <h5>Xây dựng nền tảng cốt lõi</h5>
-              <p>Hoàn thiện hệ thống quản lý sản phẩm, giỏ hàng, phân quyền người dùng (Customer, Manager, Employee, Shipper) và thiết kế giao diện Responsive.</p>
-            </div>
-            <div class="timeline-item reveal">
-              <div class="year">2026</div>
-              <h5>Tích hợp dịch vụ &amp; Tối ưu hóa toàn diện</h5>
-              <p>Tích hợp hệ sinh thái giao vận thông minh GHN, tự động hóa phiên làm việc mượt mà và triển khai hệ thống quản trị chuyên sâu.</p>
-            </div>
-          </div>
         </div>
 
       </div>
@@ -161,7 +88,7 @@
       <div class="section-head text-center">
         <span class="section-eyebrow"><i class="fas fa-users"></i>Đội ngũ phát triển</span>
         <h2 class="section-title">Nhóm thực hiện dự án</h2>
-        <p class="section-subtitle">Đội ngũ kỹ thuật trực tiếp thiết kế, phát triển và vận hành hệ thống TechNova Electronics.</p>
+        <p class="section-subtitle">Đội ngũ kỹ thuật trực tiếp thiết kế, phát triển và vận hành hệ thống UTE Shop.</p>
       </div>
 
       <div class="row g-4 justify-content-center">
@@ -170,8 +97,8 @@
         <div class="col-md-6 col-lg-4 reveal">
           <div class="team-card h-100 p-4">
             <div class="team-avatar mb-3" style="background: linear-gradient(135deg, #0d6efd, #0b5ed7); color: #fff; font-weight: 700;">PT</div>
-            <h5 class="mb-1">Phan Ngọc Trung</h5>
-            <div class="role text-primary fw-semibold mb-3">Trưởng nhóm &amp; Fullstack Developer</div>
+            <h3 class="h5 mb-1">Phan Ngọc Trung</h3>
+            <div class="role text-primary fw-semibold mb-3">Trưởng nhóm &amp; Lập trình viên toàn diện</div>
             <p class="text-muted small">
               Phụ trách kiến trúc hệ thống tổng thể, bảo mật tài khoản &amp; xác thực JWT/Token, tối ưu hóa cơ sở dữ liệu và vận hành hệ thống đơn hàng.
             </p>
@@ -187,8 +114,8 @@
         <div class="col-md-6 col-lg-4 reveal" data-delay="1">
           <div class="team-card h-100 p-4">
             <div class="team-avatar mb-3" style="background: linear-gradient(135deg, #198754, #157347); color: #fff; font-weight: 700;">ĐT</div>
-            <h5 class="mb-1">Lê Đại Thông</h5>
-            <div class="role text-success fw-semibold mb-3">Backend Developer &amp; System Architect</div>
+            <h3 class="h5 mb-1">Lê Đại Thông</h3>
+            <div class="role text-success fw-semibold mb-3">Lập trình backend &amp; Kiến trúc hệ thống</div>
             <p class="text-muted small">
               Phát triển các dịch vụ giao vận GHN, quản lý kho hàng, danh mục sản phẩm, tính năng khuyến mãi và xử lý nghiệp vụ đơn hàng.
             </p>
@@ -203,9 +130,9 @@
         <!-- Thành viên 3: Trần Ngọc Thiện -->
         <div class="col-md-6 col-lg-4 reveal" data-delay="2">
           <div class="team-card h-100 p-4">
-            <div class="team-avatar mb-3" style="background: linear-gradient(135deg, #0dcaf0, #0aa2c0); color: #fff; font-weight: 700;">TT</div>
-            <h5 class="mb-1">Trần Ngọc Thiện</h5>
-            <div class="role text-info fw-semibold mb-3">Frontend Developer &amp; UI-UX Designer</div>
+            <div class="team-avatar mb-3" style="background: linear-gradient(135deg, #0dcaf0, #0aa2c0); color: #212529; font-weight: 700;">TT</div>
+            <h3 class="h5 mb-1">Trần Ngọc Thiện</h3>
+            <div class="role text-info fw-semibold mb-3">Lập trình giao diện &amp; Thiết kế trải nghiệm</div>
             <p class="text-muted small">
               Xây dựng giao diện người dùng hiện đại, tối ưu hóa tốc độ tải trang, nâng cao trải nghiệm khách hàng và tương thích đa thiết bị.
             </p>
@@ -238,12 +165,12 @@
             <div class="accordion-item">
               <h3 class="accordion-header">
                 <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
-                  Sản phẩm tại TechNova có chính hãng và đầy đủ bảo hành không?
+                  Sản phẩm tại UTE Shop có chính hãng và đầy đủ bảo hành không?
                 </button>
               </h3>
               <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
                 <div class="accordion-body">
-                  Có. 100% sản phẩm được TechNova cung cấp đều là hàng chính hãng từ các nhà phân phối chính thức, đi kèm phiếu bảo hành tiêu chuẩn từ nhà sản xuất. Hóa đơn mua hàng tại TechNova được công nhận tại tất cả trung tâm bảo hành trên toàn quốc.
+                  Backend hiện chưa cung cấp thông tin chính sách về nguồn gốc và bảo hành. Vui lòng xem thông tin của từng sản phẩm hoặc liên hệ cửa hàng.
                 </div>
               </div>
             </div>
@@ -256,7 +183,7 @@
               </h3>
               <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                 <div class="accordion-body">
-                  Các đơn hàng tại khu vực TP. Hồ Chí Minh được hỗ trợ giao hỏa tốc trong ngày. Đối với các tỉnh thành khác trên toàn quốc, thời gian giao hàng từ 1 đến 3 ngày làm việc thông qua đối tác vận chuyển Giao Hàng Nhanh (GHN). Bạn có thể theo dõi hành trình đơn hàng theo thời gian thực.
+                  Phí vận chuyển và thời gian giao dự kiến được hiển thị theo địa chỉ ở bước thanh toán. Đơn hàng được xử lý qua tích hợp GHN.
                 </div>
               </div>
             </div>
@@ -269,7 +196,7 @@
               </h3>
               <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                 <div class="accordion-body">
-                  TechNova hỗ trợ đổi trả miễn phí trong vòng 7 ngày kể từ khi nhận hàng nếu sản phẩm có lỗi từ nhà sản xuất hoặc không đúng mô tả. Sản phẩm cần giữ nguyên hộp và đầy đủ phụ kiện kèm theo.
+                  Backend hiện chưa cung cấp chính sách đổi trả cụ thể. Vui lòng liên hệ cửa hàng để được hướng dẫn.
                 </div>
               </div>
             </div>
@@ -277,12 +204,12 @@
             <div class="accordion-item">
               <h3 class="accordion-header">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
-                  TechNova hỗ trợ những phương thức thanh toán nào?
+                  UTE Shop hỗ trợ những phương thức thanh toán nào?
                 </button>
               </h3>
               <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                 <div class="accordion-body">
-                  Chúng tôi hỗ trợ đa dạng phương thức: Thanh toán khi nhận hàng (COD), Chuyển khoản ngân hàng trực tuyến và các ví điện tử phổ biến. Mọi giao dịch đều được mã hóa bảo mật tuyệt đối.
+                  Các phương thức thanh toán khả dụng sẽ được hiển thị tại bước thanh toán.
                 </div>
               </div>
             </div>
@@ -298,7 +225,7 @@
     <div class="container">
       <div class="newsletter text-center reveal">
         <h2 class="section-title text-white">Bạn cần tìm thiết bị công nghệ phù hợp?</h2>
-        <p class="mb-4">Khám phá danh mục thiết bị chính hãng tại TechNova hoặc liên hệ ngay với nhóm chúng tôi để được tư vấn chu đáo nhất.</p>
+        <p class="mb-4">Khám phá danh mục thiết bị chính hãng tại UTE Shop hoặc liên hệ ngay với nhóm chúng tôi để được tư vấn chu đáo nhất.</p>
         <div class="d-flex justify-content-center gap-2 flex-wrap">
           <a th:href="@{/customer/products}" class="btn btn-accent btn-lg"><i class="fas fa-bag-shopping me-2"></i>Xem sản phẩm</a>
           <a th:href="@{/pages/contact}" class="btn btn-lg btn-outline-light rounded-pill px-4"><i class="fas fa-envelope me-2"></i>Liên hệ nhóm</a>

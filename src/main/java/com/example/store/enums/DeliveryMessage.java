@@ -39,7 +39,7 @@ public enum DeliveryMessage {
     GHN_ADDRESS_CONFLICT("GHN từ chối địa chỉ (TO_ADDRESS_CONFLICT). Đã ghi lại mã lỗi/message để chẩn đoán; hãy kiểm tra tên tỉnh/phường nguyên văn từ danh mục GHN và payload Preview, không tự đổi địa chỉ giao hàng."),
     GHN_PHONE_INVALID("Số điện thoại người nhận hoặc cửa hàng không hợp lệ theo GHN."),
     GHN_ROUTE_NOT_FOUND("GHN không tìm được tuyến/dịch vụ cho địa chỉ và cấu hình hiện tại."),
-    GHN_REJECTED_PREFIX("GHN từ chối tạo vận đơn (HTTP %d): %s"),
+    GHN_REJECTED_PREFIX("GHN từ chối tạo vận đơn (HTTP %d). Vui lòng kiểm tra lại thông tin giao hàng."),
     WEBHOOK_PAYLOAD_INVALID("Payload callback GHN thiếu OrderCode, Type hoặc Time."),
     WEBHOOK_SHOP_MISMATCH("ShopID callback không khớp cấu hình GHN."),
     WEBHOOK_TYPE_UNSUPPORTED_PREFIX("Loại callback GHN chưa được hỗ trợ: %s"),

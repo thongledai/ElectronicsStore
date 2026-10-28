@@ -1,5 +1,5 @@
 /* ==========================================================================
-   TechNova Electronics — Contact Form Validation
+   UTE Shop — Contact Form Validation
    --------------------------------------------------------------------------
    Pure JavaScript validation (no backend). Each field has its own rule, is
    checked live once the user leaves it, and is re-checked on submit.
@@ -16,49 +16,49 @@ const RULES = {
 
   name(value) {
     const trimmed = value.trim();
-    if (!trimmed) return 'Please enter your name.';
-    if (trimmed.length < 3) return 'Name must be at least 3 characters long.';
-    if (trimmed.length > 60) return 'Name cannot exceed 60 characters.';
+    if (!trimmed) return 'Vui lòng nhập họ và tên.';
+    if (trimmed.length < 3) return 'Họ và tên phải có ít nhất 3 ký tự.';
+    if (trimmed.length > 60) return 'Họ và tên không được vượt quá 60 ký tự.';
     if (!/^[A-Za-z][A-Za-z\s.'-]*$/.test(trimmed)) {
-      return 'Name can only contain letters, spaces, apostrophes, hyphens and full stops.';
+      return 'Tên chỉ được chứa chữ cái không dấu, khoảng trắng, dấu nháy đơn, dấu gạch ngang và dấu chấm.';
     }
     return '';
   },
 
   email(value) {
     const trimmed = value.trim();
-    if (!trimmed) return 'Please enter your email address.';
+    if (!trimmed) return 'Vui lòng nhập địa chỉ email.';
     // Standard "something@something.tld" check
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(trimmed)) {
-      return 'Enter a valid email address, for example name@example.com.';
+      return 'Vui lòng nhập địa chỉ email hợp lệ, ví dụ ten@example.com.';
     }
-    if (trimmed.length > 254) return 'That email address is too long.';
+    if (trimmed.length > 254) return 'Địa chỉ email không được vượt quá 254 ký tự.';
     return '';
   },
 
   phone(value) {
     const trimmed = value.trim();
     if (!trimmed) return '';                       // phone is optional
-    if (!/^\d{10}$/.test(trimmed)) return 'Enter a 10-digit mobile number without spaces.';
-    if (!/^[6-9]/.test(trimmed)) return 'Indian mobile numbers start with 6, 7, 8 or 9.';
+    if (!/^\d{10}$/.test(trimmed)) return 'Số điện thoại phải gồm 10 chữ số, không có khoảng trắng.';
+    if (!/^[6-9]/.test(trimmed)) return 'Số điện thoại phải bắt đầu bằng 6, 7, 8 hoặc 9.';
     return '';
   },
 
   subject(value) {
-    if (!value) return 'Please choose what your message is about.';
+    if (!value) return 'Vui lòng chọn chủ đề liên hệ.';
     return '';
   },
 
   message(value) {
     const trimmed = value.trim();
-    if (!trimmed) return 'Please write your message.';
-    if (trimmed.length < 15) return 'Please give us a bit more detail (at least 15 characters).';
-    if (trimmed.length > 600) return 'Message cannot exceed 600 characters.';
+    if (!trimmed) return 'Vui lòng nhập nội dung tin nhắn.';
+    if (trimmed.length < 15) return 'Nội dung cần có ít nhất 15 ký tự.';
+    if (trimmed.length > 600) return 'Nội dung không được vượt quá 600 ký tự.';
     return '';
   },
 
   consent(checked) {
-    if (!checked) return 'Please tick the box so we can reply to you.';
+    if (!checked) return 'Vui lòng đồng ý để chúng tôi có thể phản hồi.';
     return '';
   }
 };
@@ -138,8 +138,8 @@ function handleSubmit(e) {
   if (firstInvalid) {
     const count = results.filter(r => !r.valid).length;
     showToast(
-      'Please check the form',
-      `${count} field${count === 1 ? '' : 's'} need${count === 1 ? 's' : ''} your attention.`,
+      'Vui lòng kiểm tra biểu mẫu',
+      `Có ${count} mục cần được kiểm tra lại.`,
       'danger'
     );
 
@@ -154,7 +154,7 @@ function handleSubmit(e) {
   const submitBtn = document.getElementById('cfSubmit');
   const originalHtml = submitBtn.innerHTML;
   submitBtn.disabled = true;
-  submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Sending…';
+  submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang gửi…';
 
   // A short delay makes the demo feel like a real network request
   setTimeout(() => {
