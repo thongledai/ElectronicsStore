@@ -563,3 +563,42 @@
   color: var(--text);
   border-color: var(--border);
 }
+
+
+/* Employee review moderation: Bootstrap light table/modal helpers also follow dark tokens. */
+[data-theme="dark"] #employeeReviewsTableContainer,
+[data-theme="dark"] #employeeReviewsTableContainer .table,
+[data-theme="dark"] #employeeReviewsTableContainer .table-light,
+[data-theme="dark"] #employeeReviewsTableContainer thead,
+[data-theme="dark"] #employeeReviewsTableContainer th,
+[data-theme="dark"] #employeeReviewsTableContainer td,
+[data-theme="dark"] #employeeReviewsTableContainer tr {
+  --bs-table-bg: var(--surface);
+  --bs-table-color: var(--text);
+  --bs-table-border-color: var(--border);
+  background-color: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] #employeeReviewsTableContainer .table-hover > tbody > tr:hover > * {
+  --bs-table-bg-state: var(--surface-2);
+  color: var(--text);
+}
+
+[data-theme="dark"] #approveModal .modal-content,
+[data-theme="dark"] #rejectModal .modal-content,
+[data-theme="dark"] #approveModal .modal-header,
+[data-theme="dark"] #approveModal .modal-footer,
+[data-theme="dark"] #rejectModal .modal-header,
+[data-theme="dark"] #rejectModal .modal-footer {
+  background-color: var(--surface);
+  color: var(--text);
+  border-color: var(--border) !important;
+}
+
+[data-theme="dark"] #employeeReviewsTableContainer .text-dark,
+[data-theme="dark"] #approveModal .text-dark,
+[data-theme="dark"] #rejectModal .text-dark {
+  color: var(--text) !important;
+}
