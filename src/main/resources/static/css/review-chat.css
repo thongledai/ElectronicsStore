@@ -478,3 +478,88 @@
   flex: 1 1 0;
   overflow-y: auto;
 }
+
+
+/* Dark theme: remove hard-coded white surfaces from reviews and chat. */
+[data-theme="dark"] .tgdd-rating-box,
+[data-theme="dark"] .tgdd-filter-pill,
+[data-theme="dark"] .chat-widget-box,
+[data-theme="dark"] .chat-msg-received,
+[data-theme="dark"] .chat-footer,
+[data-theme="dark"] .employee-chat-composer {
+  background: var(--surface) !important;
+  color: var(--text);
+  border-color: var(--border) !important;
+}
+
+[data-theme="dark"] .tgdd-rating-box,
+[data-theme="dark"] .tgdd-review-card,
+[data-theme="dark"] .tgdd-review-img-thumb {
+  border-color: var(--border) !important;
+}
+
+[data-theme="dark"] .tgdd-bar-label,
+[data-theme="dark"] .tgdd-filter-pill,
+[data-theme="dark"] .tgdd-review-content,
+[data-theme="dark"] .chat-msg-received,
+[data-theme="dark"] .chat-msg-time {
+  color: var(--text);
+}
+
+[data-theme="dark"] .tgdd-bar-bg,
+[data-theme="dark"] .tgdd-store-reply,
+[data-theme="dark"] .chat-body,
+[data-theme="dark"] .chat-msg-system,
+[data-theme="dark"] #reviewStatusTabs .nav-link:hover,
+[data-theme="dark"] #reviewStatusTabs .nav-link.active {
+  background: var(--surface-2) !important;
+  color: var(--text);
+}
+
+[data-theme="dark"] .tgdd-bar-count,
+[data-theme="dark"] .tgdd-store-reply,
+[data-theme="dark"] #reviewStatusTabs .nav-link {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .tgdd-filter-pill.active {
+  background: var(--surface-3) !important;
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+[data-theme="dark"] .tgdd-badge-verified {
+  background: #17352b;
+  color: #8ce0bd;
+  border-color: #285846;
+}
+
+[data-theme="dark"] .chat-footer input,
+[data-theme="dark"] .employee-chat-composer .form-control {
+  background: var(--surface-2);
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+[data-theme="dark"] .chat-footer input::placeholder,
+[data-theme="dark"] .employee-chat-composer .form-control::placeholder {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .chat-msg-received {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
+}
+
+[data-theme="dark"] .chat-msg-system {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] #reviewStatusTabs .nav-link.active {
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .employee-chat-composer .btn-light {
+  background: var(--surface-3);
+  color: var(--text);
+  border-color: var(--border);
+}
