@@ -802,7 +802,7 @@ function applyTheme(theme) {
 
   // Keep the browser UI colour in sync on mobile
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', theme === 'dark' ? '#0a1220' : '#0b1b34');
+  if (meta) meta.setAttribute('content', theme === 'dark' ? '#0a1220' : '#ffffff');
 }
 
 function initTheme() {
