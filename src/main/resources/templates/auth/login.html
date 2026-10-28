@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" th:replace="~{layouts/customer-layout :: layout(
-        'Sign In — TechNova Electronics',
-        'Sign in to the TechNova Electronics demo account. Frontend validation only — no real authentication.',
+<html lang="vi" th:replace="~{layouts/customer-layout :: layout(
+        'Đăng nhập — UTE Shop',
+        'Đăng nhập hoặc tạo tài khoản UTE Shop.',
         ~{::main}, ~{}, 'auth.js', true)}">
-<head><title>Sign In — TechNova Electronics</title></head>
+<head><title>Đăng nhập — UTE Shop</title></head>
 <body>
 
 <main>
@@ -16,28 +16,18 @@
             <!-- ------------ Marketing panel ------------ -->
             <div class="col-lg-5 d-none d-lg-block">
               <div class="auth-aside">
-                <span class="hero-pill mb-3"><i class="fas fa-shield-halved"></i>Demo account</span>
-                <h2 class="h3">Welcome back to TechNova</h2>
+                <h2 class="h3">Chào mừng bạn quay lại UTE Shop</h2>
                 <p style="color:rgba(255,255,255,.78);font-size:.92rem">
-                  Sign in to see your saved wishlist, track orders and check out faster next time.
+                  Đăng nhập để xem sản phẩm yêu thích, theo dõi đơn hàng và thanh toán thuận tiện hơn.
                 </p>
 
                 <ul>
-                  <li><i class="fas fa-circle-check"></i>Faster checkout with saved addresses</li>
-                  <li><i class="fas fa-circle-check"></i>Order history and live tracking</li>
-                  <li><i class="fas fa-circle-check"></i>Early access to sale events</li>
-                  <li><i class="fas fa-circle-check"></i>Exclusive member-only pricing</li>
+                  <li><i class="fas fa-circle-check"></i>Thanh toán nhanh hơn với địa chỉ đã lưu</li>
+                  <li><i class="fas fa-circle-check"></i>Lịch sử đơn hàng và theo dõi trạng thái</li>
+                  <li><i class="fas fa-circle-check"></i>Cập nhật sớm các chương trình ưu đãi</li>
+                  <li><i class="fas fa-circle-check"></i>Ưu đãi dành riêng cho thành viên</li>
                 </ul>
 
-                <div class="mt-5 pt-3" style="border-top:1px solid rgba(255,255,255,.15)">
-                  <div class="stars mb-1">
-                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                  </div>
-                  <p class="small mb-1" style="color:rgba(255,255,255,.82)">
-                    "Genuinely the smoothest electronics store I've ordered from."
-                  </p>
-                  <p class="small mb-0" style="color:rgba(255,255,255,.55)">— Aditya K., verified buyer</p>
-                </div>
               </div>
             </div>
 
@@ -45,15 +35,15 @@
             <div class="col-lg-7">
               <div class="p-4 p-md-5">
 
-                <!-- Tabs: Sign in / Register -->
+                <!-- Tabs: Sign in / Đăng ký -->
                 <ul class="nav nav-tabs mb-4" role="tablist">
                   <li class="nav-item" role="presentation">
                     <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#pane-login"
-                            type="button" role="tab" aria-selected="true">Sign In</button>
+                            type="button" role="tab" aria-selected="true">Đăng nhập</button>
                   </li>
                   <li class="nav-item" role="presentation">
-                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#pane-register"
-                            type="button" role="tab" aria-selected="false">Create Account</button>
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#pane-register"
+                            type="button" role="tab" aria-selected="false">Tạo tài khoản</button>
                   </li>
                 </ul>
 
@@ -62,30 +52,30 @@
                   <!-- ============ SIGN IN ============ -->
                   <div class="tab-pane fade show active" id="pane-login" role="tabpanel">
 
-                    <h1 class="h4 mb-1">Sign in to your account</h1>
-                    <p class="text-muted small mb-3">Enter your credentials to continue shopping.</p>
+                    <h1 class="h4 mb-1">Đăng nhập vào tài khoản</h1>
+                    <p class="text-muted small mb-3">Nhập thông tin đăng nhập để tiếp tục mua sắm.</p>
 
                     <form id="loginForm" novalidate>
                       <div class="mb-3">
-                        <label class="form-label" for="liEmail">Email address</label>
+                        <label class="form-label" for="liEmail">Địa chỉ email</label>
                         <div class="input-icon">
                           <i class="fas fa-envelope"></i>
                           <input type="email" class="form-control" id="liEmail"
-                                 placeholder="you@example.com" autocomplete="username" required>
+                                 placeholder="email@example.com" autocomplete="username" required>
                         </div>
                         <div class="invalid-feedback" id="errLiEmail"></div>
                       </div>
 
                       <div class="mb-3">
                         <div class="d-flex justify-content-between align-items-center">
-                          <label class="form-label" for="liPassword">Password</label>
-                          <a th:href="@{/forgot-password}" class="small" id="forgotLink">Forgot password?</a>
+                          <label class="form-label" for="liPassword">Mật khẩu</label>
+                          <a th:href="@{/forgot-password}" class="small" id="forgotLink">Quên mật khẩu?</a>
                         </div>
                         <div class="input-icon">
                           <i class="fas fa-lock"></i>
                           <input type="password" class="form-control" id="liPassword"
-                                 placeholder="Enter your password" autocomplete="current-password" required>
-                          <button class="toggle-pass" type="button" data-target="liPassword" aria-label="Show password">
+                                 placeholder="Nhập mật khẩu" autocomplete="current-password" required>
+                          <button class="toggle-pass" type="button" data-target="liPassword" aria-label="Hiện mật khẩu">
                             <i class="fas fa-eye"></i>
                           </button>
                         </div>
@@ -95,12 +85,12 @@
                       <div class="d-flex justify-content-between align-items-center mb-4">
                         <label class="filter-check mb-0">
                           <input type="checkbox" id="rememberMe">
-                          <span>Remember me</span>
+                          <span>Ghi nhớ đăng nhập</span>
                         </label>
                       </div>
 
                       <button type="submit" class="btn btn-brand btn-lg w-100" id="loginSubmit">
-                        <i class="fas fa-right-to-bracket me-2"></i>Sign In
+                        <i class="fas fa-right-to-bracket me-2"></i>Đăng nhập
                       </button>
                     </form>
 
@@ -108,7 +98,7 @@
                       <hr>
                       <span class="px-3 small text-muted"
                             style="background:var(--surface);position:absolute;top:-12px;left:50%;transform:translateX(-50%)">
-                        or continue with
+                        hoặc tiếp tục với
                       </span>
                     </div>
 
@@ -125,64 +115,64 @@
                   <!-- ============ REGISTER ============ -->
                   <div class="tab-pane fade" id="pane-register" role="tabpanel">
 
-                    <h2 class="h4 mb-1">Create your account</h2>
-                    <p class="text-muted small mb-4">It takes less than a minute. No card details needed.</p>
+                    <h2 class="h4 mb-1">Tạo tài khoản</h2>
+                    <p class="text-muted small mb-4">Tạo tài khoản để bắt đầu mua sắm.</p>
 
                     <form id="registerForm" novalidate>
                       <div class="mb-3">
-                        <label class="form-label" for="rgName">Full name</label>
+                        <label class="form-label" for="rgName">Họ và tên</label>
                         <div class="input-icon">
                           <i class="fas fa-user"></i>
                           <input type="text" class="form-control" id="rgName"
-                                 placeholder="Your full name" autocomplete="name" required>
+                                 placeholder="Họ và tên" autocomplete="name" required>
                         </div>
                         <div class="invalid-feedback" id="errRgName"></div>
                       </div>
 
                       <div class="mb-3">
-                        <label class="form-label" for="rgEmail">Email address</label>
+                        <label class="form-label" for="rgEmail">Địa chỉ email</label>
                         <div class="input-icon">
                           <i class="fas fa-envelope"></i>
                           <input type="email" class="form-control" id="rgEmail"
-                                 placeholder="you@example.com" autocomplete="email" required>
+                                 placeholder="email@example.com" autocomplete="email" required>
                         </div>
                         <div class="invalid-feedback" id="errRgEmail"></div>
                       </div>
 
                       <div class="mb-3">
-                        <label class="form-label" for="rgPhone">Phone number</label>
+                        <label class="form-label" for="rgPhone">Số điện thoại</label>
                         <div class="input-icon">
                           <i class="fas fa-mobile-screen"></i>
                           <input type="tel" class="form-control" id="rgPhone"
-                                 placeholder="10 digits (03x, 05x, 07x, 08x, 09x)" autocomplete="tel" maxlength="12" required>
+                                 placeholder="Số điện thoại (03x, 05x, 07x, 08x, 09x)" autocomplete="tel" maxlength="12" required>
                         </div>
                         <div class="invalid-feedback" id="errRgPhone"></div>
                       </div>
 
                       <div class="mb-3">
-                        <label class="form-label" for="rgPassword">Password</label>
+                        <label class="form-label" for="rgPassword">Mật khẩu</label>
                         <div class="input-icon">
                           <i class="fas fa-lock"></i>
                           <input type="password" class="form-control" id="rgPassword"
-                                 placeholder="Create a strong password" autocomplete="new-password" required>
-                          <button class="toggle-pass" type="button" data-target="rgPassword" aria-label="Show password">
+                                 placeholder="Tạo mật khẩu có độ bảo mật cao" autocomplete="new-password" required>
+                          <button class="toggle-pass" type="button" data-target="rgPassword" aria-label="Hiện mật khẩu">
                             <i class="fas fa-eye"></i>
                           </button>
                         </div>
                         <div class="strength-meter"><span id="strengthBar"></span></div>
                         <small class="text-muted" id="strengthText">
-                          Use 6+ characters with upper case, lower case, a number and a symbol.
+                          Dùng ít nhất 6 ký tự gồm chữ hoa, chữ thường, chữ số và ký hiệu.
                         </small>
                         <div class="invalid-feedback" id="errRgPassword"></div>
                       </div>
 
                       <div class="mb-3">
-                        <label class="form-label" for="rgConfirm">Confirm password</label>
+                        <label class="form-label" for="rgConfirm">Xác nhận mật khẩu</label>
                         <div class="input-icon">
                           <i class="fas fa-lock"></i>
                           <input type="password" class="form-control" id="rgConfirm"
-                                 placeholder="Re-enter your password" autocomplete="new-password" required>
-                          <button class="toggle-pass" type="button" data-target="rgConfirm" aria-label="Show password">
+                                 placeholder="Nhập lại mật khẩu" autocomplete="new-password" required>
+                          <button class="toggle-pass" type="button" data-target="rgConfirm" aria-label="Hiện mật khẩu">
                             <i class="fas fa-eye"></i>
                           </button>
                         </div>
@@ -192,13 +182,13 @@
                       <div class="mb-4">
                         <label class="filter-check">
                           <input type="checkbox" id="rgTerms" required>
-                          <span>I agree to the Terms of Service and Privacy Policy</span>
+                          <span>Tôi đồng ý với Điều khoản dịch vụ và Chính sách quyền riêng tư</span>
                         </label>
                         <div class="invalid-feedback" id="errRgTerms"></div>
                       </div>
 
                       <button type="submit" class="btn btn-accent btn-lg w-100" id="registerSubmit">
-                        <i class="fas fa-user-plus me-2"></i>Create Account
+                        <i class="fas fa-user-plus me-2"></i>Tạo tài khoản
                       </button>
                     </form>
 
@@ -212,7 +202,7 @@
         </div>
 
         <p class="text-center mt-4 mb-0">
-          <a th:href="@{/customer/index}" class="btn btn-ghost"><i class="fas fa-arrow-left me-2"></i>Back to store</a>
+          <a th:href="@{/customer/index}" class="btn btn-ghost"><i class="fas fa-arrow-left me-2"></i>Quay lại cửa hàng</a>
         </p>
       </div>
     </div>
@@ -226,14 +216,14 @@
           <div class="d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-circle mb-3" style="width: 56px; height: 56px; font-size: 1.5rem;">
             <i class="fas fa-envelope-circle-check"></i>
           </div>
-          <h5 class="modal-title fw-bold mb-2" id="activationModalLabel">Account Verification</h5>
+          <h3 class="modal-title h5 fw-bold mb-2" id="activationModalLabel">Xác minh tài khoản</h3>
           <p class="text-muted small mb-4" id="activationModalDesc">
-            Your account (<strong id="activationModalEmail" class="text-dark"></strong>) has not been verified yet. Would you like to verify it now?
+            Tài khoản (<strong id="activationModalEmail" class="text-dark"></strong>) chưa được xác minh. Bạn muốn xác minh ngay không?
           </p>
           <div class="d-flex justify-content-end gap-2">
-            <button type="button" class="btn btn-light px-3" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-light px-3" data-bs-dismiss="modal">Hủy</button>
             <button type="button" class="btn btn-brand px-3" id="btnModalVerifyNow">
-              <i class="fas fa-paper-plane me-1"></i>Verify Now
+              <i class="fas fa-paper-plane me-1"></i>Xác minh ngay
             </button>
           </div>
         </div>

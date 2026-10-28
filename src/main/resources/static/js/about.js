@@ -1,5 +1,5 @@
 /* ==========================================================================
-   TechNova Electronics — About Page
+   UTE Shop — About Page
    --------------------------------------------------------------------------
    Only one interactive touch on this page: the statistics counters animate
    from zero to their target value the first time they scroll into view.

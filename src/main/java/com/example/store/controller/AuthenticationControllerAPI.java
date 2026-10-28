@@ -19,6 +19,7 @@ import com.example.store.service.auth.IAuthenticationService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
@@ -26,7 +27,6 @@ public class AuthenticationControllerAPI {
 
     private final IAuthenticationService authenticationService;
     private final GoogleAuthService googleAuthService;
-
 
     /**
      * Làm mới Access Token bằng Refresh Token (Silent Refresh / Token Rotation)
@@ -52,7 +52,6 @@ public class AuthenticationControllerAPI {
         return ResponseEntity.ok(ApiResponse.success(ApiMessage.AUTH_LOGOUT_SUCCESS, "OK"));
     }
 
-
     /**
      * Đăng ký tài khoản mới (sinh OTP và gửi email xác thực)
      */
@@ -71,7 +70,8 @@ public class AuthenticationControllerAPI {
     }
 
     /**
-     * Đăng nhập hệ thống (xác thực email/mật khẩu, trả về JWT Token và role redirect)
+     * Đăng nhập hệ thống (xác thực email/mật khẩu, trả về JWT Token và role
+     * redirect)
      */
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<AuthResponseDTO>> login(
@@ -97,9 +97,9 @@ public class AuthenticationControllerAPI {
      */
     @GetMapping("/google/client-id")
     public ResponseEntity<ApiResponse<String>> getGoogleClientId() {
-        return ResponseEntity.ok(ApiResponse.success(ApiMessage.AUTH_GOOGLE_CLIENT_ID_SUCCESS, googleAuthService.getGoogleClientId()));
+        return ResponseEntity.ok(
+                ApiResponse.success(ApiMessage.AUTH_GOOGLE_CLIENT_ID_SUCCESS, googleAuthService.getGoogleClientId()));
     }
-
 
     /**
      * Quên mật khẩu: gửi mã OTP về email
@@ -129,7 +129,8 @@ public class AuthenticationControllerAPI {
     }
 
     /**
-     * Đổi mật khẩu khi đã đăng nhập (cần mật khẩu cũ, mật khẩu mới, xác nhận mật khẩu mới)
+     * Đổi mật khẩu khi đã đăng nhập (cần mật khẩu cũ, mật khẩu mới, xác nhận mật
+     * khẩu mới)
      */
     @PostMapping("/reset-password")
     public ResponseEntity<ApiResponse<?>> resetPassword(
@@ -157,7 +158,8 @@ public class AuthenticationControllerAPI {
     }
 
     /**
-     * Kiểm tra người dùng hiện tại đã có mật khẩu thủ công chưa (hay là tài khoản Google)
+     * Kiểm tra người dùng hiện tại đã có mật khẩu thủ công chưa (hay là tài khoản
+     * Google)
      */
     @GetMapping("/has-password")
     public ResponseEntity<ApiResponse<Boolean>> hasPassword(Principal principal) {

@@ -1,5 +1,5 @@
 /* ==========================================================================
-   TechNova Electronics — Manager Statistics (Thống kê chuyên sâu)
+   UTE Shop — Manager Statistics (Thống kê chuyên sâu)
    ========================================================================== */
 
 'use strict';

@@ -1,5 +1,5 @@
 /* ==========================================================================
-   TechNova Electronics — Home Page Script
+   UTE Shop — Home Page Script
    --------------------------------------------------------------------------
    Hiển thị DANH MỤC và SẢN PHẨM THẬT từ database (qua /api/categories và
    /api/products) thay cho dữ liệu mẫu trong data.js.
@@ -83,7 +83,7 @@ function homeProductCard(p, delay = 0) {
       </div>
 
       <div class="card-body">
-        <span class="card-cat">${homeEsc(p.brandName || p.categoryName || 'TechNova')}</span>
+        <span class="card-cat">${homeEsc(p.brandName || p.categoryName || 'UTE Shop')}</span>
         <h3 class="card-title"><a href="${href}">${homeEsc(p.name)}</a></h3>
 
         <div class="card-rating">
@@ -232,37 +232,9 @@ async function initDealOfTheDay() {
   document.getElementById('dealOff').textContent = `GIẢM ${homeDiscountPercent(deal)}%`;
   document.getElementById('dealLink').href = homeProductUrl(deal);
 
-  startCountdown();
 }
 
 /** Đếm ngược đến 00:00 hôm nay. */
-function startCountdown() {
-  const boxes = {
-    h: document.querySelector('[data-cd="h"]'),
-    m: document.querySelector('[data-cd="m"]'),
-    s: document.querySelector('[data-cd="s"]')
-  };
-  if (!boxes.h) return;
-
-  const tick = () => {
-    const now = new Date();
-    const midnight = new Date(now);
-    midnight.setHours(24, 0, 0, 0);
-
-    const totalSeconds = Math.floor(Math.max(0, midnight - now) / 1000);
-    const pad = n => String(n).padStart(2, '0');
-    boxes.h.textContent = pad(Math.floor(totalSeconds / 3600));
-    boxes.m.textContent = pad(Math.floor((totalSeconds % 3600) / 60));
-    boxes.s.textContent = pad(totalSeconds % 60);
-  };
-
-  tick();
-  setInterval(tick, 1000);
-}
-
-/* ==========================================================================
-   5. GIỎ HÀNG / YÊU THÍCH
-   ========================================================================== */
 const homeAddingSlugs = new Set();
 
 function homeNotify(title, message, type) {

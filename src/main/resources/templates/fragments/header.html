@@ -1,24 +1,24 @@
 <!--
-  Shared <head> for EVERY page (customer + manager + employee + shipper).
+  Shared <head> for EVERY page (customer + manager + employee).
   Use:  <head th:replace="~{fragments/header :: head(${title}, ${description})}"></head>
   Requires ${URL} (declared on <html> by the layouts).
 -->
 <head th:fragment="head(title, description)">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#0b1b34">
+  <meta name="theme-color" content="#ffffff">
   <meta name="description" th:content="${description}">
-  <title th:text="${title}">TechNova Electronics</title>
+  <title th:text="${title}">UTE Shop</title>
 
   <link rel="icon" type="image/svg+xml" th:href="@{/images/favicon.svg}">
 
   <!-- Base URL (context path + "/") for scripts: js/data.js and js/main.js build every link from it -->
   <script th:inline="javascript">window.APP_URL = /*[[@{/}]]*/ '/';</script>
 
-  <!-- Apply saved theme before first paint; default to the light theme. -->
+  <!-- Áp dụng saved theme before first paint; default to the light theme. -->
   <script>(function(){try{var t=localStorage.getItem("technova_theme");if(t)document.documentElement.setAttribute("data-theme",JSON.parse(t));else document.documentElement.setAttribute("data-theme","light")}catch(e){document.documentElement.setAttribute("data-theme","light")}})();</script>
 
-  <!-- Apply logged-in auth state before first paint (no flash of Guest / Sign In in dropdown) -->
+  <!-- Áp dụng logged-in auth state before first paint (no flash of Guest / Đăng nhập in dropdown) -->
   <script>(function(){try{var u=JSON.parse(localStorage.getItem('technova_user')||'null');var t=localStorage.getItem('technova_jwt');if(t||(u&&u.email)){document.documentElement.classList.add('user-logged-in');}}catch(e){}})();</script>
   <style>
     html.user-logged-in .js-auth-guest { display: none !important; }

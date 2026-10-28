@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi"
       th:replace="~{layouts/dashboard-layout :: layout('Chi tiết đơn hàng', 'employee', 'orders', ~{::section.content})}">
-<head><title>Chi tiết đơn hàng | TechNova</title></head>
+<head><title>Chi tiết đơn hàng | UTE Shop</title></head>
 <body>
 <section class="content order-management delivery-page" th:attr="data-order-id=${order.id}">
     <div class="delivery-page-header">
@@ -314,9 +314,9 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="confirmOrderModalLabel">
+                    <h3 class="modal-title h5" id="confirmOrderModalLabel">
                         <i class="fa-solid fa-circle-question text-primary me-2"></i>Xác nhận đơn hàng
-                    </h5>
+                    </h3>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
                 </div>
                 <div class="modal-body">

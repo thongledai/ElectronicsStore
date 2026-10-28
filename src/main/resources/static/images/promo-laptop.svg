@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1648" height="928" viewBox="0 0 1648 928" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1648" y2="928" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#190B2B"/>
+      <stop offset="0.55" stop-color="#281047"/>
+      <stop offset="1" stop-color="#431778"/>
+    </linearGradient>
+    <linearGradient id="screen" x1="878" y1="322" x2="1310" y2="567" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#351954"/>
+      <stop offset="1" stop-color="#28103F"/>
+    </linearGradient>
+    <linearGradient id="laptop" x1="1095" y1="294" x2="1095" y2="698" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFDFE"/>
+      <stop offset="1" stop-color="#F0ECF8"/>
+    </linearGradient>
+    <clipPath id="canvas"><rect width="1648" height="928" rx="38"/></clipPath>
+    <clipPath id="screenClip"><rect x="878" y="322" width="433" height="244" rx="9"/></clipPath>
+  </defs>
+  <g clip-path="url(#canvas)">
+    <rect width="1648" height="928" fill="url(#bg)"/>
+    <circle cx="1400" cy="143" r="318" fill="#A52C73" fill-opacity=".28"/>
+    <circle cx="233" cy="817" r="232" fill="#A52C73" fill-opacity=".24"/>
+    <g>
+      <rect x="851" y="294" width="488" height="293" rx="27" fill="url(#laptop)"/>
+      <rect x="878" y="322" width="433" height="244" rx="9" fill="url(#screen)"/>
+      <g clip-path="url(#screenClip)">
+        <path d="M1147 322H1270L1062 566H942L1147 322Z" fill="#8651B2" fill-opacity=".12"/>
+      </g>
+      <path d="M852 577H1338L1394 670C1403 684 1391 698 1373 698H818C800 698 788 684 797 670L852 577Z" fill="url(#laptop)"/>
+      <path d="M876 597H1315L1332 625C1337 632 1331 637 1322 637H869C860 637 855 632 860 625L876 597Z" fill="#32164E"/>
+      <path d="M1028 650H1163C1169 650 1173 653 1176 659L1180 671C1182 675 1178 678 1172 678H1017C1011 678 1009 675 1012 671L1018 659C1020 653 1023 650 1028 650Z" fill="#9B82C2"/>
+    </g>
+  </g>
+</svg>

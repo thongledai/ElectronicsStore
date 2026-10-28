@@ -1,5 +1,5 @@
 /* ==========================================================================
-   TechNova Electronics — Wishlist Page (Kết nối backend /api/wishlist)
+   UTE Shop — Wishlist Page (Kết nối backend /api/wishlist)
    ========================================================================== */
 
 'use strict';
